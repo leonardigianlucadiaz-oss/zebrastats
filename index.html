@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ZebraStats — Login</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/main.css" />
+</head>
+<body>
+  <div class="phone">
+    <div class="auth-wrapper">
+
+      <!-- Logo -->
+      <div class="auth-logo">
+        <div class="auth-logo__circle">Z</div>
+        <div class="auth-logo__name">Zebra<span>Stats</span></div>
+        <p class="auth-logo__tagline">Dados que revelam as zebras do futebol</p>
+      </div>
+
+      <!-- Card de Login -->
+      <div class="auth-card">
+        <div>
+          <h2 class="auth-card__title">Entrar</h2>
+          <p class="auth-card__subtitle">Acesse sua conta ZebraStats</p>
+        </div>
+
+        <form id="loginForm" novalidate>
+          <div style="display:flex;flex-direction:column;gap:14px;">
+
+            <div class="form-group">
+              <label class="form-label" for="email">E-mail</label>
+              <input
+                class="form-input"
+                type="email"
+                id="email"
+                name="email"
+                placeholder="seu@email.com"
+                autocomplete="email"
+                required
+              />
+              <span class="form-error text-red text-xs" id="emailError" style="display:none;margin-top:2px;"></span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="password">Senha</label>
+              <div style="position:relative;">
+                <input
+                  class="form-input"
+                  type="password"
+                  id="password"
+                  name="password"
+                  placeholder="••••••••"
+                  autocomplete="current-password"
+                  required
+                  style="padding-right: 44px;"
+                />
+                <button
+                  type="button"
+                  id="togglePass"
+                  style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:1.1rem;color:var(--gray);"
+                  aria-label="Mostrar senha"
+                >👁</button>
+              </div>
+              <span class="form-error text-red text-xs" id="passError" style="display:none;margin-top:2px;"></span>
+            </div>
+
+            <div style="text-align:right;margin-top:-6px;">
+              <a href="#" class="text-green text-sm">Esqueci minha senha</a>
+            </div>
+
+            <button class="btn btn--primary" type="submit" id="loginBtn">
+              Entrar
+            </button>
+          </div>
+        </form>
+
+        <div class="divider--text">ou continue com</div>
+
+        <button class="btn btn--outline" type="button" onclick="window.location.href='home.html'">
+          <span>⚽</span> Entrar como convidado
+        </button>
+      </div>
+
+      <p class="auth-footer">
+        Não tem conta? <a href="cadastro.html">Cadastre-se</a>
+      </p>
+
+    </div>
+    <div class="accent-bar"></div>
+  </div>
+
+  <script src="js/main.js"></script>
+  <script>
+    // Toggle password visibility
+    document.getElementById('togglePass').addEventListener('click', function() {
+      const input = document.getElementById('password');
+      input.type = input.type === 'password' ? 'text' : 'password';
+      this.textContent = input.type === 'password' ? '👁' : '🙈';
+    });
+
+    // Form validation + redirect
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const email = document.getElementById('email').value.trim();
+      const pass  = document.getElementById('password').value;
+      let valid = true;
+
+      document.getElementById('emailError').style.display = 'none';
+      document.getElementById('passError').style.display  = 'none';
+
+      if (!email || !/\S+@\S+\.\S+/.test(email)) {
+        document.getElementById('emailError').textContent = 'Digite um e-mail válido.';
+        document.getElementById('emailError').style.display = 'block';
+        document.getElementById('email').style.borderColor = 'var(--red)';
+        valid = false;
+      }
+
+      if (!pass || pass.length < 6) {
+        document.getElementById('passError').textContent = 'Senha deve ter ao menos 6 caracteres.';
+        document.getElementById('passError').style.display = 'block';
+        document.getElementById('password').style.borderColor = 'var(--red)';
+        valid = false;
+      }
+
+      if (valid) {
+        const btn = document.getElementById('loginBtn');
+        btn.textContent = 'Entrando...';
+        btn.disabled = true;
+        setTimeout(() => window.location.href = 'home.html', 800);
+      }
+    });
+
+    // Reset border on input
+    ['email','password'].forEach(id => {
+      document.getElementById(id).addEventListener('input', function() {
+        this.style.borderColor = '';
+      });
+    });
+  </script>
+</body>
+</html>

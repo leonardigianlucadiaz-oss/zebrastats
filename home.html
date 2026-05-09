@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ZebraStats — Home</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/main.css" />
+</head>
+<body>
+  <div class="phone">
+
+    <!-- TOP NAVBAR -->
+    <nav class="navbar">
+      <a href="home.html" class="navbar__brand">Zebra<span>Stats</span></a>
+      <div class="navbar__actions">
+        <span class="badge badge--free">FREE</span>
+        <a href="assinatura.html" class="navbar__icon" title="Upgrade" style="background:var(--gold-dim);color:var(--gold);border:1px solid rgba(255,200,50,0.3);">👑</a>
+        <button class="navbar__icon" id="notifBtn" title="Notificações">🔔</button>
+      </div>
+    </nav>
+
+    <!-- MEUS TIMES (favorites bar) -->
+    <section style="background:var(--card2);padding:12px 16px;border-bottom:1px solid var(--border);">
+      <div class="section-header" style="margin-bottom:10px;">
+        <span class="section-title" style="font-size:0.875rem;">Meus Times</span>
+        <a href="#" class="section-link" id="editFavBtn">Editar</a>
+      </div>
+      <div class="scroll-x" id="favTeamsBar">
+        <!-- Gerado por JS -->
+      </div>
+    </section>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="content">
+
+      <!-- AO VIVO -->
+      <div class="section-header">
+        <span class="section-title">
+          <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--red);margin-right:6px;animation:pulse 1.2s infinite;"></span>
+          Ao Vivo
+        </span>
+        <a href="#" class="section-link">Ver todos</a>
+      </div>
+
+      <div id="liveGames" style="display:flex;flex-direction:column;gap:10px;"></div>
+
+      <!-- FILTRO DE LIGAS -->
+      <div class="scroll-x" id="leagueFilter" style="margin-top:4px;gap:8px;">
+        <button class="league-pill active" data-league="all">Todos</button>
+        <button class="league-pill" data-league="BRA">🇧🇷 Brasileirão</button>
+        <button class="league-pill" data-league="ENG">🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League</button>
+        <button class="league-pill" data-league="ESP">🇪🇸 La Liga</button>
+        <button class="league-pill" data-league="ITA">🇮🇹 Serie A</button>
+        <button class="league-pill" data-league="GER">🇩🇪 Bundesliga</button>
+      </div>
+
+      <!-- EM BREVE -->
+      <div class="section-header" style="margin-top:4px;">
+        <span class="section-title">⏰ Em Breve</span>
+        <a href="#" class="section-link">Ver agenda</a>
+      </div>
+
+      <div id="upcomingGames" style="display:flex;flex-direction:column;gap:10px;"></div>
+
+      <!-- ZEBRAS DO DIA -->
+      <div class="section-header" style="margin-top:4px;">
+        <span class="section-title">🦓 Zebras do Dia</span>
+        <a href="assinatura.html" class="section-link text-gold">🔒 Pro</a>
+      </div>
+
+      <div class="lock-banner" onclick="window.location.href='assinatura.html'">
+        <span style="font-size:1.2rem;">🔒</span>
+        <div>
+          <div style="font-size:0.875rem;font-weight:600;">Análise de zebras exclusiva</div>
+          <div style="font-size:0.75rem;font-weight:400;color:var(--gray);margin-top:2px;">Assine o Pro para ver probabilidades e histórico completo</div>
+        </div>
+        <span style="margin-left:auto;color:var(--green);font-size:1rem;">→</span>
+      </div>
+
+      <!-- RANKINGS RÁPIDOS -->
+      <div class="section-header" style="margin-top:4px;">
+        <span class="section-title">📊 Top Zebras da Temporada</span>
+      </div>
+
+      <div id="zebraRanking" style="display:flex;flex-direction:column;gap:8px;"></div>
+
+    </main>
+
+    <!-- BOTTOM NAVIGATION -->
+    <nav class="bottom-nav">
+      <a href="home.html"       class="bottom-nav__item active">
+        <span class="bottom-nav__icon">🏠</span>Home
+      </a>
+      <a href="#"               class="bottom-nav__item">
+        <span class="bottom-nav__icon">📊</span>Stats
+      </a>
+      <a href="time.html"       class="bottom-nav__item">
+        <span class="bottom-nav__icon">⭐</span>Times
+      </a>
+      <a href="assinatura.html" class="bottom-nav__item">
+        <span class="bottom-nav__icon">👑</span>Pro
+      </a>
+      <a href="#"               class="bottom-nav__item">
+        <span class="bottom-nav__icon">👤</span>Perfil
+      </a>
+    </nav>
+
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast"></div>
+
+  <style>
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.3; }
+    }
+
+    .league-pill {
+      flex-shrink: 0;
+      padding: 6px 14px;
+      border-radius: var(--radius-pill);
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--gray);
+      font-size: 0.8125rem;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all var(--transition);
+      white-space: nowrap;
+    }
+    .league-pill.active,
+    .league-pill:hover {
+      background: var(--green-dim);
+      border-color: var(--green);
+      color: var(--white);
+    }
+
+    .ranking-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: border-color var(--transition);
+    }
+    .ranking-row:hover { border-color: var(--green); }
+    .ranking-row__pos  { font-size: 1rem; font-weight: 700; color: var(--gray); min-width: 22px; }
+    .ranking-row__name { flex: 1; font-size: 0.9375rem; font-weight: 500; }
+    .ranking-row__stars{ color: var(--gold); font-size: 0.875rem; }
+    .ranking-row__badge{ flex-shrink: 0; }
+  </style>
+
+  <script src="js/main.js"></script>
+  <script>
+    // ── DATA ──────────────────────────────────────────────
+    const FAV_TEAMS = [
+      { id: 'fla', abbr: 'FLA', name: 'Flamengo',  color: '#CC1A1A', active: true  },
+      { id: 'pal', abbr: 'PAL', name: 'Palmeiras', color: '#1A7A1A', active: false },
+      { id: 'cor', abbr: 'COR', name: 'Corinthians',color:'#222',   active: false },
+      { id: 'sao', abbr: 'SPF', name: 'São Paulo', color: '#CC1A1A', active: false },
+    ];
+
+    const LIVE_GAMES = [
+      { home:'Flamengo', away:'Palmeiras', hs:1, as:2, min:"67'", league:'Brasileirão · Série A', league_id:'BRA', zebra:true  },
+      { home:'Man City',  away:'Arsenal',  hs:0, as:1, min:"34'", league:'Premier League',         league_id:'ENG', zebra:false },
+      { home:'Real Mad.', away:'Barcelona',hs:2, as:2, min:"82'", league:'La Liga',                league_id:'ESP', zebra:false },
+      { home:'Juventus',  away:'Inter',    hs:0, as:2, min:"51'", league:'Serie A',                league_id:'ITA', zebra:true  },
+    ];
+
+    const UPCOMING_GAMES = [
+      { home:'PSG',     away:'Lyon',     time:'20:00', league:'Ligue 1',         league_id:'FRA', favProb:'68% fav' },
+      { home:'Bayern',  away:'Dortmund', time:'21:30', league:'Bundesliga',      league_id:'GER', favProb:'74% fav' },
+      { home:'Chelsea', away:'Liverpool',time:'22:00', league:'Premier League',  league_id:'ENG', favProb:'52% fav' },
+    ];
+
+    const ZEBRA_RANKING = [
+      { pos:1, name:'Flamengo',   stars:'★★★★★', badge:'5.0', color:'var(--green)' },
+      { pos:2, name:'Torino FC',  stars:'★★★½☆', badge:'3.5', color:'var(--gold)'  },
+      { pos:3, name:'Getafe',     stars:'★★★☆☆', badge:'3.0', color:'var(--gold)'  },
+    ];
+
+    // ── RENDER FAV TEAMS BAR ──────────────────────────────
+    const bar = document.getElementById('favTeamsBar');
+    FAV_TEAMS.forEach(t => {
+      const pill = document.createElement('div');
+      pill.className = 'team-pill';
+      pill.innerHTML = `
+        <a href="time.html" class="team-pill__avatar ${t.active ? 'active' : ''}"
+           style="${t.active ? `border-color:${t.color};` : ''}"
+           title="${t.name}">
+          ${t.abbr}
+        </a>
+        <span class="team-pill__name">${t.name}</span>
+      `;
+      bar.appendChild(pill);
+    });
+
+    // Add button
+    const addPill = document.createElement('div');
+    addPill.className = 'team-pill';
+    addPill.innerHTML = `
+      <button class="team-pill__avatar" style="border-style:dashed;font-size:1.25rem;" title="Adicionar time">+</button>
+      <span class="team-pill__name">Adicionar</span>
+    `;
+    addPill.querySelector('button').addEventListener('click', () => showToast('⭐ Busque um time para favoritar'));
+    bar.appendChild(addPill);
+
+    // ── RENDER LIVE GAMES ─────────────────────────────────
+    function renderLive(filter = 'all') {
+      const container = document.getElementById('liveGames');
+      container.innerHTML = '';
+      const games = filter === 'all' ? LIVE_GAMES : LIVE_GAMES.filter(g => g.league_id === filter);
+
+      if (!games.length) {
+        container.innerHTML = `<p class="text-gray text-sm" style="text-align:center;padding:16px;">Nenhum jogo ao vivo nessa liga agora.</p>`;
+        return;
+      }
+
+      games.forEach(g => {
+        const card = document.createElement('div');
+        card.className = `game-card${g.zebra ? ' game-card--zebra' : ''}`;
+        card.innerHTML = `
+          <div class="game-card__league" style="display:flex;align-items:center;justify-content:space-between;">
+            <span>${g.league}</span>
+            <span class="badge badge--live">${g.min}</span>
+          </div>
+          <div class="game-card__match">
+            <span class="game-card__team">${g.home}</span>
+            <span class="game-card__score">${g.hs} – ${g.as}</span>
+            <span class="game-card__team game-card__team--away">${g.away}</span>
+          </div>
+          ${g.zebra ? `
+          <div class="game-card__footer">
+            <span class="badge badge--zebra">🦓 ZEBRA ALERT</span>
+            <span class="text-xs text-gray">Resultado improvável em andamento</span>
+          </div>` : ''}
+        `;
+        card.addEventListener('click', () => window.location.href = 'time.html');
+        container.appendChild(card);
+      });
+    }
+
+    // ── RENDER UPCOMING GAMES ─────────────────────────────
+    function renderUpcoming(filter = 'all') {
+      const container = document.getElementById('upcomingGames');
+      container.innerHTML = '';
+      const games = filter === 'all' ? UPCOMING_GAMES : UPCOMING_GAMES.filter(g => g.league_id === filter);
+
+      if (!games.length) {
+        container.innerHTML = `<p class="text-gray text-sm" style="text-align:center;padding:16px;">Nenhum jogo agendado nessa liga.</p>`;
+        return;
+      }
+
+      games.forEach(g => {
+        const card = document.createElement('div');
+        card.className = 'game-card';
+        card.innerHTML = `
+          <div class="game-card__league" style="display:flex;align-items:center;justify-content:space-between;">
+            <span>${g.league}</span>
+            <span style="color:var(--gold);font-size:0.8125rem;font-weight:600;">${g.time}</span>
+          </div>
+          <div class="game-card__match">
+            <span class="game-card__team">${g.home}</span>
+            <span class="game-card__score" style="font-size:0.875rem;color:var(--gray);">vs</span>
+            <span class="game-card__team game-card__team--away">${g.away}</span>
+          </div>
+          <div class="game-card__footer">
+            <span class="text-xs text-gray">${g.favProb}</span>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    // ── RENDER ZEBRA RANKING ──────────────────────────────
+    const rankContainer = document.getElementById('zebraRanking');
+    ZEBRA_RANKING.forEach(r => {
+      const row = document.createElement('div');
+      row.className = 'ranking-row';
+      row.innerHTML = `
+        <span class="ranking-row__pos">#${r.pos}</span>
+        <span class="ranking-row__name">${r.name}</span>
+        <span class="ranking-row__stars">${r.stars}</span>
+        <span class="badge ranking-row__badge" style="background:${r.color}22;color:${r.color};border:1px solid ${r.color}44;">${r.badge}</span>
+      `;
+      row.addEventListener('click', () => window.location.href = 'time.html');
+      rankContainer.appendChild(row);
+    });
+
+    // ── LEAGUE FILTER ─────────────────────────────────────
+    document.querySelectorAll('.league-pill').forEach(pill => {
+      pill.addEventListener('click', function() {
+        document.querySelectorAll('.league-pill').forEach(p => p.classList.remove('active'));
+        this.classList.add('active');
+        const league = this.dataset.league;
+        renderLive(league);
+        renderUpcoming(league);
+      });
+    });
+
+    // ── NOTIFICATION BUTTON ───────────────────────────────
+    document.getElementById('notifBtn').addEventListener('click', () => {
+      showToast('🔔 Notificações ativadas');
+    });
+
+    // ── INITIAL RENDER ────────────────────────────────────
+    renderLive();
+    renderUpcoming();
+  </script>
+</body>
+</html>

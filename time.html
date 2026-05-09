@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ZebraStats — Perfil do Time</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/main.css" />
+</head>
+<body>
+  <div class="phone">
+
+    <!-- HEADER -->
+    <nav class="navbar">
+      <button onclick="history.back()" class="navbar__icon" style="background:none;border:none;cursor:pointer;font-size:1.25rem;color:var(--white);">←</button>
+      <span style="font-size:1rem;font-weight:600;" id="navTitle">Perfil do Time</span>
+      <button id="favBtn" class="navbar__icon" title="Favoritar" style="font-size:1.1rem;">☆</button>
+    </nav>
+
+    <!-- HERO DO TIME -->
+    <div class="team-hero" id="teamHero" style="background:linear-gradient(160deg,#851414 0%,#3a0808 100%);">
+      <div class="team-hero__shield" id="heroShield">TOR</div>
+      <div class="team-hero__name"  id="heroName">Torino FC</div>
+      <div class="team-hero__league" id="heroLeague">Serie A · Itália</div>
+
+      <!-- Mini stats rápidos -->
+      <div style="display:flex;gap:24px;margin-top:12px;">
+        <div style="text-align:center;">
+          <div style="font-size:1.25rem;font-weight:700;" id="statW">8</div>
+          <div style="font-size:0.6875rem;color:rgba(255,255,255,0.6);">Vitórias</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-size:1.25rem;font-weight:700;" id="statD">5</div>
+          <div style="font-size:0.6875rem;color:rgba(255,255,255,0.6);">Empates</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-size:1.25rem;font-weight:700;" id="statL">11</div>
+          <div style="font-size:0.6875rem;color:rgba(255,255,255,0.6);">Derrotas</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-size:1.25rem;font-weight:700;color:var(--gold);" id="statZebra">7</div>
+          <div style="font-size:0.6875rem;color:rgba(255,255,255,0.6);">Zebras</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SELETOR DE TIME (demo) -->
+    <div style="background:var(--card2);padding:10px 16px;border-bottom:1px solid var(--border);">
+      <div class="scroll-x" id="teamSelector"></div>
+    </div>
+
+    <main class="content">
+
+      <!-- ÍNDICE ZEBRA (STAR RATING) -->
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <span class="section-title" style="font-size:0.875rem;color:var(--gray);">Índice Zebra do Time</span>
+          <a href="assinatura.html" class="badge badge--pro" style="font-size:0.6875rem;">Pro</a>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div class="stars" id="starDisplay"></div>
+          <div>
+            <span style="font-size:1.75rem;font-weight:700;color:var(--gold);" id="starScore">3.5</span>
+            <span style="font-size:0.875rem;color:var(--gray);"> / 5</span>
+          </div>
+        </div>
+
+        <p style="font-size:0.8125rem;color:var(--gray);margin-top:8px;" id="starDescription">
+          Alta frequência de resultados inesperados nas últimas 3 temporadas.
+        </p>
+
+        <!-- Barra de distribuição -->
+        <div style="margin-top:14px;display:flex;flex-direction:column;gap:6px;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:0.75rem;color:var(--gray);min-width:70px;">Como zebra</span>
+            <div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;">
+              <div style="width:65%;height:100%;background:var(--green);border-radius:3px;"></div>
+            </div>
+            <span style="font-size:0.75rem;color:var(--green);min-width:30px;">65%</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:0.75rem;color:var(--gray);min-width:70px;">Causou zebra</span>
+            <div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;">
+              <div style="width:42%;height:100%;background:var(--gold);border-radius:3px;"></div>
+            </div>
+            <span style="font-size:0.75rem;color:var(--gold);min-width:30px;">42%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- VINDO PERDENDO PARA -->
+      <div class="card card--red-border">
+        <div class="section-header">
+          <span class="section-title" style="color:var(--red);">📉 Vem perdendo para...</span>
+          <span class="text-xs text-gray">Últimas 3 temp.</span>
+        </div>
+        <div id="losingList"></div>
+      </div>
+
+      <!-- VINDO GANHANDO DE -->
+      <div class="card card--green-border">
+        <div class="section-header">
+          <span class="section-title" style="color:var(--green);">📈 Vem ganhando de...</span>
+          <span class="text-xs text-gray">Últimas 3 temp.</span>
+        </div>
+        <div id="winningList"></div>
+      </div>
+
+      <!-- DESEMPENHO SAZONAL -->
+      <div class="card">
+        <div class="section-header" style="margin-bottom:16px;">
+          <span class="section-title">📅 Desempenho Sazonal</span>
+          <select id="seasonSelect" style="background:var(--input-bg);border:1px solid var(--border);color:var(--gray);font-size:0.75rem;padding:4px 8px;border-radius:6px;font-family:inherit;outline:none;">
+            <option value="24-25">2024–25</option>
+            <option value="23-24">2023–24</option>
+            <option value="22-23">2022–23</option>
+          </select>
+        </div>
+
+        <div class="season-chart" id="seasonChart"></div>
+
+        <div style="display:flex;gap:16px;margin-top:14px;flex-wrap:wrap;">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <div style="width:10px;height:10px;border-radius:2px;background:var(--green);"></div>
+            <span class="text-xs text-gray">Alta (Mar–Mai)</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <div style="width:10px;height:10px;border-radius:2px;background:var(--red);"></div>
+            <span class="text-xs text-gray">Baixa (Nov–Dez)</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <div style="width:10px;height:10px;border-radius:2px;background:var(--border);"></div>
+            <span class="text-xs text-gray">Regular</span>
+          </div>
+        </div>
+
+        <!-- Insight sazonal -->
+        <div style="margin-top:14px;padding:12px;background:var(--input-bg);border-radius:var(--radius-sm);border-left:3px solid var(--gold);">
+          <p style="font-size:0.8125rem;color:var(--white);font-weight:500;">💡 Insight</p>
+          <p style="font-size:0.75rem;color:var(--gray);margin-top:4px;line-height:1.5;">
+            O Torino FC tende a perder desempenho em novembro e dezembro, período em que mais produz zebras como azarão. Historicamente, recupera força em março.
+          </p>
+        </div>
+      </div>
+
+      <!-- ÚLTIMAS PARTIDAS -->
+      <div>
+        <div class="section-header">
+          <span class="section-title">🕐 Últimas Partidas</span>
+          <a href="#" class="section-link">Ver todas</a>
+        </div>
+        <div id="lastMatchesList" style="display:flex;flex-direction:column;gap:8px;"></div>
+      </div>
+
+      <!-- BANNER PREMIUM -->
+      <div class="lock-banner" onclick="window.location.href='assinatura.html'">
+        <span style="font-size:1.2rem;">🔒</span>
+        <div>
+          <div style="font-size:0.875rem;font-weight:600;">Análise completa de zebras</div>
+          <div style="font-size:0.75rem;font-weight:400;color:var(--gray);margin-top:2px;">Histórico de jogadores, relatórios e alertas em tempo real</div>
+        </div>
+        <span style="margin-left:auto;font-size:1rem;">→</span>
+      </div>
+
+    </main>
+
+    <!-- BOTTOM NAV -->
+    <nav class="bottom-nav">
+      <a href="home.html"       class="bottom-nav__item">
+        <span class="bottom-nav__icon">🏠</span>Home
+      </a>
+      <a href="#"               class="bottom-nav__item">
+        <span class="bottom-nav__icon">📊</span>Stats
+      </a>
+      <a href="time.html"       class="bottom-nav__item active">
+        <span class="bottom-nav__icon">⭐</span>Times
+      </a>
+      <a href="assinatura.html" class="bottom-nav__item">
+        <span class="bottom-nav__icon">👑</span>Pro
+      </a>
+      <a href="#"               class="bottom-nav__item">
+        <span class="bottom-nav__icon">👤</span>Perfil
+      </a>
+    </nav>
+
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast"></div>
+
+  <script src="js/main.js"></script>
+  <script>
+    // ── DATA ──────────────────────────────────────────────
+    const TEAMS = {
+      torino: {
+        name: 'Torino FC', abbr: 'TOR', league: 'Serie A · Itália',
+        color: '#851414', w:8, d:5, l:11, zebras:7,
+        rating: 3.5,
+        ratingDesc: 'Alta frequência de resultados inesperados nas últimas 3 temporadas.',
+        losing:  [
+          { name:'Juventus',  abbr:'JUV', rec:'0V 1E 4D', period:'3 temp.', color:'#333' },
+          { name:'Inter',     abbr:'INT', rec:'1V 1E 3D', period:'2 temp.', color:'#003399' },
+          { name:'Atalanta',  abbr:'ATA', rec:'1V 0E 4D', period:'3 temp.', color:'#00008B' },
+        ],
+        winning: [
+          { name:'Empoli',    abbr:'EMP', rec:'4V 1E 0D', period:'3 temp.', color:'#005BAC' },
+          { name:'Lecce',     abbr:'LEC', rec:'3V 2E 0D', period:'2 temp.', color:'#FFC000' },
+          { name:'Frosinone', abbr:'FRO', rec:'3V 1E 1D', period:'2 temp.', color:'#003F8F' },
+        ],
+        seasonal: [
+          {m:'Ago',v:55},{m:'Set',v:50},{m:'Out',v:44},{m:'Nov',v:36},
+          {m:'Dez',v:33},{m:'Jan',v:42},{m:'Fev',v:54},{m:'Mar',v:67},
+          {m:'Abr',v:72},{m:'Mai',v:65},
+        ],
+        lastMatches: [
+          {home:'Torino',away:'Juventus', hs:0,as:2, date:'05/05',result:'D'},
+          {home:'Lecce', away:'Torino',   hs:1,as:2, date:'28/04',result:'W'},
+          {home:'Torino',away:'Inter',    hs:0,as:3, date:'21/04',result:'D'},
+          {home:'Empoli',away:'Torino',   hs:0,as:1, date:'14/04',result:'W'},
+          {home:'Torino',away:'Atalanta', hs:1,as:2, date:'07/04',result:'D'},
+        ],
+      },
+      flamengo: {
+        name: 'Flamengo', abbr: 'FLA', league: 'Brasileirão · Série A',
+        color: '#CC1A1A', w:14, d:4, l:6, zebras:5,
+        rating: 4.5,
+        ratingDesc: 'Frequentemente favorito e causa surpresas jogando como azarão fora de casa.',
+        losing:  [
+          { name:'Atletico MG', abbr:'ATM', rec:'1V 2E 4D', period:'3 temp.', color:'333' },
+          { name:'Fluminense',  abbr:'FLU', rec:'2V 1E 3D', period:'2 temp.', color:'#8B0000' },
+        ],
+        winning: [
+          { name:'Bahia',      abbr:'BAH', rec:'5V 1E 0D', period:'3 temp.', color:'#003399' },
+          { name:'Fortaleza',  abbr:'FOR', rec:'4V 2E 0D', period:'3 temp.', color:'#8B0000' },
+          { name:'Cruzeiro',   abbr:'CRU', rec:'4V 1E 1D', period:'2 temp.', color:'#003399' },
+        ],
+        seasonal: [
+          {m:'Abr',v:62},{m:'Mai',v:68},{m:'Jun',v:74},{m:'Jul',v:70},
+          {m:'Ago',v:65},{m:'Set',v:72},{m:'Out',v:60},{m:'Nov',v:55},
+          {m:'Dez',v:78},{m:'Jan',v:58},
+        ],
+        lastMatches: [
+          {home:'Flamengo',away:'Palmeiras',hs:1,as:2,date:'06/05',result:'D'},
+          {home:'Bahia',   away:'Flamengo', hs:0,as:3,date:'29/04',result:'W'},
+          {home:'Flamengo',away:'Flu',      hs:2,as:2,date:'22/04',result:'E'},
+          {home:'Flamengo',away:'Cruzeiro', hs:3,as:0,date:'15/04',result:'W'},
+        ],
+      },
+    };
+
+    let currentTeam = 'torino';
+    let isFavorited = false;
+
+    // ── TEAM SELECTOR ────────────────────────────────────
+    const selectorEl = document.getElementById('teamSelector');
+    Object.keys(TEAMS).forEach(key => {
+      const t = TEAMS[key];
+      const btn = document.createElement('button');
+      btn.className = `team-chip${key === currentTeam ? ' active' : ''}`;
+      btn.textContent = t.name;
+      btn.dataset.team = key;
+      btn.style.cssText = 'flex-shrink:0;padding:6px 14px;border-radius:999px;background:var(--card);border:1px solid var(--border);color:var(--gray);font-size:0.8125rem;font-family:inherit;cursor:pointer;white-space:nowrap;transition:all 0.2s;';
+      btn.addEventListener('click', () => loadTeam(key));
+      selectorEl.appendChild(btn);
+    });
+
+    // ── RENDER STARS ──────────────────────────────────────
+    function renderStars(rating) {
+      const el = document.getElementById('starDisplay');
+      el.innerHTML = '';
+      for (let i = 1; i <= 5; i++) {
+        const star = document.createElement('span');
+        if (rating >= i) {
+          star.className = 'star';
+          star.textContent = '★';
+        } else if (rating >= i - 0.5) {
+          star.className = 'star star--half';
+          star.textContent = '★';
+          star.style.cssText = 'position:relative;';
+          star.innerHTML = `<span style="color:var(--border);">★</span><span style="position:absolute;left:0;top:0;width:50%;overflow:hidden;display:inline-block;color:var(--gold);">★</span>`;
+        } else {
+          star.className = 'star star--empty';
+          star.textContent = '★';
+        }
+        el.appendChild(star);
+      }
+    }
+
+    // ── RENDER CONFRONTOS ─────────────────────────────────
+    function renderConfrontos(list, containerId, type) {
+      const el = document.getElementById(containerId);
+      el.innerHTML = '';
+      list.forEach(t => {
+        const row = document.createElement('div');
+        row.className = `confronto-row confronto-row--${type}`;
+        row.innerHTML = `
+          <div class="confronto-row__avatar" style="background:${t.color}33;border:1px solid ${t.color}66;color:var(--white);">
+            ${t.abbr.substring(0,3)}
+          </div>
+          <span class="confronto-row__name">${t.name}</span>
+          <span class="confronto-row__record" style="color:${type==='red'?'var(--red)':'var(--green)'};">${t.rec}</span>
+          <span class="confronto-row__period">${t.period}</span>
+        `;
+        el.appendChild(row);
+      });
+    }
+
+    // ── RENDER SEASONAL CHART ─────────────────────────────
+    function renderChart(data) {
+      const chart = document.getElementById('seasonChart');
+      chart.innerHTML = '';
+      const max = Math.max(...data.map(d => d.v));
+      data.forEach(d => {
+        const pct = d.v / max;
+        const isLow  = d.v < 44;
+        const isHigh = d.v >= 62;
+        const colorClass = isLow ? 'season-bar--red' : isHigh ? 'season-bar--green' : 'season-bar--mid';
+
+        const wrap = document.createElement('div');
+        wrap.className = 'season-bar-wrap';
+        wrap.title = `${d.m}: ${d.v}`;
+        wrap.innerHTML = `
+          <div class="season-bar ${colorClass}" style="height:${Math.round(pct*100)}%;"></div>
+          <span class="season-label">${d.m}</span>
+        `;
+        chart.appendChild(wrap);
+      });
+    }
+
+    // ── RENDER LAST MATCHES ───────────────────────────────
+    function renderLastMatches(matches) {
+      const el = document.getElementById('lastMatchesList');
+      el.innerHTML = '';
+      matches.forEach(m => {
+        const colors = { W:'var(--green)', D:'var(--red)', E:'var(--gold)' };
+        const labels = { W:'V', D:'D', E:'E' };
+        const row = document.createElement('div');
+        row.className = 'game-card';
+        row.innerHTML = `
+          <div class="game-card__match">
+            <span class="game-card__team" style="font-size:0.875rem;">${m.home}</span>
+            <span class="game-card__score" style="font-size:1rem;">${m.hs} – ${m.as}</span>
+            <span class="game-card__team game-card__team--away" style="font-size:0.875rem;">${m.away}</span>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px;">
+            <span class="text-xs text-gray">${m.date}</span>
+            <span style="font-size:0.75rem;font-weight:700;color:${colors[m.result]};background:${colors[m.result]}22;padding:2px 8px;border-radius:4px;">
+              ${labels[m.result]}
+            </span>
+          </div>
+        `;
+        el.appendChild(row);
+      });
+    }
+
+    // ── LOAD TEAM ─────────────────────────────────────────
+    function loadTeam(key) {
+      currentTeam = key;
+      const t = TEAMS[key];
+
+      // Update hero
+      document.getElementById('navTitle').textContent  = t.name;
+      document.getElementById('heroShield').textContent = t.abbr;
+      document.getElementById('heroName').textContent   = t.name;
+      document.getElementById('heroLeague').textContent = t.league;
+      document.getElementById('teamHero').style.background = `linear-gradient(160deg,${t.color} 0%,${t.color}55 100%)`;
+      document.getElementById('statW').textContent = t.w;
+      document.getElementById('statD').textContent = t.d;
+      document.getElementById('statL').textContent = t.l;
+      document.getElementById('statZebra').textContent = t.zebras;
+
+      // Rating
+      document.getElementById('starScore').textContent    = t.rating;
+      document.getElementById('starDescription').textContent = t.ratingDesc;
+      renderStars(t.rating);
+
+      // Confrontos
+      renderConfrontos(t.losing,  'losingList',  'red');
+      renderConfrontos(t.winning, 'winningList', 'green');
+
+      // Chart
+      renderChart(t.seasonal);
+
+      // Last matches
+      renderLastMatches(t.lastMatches);
+
+      // Update selector
+      document.querySelectorAll('#teamSelector button').forEach(b => {
+        b.style.background   = b.dataset.team === key ? 'var(--green-dim)' : 'var(--card)';
+        b.style.borderColor  = b.dataset.team === key ? 'var(--green)'     : 'var(--border)';
+        b.style.color        = b.dataset.team === key ? 'var(--white)'     : 'var(--gray)';
+      });
+
+      // Reset favorite
+      isFavorited = false;
+      document.getElementById('favBtn').textContent = '☆';
+    }
+
+    // ── FAVORITE BUTTON ───────────────────────────────────
+    document.getElementById('favBtn').addEventListener('click', function() {
+      isFavorited = !isFavorited;
+      this.textContent = isFavorited ? '★' : '☆';
+      this.style.color = isFavorited ? 'var(--gold)' : '';
+      showToast(isFavorited
+        ? `⭐ ${TEAMS[currentTeam].name} adicionado aos favoritos`
+        : `${TEAMS[currentTeam].name} removido dos favoritos`
+      );
+    });
+
+    // ── SEASON SELECTOR ───────────────────────────────────
+    document.getElementById('seasonSelect').addEventListener('change', function() {
+      // Simula dados diferentes por temporada (embaralhados)
+      const t = TEAMS[currentTeam];
+      const shuffled = [...t.seasonal].map(d => ({ ...d, v: Math.max(25, Math.min(85, d.v + (Math.random()*20-10)|0)) }));
+      renderChart(shuffled);
+      showToast(`📅 Temporada ${this.value} carregada`);
+    });
+
+    // ── INIT ──────────────────────────────────────────────
+    loadTeam('torino');
+  </script>
+</body>
+</html>
