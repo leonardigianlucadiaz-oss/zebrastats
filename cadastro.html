@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ZebraStats — Criar conta</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/main.css" />
+</head>
+<body>
+  <div class="phone">
+    <div class="auth-wrapper" style="padding-top:36px;">
+
+      <!-- Logo menor -->
+      <div class="auth-logo" style="margin-bottom:28px;gap:8px;">
+        <div class="auth-logo__circle" style="width:60px;height:60px;font-size:1.5rem;">Z</div>
+        <div class="auth-logo__name" style="font-size:1.25rem;">Zebra<span>Stats</span></div>
+      </div>
+
+      <!-- Card de Cadastro -->
+      <div class="auth-card">
+        <div>
+          <h2 class="auth-card__title">Criar conta</h2>
+          <p class="auth-card__subtitle">Preencha os dados para começar</p>
+        </div>
+
+        <form id="registerForm" novalidate>
+          <div style="display:flex;flex-direction:column;gap:14px;">
+
+            <div class="form-group">
+              <label class="form-label" for="name">Nome completo</label>
+              <input
+                class="form-input"
+                type="text"
+                id="name"
+                placeholder="Seu nome"
+                autocomplete="name"
+                required
+              />
+              <span class="form-error text-red text-xs" id="nameError" style="display:none;margin-top:2px;"></span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="email">E-mail</label>
+              <input
+                class="form-input"
+                type="email"
+                id="email"
+                placeholder="seu@email.com"
+                autocomplete="email"
+                required
+              />
+              <span class="form-error text-red text-xs" id="emailError" style="display:none;margin-top:2px;"></span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="password">Senha</label>
+              <div style="position:relative;">
+                <input
+                  class="form-input"
+                  type="password"
+                  id="password"
+                  placeholder="Mínimo 6 caracteres"
+                  autocomplete="new-password"
+                  required
+                  style="padding-right:44px;"
+                />
+                <button type="button" class="toggle-pass" data-target="password"
+                  style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:1.1rem;color:var(--gray);">
+                  👁
+                </button>
+              </div>
+              <!-- Barra de força da senha -->
+              <div id="strengthBar" style="display:flex;gap:4px;margin-top:6px;">
+                <div class="strength-seg" style="height:3px;flex:1;border-radius:2px;background:var(--border);transition:background 0.3s;"></div>
+                <div class="strength-seg" style="height:3px;flex:1;border-radius:2px;background:var(--border);transition:background 0.3s;"></div>
+                <div class="strength-seg" style="height:3px;flex:1;border-radius:2px;background:var(--border);transition:background 0.3s;"></div>
+              </div>
+              <span id="strengthLabel" class="text-xs text-gray" style="margin-top:2px;"></span>
+              <span class="form-error text-red text-xs" id="passError" style="display:none;margin-top:2px;"></span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="confirmPassword">Confirmar senha</label>
+              <div style="position:relative;">
+                <input
+                  class="form-input"
+                  type="password"
+                  id="confirmPassword"
+                  placeholder="••••••••"
+                  autocomplete="new-password"
+                  required
+                  style="padding-right:44px;"
+                />
+                <button type="button" class="toggle-pass" data-target="confirmPassword"
+                  style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:1.1rem;color:var(--gray);">
+                  👁
+                </button>
+              </div>
+              <span class="form-error text-red text-xs" id="confirmError" style="display:none;margin-top:2px;"></span>
+            </div>
+
+            <!-- Times favoritos -->
+            <div class="form-group">
+              <label class="form-label">Seu time do coração (opcional)</label>
+              <div class="scroll-x" style="padding:4px 0;">
+                <button type="button" class="team-chip active" data-team="Flamengo">🔴 Flamengo</button>
+                <button type="button" class="team-chip" data-team="Palmeiras">🟢 Palmeiras</button>
+                <button type="button" class="team-chip" data-team="Corinthians">⚫ Corinthians</button>
+                <button type="button" class="team-chip" data-team="São Paulo">🔴 São Paulo</button>
+                <button type="button" class="team-chip" data-team="Outro">➕ Outro</button>
+              </div>
+            </div>
+
+            <button class="btn btn--primary" type="submit" id="registerBtn">
+              Criar conta
+            </button>
+
+            <p class="text-xs text-gray" style="text-align:center;line-height:1.5;">
+              Ao criar conta você aceita os
+              <a href="#" class="text-green">Termos de Uso</a> e a
+              <a href="#" class="text-green">Política de Privacidade</a>
+            </p>
+          </div>
+        </form>
+      </div>
+
+      <p class="auth-footer">
+        Já tem conta? <a href="index.html">Entrar</a>
+      </p>
+
+    </div>
+    <div class="accent-bar"></div>
+  </div>
+
+  <style>
+    .team-chip {
+      flex-shrink: 0;
+      padding: 7px 14px;
+      border-radius: var(--radius-pill);
+      background: var(--card2);
+      border: 1px solid var(--border);
+      color: var(--gray);
+      font-size: 0.8125rem;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all var(--transition);
+      white-space: nowrap;
+    }
+    .team-chip.active,
+    .team-chip:hover {
+      background: var(--green-dim);
+      border-color: var(--green);
+      color: var(--white);
+    }
+  </style>
+
+  <script src="js/main.js"></script>
+  <script>
+    // Toggle password buttons
+    document.querySelectorAll('.toggle-pass').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const input = document.getElementById(this.dataset.target);
+        input.type = input.type === 'password' ? 'text' : 'password';
+        this.textContent = input.type === 'password' ? '👁' : '🙈';
+      });
+    });
+
+    // Password strength
+    document.getElementById('password').addEventListener('input', function() {
+      const val = this.value;
+      const segs = document.querySelectorAll('.strength-seg');
+      const label = document.getElementById('strengthLabel');
+      let strength = 0;
+      if (val.length >= 6) strength++;
+      if (/[A-Z]/.test(val) || /[0-9]/.test(val)) strength++;
+      if (/[^A-Za-z0-9]/.test(val) && val.length >= 8) strength++;
+
+      const colors = ['var(--red)', 'var(--gold)', 'var(--green)'];
+      const labels = ['Fraca', 'Média', 'Forte'];
+      segs.forEach((s, i) => {
+        s.style.background = i < strength ? colors[strength - 1] : 'var(--border)';
+      });
+      label.textContent = val.length > 0 ? labels[strength - 1] || '' : '';
+      label.style.color = val.length > 0 ? colors[strength - 1] : '';
+    });
+
+    // Team chip single-select
+    document.querySelectorAll('.team-chip').forEach(chip => {
+      chip.addEventListener('click', function() {
+        document.querySelectorAll('.team-chip').forEach(c => c.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+
+    // Form validation + redirect
+    document.getElementById('registerForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const name    = document.getElementById('name').value.trim();
+      const email   = document.getElementById('email').value.trim();
+      const pass    = document.getElementById('password').value;
+      const confirm = document.getElementById('confirmPassword').value;
+      let valid = true;
+
+      ['name','email','password','confirmPassword'].forEach(id => {
+        document.getElementById(id).style.borderColor = '';
+      });
+      ['nameError','emailError','passError','confirmError'].forEach(id => {
+        document.getElementById(id).style.display = 'none';
+      });
+
+      if (!name || name.length < 2) {
+        showError('name', 'nameError', 'Digite seu nome completo.');
+        valid = false;
+      }
+      if (!email || !/\S+@\S+\.\S+/.test(email)) {
+        showError('email', 'emailError', 'Digite um e-mail válido.');
+        valid = false;
+      }
+      if (!pass || pass.length < 6) {
+        showError('password', 'passError', 'Senha deve ter ao menos 6 caracteres.');
+        valid = false;
+      }
+      if (pass !== confirm) {
+        showError('confirmPassword', 'confirmError', 'As senhas não coincidem.');
+        valid = false;
+      }
+
+      if (valid) {
+        const btn = document.getElementById('registerBtn');
+        btn.textContent = 'Criando conta...';
+        btn.disabled = true;
+        setTimeout(() => window.location.href = 'home.html', 900);
+      }
+    });
+
+    function showError(inputId, errorId, msg) {
+      document.getElementById(inputId).style.borderColor = 'var(--red)';
+      const el = document.getElementById(errorId);
+      el.textContent = msg;
+      el.style.display = 'block';
+    }
+
+    ['name','email','password','confirmPassword'].forEach(id => {
+      document.getElementById(id).addEventListener('input', function() {
+        this.style.borderColor = '';
+      });
+    });
+  </script>
+</body>
+</html>

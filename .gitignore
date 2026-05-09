@@ -1,0 +1,13 @@
+# Sistema
+.DS_Store
+Thumbs.db
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# Claude
+.claude/
+
+# Logs
+*.log
