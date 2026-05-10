@@ -288,9 +288,71 @@
     });
   });
 
+  // ── API SEARCH (TheSportsDB) ──────────────────────────────────
+  let _apiTimer = null;
+
+  async function apiSearchTeams(query) {
+    if (typeof ZebraAPI === 'undefined') return;
+    if (document.getElementById('searchInput').value.trim().toLowerCase() !== query.toLowerCase()) return;
+    try {
+      const data = await ZebraAPI.sportsDb.searchTeam(query);
+      if (!data?.teams?.length) return;
+      if (document.getElementById('searchInput').value.trim().toLowerCase() !== query.toLowerCase()) return;
+
+      const existing = new Set(SEARCHABLE.map(s => s.label.toLowerCase()));
+      const newTeams = data.teams
+        .slice(0, 8)
+        .map(t => ZebraAPI.transform.sdbTeam(t))
+        .filter(t => t && t.name && !existing.has(t.name.toLowerCase()));
+
+      if (!newTeams.length) return;
+
+      const container = document.getElementById('resultsList');
+      document.getElementById('resultsState').style.display = 'block';
+      document.getElementById('emptyState').style.display   = 'none';
+
+      const label = document.createElement('div');
+      label.style.cssText = 'padding:10px 16px 4px;font-size:0.6875rem;font-weight:600;color:var(--gray);text-transform:uppercase;letter-spacing:0.8px;';
+      label.textContent = 'Mais resultados — TheSportsDB';
+      container.appendChild(label);
+
+      const wrap = document.createElement('div');
+      wrap.style.cssText = 'background:var(--card);border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin-bottom:8px;';
+
+      newTeams.forEach(t => {
+        const item = document.createElement('div');
+        item.className = 'result-item';
+        const iconHtml = t.logo
+          ? `<img src="${t.logo}" alt="${t.name}" style="width:32px;height:32px;object-fit:contain;border-radius:4px;">`
+          : `<span style="font-size:0.7rem;font-weight:700;">${t.name.substring(0,3).toUpperCase()}</span>`;
+        item.innerHTML = `
+          <div class="result-item__icon">${iconHtml}</div>
+          <div style="flex:1;">
+            <div class="result-item__label">${highlight(t.name, query)}</div>
+            <div class="result-item__sub">${[t.league, t.country].filter(Boolean).join(' · ')}</div>
+          </div>
+          <span class="result-item__type type--times">Time</span>`;
+        item.addEventListener('click', () => {
+          localStorage.setItem('zs_search_team', t.name);
+          window.location.href = 'time.html';
+        });
+        wrap.appendChild(item);
+      });
+
+      container.appendChild(wrap);
+      const total = container.querySelectorAll('.result-item').length;
+      document.getElementById('resultsCount').textContent = `${total} resultado${total !== 1 ? 's' : ''} para "${query}"`;
+    } catch(e) { console.warn('[busca] API search error:', e); }
+  }
+
   // ── INPUT ─────────────────────────────────────────────────────
   document.getElementById('searchInput').addEventListener('input', function() {
-    performSearch(this.value);
+    const val = this.value;
+    performSearch(val);
+    clearTimeout(_apiTimer);
+    if (val.trim().length >= 3 && (activeCategory === 'all' || activeCategory === 'times')) {
+      _apiTimer = setTimeout(() => apiSearchTeams(val.trim()), 600);
+    }
   });
 
   document.getElementById('clearBtn').addEventListener('click', () => {

@@ -444,7 +444,7 @@
 
   // ── API REAL DATA ──────────────────────────────────────────────────
   async function initRealData() {
-    const lid = currentLeague || 'BRA';
+    const lid = activeLid || 'BRA';
 
     // TheSportsDB — sempre disponível
     async function loadSDBStandings() {
@@ -476,7 +476,11 @@
           ZebraAPI.footballData.getMatches(lid,'IN_PLAY',4).catch(()=>[]),
           ZebraAPI.footballData.getMatches(lid,'FINISHED',8).catch(()=>[]),
         ]);
-        const all = [...live, ...scheduled, ...finished].map(ZebraAPI.transform.fdMatch).filter(Boolean);
+        const all = [
+          ...(live?.matches     || []),
+          ...(scheduled?.matches || []),
+          ...(finished?.matches  || []),
+        ].map(ZebraAPI.transform.fdMatch).filter(Boolean);
         if (all.length) {
           ['proximos','ao_vivo','resultados'].forEach(k => { JOGOS[k] = []; });
           all.forEach(m => {
