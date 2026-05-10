@@ -130,6 +130,8 @@
 
 <div class="toast" id="toast"></div>
 
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
 <script src="js/main.js"></script>
 <script>
   // ── DATA ────────────────────────────────────────────────────────
@@ -439,6 +441,77 @@
   // ── INIT ──────────────────────────────────────────────────────────
   updatePlanBadge && updatePlanBadge();
   renderJogos();
+
+  // ── API REAL DATA ──────────────────────────────────────────────────
+  async function initRealData() {
+    const lid = currentLeague || 'BRA';
+
+    // TheSportsDB — sempre disponível
+    async function loadSDBStandings() {
+      try {
+        const data = await ZebraAPI.sportsDb.getLeagueTable(lid);
+        const rows = ZebraAPI.transform.sdbTable(data);
+        if (rows && rows.length) {
+          STANDINGS.length = 0;
+          rows.forEach((r, i) => STANDINGS.push({
+            pos: r.pos, name: r.name, abbr: r.name.substring(0,3).toUpperCase(),
+            p: r.p, j: r.j, v: r.v, e: r.e, d: r.d,
+            gp: r.gp, gc: r.gc, sg: r.sg,
+            zi: '—',
+            posClass: r.pos <= 4 ? 'cl' : r.pos >= 18 ? 'rel' : r.pos <= 6 ? 'eur' : '',
+          }));
+          if (activeTab === 'tabela') renderTabela();
+          const lider = STANDINGS[0];
+          if (lider) document.getElementById('statLider').textContent = lider.abbr || lider.name.substring(0,3).toUpperCase();
+        }
+      } catch(e) { console.warn('SDB standings error:', e); }
+    }
+
+    // Football-Data.org — requer chave
+    async function loadFDMatches() {
+      if (!ZebraAPI.isConfigured.footballData()) return;
+      try {
+        const [scheduled, live, finished] = await Promise.all([
+          ZebraAPI.footballData.getMatches(lid,'SCHEDULED',8).catch(()=>[]),
+          ZebraAPI.footballData.getMatches(lid,'IN_PLAY',4).catch(()=>[]),
+          ZebraAPI.footballData.getMatches(lid,'FINISHED',8).catch(()=>[]),
+        ]);
+        const all = [...live, ...scheduled, ...finished].map(ZebraAPI.transform.fdMatch).filter(Boolean);
+        if (all.length) {
+          ['proximos','ao_vivo','resultados'].forEach(k => { JOGOS[k] = []; });
+          all.forEach(m => {
+            if (m.isLive) JOGOS['ao_vivo'].push({ home:m.home, away:m.away, hs:m.hs, as:m.as, time:m.time, status:'live' });
+            else if (m.isFinished) JOGOS['resultados'].push({ home:m.home, away:m.away, hs:m.hs, as:m.as, date:m.date });
+            else JOGOS['proximos'].push({ home:m.home, away:m.away, time:m.time, date:m.date });
+          });
+          if (activeTab === 'jogos') renderJogos();
+        }
+      } catch(e) { console.warn('FD matches error:', e); }
+    }
+
+    async function loadFDScorers() {
+      if (!ZebraAPI.isConfigured.footballData()) return;
+      try {
+        const data = await ZebraAPI.footballData.getScorers(lid, 10);
+        const scorers = ZebraAPI.transform.fdScorers(data);
+        if (scorers && scorers.length) {
+          ARTILHEIROS.length = 0;
+          ASSISTENCIAS.length = 0;
+          scorers.forEach(s => {
+            ARTILHEIROS.push({ name:s.name, team:s.team, gols:s.goals, flag:s.flag || '🌍' });
+            if (s.assists > 0) ASSISTENCIAS.push({ name:s.name, team:s.team, ast:s.assists, flag:s.flag || '🌍' });
+          });
+          ASSISTENCIAS.sort((a,b) => b.ast - a.ast);
+          if (activeTab === 'stats') renderStats();
+        }
+      } catch(e) { console.warn('FD scorers error:', e); }
+    }
+
+    loadSDBStandings();
+    loadFDMatches();
+    loadFDScorers();
+  }
+  initRealData();
 </script>
 </body>
 </html>

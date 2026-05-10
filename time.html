@@ -181,6 +181,8 @@
   <!-- TOAST -->
   <div class="toast" id="toast"></div>
 
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
   <script src="js/main.js"></script>
   <script>
     // ── DATA ──────────────────────────────────────────────
@@ -411,6 +413,28 @@
 
     // ── INIT ──────────────────────────────────────────────
     loadTeam('torino');
+
+    // ── API REAL DATA ─────────────────────────────────────
+    async function initRealData() {
+      const t = TEAMS[currentTeam];
+      if (!t) return;
+      try {
+        const results = await ZebraAPI.sportsDb.searchTeam(t.name);
+        if (!results || !results.teams || !results.teams.length) return;
+        const team = ZebraAPI.transform.sdbTeam(results.teams[0]);
+        if (team && team.logo) {
+          const shield = document.getElementById('heroShield');
+          shield.innerHTML = `<img src="${team.logo}" alt="${team.name}" style="width:52px;height:52px;object-fit:contain;border-radius:6px;">`;
+          shield.style.background = 'transparent';
+          shield.style.fontSize = '0';
+        }
+        if (team && team.stadium) {
+          const leagueEl = document.getElementById('heroLeague');
+          leagueEl.textContent = `${t.league} · ${team.stadium}`;
+        }
+      } catch(e) { console.warn('SDB team search error:', e); }
+    }
+    initRealData();
   </script>
 </body>
 </html>
