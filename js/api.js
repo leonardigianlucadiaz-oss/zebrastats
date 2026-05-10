@@ -50,7 +50,10 @@ const ZebraAPI = (() => {
       const hit = _cache.get(ck);
       if (hit) return hit;
       try {
-        const r = await fetch(`${this.BASE}${path}`, { headers: { 'X-Auth-Token': k } });
+        // Usa query param em vez de header customizado para evitar CORS preflight
+        const sep = path.includes('?') ? '&' : '?';
+        const url = `${this.BASE}${path}${sep}X-Auth-Token=${k}`;
+        const r = await fetch(url);
         if (!r.ok) { console.warn(`[FD] ${r.status} — ${path}`); return null; }
         const data = await r.json();
         _cache.set(ck, data);
@@ -179,6 +182,7 @@ const ZebraAPI = (() => {
 
     /* Football-Data.org: match object → ZebraStats format */
     fdMatch(m) {
+      if (!m || !m.status) return null;
       const LIVE_STATUSES = new Set(['IN_PLAY', 'PAUSED', 'LIVE', 'HALFTIME']);
       const isLive     = LIVE_STATUSES.has(m.status);
       const isFinished = m.status === 'FINISHED';
