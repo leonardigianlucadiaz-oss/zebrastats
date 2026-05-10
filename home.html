@@ -148,6 +148,8 @@
     .ranking-row__badge{ flex-shrink: 0; }
   </style>
 
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
   <script src="js/main.js"></script>
   <script>
     // ── DATA ──────────────────────────────────────────────
@@ -304,6 +306,55 @@
     // ── INITIAL RENDER ────────────────────────────────────
     renderLive();
     renderUpcoming();
+
+    // ── API REAL DATA ─────────────────────────────────────
+    async function initRealData() {
+      const content = document.querySelector('.content');
+      if (!ZebraAPI.isConfigured.footballData()) {
+        const banner = document.createElement('div');
+        banner.style.cssText = 'background:rgba(255,200,50,0.12);border:1px solid rgba(255,200,50,0.3);border-radius:var(--radius-md);padding:10px 14px;margin-bottom:16px;font-size:0.8125rem;color:var(--gold);display:flex;align-items:center;gap:8px;';
+        banner.innerHTML = `⚠️ <span>Configure sua chave Football-Data.org em <a href="perfil.html" style="color:var(--gold);text-decoration:underline;">Perfil → Integração de Dados</a> para dados ao vivo.</span>`;
+        content.insertBefore(banner, content.firstChild);
+        return;
+      }
+      const banner = document.createElement('div');
+      banner.style.cssText = 'background:rgba(46,230,92,0.08);border:1px solid rgba(46,230,92,0.2);border-radius:var(--radius-md);padding:10px 14px;margin-bottom:16px;font-size:0.8125rem;color:var(--green);display:flex;align-items:center;gap:8px;';
+      banner.innerHTML = `✓ <span>Dados ao vivo ativos — Football-Data.org</span>`;
+      content.insertBefore(banner, content.firstChild);
+
+      const leagues = ['ENG','ESP','ITA','GER','BRA'];
+      try {
+        const [liveResults, upcomingResults] = await Promise.all([
+          Promise.all(leagues.map(lid => ZebraAPI.footballData.getMatches(lid,'IN_PLAY',4).catch(()=>[]))),
+          Promise.all(leagues.map(lid => ZebraAPI.footballData.getMatches(lid,'SCHEDULED',4).catch(()=>[]))),
+        ]);
+
+        const liveMatches = liveResults.flat().map(ZebraAPI.transform.fdMatch).filter(Boolean);
+        const upcomingMatches = upcomingResults.flat().map(ZebraAPI.transform.fdMatch).filter(Boolean);
+
+        if (liveMatches.length) {
+          LIVE_GAMES.length = 0;
+          liveMatches.forEach(m => LIVE_GAMES.push({
+            league: m.home.split(' ')[0], league_id: 'all',
+            home: m.home, away: m.away,
+            hs: m.hs ?? 0, as: m.as ?? 0,
+            min: m.time || '🔴', zebra: false,
+          }));
+          renderLive();
+        }
+
+        if (upcomingMatches.length) {
+          UPCOMING_GAMES.length = 0;
+          upcomingMatches.forEach(m => UPCOMING_GAMES.push({
+            league: m.home.split(' ')[0], league_id: 'all',
+            home: m.home, away: m.away,
+            time: m.time || '—', favProb: '',
+          }));
+          renderUpcoming();
+        }
+      } catch(e) { console.warn('ZebraStats API error:', e); }
+    }
+    initRealData();
   </script>
 </body>
 </html>

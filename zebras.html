@@ -88,6 +88,8 @@
 
 <div class="toast" id="toast"></div>
 
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
 <script src="js/main.js"></script>
 <script>
   const LEAGUES = [
@@ -290,6 +292,66 @@
   updatePlanBadge();
   renderLeagueBar();
   renderZebras();
+
+  // ── INTEGRAÇÃO COM APIS ──────────────────────────────────────
+  async function initRealData() {
+    if (typeof ZebraAPI === 'undefined') return;
+
+    if (!ZebraAPI.isConfigured.footballData()) {
+      const tip = document.createElement('div');
+      tip.style.cssText = 'background:rgba(255,200,50,0.08);border:1px solid rgba(255,200,50,0.2);border-radius:var(--radius-sm);padding:10px 14px;display:flex;align-items:center;gap:8px;font-size:0.75rem;color:var(--gold);cursor:pointer;';
+      tip.innerHTML = '⚙️ Configure Football-Data.org no Perfil para zebras com dados reais <span style="margin-left:auto;color:var(--green);">→</span>';
+      tip.addEventListener('click', () => window.location.href = 'perfil.html');
+      document.querySelector('.content').prepend(tip);
+      return;
+    }
+
+    const lid = activeLeague === 'all' ? 'ENG' : activeLeague;
+    const NAMES = { ENG:'Prem. League', ESP:'La Liga', ITA:'Serie A', GER:'Bundesliga', BRA:'Brasileirão', FRA:'Ligue 1' };
+
+    try {
+      const [matchData, standData] = await Promise.all([
+        ZebraAPI.footballData.getMatches(lid, 'FINISHED', 20),
+        ZebraAPI.footballData.getStandings(lid),
+      ]);
+      if (!matchData?.matches?.length) return;
+
+      // Mapa nome → posição na tabela
+      const posMap = {};
+      if (standData) {
+        ZebraAPI.transform.fdStandings(standData).forEach(r => {
+          posMap[r.name] = r.pos;
+          if (r.abbr) posMap[r.abbr] = r.pos;
+        });
+      }
+
+      const realZebras = [];
+      matchData.matches.forEach(m => {
+        const t = ZebraAPI.transform.fdMatch(m);
+        if (!t.isFinished || t.winner === 'DRAW' || !t.winner) return;
+        const isHomeWin = t.winner === 'HOME_TEAM';
+        const winName   = isHomeWin ? t.homeFull : t.awayFull;
+        const loseName  = isHomeWin ? t.awayFull : t.homeFull;
+        const winPos    = posMap[winName]  || posMap[t.home];
+        const losePos   = posMap[loseName] || posMap[t.away];
+        const zi        = (winPos && losePos) ? ZebraAPI.zebra.fromPositions(winPos, losePos) : 0;
+        if (zi > 0) {
+          realZebras.push({ home:t.home, away:t.away, hs:t.hs, as:t.as, league:NAMES[lid]||lid, lid, date:t.date, zi, odds_h:'–', odds_a:'–' });
+        }
+      });
+
+      realZebras.sort((a, b) => b.zi - a.zi);
+
+      if (realZebras.length) {
+        ZEBRAS.length = 0;
+        ZEBRAS.push(...realZebras);
+        renderZebras();
+        document.getElementById('zebraCount').textContent = `${realZebras.length} resultado${realZebras.length !== 1 ? 's' : ''} · dados reais ⚡`;
+      }
+    } catch(e) { console.warn('[Zebras] Erro ao carregar dados reais:', e.message); }
+  }
+
+  initRealData();
 </script>
 </body>
 </html>
