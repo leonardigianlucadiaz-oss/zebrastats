@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ZebraStats — Notificações</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/main.css" />
+</head>
+<body>
+<div class="phone">
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <button onclick="history.back()" style="background:none;border:none;color:var(--gray);font-size:1.375rem;cursor:pointer;padding:4px;line-height:1;">←</button>
+    <span style="font-size:1rem;font-weight:700;flex:1;text-align:center;">Notificações</span>
+    <button id="markAllBtn" style="background:none;border:none;color:var(--green);font-size:0.75rem;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;">Marcar lidas</button>
+  </nav>
+
+  <!-- FILTROS -->
+  <section style="padding:10px 16px;border-bottom:1px solid var(--border);background:var(--card2);">
+    <div class="scroll-x" style="gap:8px;">
+      <button class="filter-chip active" data-nfilter="all">Todas</button>
+      <button class="filter-chip" data-nfilter="zebra">🦓 Zebras</button>
+      <button class="filter-chip" data-nfilter="jogo">⚽ Jogos</button>
+      <button class="filter-chip" data-nfilter="sistema">⚙️ Sistema</button>
+    </div>
+  </section>
+
+  <!-- LISTA DE NOTIFICAÇÕES -->
+  <main style="padding-bottom:80px;" id="notifMain"></main>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <a href="home.html"   class="bottom-nav__item"><span class="bottom-nav__icon">🏠</span>Home</a>
+    <a href="zebras.html" class="bottom-nav__item"><span class="bottom-nav__icon">🦓</span>Zebras</a>
+    <a href="liga.html"   class="bottom-nav__item"><span class="bottom-nav__icon">🏆</span>Ligas</a>
+    <a href="time.html"   class="bottom-nav__item"><span class="bottom-nav__icon">⭐</span>Times</a>
+    <a href="perfil.html" class="bottom-nav__item"><span class="bottom-nav__icon">👤</span>Perfil</a>
+  </nav>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="js/main.js"></script>
+<script>
+  const NOTIFS = [
+    // Hoje
+    { id:1,  group:'Hoje',    type:'zebra',   unread:true,  icon:'🦓', iconBg:'var(--green-dim)',  title:'ZEBRA ALERT — Botafogo 3×0 Flamengo', desc:'Zebra Index 8.2 — resultado altamente improvável confirmado. Odd do Botafogo era 4.50.',  time:'Há 2 horas',   link:'partida.html' },
+    { id:2,  group:'Hoje',    type:'jogo',    unread:true,  icon:'⚽', iconBg:'rgba(30,58,85,0.8)',title:'Lembrete: Flamengo × Botafogo começa em 1h', desc:'Brasileirão · Rodada 13 · Estádio Nilton Santos · 16h00', time:'Há 5 horas',   link:'partida.html' },
+    { id:3,  group:'Hoje',    type:'zebra',   unread:true,  icon:'🦓', iconBg:'var(--green-dim)',  title:'ZEBRA ALERT — Lecce 2×1 Juventus',    desc:'Zebra Index 7.9 — Lecce, 22º no Índice de Força, derrubou a Juventus em casa.',       time:'Há 6 horas',   link:'partida.html' },
+    { id:4,  group:'Hoje',    type:'sistema', unread:false, icon:'✨', iconBg:'var(--gold-dim)',   title:'Novo recurso: Tela da Liga disponível!', desc:'Acesse tabela de classificação, artilheiros e zebras por liga diretamente no app.', time:'Há 8 horas',   link:'liga.html'    },
+
+    // Ontem
+    { id:5,  group:'Ontem',   type:'jogo',    unread:false, icon:'🏆', iconBg:'var(--gold-dim)',   title:'Resultado: Champions League — Final',  desc:'Real Madrid 1×0 Borussia Dortmund. Fim de jogo.',                                    time:'Ontem · 23h05',link:'partida.html' },
+    { id:6,  group:'Ontem',   type:'zebra',   unread:false, icon:'🦓', iconBg:'var(--green-dim)',  title:'Top Zebra da Semana: Angers 2×0 PSG',  desc:'Zebra Index 9.4 — a maior zebra da temporada! PSG com odd 1.38 foi eliminado em casa.',time:'Ontem · 18h30',link:'zebras.html'  },
+    { id:7,  group:'Ontem',   type:'sistema', unread:false, icon:'👑', iconBg:'var(--gold-dim)',   title:'Oferta especial: Pro Anual com -17%',  desc:'Economize R$100 comparado ao mensal. Válido por mais 3 dias.',                       time:'Ontem · 10h00',link:'assinatura.html'},
+
+    // Esta semana
+    { id:8,  group:'Esta semana', type:'jogo', unread:false, icon:'⭐', iconBg:'rgba(30,58,85,0.8)', title:'Seu time favorito joga amanhã',       desc:'Flamengo × Internacional · Brasileirão · 18h30',                                    time:'08/05 · 09h00',link:'partida.html' },
+    { id:9,  group:'Esta semana', type:'zebra',unread:false, icon:'🦓', iconBg:'var(--green-dim)',   title:'ZEBRA ALERT — Augsburg 2×1 Bayern',   desc:'Zebra Index 8.7 — o Bayern Munich, favorito com odd 1.50, perdeu para o Augsburg.', time:'07/05 · 17h30',link:'partida.html' },
+    { id:10, group:'Esta semana', type:'sistema',unread:false,icon:'🔔',iconBg:'rgba(30,58,85,0.8)', title:'Lembrete de pagamento',               desc:'Sua assinatura Pro renova em 7 dias. Verifique seus dados de pagamento.',            time:'06/05 · 10h00',link:'perfil.html'  },
+  ];
+
+  let activeFilter = 'all';
+  let readIds = new Set();
+
+  function renderNotifs() {
+    const main = document.getElementById('notifMain');
+    main.innerHTML = '';
+
+    const filtered = activeFilter === 'all' ? NOTIFS : NOTIFS.filter(n => n.type === activeFilter);
+    if (!filtered.length) {
+      main.innerHTML = `<div style="text-align:center;padding:48px 16px;color:var(--gray);">
+        <div style="font-size:2.5rem;margin-bottom:12px;">🔔</div>
+        <div style="font-weight:600;margin-bottom:4px;">Nenhuma notificação</div>
+        <div style="font-size:0.8125rem;">Você está em dia!</div>
+      </div>`;
+      return;
+    }
+
+    const groups = {};
+    filtered.forEach(n => {
+      if (!groups[n.group]) groups[n.group] = [];
+      groups[n.group].push(n);
+    });
+
+    Object.entries(groups).forEach(([group, items]) => {
+      // Group header
+      const header = document.createElement('div');
+      header.style.cssText = 'padding:12px 16px 6px;font-size:0.6875rem;font-weight:600;color:var(--gray);text-transform:uppercase;letter-spacing:0.8px;';
+      header.textContent = group;
+      main.appendChild(header);
+
+      const groupWrap = document.createElement('div');
+      groupWrap.style.cssText = 'background:var(--card);border-top:1px solid var(--border);border-bottom:1px solid var(--border);';
+
+      items.forEach(n => {
+        const isUnread = n.unread && !readIds.has(n.id);
+        const item = document.createElement('div');
+        item.className = `notif-item${isUnread ? ' notif-item--unread' : ''}`;
+        item.innerHTML = `
+          <div class="notif-item__icon" style="background:${n.iconBg};">${n.icon}</div>
+          <div class="notif-item__body">
+            <div class="notif-item__title">${n.title}</div>
+            <div class="notif-item__desc">${n.desc}</div>
+            <div class="notif-item__time">${n.time}</div>
+          </div>
+          ${isUnread ? '<div class="notif-item__dot"></div>' : ''}
+        `;
+        item.addEventListener('click', () => {
+          readIds.add(n.id);
+          window.location.href = n.link;
+        });
+        groupWrap.appendChild(item);
+      });
+
+      main.appendChild(groupWrap);
+    });
+  }
+
+  // ── FILTROS ──────────────────────────────────────────────────
+  document.querySelectorAll('[data-nfilter]').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('[data-nfilter]').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      activeFilter = this.dataset.nfilter;
+      renderNotifs();
+    });
+  });
+
+  // ── MARCAR TODAS COMO LIDAS ───────────────────────────────────
+  document.getElementById('markAllBtn').addEventListener('click', () => {
+    NOTIFS.forEach(n => readIds.add(n.id));
+    renderNotifs();
+    showToast('✓ Todas marcadas como lidas');
+  });
+
+  // ── INIT ─────────────────────────────────────────────────────
+  renderNotifs();
+</script>
+</body>
+</html>

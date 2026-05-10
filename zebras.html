@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ZebraStats — Zebras</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/main.css" />
+</head>
+<body>
+<div class="phone">
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a href="home.html" class="navbar__brand">Zebra<span>Stats</span></a>
+    <div class="navbar__actions">
+      <span class="badge badge--free" id="planBadge">FREE</span>
+      <a href="busca.html" class="navbar__icon" title="Buscar">🔍</a>
+      <a href="notificacoes.html" class="navbar__icon" title="Notificações">🔔</a>
+    </div>
+  </nav>
+
+  <!-- BARRA DE LIGAS -->
+  <section style="background:var(--card2);padding:12px 16px;border-bottom:1px solid var(--border);">
+    <div class="section-header" style="margin-bottom:10px;">
+      <span class="section-title" style="font-size:0.875rem;">🏆 Ligas</span>
+      <button id="addLeagueBtn" style="background:none;border:none;color:var(--green);font-size:0.75rem;font-weight:600;cursor:pointer;font-family:inherit;">+ Adicionar Liga</button>
+    </div>
+    <div class="scroll-x" id="leagueBar"></div>
+  </section>
+
+  <!-- FILTROS DE MAGNITUDE -->
+  <section style="padding:10px 16px;border-bottom:1px solid var(--border);">
+    <div class="scroll-x" style="gap:8px;" id="filterRow">
+      <button class="filter-chip active" data-filter="all">Todas</button>
+      <button class="filter-chip" data-filter="grande">🔴 Grande (7+)</button>
+      <button class="filter-chip" data-filter="media">🟠 Média (4–7)</button>
+      <button class="filter-chip" data-filter="leve">🟡 Leve (&lt;4)</button>
+    </div>
+  </section>
+
+  <!-- LISTA DE ZEBRAS -->
+  <main class="content">
+    <div class="section-header">
+      <span class="section-title">🦓 Zebras Recentes</span>
+      <span class="text-xs text-gray" id="zebraCount"></span>
+    </div>
+
+    <div id="zebraList" style="display:flex;flex-direction:column;gap:12px;"></div>
+
+    <!-- LOCK BANNER PRO -->
+    <div class="lock-banner" onclick="window.location.href='assinatura.html'">
+      <span style="font-size:1.2rem;">🔒</span>
+      <div>
+        <div style="font-size:0.875rem;font-weight:600;">Histórico completo + alertas</div>
+        <div style="font-size:0.75rem;font-weight:400;color:var(--gray);margin-top:2px;">Assine o Pro para acesso ilimitado</div>
+      </div>
+      <span style="margin-left:auto;color:var(--green);">→</span>
+    </div>
+  </main>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <a href="home.html"   class="bottom-nav__item"><span class="bottom-nav__icon">🏠</span>Home</a>
+    <a href="zebras.html" class="bottom-nav__item active"><span class="bottom-nav__icon">🦓</span>Zebras</a>
+    <a href="liga.html"   class="bottom-nav__item"><span class="bottom-nav__icon">🏆</span>Ligas</a>
+    <a href="time.html"   class="bottom-nav__item"><span class="bottom-nav__icon">⭐</span>Times</a>
+    <a href="perfil.html" class="bottom-nav__item"><span class="bottom-nav__icon">👤</span>Perfil</a>
+  </nav>
+</div>
+
+<!-- MODAL ADICIONAR LIGA -->
+<div class="modal-overlay" id="addLeagueModal">
+  <div class="modal">
+    <div class="modal__header">
+      <span class="modal__title">Adicionar Liga</span>
+      <button class="modal__close" id="closeModal">✕</button>
+    </div>
+    <div class="search-bar" style="margin-bottom:14px;">
+      <span class="search-bar__icon">🔍</span>
+      <input type="text" placeholder="Buscar liga..." id="leagueSearchInput" />
+    </div>
+    <div id="allLeaguesList" style="display:flex;flex-direction:column;gap:2px;"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="js/main.js"></script>
+<script>
+  const LEAGUES = [
+    { id:'BRA', flag:'🇧🇷', name:'Brasileirão Série A', country:'Brasil',     faved:true  },
+    { id:'ENG', flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', name:'Premier League',    country:'Inglaterra', faved:true  },
+    { id:'ESP', flag:'🇪🇸', name:'La Liga',             country:'Espanha',    faved:false },
+    { id:'ITA', flag:'🇮🇹', name:'Serie A',             country:'Itália',     faved:false },
+    { id:'GER', flag:'🇩🇪', name:'Bundesliga',          country:'Alemanha',   faved:false },
+    { id:'FRA', flag:'🇫🇷', name:'Ligue 1',             country:'França',     faved:false },
+    { id:'POR', flag:'🇵🇹', name:'Liga Portugal',       country:'Portugal',   faved:false },
+    { id:'HOL', flag:'🇳🇱', name:'Eredivisie',          country:'Holanda',    faved:false },
+    { id:'ARG', flag:'🇦🇷', name:'Liga Profesional',    country:'Argentina',  faved:false },
+    { id:'UCL', flag:'🏆', name:'Champions League',     country:'Europa',     faved:false },
+    { id:'UEL', flag:'🟠', name:'Europa League',        country:'Europa',     faved:false },
+    { id:'MLS', flag:'🇺🇸', name:'MLS',                 country:'EUA',        faved:false },
+  ];
+
+  const ZEBRAS = [
+    { home:'Botafogo',    away:'Flamengo',    hs:3, as:0, league:'Brasileirão', lid:'BRA', date:'Hoje · 16h00',   zi:8.2, odds_h:'4.50', odds_a:'1.75' },
+    { home:'Lecce',       away:'Juventus',    hs:2, as:1, league:'Serie A',     lid:'ITA', date:'Hoje · 14h00',   zi:7.9, odds_h:'5.20', odds_a:'1.62' },
+    { home:'Luton',       away:'Man City',    hs:1, as:0, league:'Prem. League',lid:'ENG', date:'Ontem · 13h30',  zi:9.1, odds_h:'7.00', odds_a:'1.43' },
+    { home:'Mallorca',    away:'Real Madrid', hs:1, as:0, league:'La Liga',     lid:'ESP', date:'09/05 · 20h00',  zi:6.4, odds_h:'4.10', odds_a:'1.85' },
+    { home:'Empoli',      away:'Inter',       hs:2, as:2, league:'Serie A',     lid:'ITA', date:'08/05 · 19h45',  zi:5.1, odds_h:'5.50', odds_a:'1.55' },
+    { home:'Augsburg',    away:'Bayern',      hs:2, as:1, league:'Bundesliga',  lid:'GER', date:'07/05 · 15h30',  zi:8.7, odds_h:'6.00', odds_a:'1.50' },
+    { home:'Bragantino',  away:'Palmeiras',   hs:3, as:1, league:'Brasileirão', lid:'BRA', date:'06/05 · 20h00',  zi:4.3, odds_h:'3.10', odds_a:'2.15' },
+    { home:'Angers',      away:'PSG',         hs:2, as:0, league:'Ligue 1',     lid:'FRA', date:'05/05 · 21h00',  zi:9.4, odds_h:'8.50', odds_a:'1.38' },
+    { home:'Granada',     away:'Barça',       hs:1, as:0, league:'La Liga',     lid:'ESP', date:'04/05 · 19h00',  zi:8.0, odds_h:'5.80', odds_a:'1.55' },
+    { home:'Clermont',    away:'Monaco',      hs:3, as:2, league:'Ligue 1',     lid:'FRA', date:'03/05 · 17h00',  zi:3.8, odds_h:'2.90', odds_a:'2.30' },
+  ];
+
+  let activeLeague = 'all';
+  let activeFilter = 'all';
+
+  function ziClass(z) {
+    if (z.zi >= 7) return 'grande';
+    if (z.zi >= 4) return 'media';
+    return 'leve';
+  }
+
+  function ziLabel(cls) {
+    return { grande:'🔴 Grande', media:'🟠 Média', leve:'🟡 Leve' }[cls];
+  }
+
+  // ── LEAGUE BAR ──────────────────────────────────────────────
+  function renderLeagueBar() {
+    const bar = document.getElementById('leagueBar');
+    bar.innerHTML = '';
+
+    const allPill = document.createElement('div');
+    allPill.className = `league-fav-pill${activeLeague === 'all' ? ' active-league' : ''}`;
+    allPill.innerHTML = `<span class="league-fav-pill__label" style="padding:6px 14px;">⚽ Todas</span>`;
+    allPill.addEventListener('click', () => { activeLeague = 'all'; renderLeagueBar(); renderZebras(); });
+    bar.appendChild(allPill);
+
+    LEAGUES.forEach(l => {
+      const pill = document.createElement('div');
+      pill.className = `league-fav-pill${activeLeague === l.id ? ' active-league' : ''}`;
+      pill.innerHTML = `
+        <span class="league-fav-pill__label" data-lid="${l.id}">${l.flag} ${l.name.split(' ')[0]}</span>
+        <button class="league-fav-pill__star${l.faved ? ' faved' : ''}" data-star="${l.id}" title="${l.faved ? 'Remover' : 'Favoritar'}">★</button>
+      `;
+      pill.querySelector('[data-lid]').addEventListener('click', () => { activeLeague = l.id; renderLeagueBar(); renderZebras(); });
+      pill.querySelector('[data-star]').addEventListener('click', e => {
+        e.stopPropagation();
+        l.faved = !l.faved;
+        renderLeagueBar();
+        showToast(l.faved ? `⭐ ${l.name} favoritada` : `${l.name} removida`);
+      });
+      bar.appendChild(pill);
+    });
+  }
+
+  // ── ZEBRA LIST ───────────────────────────────────────────────
+  function renderZebras() {
+    const container = document.getElementById('zebraList');
+    container.innerHTML = '';
+    const isPro = getUserPlan() !== 'free';
+
+    let list = [...ZEBRAS];
+    if (activeLeague !== 'all') list = list.filter(z => z.lid === activeLeague);
+    if (activeFilter !== 'all') list = list.filter(z => ziClass(z) === activeFilter);
+
+    document.getElementById('zebraCount').textContent = `${list.length} resultado${list.length !== 1 ? 's' : ''}`;
+
+    if (!list.length) {
+      container.innerHTML = `<div style="text-align:center;padding:32px;color:var(--gray);">
+        <div style="font-size:2rem;margin-bottom:8px;">🦓</div>
+        <div style="font-weight:600;margin-bottom:4px;">Nenhuma zebra encontrada</div>
+        <div style="font-size:0.8125rem;">Tente outro filtro ou liga</div>
+      </div>`;
+      return;
+    }
+
+    list.forEach((z, i) => {
+      const cls   = ziClass(z);
+      const label = ziLabel(cls);
+      const locked = i >= 4 && !isPro;
+
+      const card = document.createElement('div');
+      card.className = 'zebra-card';
+
+      if (locked) {
+        card.innerHTML = `
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+            <span class="text-xs text-gray">${z.league} · ${z.date}</span>
+            <span class="zebra-index-badge zi--${cls}">🦓 ${z.zi} ${label}</span>
+          </div>
+          <div style="filter:blur(5px);pointer-events:none;user-select:none;display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+            <span style="font-size:0.9375rem;font-weight:600;flex:1;">${z.home}</span>
+            <span style="font-size:1.375rem;font-weight:700;min-width:72px;text-align:center;">${z.hs} – ${z.as}</span>
+            <span style="font-size:0.9375rem;font-weight:600;flex:1;text-align:right;">${z.away}</span>
+          </div>
+          <div style="text-align:center;padding-top:4px;">
+            <a href="assinatura.html" style="font-size:0.75rem;color:var(--green);font-weight:600;text-decoration:none;">🔒 Assine o Pro para ver →</a>
+          </div>`;
+      } else {
+        card.innerHTML = `
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+            <span class="text-xs text-gray">${z.league} · ${z.date}</span>
+            <span class="zebra-index-badge zi--${cls}">🦓 ${z.zi} ${label}</span>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+            <span style="font-size:0.9375rem;font-weight:600;flex:1;">${z.home}</span>
+            <span style="font-size:1.375rem;font-weight:700;min-width:72px;text-align:center;">${z.hs} – ${z.as}</span>
+            <span style="font-size:0.9375rem;font-weight:600;flex:1;text-align:right;">${z.away}</span>
+          </div>
+          <div style="display:flex;gap:16px;padding-top:10px;border-top:1px solid var(--border);align-items:center;">
+            <div>
+              <div style="font-size:0.625rem;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px;">Odd azarão</div>
+              <div style="font-size:0.875rem;font-weight:700;color:var(--white);">${z.odds_h}</div>
+            </div>
+            <div>
+              <div style="font-size:0.625rem;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px;">Odd favorito</div>
+              <div style="font-size:0.875rem;font-weight:700;color:var(--red);">${z.odds_a}</div>
+            </div>
+            <a href="partida.html" style="margin-left:auto;font-size:0.75rem;color:var(--green);font-weight:600;text-decoration:none;">Ver detalhes →</a>
+          </div>`;
+      }
+
+      card.addEventListener('click', e => { if (e.target.tagName !== 'A') window.location.href = 'partida.html'; });
+      container.appendChild(card);
+    });
+  }
+
+  // ── FILTROS ──────────────────────────────────────────────────
+  document.querySelectorAll('.filter-chip').forEach(chip => {
+    chip.addEventListener('click', function() {
+      document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+      this.classList.add('active');
+      activeFilter = this.dataset.filter;
+      renderZebras();
+    });
+  });
+
+  // ── MODAL ────────────────────────────────────────────────────
+  const modal = document.getElementById('addLeagueModal');
+
+  document.getElementById('addLeagueBtn').addEventListener('click', () => {
+    modal.classList.add('show');
+    renderModalLeagues('');
+    document.getElementById('leagueSearchInput').focus();
+  });
+  document.getElementById('closeModal').addEventListener('click', () => modal.classList.remove('show'));
+  modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('show'); });
+  document.getElementById('leagueSearchInput').addEventListener('input', e => renderModalLeagues(e.target.value));
+
+  function renderModalLeagues(query) {
+    const container = document.getElementById('allLeaguesList');
+    container.innerHTML = '';
+    const filtered = LEAGUES.filter(l =>
+      l.name.toLowerCase().includes(query.toLowerCase()) ||
+      l.country.toLowerCase().includes(query.toLowerCase())
+    );
+    if (!filtered.length) {
+      container.innerHTML = `<p style="text-align:center;padding:20px;color:var(--gray);font-size:0.875rem;">Nenhuma liga encontrada</p>`;
+      return;
+    }
+    filtered.forEach(l => {
+      const item = document.createElement('div');
+      item.className = `league-list-item${l.faved ? ' added' : ''}`;
+      item.innerHTML = `
+        <span class="league-list-item__flag">${l.flag}</span>
+        <div style="flex:1;">
+          <div class="league-list-item__name">${l.name}</div>
+          <div style="font-size:0.75rem;color:var(--gray);">${l.country}</div>
+        </div>
+        <span class="league-list-item__action">${l.faved ? '✓ Adicionada' : '+ Adicionar'}</span>
+      `;
+      item.addEventListener('click', () => {
+        l.faved = !l.faved;
+        renderModalLeagues(query);
+        renderLeagueBar();
+        showToast(l.faved ? `⭐ ${l.name} adicionada` : `${l.name} removida`);
+      });
+      container.appendChild(item);
+    });
+  }
+
+  // ── INIT ─────────────────────────────────────────────────────
+  updatePlanBadge();
+  renderLeagueBar();
+  renderZebras();
+</script>
+</body>
+</html>

@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ZebraStats — Perfil</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/main.css" />
+</head>
+<body>
+<div class="phone">
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a href="home.html" class="navbar__brand">Zebra<span>Stats</span></a>
+    <div class="navbar__actions">
+      <a href="notificacoes.html" class="navbar__icon" title="Notificações">🔔</a>
+      <a href="busca.html" class="navbar__icon" title="Buscar">🔍</a>
+    </div>
+  </nav>
+
+  <!-- HERO DO PERFIL -->
+  <section style="background:linear-gradient(180deg,var(--card2) 0%,var(--bg) 100%);padding:24px 16px 20px;border-bottom:1px solid var(--border);">
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;">
+      <div class="profile-avatar" id="avatarEl">G</div>
+      <div style="flex:1;">
+        <div style="font-size:1.125rem;font-weight:700;" id="userName">Gianluca Diaz</div>
+        <div style="font-size:0.8125rem;color:var(--gray);margin-top:2px;" id="userEmail">leonardi@email.com</div>
+        <div style="margin-top:6px;">
+          <span class="badge badge--free" id="planBadge">FREE</span>
+        </div>
+      </div>
+      <a href="#editarDados" class="navbar__icon" title="Editar perfil" style="font-size:0.875rem;">✏️</a>
+    </div>
+
+    <!-- STATS RÁPIDOS -->
+    <div style="display:flex;gap:0;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;">
+      <div class="profile-stat" style="padding:12px 8px;border-right:1px solid var(--border);">
+        <div class="profile-stat__value">47</div>
+        <div class="profile-stat__label">Zebras vistas</div>
+      </div>
+      <div class="profile-stat" style="padding:12px 8px;border-right:1px solid var(--border);">
+        <div class="profile-stat__value">12</div>
+        <div class="profile-stat__label">Alertas</div>
+      </div>
+      <div class="profile-stat" style="padding:12px 8px;border-right:1px solid var(--border);">
+        <div class="profile-stat__value">4</div>
+        <div class="profile-stat__label">Times fav.</div>
+      </div>
+      <div class="profile-stat" style="padding:12px 8px;">
+        <div class="profile-stat__value">2</div>
+        <div class="profile-stat__label">Ligas fav.</div>
+      </div>
+    </div>
+  </section>
+
+  <main style="padding-bottom:80px;">
+
+    <!-- MINHA CONTA -->
+    <div class="profile-section-title">Minha Conta</div>
+    <div style="background:var(--card);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
+
+      <a id="editarDados" href="#" class="profile-menu-item" onclick="openModal('editDadosModal');return false;">
+        <div class="profile-menu-item__icon">👤</div>
+        <div class="profile-menu-item__text">
+          <div class="profile-menu-item__label">Editar Dados</div>
+          <div class="profile-menu-item__sub">Nome, e-mail e foto</div>
+        </div>
+        <span class="profile-menu-item__arrow">›</span>
+      </a>
+
+      <a href="#" class="profile-menu-item" onclick="openModal('senhaModal');return false;">
+        <div class="profile-menu-item__icon">🔑</div>
+        <div class="profile-menu-item__text">
+          <div class="profile-menu-item__label">Alterar Senha</div>
+          <div class="profile-menu-item__sub">Senha atual e nova senha</div>
+        </div>
+        <span class="profile-menu-item__arrow">›</span>
+      </a>
+
+      <a href="notificacoes.html" class="profile-menu-item">
+        <div class="profile-menu-item__icon">🔔</div>
+        <div class="profile-menu-item__text">
+          <div class="profile-menu-item__label">Notificações</div>
+          <div class="profile-menu-item__sub">Gerenciar alertas e avisos</div>
+        </div>
+        <span class="profile-menu-item__arrow">›</span>
+      </a>
+    </div>
+
+    <!-- FAVORITOS -->
+    <div class="profile-section-title">Favoritos</div>
+    <div style="background:var(--card);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
+
+      <a href="time.html" class="profile-menu-item">
+        <div class="profile-menu-item__icon">⭐</div>
+        <div class="profile-menu-item__text">
+          <div class="profile-menu-item__label">Times Favoritos</div>
+          <div class="profile-menu-item__sub" id="favTeamsCount">Flamengo, Palmeiras + 2</div>
+        </div>
+        <span class="profile-menu-item__arrow">›</span>
+      </a>
+
+      <a href="liga.html" class="profile-menu-item">
+        <div class="profile-menu-item__icon">🏆</div>
+        <div class="profile-menu-item__text">
+          <div class="profile-menu-item__label">Ligas Favoritas</div>
+          <div class="profile-menu-item__sub">Brasileirão, Premier League</div>
+        </div>
+        <span class="profile-menu-item__arrow">›</span>
+      </a>
+
+      <a href="zebras.html" class="profile-menu-item">
+        <div class="profile-menu-item__icon">🦓</div>
+        <div class="profile-menu-item__text">
+          <div class="profile-menu-item__label">Zebras Salvas</div>
+          <div class="profile-menu-item__sub">Partidas marcadas para revisitar</div>
+        </div>
+        <span class="profile-menu-item__arrow">›</span>
+      </a>
+    </div>
+
+    <!-- ASSINATURA -->
+    <div class="profile-section-title">Assinatura</div>
+    <div style="background:var(--card);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
+
+      <div class="profile-menu-item" id="planRow" style="cursor:default;">
+        <div class="profile-menu-item__icon" style="background:var(--gold-dim);color:var(--gold);">👑</div>
+        <div class="profile-menu-item__text">
+          <div class="profile-menu-item__label" id="planLabel">Plano Free</div>
+          <div class="profile-menu-item__sub" id="planSub">Recursos básicos</div>
+        </div>
+        <span class="badge badge--free" id="planBadge2">FREE</span>
+      </div>
+
+      <a href="assinatura.html" class="profile-menu-item">
+        <div class="profile-menu-item__icon" style="background:var(--green-dim);color:var(--green);">🚀</div>
+        <div class="profile-menu-item__text">
+          <div class="profile-menu-item__label" style="color:var(--green);">Mudar de Plano</div>
+          <div class="profile-menu-item__sub">Ver todos os planos disponíveis</div>
+        </div>
+        <span class="profile-menu-item__arrow" style="color:var(--green);">›</span>
+      </a>
+
+      <a href="#" class="profile-menu-item" onclick="showToast('📧 Histórico enviado para seu e-mail');return false;">
+        <div class="profile-menu-item__icon">🧾</div>
+        <div class="profile-menu-item__text">
+          <div class="profile-menu-item__label">Histórico de Pagamentos</div>
+          <div class="profile-menu-item__sub">Faturas e recibos</div>
+        </div>
+        <span class="profile-menu-item__arrow">›</span>
+      </a>
+    </div>
+
+    <!-- PREFERÊNCIAS -->
+    <div class="profile-section-title">Preferências</div>
+    <div style="background:var(--card);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
+
+      <div class="profile-menu-item" style="cursor:default;">
+        <div class="profile-menu-item__icon">🌐</div>
+        <div class="profile-menu-item__text">
+          <div class="profile-menu-item__label">Idioma</div>
+          <div class="profile-menu-item__sub">Português (Brasil)</div>
+        </div>
+        <span class="profile-menu-item__arrow">›</span>
+      </div>
+
+      <div class="profile-menu-item" style="justify-content:space-between;">
+        <div style="display:flex;align-items:center;gap:14px;">
+          <div class="profile-menu-item__icon">🌙</div>
+          <div class="profile-menu-item__text">
+            <div class="profile-menu-item__label">Modo Escuro</div>
+            <div class="profile-menu-item__sub">Padrão do aplicativo</div>
+          </div>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" checked />
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <div class="profile-menu-item" style="justify-content:space-between;">
+        <div style="display:flex;align-items:center;gap:14px;">
+          <div class="profile-menu-item__icon">📳</div>
+          <div class="profile-menu-item__text">
+            <div class="profile-menu-item__label">Alertas de Zebra</div>
+            <div class="profile-menu-item__sub">Push em tempo real</div>
+          </div>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" checked />
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- SUPORTE -->
+    <div class="profile-section-title">Suporte</div>
+    <div style="background:var(--card);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
+
+      <a href="#" class="profile-menu-item" onclick="openModal('feedbackModal');return false;">
+        <div class="profile-menu-item__icon">💬</div>
+        <div class="profile-menu-item__text">
+          <div class="profile-menu-item__label">Enviar Feedback</div>
+          <div class="profile-menu-item__sub">Sugestões e opiniões</div>
+        </div>
+        <span class="profile-menu-item__arrow">›</span>
+      </a>
+
+      <a href="#" class="profile-menu-item" onclick="showToast('📧 Fale conosco: suporte@zebrastats.com');return false;">
+        <div class="profile-menu-item__icon">🎧</div>
+        <div class="profile-menu-item__text">
+          <div class="profile-menu-item__label">Central de Ajuda</div>
+          <div class="profile-menu-item__sub">FAQ e atendimento</div>
+        </div>
+        <span class="profile-menu-item__arrow">›</span>
+      </a>
+
+      <a href="#" class="profile-menu-item" onclick="showToast('🐛 Bug reportado. Obrigado!');return false;">
+        <div class="profile-menu-item__icon">🐛</div>
+        <div class="profile-menu-item__text">
+          <div class="profile-menu-item__label">Reportar Problema</div>
+          <div class="profile-menu-item__sub">Algo não está funcionando?</div>
+        </div>
+        <span class="profile-menu-item__arrow">›</span>
+      </a>
+    </div>
+
+    <!-- SOBRE -->
+    <div class="profile-section-title">Sobre</div>
+    <div style="background:var(--card);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
+
+      <a href="#" class="profile-menu-item" onclick="showToast('📄 Termos de Uso');return false;">
+        <div class="profile-menu-item__icon">📄</div>
+        <div class="profile-menu-item__text">
+          <div class="profile-menu-item__label">Termos de Uso</div>
+        </div>
+        <span class="profile-menu-item__arrow">›</span>
+      </a>
+
+      <a href="#" class="profile-menu-item" onclick="showToast('🔒 Política de Privacidade');return false;">
+        <div class="profile-menu-item__icon">🔒</div>
+        <div class="profile-menu-item__text">
+          <div class="profile-menu-item__label">Política de Privacidade</div>
+        </div>
+        <span class="profile-menu-item__arrow">›</span>
+      </a>
+
+      <div class="profile-menu-item" style="cursor:default;">
+        <div class="profile-menu-item__icon">ℹ️</div>
+        <div class="profile-menu-item__text">
+          <div class="profile-menu-item__label">Versão do App</div>
+          <div class="profile-menu-item__sub">v1.0.0 · ZebraStats</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SAIR -->
+    <div style="padding:16px;">
+      <button class="profile-menu-item profile-menu-item--red" style="border-radius:var(--radius-md);border:1px solid var(--border);" onclick="confirmLogout()">
+        <div class="profile-menu-item__icon">🚪</div>
+        <div class="profile-menu-item__text">
+          <div class="profile-menu-item__label">Sair da Conta</div>
+        </div>
+      </button>
+    </div>
+
+    <!-- EXCLUIR CONTA -->
+    <div style="text-align:center;padding-bottom:16px;">
+      <button style="background:none;border:none;color:var(--gray);font-size:0.75rem;cursor:pointer;font-family:inherit;text-decoration:underline;" onclick="showToast('⚠️ Fale com o suporte para excluir sua conta')">
+        Excluir conta
+      </button>
+    </div>
+  </main>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <a href="home.html"   class="bottom-nav__item"><span class="bottom-nav__icon">🏠</span>Home</a>
+    <a href="zebras.html" class="bottom-nav__item"><span class="bottom-nav__icon">🦓</span>Zebras</a>
+    <a href="liga.html"   class="bottom-nav__item"><span class="bottom-nav__icon">🏆</span>Ligas</a>
+    <a href="time.html"   class="bottom-nav__item"><span class="bottom-nav__icon">⭐</span>Times</a>
+    <a href="perfil.html" class="bottom-nav__item active"><span class="bottom-nav__icon">👤</span>Perfil</a>
+  </nav>
+</div>
+
+<!-- MODAL EDITAR DADOS -->
+<div class="modal-overlay" id="editDadosModal">
+  <div class="modal">
+    <div class="modal__header">
+      <span class="modal__title">Editar Dados</span>
+      <button class="modal__close" onclick="closeModal('editDadosModal')">✕</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div class="form-group">
+        <label class="form-label">Nome completo</label>
+        <input class="form-input" type="text" id="editName" placeholder="Seu nome" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">E-mail</label>
+        <input class="form-input" type="email" id="editEmail" placeholder="seu@email.com" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Telefone (opcional)</label>
+        <input class="form-input" type="tel" placeholder="+55 (11) 99999-9999" />
+      </div>
+      <button class="btn btn--primary" onclick="saveProfile()">Salvar alterações</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ALTERAR SENHA -->
+<div class="modal-overlay" id="senhaModal">
+  <div class="modal">
+    <div class="modal__header">
+      <span class="modal__title">Alterar Senha</span>
+      <button class="modal__close" onclick="closeModal('senhaModal')">✕</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div class="form-group">
+        <label class="form-label">Senha atual</label>
+        <input class="form-input" type="password" placeholder="••••••••" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Nova senha</label>
+        <input class="form-input" type="password" placeholder="Mínimo 8 caracteres" id="newPass" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Confirmar nova senha</label>
+        <input class="form-input" type="password" placeholder="Repita a nova senha" id="confirmPass" />
+      </div>
+      <button class="btn btn--primary" onclick="changePassword()">Atualizar senha</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL FEEDBACK -->
+<div class="modal-overlay" id="feedbackModal">
+  <div class="modal">
+    <div class="modal__header">
+      <span class="modal__title">Enviar Feedback</span>
+      <button class="modal__close" onclick="closeModal('feedbackModal')">✕</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div>
+        <div style="font-size:0.75rem;color:var(--gray);margin-bottom:8px;">O que você achou do ZebraStats?</div>
+        <div style="display:flex;gap:8px;justify-content:center;font-size:2rem;" id="ratingStars">
+          <span class="rating-star" data-v="1">⭐</span>
+          <span class="rating-star" data-v="2">⭐</span>
+          <span class="rating-star" data-v="3">⭐</span>
+          <span class="rating-star" data-v="4">⭐</span>
+          <span class="rating-star" data-v="5">⭐</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tipo de feedback</label>
+        <select class="form-input" style="cursor:pointer;">
+          <option>💡 Sugestão de melhoria</option>
+          <option>🐛 Problema encontrado</option>
+          <option>❤️ Elogio</option>
+          <option>❓ Dúvida</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Mensagem</label>
+        <textarea class="form-input" rows="4" placeholder="Conte o que você está pensando..." style="resize:none;"></textarea>
+      </div>
+      <button class="btn btn--primary" onclick="sendFeedback()">Enviar Feedback</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="js/main.js"></script>
+<script>
+  function openModal(id)  { document.getElementById(id).classList.add('show'); }
+  function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.remove('show'); });
+  });
+
+  function saveProfile() {
+    const name  = document.getElementById('editName').value.trim();
+    const email = document.getElementById('editEmail').value.trim();
+    if (name)  document.getElementById('userName').textContent  = name;
+    if (email) document.getElementById('userEmail').textContent = email;
+    if (name)  document.getElementById('avatarEl').textContent  = name[0].toUpperCase();
+    closeModal('editDadosModal');
+    showToast('✓ Dados atualizados!');
+  }
+
+  function changePassword() {
+    const np = document.getElementById('newPass').value;
+    const cp = document.getElementById('confirmPass').value;
+    if (np.length < 8)    { showToast('⚠️ Senha precisa ter no mínimo 8 caracteres'); return; }
+    if (np !== cp)        { showToast('⚠️ As senhas não coincidem'); return; }
+    closeModal('senhaModal');
+    showToast('✓ Senha alterada com sucesso!');
+  }
+
+  function sendFeedback() {
+    closeModal('feedbackModal');
+    showToast('💬 Feedback enviado! Obrigado.');
+  }
+
+  function confirmLogout() {
+    if (confirm('Tem certeza que deseja sair?')) {
+      showToast('👋 Até logo!');
+      setTimeout(() => window.location.href = 'index.html', 1200);
+    }
+  }
+
+  // ── PLAN INFO ────────────────────────────────────────────────
+  updatePlanBadge();
+  const plan = getUserPlan();
+  if (plan === 'pro') {
+    document.getElementById('planLabel').textContent = 'ZebraStats Pro';
+    document.getElementById('planSub').textContent   = 'Acesso completo · Renovação anual';
+    document.getElementById('planBadge2').textContent = 'PRO';
+    document.getElementById('planBadge2').className  = 'badge badge--pro';
+  }
+
+  // ── PREENCHE CAMPOS COM DADOS SALVOS ─────────────────────────
+  document.getElementById('editName').value  = document.getElementById('userName').textContent;
+  document.getElementById('editEmail').value = document.getElementById('userEmail').textContent;
+</script>
+</body>
+</html>

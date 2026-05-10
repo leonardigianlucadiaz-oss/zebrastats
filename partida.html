@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ZebraStats — Detalhes da Partida</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/main.css" />
+</head>
+<body>
+<div class="phone">
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <button onclick="history.back()" style="background:none;border:none;color:var(--gray);font-size:1.375rem;cursor:pointer;padding:4px;line-height:1;">←</button>
+    <span style="font-size:0.9375rem;font-weight:600;flex:1;text-align:center;">Detalhes da Partida</span>
+    <button class="navbar__icon" onclick="showToast('🔗 Link copiado!')" title="Compartilhar">🔗</button>
+  </nav>
+
+  <!-- PLACAR HERO -->
+  <section style="background:linear-gradient(180deg,var(--card2) 0%,var(--bg) 100%);padding:20px 16px 16px;border-bottom:1px solid var(--border);">
+    <!-- Liga e status -->
+    <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px;">
+      <span style="font-size:0.75rem;color:var(--gray);">🇧🇷 Brasileirão Série A · Rodada 12</span>
+      <span class="badge badge--zebra">🦓 ZEBRA</span>
+    </div>
+
+    <!-- Times e placar -->
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:16px;">
+      <div style="flex:1;text-align:center;">
+        <div style="width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,0.1);border:2px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:1.125rem;font-weight:700;margin:0 auto 8px;">BOT</div>
+        <div style="font-size:0.9375rem;font-weight:600;">Botafogo</div>
+        <div style="font-size:0.75rem;color:var(--gray);margin-top:2px;">Azarão</div>
+      </div>
+
+      <div style="text-align:center;flex-shrink:0;">
+        <div style="font-size:3rem;font-weight:700;line-height:1;letter-spacing:-2px;">3<span style="color:var(--gray);font-size:2rem;margin:0 4px;">–</span>0</div>
+        <div style="margin-top:8px;display:flex;flex-direction:column;gap:4px;align-items:center;">
+          <span style="background:var(--red-dim);color:var(--red);border:1px solid rgba(238,68,68,0.3);padding:3px 12px;border-radius:var(--radius-pill);font-size:0.75rem;font-weight:700;">ENCERRADO</span>
+          <span style="font-size:0.75rem;color:var(--gray);">Estádio Nilton Santos</span>
+        </div>
+      </div>
+
+      <div style="flex:1;text-align:center;">
+        <div style="width:52px;height:52px;border-radius:50%;background:rgba(204,26,26,0.15);border:2px solid rgba(204,26,26,0.3);display:flex;align-items:center;justify-content:center;font-size:1.125rem;font-weight:700;color:#CC1A1A;margin:0 auto 8px;">FLA</div>
+        <div style="font-size:0.9375rem;font-weight:600;">Flamengo</div>
+        <div style="font-size:0.75rem;color:var(--gray);margin-top:2px;">Favorito</div>
+      </div>
+    </div>
+
+    <!-- ODDS PRÉ-JOGO -->
+    <div style="display:flex;gap:0;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;">
+      <div style="flex:1;padding:10px;text-align:center;border-right:1px solid var(--border);">
+        <div style="font-size:0.625rem;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Odd Botafogo</div>
+        <div style="font-size:1.125rem;font-weight:700;color:var(--green);">4.50</div>
+      </div>
+      <div style="flex:1;padding:10px;text-align:center;border-right:1px solid var(--border);">
+        <div style="font-size:0.625rem;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Empate</div>
+        <div style="font-size:1.125rem;font-weight:700;">3.20</div>
+      </div>
+      <div style="flex:1;padding:10px;text-align:center;">
+        <div style="font-size:0.625rem;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Odd Flamengo</div>
+        <div style="font-size:1.125rem;font-weight:700;color:var(--red);">1.75</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB BAR -->
+  <div class="tab-bar">
+    <button class="tab-bar__item active" data-tab="resumo">Resumo</button>
+    <button class="tab-bar__item" data-tab="stats">Estatísticas</button>
+    <button class="tab-bar__item" data-tab="zebra">🦓 Zebra</button>
+    <button class="tab-bar__item" data-tab="h2h">H2H</button>
+  </div>
+
+  <!-- CONTEÚDO TABS -->
+  <main class="content">
+
+    <!-- TAB: RESUMO -->
+    <div id="tab-resumo">
+      <div class="section-header"><span class="section-title">📋 Linha do Tempo</span></div>
+
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;">
+        <!-- Eventos -->
+        <div id="timeline"></div>
+      </div>
+
+      <div class="section-header" style="margin-top:16px;"><span class="section-title">👥 Escalações</span></div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px 16px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div>
+            <div style="font-size:0.75rem;font-weight:700;color:var(--gray);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px;">Botafogo</div>
+            <div style="display:flex;flex-direction:column;gap:5px;font-size:0.8125rem;" id="squad-bot"></div>
+          </div>
+          <div>
+            <div style="font-size:0.75rem;font-weight:700;color:var(--gray);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px;">Flamengo</div>
+            <div style="display:flex;flex-direction:column;gap:5px;font-size:0.8125rem;" id="squad-fla"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: ESTATÍSTICAS -->
+    <div id="tab-stats" style="display:none;">
+      <div class="section-header"><span class="section-title">📊 Estatísticas da Partida</span></div>
+      <div class="card" id="matchStats"></div>
+    </div>
+
+    <!-- TAB: ZEBRA -->
+    <div id="tab-zebra" style="display:none;">
+
+      <!-- ZEBRA INDEX METER -->
+      <div class="card card--green-border" style="text-align:center;margin-bottom:12px;">
+        <div style="font-size:0.75rem;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">🦓 Zebra Index</div>
+        <div style="font-size:3.5rem;font-weight:700;color:var(--green);line-height:1;margin-bottom:4px;">8.2</div>
+        <div style="font-size:0.875rem;color:var(--gray);margin-bottom:16px;">Grande Zebra · Top 5% histórico</div>
+        <div class="zebra-meter-wrap">
+          <div style="display:flex;justify-content:space-between;width:100%;font-size:0.625rem;color:var(--gray);margin-bottom:4px;">
+            <span>Esperado</span><span>Improvável</span><span>Zebra</span>
+          </div>
+          <div class="zebra-meter-bar">
+            <div class="zebra-meter-fill" style="width:82%;"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;width:100%;font-size:0.625rem;color:var(--gray);margin-top:4px;">
+            <span>0</span><span>5</span><span>10</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- PROBABILIDADES -->
+      <div class="card" style="margin-bottom:12px;">
+        <div style="font-size:0.875rem;font-weight:600;margin-bottom:14px;">Probabilidades Pré-Jogo</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:0.8125rem;margin-bottom:5px;">
+              <span>Botafogo vencer</span><span style="color:var(--green);font-weight:600;">22%</span>
+            </div>
+            <div style="height:6px;background:var(--border);border-radius:3px;"><div style="width:22%;height:100%;background:var(--green);border-radius:3px;"></div></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:0.8125rem;margin-bottom:5px;">
+              <span>Empate</span><span style="font-weight:600;">26%</span>
+            </div>
+            <div style="height:6px;background:var(--border);border-radius:3px;"><div style="width:26%;height:100%;background:var(--gray);border-radius:3px;"></div></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:0.8125rem;margin-bottom:5px;">
+              <span>Flamengo vencer</span><span style="color:var(--red);font-weight:600;">52%</span>
+            </div>
+            <div style="height:6px;background:var(--border);border-radius:3px;"><div style="width:52%;height:100%;background:var(--red);border-radius:3px;"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FATORES DA ZEBRA -->
+      <div class="card card--gold-border">
+        <div style="font-size:0.875rem;font-weight:600;margin-bottom:12px;color:var(--gold);">🔍 Fatores que contribuíram</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div style="display:flex;gap:10px;align-items:flex-start;">
+            <span style="font-size:1rem;flex-shrink:0;">📅</span>
+            <div>
+              <div style="font-size:0.8125rem;font-weight:600;">Flamengo jogava pelo 3º jogo em 7 dias</div>
+              <div style="font-size:0.75rem;color:var(--gray);">Desgaste físico elevado identificado no histórico</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;align-items:flex-start;">
+            <span style="font-size:1rem;flex-shrink:0;">🏟️</span>
+            <div>
+              <div style="font-size:0.8125rem;font-weight:600;">Botafogo em casa — fator mando forte</div>
+              <div style="font-size:0.75rem;color:var(--gray);">72% de aproveitamento em casa nesta temporada</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;align-items:flex-start;">
+            <span style="font-size:1rem;flex-shrink:0;">📊</span>
+            <div>
+              <div style="font-size:0.8125rem;font-weight:600;">xG favorável ao Botafogo nos últimos 3 jogos</div>
+              <div style="font-size:0.75rem;color:var(--gray);">Expected Goals indicavam oportunidades reais de gol</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: H2H -->
+    <div id="tab-h2h" style="display:none;">
+      <div class="section-header"><span class="section-title">🔁 Últimos Confrontos</span></div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;margin-bottom:16px;" id="h2hList"></div>
+
+      <div class="section-header"><span class="section-title">📈 Histórico de Desempenho</span></div>
+      <div class="card">
+        <div style="font-size:0.8125rem;color:var(--gray);margin-bottom:12px;">Últimas 5 partidas (cada time)</div>
+        <div style="margin-bottom:12px;">
+          <div style="font-size:0.75rem;font-weight:600;margin-bottom:6px;">Botafogo</div>
+          <div style="display:flex;gap:4px;" id="botForm"></div>
+        </div>
+        <div>
+          <div style="font-size:0.75rem;font-weight:600;margin-bottom:6px;">Flamengo</div>
+          <div style="display:flex;gap:4px;" id="flaForm"></div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <a href="home.html"   class="bottom-nav__item"><span class="bottom-nav__icon">🏠</span>Home</a>
+    <a href="zebras.html" class="bottom-nav__item"><span class="bottom-nav__icon">🦓</span>Zebras</a>
+    <a href="liga.html"   class="bottom-nav__item"><span class="bottom-nav__icon">🏆</span>Ligas</a>
+    <a href="time.html"   class="bottom-nav__item"><span class="bottom-nav__icon">⭐</span>Times</a>
+    <a href="perfil.html" class="bottom-nav__item"><span class="bottom-nav__icon">👤</span>Perfil</a>
+  </nav>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="js/main.js"></script>
+<script>
+  // ── TABS ────────────────────────────────────────────────────────
+  document.querySelectorAll('.tab-bar__item').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.tab-bar__item').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      const tab = this.dataset.tab;
+      ['resumo','stats','zebra','h2h'].forEach(t => {
+        document.getElementById(`tab-${t}`).style.display = t === tab ? 'block' : 'none';
+      });
+    });
+  });
+
+  // ── TIMELINE ────────────────────────────────────────────────────
+  const EVENTS = [
+    { min:12, team:'BOT', type:'gol',    icon:'⚽', player:'Tiquinho Soares',   desc:'Gol de cabeça após escanteio' },
+    { min:38, team:'FLA', type:'amarelo',icon:'🟨', player:'Léo Pereira',       desc:'Falta dura no meio-campo' },
+    { min:55, team:'BOT', type:'gol',    icon:'⚽', player:'Júnior Santos',     desc:'Finalização de fora da área' },
+    { min:63, team:'FLA', type:'sub',    icon:'🔄', player:'Gabigol → Éverton', desc:'Substituição Flamengo' },
+    { min:78, team:'BOT', type:'gol',    icon:'⚽', player:'Luiz Henrique',     desc:'Contra-ataque decisivo' },
+    { min:82, team:'FLA', type:'vermelho',icon:'🟥',player:'Fabrício Bruno',    desc:'Segundo cartão amarelo' },
+    { min:90, team:'BOT', type:'fim',    icon:'🏁', player:'Fim de Jogo',       desc:'Botafogo 3×0 Flamengo' },
+  ];
+
+  const timeline = document.getElementById('timeline');
+  EVENTS.forEach((e, i) => {
+    const isBot = e.team === 'BOT';
+    const isLast = i === EVENTS.length - 1;
+    const row = document.createElement('div');
+    row.style.cssText = `display:flex;align-items:center;gap:10px;padding:10px 14px;${isLast ? '' : 'border-bottom:1px solid var(--border);'}`;
+    row.innerHTML = `
+      <span style="font-size:0.75rem;font-weight:700;color:var(--gray);min-width:28px;">${e.min}'</span>
+      <span style="font-size:1.125rem;">${e.icon}</span>
+      <div style="flex:1;">
+        <div style="font-size:0.875rem;font-weight:600;">${e.player}</div>
+        <div style="font-size:0.75rem;color:var(--gray);">${e.desc}</div>
+      </div>
+      <span style="font-size:0.6875rem;font-weight:700;padding:3px 8px;border-radius:var(--radius-pill);background:${isBot ? 'rgba(46,230,92,0.12)' : 'var(--red-dim)'};color:${isBot ? 'var(--green)' : 'var(--red)'};">${e.team}</span>
+    `;
+    timeline.appendChild(row);
+  });
+
+  // ── ESCALAÇÕES ─────────────────────────────────────────────────
+  const BOT_SQUAD = ['John (GK)','Damián Suárez','Adryelson','Barboza','Marçal','Tchê Tchê','Gregore','Marlon Freitas','Tiquinho','Júnior Santos','Luiz Henrique'];
+  const FLA_SQUAD = ['Rossi (GK)','Wesley','Fabrício Bruno','David Luiz','Ayrton Lucas','Erick Pulgar','Léo Ortiz','Gerson','Arrascaeta','Gabigol','Pedro'];
+
+  ['bot','fla'].forEach(t => {
+    const el = document.getElementById(`squad-${t}`);
+    const squad = t === 'bot' ? BOT_SQUAD : FLA_SQUAD;
+    squad.forEach((p, i) => {
+      const div = document.createElement('div');
+      div.style.cssText = 'display:flex;align-items:center;gap:6px;';
+      div.innerHTML = `<span style="font-size:0.625rem;color:var(--gray);min-width:14px;">${i === 0 ? '' : i}</span><span>${p}</span>`;
+      el.appendChild(div);
+    });
+  });
+
+  // ── MATCH STATS ─────────────────────────────────────────────────
+  const STATS = [
+    { label:'Posse de bola', home:58, away:42, unit:'%' },
+    { label:'Chutes',        home:14, away:9,  unit:'' },
+    { label:'No gol',        home:6,  away:2,  unit:'' },
+    { label:'Escanteios',    home:7,  away:4,  unit:'' },
+    { label:'Faltas',        home:11, away:16, unit:'' },
+    { label:'Amarelos',      home:1,  away:2,  unit:'' },
+    { label:'Vermelhos',     home:0,  away:1,  unit:'' },
+    { label:'xG',            home:2.1,away:0.8,unit:'' },
+  ];
+
+  const statsEl = document.getElementById('matchStats');
+  statsEl.innerHTML = `
+    <div style="display:flex;justify-content:space-between;margin-bottom:14px;">
+      <span style="font-size:0.875rem;font-weight:700;color:var(--green);">Botafogo</span>
+      <span style="font-size:0.875rem;font-weight:700;color:var(--red);">Flamengo</span>
+    </div>`;
+
+  STATS.forEach(s => {
+    const total = s.home + s.away || 1;
+    const homePct = Math.round((s.home / total) * 100);
+    const div = document.createElement('div');
+    div.style.marginBottom = '12px';
+    div.innerHTML = `
+      <div style="display:flex;justify-content:space-between;font-size:0.8125rem;margin-bottom:5px;">
+        <span style="font-weight:600;color:var(--green);">${s.home}${s.unit}</span>
+        <span style="font-size:0.75rem;color:var(--gray);">${s.label}</span>
+        <span style="font-weight:600;color:var(--red);">${s.away}${s.unit}</span>
+      </div>
+      <div style="display:flex;gap:3px;height:5px;">
+        <div style="flex:${homePct};background:var(--green);border-radius:3px 0 0 3px;"></div>
+        <div style="flex:${100-homePct};background:var(--red);border-radius:0 3px 3px 0;"></div>
+      </div>`;
+    statsEl.appendChild(div);
+  });
+
+  // ── H2H ─────────────────────────────────────────────────────────
+  const H2H = [
+    { date:'09/05/2025', home:'Botafogo', away:'Flamengo', hs:3, as:0, zebra:true  },
+    { date:'02/03/2025', home:'Flamengo', away:'Botafogo', hs:2, as:1, zebra:false },
+    { date:'15/09/2024', home:'Botafogo', away:'Flamengo', hs:1, as:1, zebra:false },
+    { date:'22/06/2024', home:'Flamengo', away:'Botafogo', hs:3, as:0, zebra:false },
+    { date:'10/03/2024', home:'Botafogo', away:'Flamengo', hs:0, as:2, zebra:false },
+  ];
+
+  const h2hEl = document.getElementById('h2hList');
+  H2H.forEach((g, i) => {
+    const diff = g.hs - g.as;
+    const scoreColor = diff > 0 ? 'var(--green)' : diff < 0 ? 'var(--red)' : 'var(--gray)';
+    const row = document.createElement('div');
+    row.style.cssText = `display:flex;align-items:center;gap:10px;padding:10px 14px;${i < H2H.length-1 ? 'border-bottom:1px solid var(--border);' : ''}`;
+    row.innerHTML = `
+      <span style="font-size:0.6875rem;color:var(--gray);min-width:60px;">${g.date}</span>
+      <span style="font-size:0.8125rem;flex:1;font-weight:500;">${g.home}</span>
+      <span style="font-size:1rem;font-weight:700;min-width:48px;text-align:center;color:${scoreColor};">${g.hs}–${g.as}</span>
+      <span style="font-size:0.8125rem;flex:1;text-align:right;font-weight:500;">${g.away}</span>
+      ${g.zebra ? `<span class="badge badge--zebra" style="font-size:0.5625rem;">🦓</span>` : '<span style="width:28px;"></span>'}`;
+    h2hEl.appendChild(row);
+  });
+
+  // ── FORMA RECENTE ───────────────────────────────────────────────
+  const BOT_FORM = ['V','V','E','V','D'];
+  const FLA_FORM = ['D','V','V','D','V'];
+
+  ['bot','fla'].forEach(t => {
+    const form = t === 'bot' ? BOT_FORM : FLA_FORM;
+    const el   = document.getElementById(`${t}Form`);
+    form.forEach(r => {
+      const pill = document.createElement('span');
+      pill.className = `result-pill result-pill--${r.toLowerCase()}`;
+      pill.textContent = r;
+      el.appendChild(pill);
+    });
+  });
+</script>
+</body>
+</html>
