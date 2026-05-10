@@ -23,30 +23,30 @@
   <section style="background:linear-gradient(180deg,var(--card2) 0%,var(--bg) 100%);padding:20px 16px 16px;border-bottom:1px solid var(--border);">
     <!-- Liga e status -->
     <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px;">
-      <span style="font-size:0.75rem;color:var(--gray);">🇧🇷 Brasileirão Série A · Rodada 12</span>
-      <span class="badge badge--zebra">🦓 ZEBRA</span>
+      <span id="matchCompetition" style="font-size:0.75rem;color:var(--gray);">🇧🇷 Brasileirão Série A · Rodada 12</span>
+      <span id="zebraBadge" class="badge badge--zebra">🦓 ZEBRA</span>
     </div>
 
     <!-- Times e placar -->
     <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:16px;">
       <div style="flex:1;text-align:center;">
-        <div style="width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,0.1);border:2px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:1.125rem;font-weight:700;margin:0 auto 8px;">BOT</div>
-        <div style="font-size:0.9375rem;font-weight:600;">Botafogo</div>
-        <div style="font-size:0.75rem;color:var(--gray);margin-top:2px;">Azarão</div>
+        <div id="matchHomeAbbr" style="width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,0.1);border:2px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:1.125rem;font-weight:700;margin:0 auto 8px;">BOT</div>
+        <div id="matchHomeName" style="font-size:0.9375rem;font-weight:600;">Botafogo</div>
+        <div id="matchHomeRole" style="font-size:0.75rem;color:var(--gray);margin-top:2px;">Azarão</div>
       </div>
 
       <div style="text-align:center;flex-shrink:0;">
-        <div style="font-size:3rem;font-weight:700;line-height:1;letter-spacing:-2px;">3<span style="color:var(--gray);font-size:2rem;margin:0 4px;">–</span>0</div>
+        <div id="matchScore" style="font-size:3rem;font-weight:700;line-height:1;letter-spacing:-2px;">3<span style="color:var(--gray);font-size:2rem;margin:0 4px;">–</span>0</div>
         <div style="margin-top:8px;display:flex;flex-direction:column;gap:4px;align-items:center;">
-          <span style="background:var(--red-dim);color:var(--red);border:1px solid rgba(238,68,68,0.3);padding:3px 12px;border-radius:var(--radius-pill);font-size:0.75rem;font-weight:700;">ENCERRADO</span>
-          <span style="font-size:0.75rem;color:var(--gray);">Estádio Nilton Santos</span>
+          <span id="matchStatus" style="background:var(--red-dim);color:var(--red);border:1px solid rgba(238,68,68,0.3);padding:3px 12px;border-radius:var(--radius-pill);font-size:0.75rem;font-weight:700;">ENCERRADO</span>
+          <span id="matchVenue" style="font-size:0.75rem;color:var(--gray);">Estádio Nilton Santos</span>
         </div>
       </div>
 
       <div style="flex:1;text-align:center;">
-        <div style="width:52px;height:52px;border-radius:50%;background:rgba(204,26,26,0.15);border:2px solid rgba(204,26,26,0.3);display:flex;align-items:center;justify-content:center;font-size:1.125rem;font-weight:700;color:#CC1A1A;margin:0 auto 8px;">FLA</div>
-        <div style="font-size:0.9375rem;font-weight:600;">Flamengo</div>
-        <div style="font-size:0.75rem;color:var(--gray);margin-top:2px;">Favorito</div>
+        <div id="matchAwayAbbr" style="width:52px;height:52px;border-radius:50%;background:rgba(204,26,26,0.15);border:2px solid rgba(204,26,26,0.3);display:flex;align-items:center;justify-content:center;font-size:1.125rem;font-weight:700;color:#CC1A1A;margin:0 auto 8px;">FLA</div>
+        <div id="matchAwayName" style="font-size:0.9375rem;font-weight:600;">Flamengo</div>
+        <div id="matchAwayRole" style="font-size:0.75rem;color:var(--gray);margin-top:2px;">Favorito</div>
       </div>
     </div>
 
@@ -114,14 +114,14 @@
       <!-- ZEBRA INDEX METER -->
       <div class="card card--green-border" style="text-align:center;margin-bottom:12px;">
         <div style="font-size:0.75rem;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">🦓 Zebra Index</div>
-        <div style="font-size:3.5rem;font-weight:700;color:var(--green);line-height:1;margin-bottom:4px;">8.2</div>
-        <div style="font-size:0.875rem;color:var(--gray);margin-bottom:16px;">Grande Zebra · Top 5% histórico</div>
+        <div id="ziValue" style="font-size:3.5rem;font-weight:700;color:var(--green);line-height:1;margin-bottom:4px;">8.2</div>
+        <div id="ziDesc" style="font-size:0.875rem;color:var(--gray);margin-bottom:16px;">Grande Zebra · Top 5% histórico</div>
         <div class="zebra-meter-wrap">
           <div style="display:flex;justify-content:space-between;width:100%;font-size:0.625rem;color:var(--gray);margin-bottom:4px;">
             <span>Esperado</span><span>Improvável</span><span>Zebra</span>
           </div>
           <div class="zebra-meter-bar">
-            <div class="zebra-meter-fill" style="width:82%;"></div>
+            <div id="ziMeter" class="zebra-meter-fill" style="width:82%;"></div>
           </div>
           <div style="display:flex;justify-content:space-between;width:100%;font-size:0.625rem;color:var(--gray);margin-top:4px;">
             <span>0</span><span>5</span><span>10</span>
@@ -290,7 +290,7 @@
 
   const statsEl = document.getElementById('matchStats');
   statsEl.innerHTML = `
-    <div style="display:flex;justify-content:space-between;margin-bottom:14px;">
+    <div id="matchStatsHeader" style="display:flex;justify-content:space-between;margin-bottom:14px;">
       <span style="font-size:0.875rem;font-weight:700;color:var(--green);">Botafogo</span>
       <span style="font-size:0.875rem;font-weight:700;color:var(--red);">Flamengo</span>
     </div>`;
@@ -336,6 +336,105 @@
       ${g.zebra ? `<span class="badge badge--zebra" style="font-size:0.5625rem;">🦓</span>` : '<span style="width:28px;"></span>'}`;
     h2hEl.appendChild(row);
   });
+
+  // ── API REAL DATA ──────────────────────────────────────────────
+  async function initRealData() {
+    if (typeof ZebraAPI === 'undefined') return;
+
+    const storedId  = localStorage.getItem('zs_current_match_id');
+    const storedLid = localStorage.getItem('zs_current_match_lid') || 'BRA';
+
+    try {
+      let rawMatch = null;
+
+      if (storedId && ZebraAPI.isConfigured.footballData()) {
+        const data = await ZebraAPI.footballData.getMatch(parseInt(storedId));
+        if (data && data.status) rawMatch = data;
+      }
+
+      if (!rawMatch && ZebraAPI.isConfigured.footballData()) {
+        const resp = await ZebraAPI.footballData.getMatches(storedLid, 'FINISHED', 3);
+        const matches = resp?.matches || [];
+        if (matches.length) rawMatch = matches[0];
+      }
+
+      if (!rawMatch) return;
+
+      const m = ZebraAPI.transform.fdMatch(rawMatch);
+      if (!m) return;
+
+      // ── Hero ────────────────────────────────────────────────
+      const homeAbbr = rawMatch.homeTeam?.tla || m.home.substring(0,3).toUpperCase();
+      const awayAbbr = rawMatch.awayTeam?.tla || m.away.substring(0,3).toUpperCase();
+      const compName = rawMatch.competition?.name || 'Liga';
+      const round    = rawMatch.matchday ? `Rodada ${rawMatch.matchday}` : m.date;
+
+      document.getElementById('matchCompetition').textContent = `${compName} · ${round}`;
+      document.getElementById('matchHomeAbbr').textContent    = homeAbbr;
+      document.getElementById('matchHomeName').textContent    = m.home;
+      document.getElementById('matchAwayAbbr').textContent    = awayAbbr;
+      document.getElementById('matchAwayName').textContent    = m.away;
+
+      if (m.isFinished && m.hs !== null && m.as !== null) {
+        document.getElementById('matchScore').innerHTML =
+          `${m.hs}<span style="color:var(--gray);font-size:2rem;margin:0 4px;">–</span>${m.as}`;
+        document.getElementById('matchStatus').textContent = 'ENCERRADO';
+        const hw = m.winner === 'HOME_TEAM', aw = m.winner === 'AWAY_TEAM';
+        document.getElementById('matchHomeRole').textContent = hw ? 'Vencedor' : aw ? 'Perdedor' : 'Empate';
+        document.getElementById('matchAwayRole').textContent = aw ? 'Vencedor' : hw ? 'Perdedor' : 'Empate';
+      } else if (m.isLive) {
+        document.getElementById('matchScore').innerHTML =
+          `${m.hs ?? 0}<span style="color:var(--gray);font-size:2rem;margin:0 4px;">–</span>${m.as ?? 0}`;
+        const st = document.getElementById('matchStatus');
+        st.textContent = '🔴 AO VIVO';
+        st.style.cssText = 'background:var(--red-dim);color:var(--red);padding:3px 12px;border-radius:var(--radius-pill);font-size:0.75rem;font-weight:700;';
+      } else {
+        document.getElementById('matchScore').innerHTML =
+          `<span style="font-size:1.5rem;color:var(--gold);">${m.time}</span>`;
+        const st = document.getElementById('matchStatus');
+        st.textContent = 'AGENDADO';
+        st.style.cssText = 'background:var(--card2);color:var(--gray);padding:3px 12px;border-radius:var(--radius-pill);font-size:0.75rem;font-weight:700;';
+        document.getElementById('zebraBadge').style.display = 'none';
+      }
+
+      if (rawMatch.venue) document.getElementById('matchVenue').textContent = rawMatch.venue;
+
+      const sh = document.getElementById('matchStatsHeader');
+      if (sh) {
+        sh.querySelector('span:first-child').textContent = m.home;
+        sh.querySelector('span:last-child').textContent  = m.away;
+      }
+
+      // ── Zebra Index ─────────────────────────────────────────
+      if (m.isFinished && m.winner && m.winner !== 'DRAW') {
+        const standData = await ZebraAPI.footballData.getStandings(storedLid).catch(() => null);
+        if (standData) {
+          const posMap = {};
+          ZebraAPI.transform.fdStandings(standData).forEach(r => {
+            posMap[r.name] = r.pos;
+            if (r.abbr) posMap[r.abbr] = r.pos;
+          });
+          const isHomeWin = m.winner === 'HOME_TEAM';
+          const winFull   = isHomeWin ? m.homeFull : m.awayFull;
+          const loseFull  = isHomeWin ? m.awayFull : m.homeFull;
+          const winPos    = posMap[winFull]  || posMap[m.home];
+          const losePos   = posMap[loseFull] || posMap[m.away];
+
+          if (winPos && losePos) {
+            const zi = ZebraAPI.zebra.fromPositions(winPos, losePos);
+            const { cls } = ZebraAPI.zebra.classify(zi);
+            const labelPT = { grande:'Grande', media:'Média', leve:'Leve' }[cls];
+            document.getElementById('ziValue').textContent    = zi;
+            document.getElementById('ziDesc').textContent     = `${labelPT} Zebra · ZI ${zi}`;
+            document.getElementById('ziMeter').style.width    = `${zi * 10}%`;
+            if (zi === 0) document.getElementById('zebraBadge').style.display = 'none';
+          }
+        }
+      }
+
+    } catch(e) { console.warn('[partida] initRealData error:', e); }
+  }
+  initRealData();
 
   // ── FORMA RECENTE ───────────────────────────────────────────────
   const BOT_FORM = ['V','V','E','V','D'];

@@ -329,8 +329,8 @@
           Promise.all(leagues.map(lid => ZebraAPI.footballData.getMatches(lid,'SCHEDULED',4).catch(()=>[]))),
         ]);
 
-        const liveMatches = liveResults.flat().map(ZebraAPI.transform.fdMatch).filter(Boolean);
-        const upcomingMatches = upcomingResults.flat().map(ZebraAPI.transform.fdMatch).filter(Boolean);
+        const liveMatches = liveResults.flatMap(r => r?.matches || []).map(ZebraAPI.transform.fdMatch).filter(Boolean);
+        const upcomingMatches = upcomingResults.flatMap(r => r?.matches || []).map(ZebraAPI.transform.fdMatch).filter(Boolean);
 
         if (liveMatches.length) {
           LIVE_GAMES.length = 0;

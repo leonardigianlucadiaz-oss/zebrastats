@@ -416,10 +416,13 @@
 
     // ── API REAL DATA ─────────────────────────────────────
     async function initRealData() {
+      const searchTeam = localStorage.getItem('zs_search_team');
+      if (searchTeam) localStorage.removeItem('zs_search_team');
       const t = TEAMS[currentTeam];
-      if (!t) return;
+      const teamName = searchTeam || t?.name;
+      if (!teamName) return;
       try {
-        const results = await ZebraAPI.sportsDb.searchTeam(t.name);
+        const results = await ZebraAPI.sportsDb.searchTeam(teamName);
         if (!results || !results.teams || !results.teams.length) return;
         const team = ZebraAPI.transform.sdbTeam(results.teams[0]);
         if (team && team.logo) {
