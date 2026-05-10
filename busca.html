@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ZebraStats — Busca</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/main.css" />
+</head>
+<body>
+<div class="phone">
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <button onclick="history.back()" style="background:none;border:none;color:var(--gray);font-size:1.375rem;cursor:pointer;padding:4px;line-height:1;">←</button>
+    <div class="search-bar" style="flex:1;margin:0 8px;padding:8px 12px;">
+      <span class="search-bar__icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="Times, ligas, jogadores..." autofocus />
+      <button id="clearBtn" style="display:none;background:none;border:none;color:var(--gray);cursor:pointer;font-size:1rem;padding:0;">✕</button>
+    </div>
+  </nav>
+
+  <!-- CATEGORIAS -->
+  <section style="padding:10px 16px;border-bottom:1px solid var(--border);background:var(--card2);">
+    <div class="scroll-x" style="gap:8px;">
+      <button class="filter-chip active" data-cat="all">Tudo</button>
+      <button class="filter-chip" data-cat="times">⭐ Times</button>
+      <button class="filter-chip" data-cat="ligas">🏆 Ligas</button>
+      <button class="filter-chip" data-cat="jogadores">👤 Jogadores</button>
+    </div>
+  </section>
+
+  <!-- CONTEÚDO PRINCIPAL -->
+  <main style="padding-bottom:80px;">
+
+    <!-- ESTADO INICIAL (sem query) -->
+    <div id="initialState">
+      <!-- BUSCAS RECENTES -->
+      <div style="padding:16px 16px 0;" id="recentSection">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <span style="font-size:0.875rem;font-weight:600;">Buscas Recentes</span>
+          <button id="clearRecent" style="background:none;border:none;color:var(--green);font-size:0.75rem;font-weight:600;cursor:pointer;font-family:inherit;">Limpar</button>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;" id="recentChips"></div>
+      </div>
+
+      <!-- POPULARES -->
+      <div style="padding:16px 16px 0;">
+        <div style="font-size:0.875rem;font-weight:600;margin-bottom:12px;">🔥 Em Alta</div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;" id="trendingList"></div>
+      </div>
+    </div>
+
+    <!-- RESULTADOS DE BUSCA -->
+    <div id="resultsState" style="display:none;">
+      <div style="padding:10px 16px 0;">
+        <span style="font-size:0.8125rem;color:var(--gray);" id="resultsCount"></span>
+      </div>
+      <div id="resultsList" style="padding:8px 0;"></div>
+    </div>
+
+    <!-- SEM RESULTADOS -->
+    <div id="emptyState" style="display:none;text-align:center;padding:48px 16px;color:var(--gray);">
+      <div style="font-size:2.5rem;margin-bottom:12px;">🔍</div>
+      <div style="font-weight:600;margin-bottom:4px;">Nenhum resultado encontrado</div>
+      <div style="font-size:0.8125rem;" id="emptyMsg"></div>
+    </div>
+
+  </main>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <a href="home.html"   class="bottom-nav__item"><span class="bottom-nav__icon">🏠</span>Home</a>
+    <a href="zebras.html" class="bottom-nav__item"><span class="bottom-nav__icon">🦓</span>Zebras</a>
+    <a href="liga.html"   class="bottom-nav__item"><span class="bottom-nav__icon">🏆</span>Ligas</a>
+    <a href="time.html"   class="bottom-nav__item"><span class="bottom-nav__icon">⭐</span>Times</a>
+    <a href="perfil.html" class="bottom-nav__item"><span class="bottom-nav__icon">👤</span>Perfil</a>
+  </nav>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<style>
+  .result-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: background var(--transition);
+    border-bottom: 1px solid var(--border);
+  }
+  .result-item:hover { background: var(--card2); }
+  .result-item:last-child { border-bottom: none; }
+  .result-item__icon {
+    width: 40px; height: 40px;
+    border-radius: var(--radius-sm);
+    background: var(--card);
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.125rem;
+    flex-shrink: 0;
+  }
+  .result-item__label  { font-size: 0.9375rem; font-weight: 600; }
+  .result-item__sub    { font-size: 0.75rem; color: var(--gray); margin-top: 2px; }
+  .result-item__type   { font-size: 0.625rem; font-weight: 600; padding: 2px 8px; border-radius: var(--radius-pill); }
+  .type--time    { background: var(--green-dim); color: var(--green); border: 1px solid rgba(46,230,92,0.3); }
+  .type--liga    { background: var(--gold-dim);  color: var(--gold);  border: 1px solid rgba(255,200,50,0.3); }
+  .type--jogador { background: var(--gray-dim);  color: var(--gray);  border: 1px solid rgba(136,154,170,0.3); }
+</style>
+
+<script src="js/main.js"></script>
+<script>
+  const SEARCHABLE = [
+    // Times
+    { type:'times',    icon:'🔴', label:'Flamengo',           sub:'Brasileirão · Rio de Janeiro',    link:'time.html' },
+    { type:'times',    icon:'🟢', label:'Palmeiras',           sub:'Brasileirão · São Paulo',         link:'time.html' },
+    { type:'times',    icon:'⚫', label:'Corinthians',         sub:'Brasileirão · São Paulo',         link:'time.html' },
+    { type:'times',    icon:'🔴', label:'São Paulo FC',        sub:'Brasileirão · São Paulo',         link:'time.html' },
+    { type:'times',    icon:'⚫', label:'Botafogo',            sub:'Brasileirão · Rio de Janeiro',    link:'time.html' },
+    { type:'times',    icon:'🔵', label:'Cruzeiro',            sub:'Brasileirão · Minas Gerais',      link:'time.html' },
+    { type:'times',    icon:'🔵', label:'Grêmio',              sub:'Brasileirão · Rio Grande do Sul', link:'time.html' },
+    { type:'times',    icon:'🔴', label:'Manchester United',   sub:'Premier League · Manchester',     link:'time.html' },
+    { type:'times',    icon:'🔵', label:'Chelsea',             sub:'Premier League · Londres',        link:'time.html' },
+    { type:'times',    icon:'🔴', label:'Arsenal',             sub:'Premier League · Londres',        link:'time.html' },
+    { type:'times',    icon:'🔵', label:'Manchester City',     sub:'Premier League · Manchester',     link:'time.html' },
+    { type:'times',    icon:'🔴', label:'Liverpool',           sub:'Premier League · Liverpool',      link:'time.html' },
+    { type:'times',    icon:'⚪', label:'Real Madrid',         sub:'La Liga · Madrid',                link:'time.html' },
+    { type:'times',    icon:'🔵', label:'Barcelona',           sub:'La Liga · Barcelona',             link:'time.html' },
+    { type:'times',    icon:'⚫', label:'Juventus',            sub:'Serie A · Turim',                 link:'time.html' },
+    { type:'times',    icon:'⚫', label:'Inter de Milão',      sub:'Serie A · Milão',                 link:'time.html' },
+    { type:'times',    icon:'🔴', label:'Bayern de Munique',   sub:'Bundesliga · Munique',            link:'time.html' },
+    { type:'times',    icon:'🟡', label:'Borussia Dortmund',   sub:'Bundesliga · Dortmund',           link:'time.html' },
+
+    // Ligas
+    { type:'ligas',    icon:'🇧🇷', label:'Brasileirão Série A', sub:'Brasil · 20 times',              link:'liga.html' },
+    { type:'ligas',    icon:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', label:'Premier League',     sub:'Inglaterra · 20 times',          link:'liga.html' },
+    { type:'ligas',    icon:'🇪🇸', label:'La Liga',             sub:'Espanha · 20 times',             link:'liga.html' },
+    { type:'ligas',    icon:'🇮🇹', label:'Serie A',             sub:'Itália · 20 times',              link:'liga.html' },
+    { type:'ligas',    icon:'🇩🇪', label:'Bundesliga',          sub:'Alemanha · 18 times',            link:'liga.html' },
+    { type:'ligas',    icon:'🇫🇷', label:'Ligue 1',             sub:'França · 18 times',              link:'liga.html' },
+    { type:'ligas',    icon:'🏆', label:'Champions League',    sub:'Europa · 32 times',              link:'liga.html' },
+    { type:'ligas',    icon:'🟠', label:'Europa League',       sub:'Europa · 24 times',              link:'liga.html' },
+    { type:'ligas',    icon:'🇵🇹', label:'Liga Portugal',       sub:'Portugal · 18 times',            link:'liga.html' },
+    { type:'ligas',    icon:'🇦🇷', label:'Liga Profesional',   sub:'Argentina · 28 times',           link:'liga.html' },
+
+    // Jogadores
+    { type:'jogadores',icon:'🇧🇷', label:'Pedro',               sub:'Flamengo · Centroavante',        link:'time.html' },
+    { type:'jogadores',icon:'🇺🇾', label:'Arrascaeta',           sub:'Flamengo · Meia',               link:'time.html' },
+    { type:'jogadores',icon:'🇧🇷', label:'Raphael Veiga',        sub:'Palmeiras · Meia',              link:'time.html' },
+    { type:'jogadores',icon:'🇵🇹', label:'Bruno Fernandes',      sub:'Manchester United · Meia',      link:'time.html' },
+    { type:'jogadores',icon:'🇳🇴', label:'Erling Haaland',       sub:'Manchester City · Centroavante',link:'time.html' },
+    { type:'jogadores',icon:'🇧🇷', label:'Vinicius Jr.',         sub:'Real Madrid · Atacante',        link:'time.html' },
+    { type:'jogadores',icon:'🇧🇷', label:'Rodrygo',              sub:'Real Madrid · Atacante',        link:'time.html' },
+    { type:'jogadores',icon:'🇧🇪', label:'Kevin De Bruyne',      sub:'Manchester City · Meia',        link:'time.html' },
+  ];
+
+  const RECENT = ['Flamengo', 'Brasileirão', 'Vinicius Jr.'];
+  const TRENDING = [
+    { icon:'🦓', label:'Botafogo 3×0 Flamengo',  sub:'Zebra Index 8.2 · Ontem',       link:'partida.html' },
+    { icon:'🏆', label:'Champions League Final',   sub:'Real Madrid × Borussia · 22h',  link:'partida.html' },
+    { icon:'⭐', label:'Flamengo',                 sub:'5 jogos sem derrota em casa',   link:'time.html'    },
+    { icon:'📊', label:'Brasileirão — Rodada 12', sub:'Tabela atualizada · Ver todos', link:'liga.html'    },
+    { icon:'👤', label:'Pedro',                    sub:'10 gols na temporada',          link:'time.html'    },
+  ];
+
+  let activeCategory = 'all';
+  let currentQuery   = '';
+
+  // ── RECENTES ──────────────────────────────────────────────────
+  function renderRecent() {
+    const container = document.getElementById('recentChips');
+    container.innerHTML = '';
+    if (!RECENT.length) { document.getElementById('recentSection').style.display = 'none'; return; }
+    RECENT.forEach(term => {
+      const chip = document.createElement('button');
+      chip.style.cssText = 'background:var(--card);border:1px solid var(--border);border-radius:var(--radius-pill);padding:5px 12px;font-size:0.8125rem;color:var(--white);cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;';
+      chip.innerHTML = `🕐 ${term}`;
+      chip.addEventListener('click', () => {
+        document.getElementById('searchInput').value = term;
+        performSearch(term);
+      });
+      container.appendChild(chip);
+    });
+  }
+
+  document.getElementById('clearRecent').addEventListener('click', () => {
+    RECENT.length = 0;
+    renderRecent();
+    showToast('🗑️ Histórico limpo');
+  });
+
+  // ── TRENDING ──────────────────────────────────────────────────
+  function renderTrending() {
+    const container = document.getElementById('trendingList');
+    TRENDING.forEach((t, i) => {
+      const row = document.createElement('div');
+      row.style.cssText = `display:flex;align-items:center;gap:12px;padding:11px 14px;cursor:pointer;transition:background var(--transition);${i < TRENDING.length-1 ? 'border-bottom:1px solid var(--border);' : ''}`;
+      row.innerHTML = `
+        <span style="font-size:1.25rem;min-width:28px;">${t.icon}</span>
+        <div style="flex:1;">
+          <div style="font-size:0.9375rem;font-weight:500;">${t.label}</div>
+          <div style="font-size:0.75rem;color:var(--gray);">${t.sub}</div>
+        </div>
+        <span style="color:var(--gray);">›</span>`;
+      row.addEventListener('mouseenter', () => row.style.background = 'var(--card2)');
+      row.addEventListener('mouseleave', () => row.style.background = '');
+      row.addEventListener('click', () => window.location.href = t.link);
+      container.appendChild(row);
+    });
+  }
+
+  // ── BUSCA ─────────────────────────────────────────────────────
+  function performSearch(query) {
+    currentQuery = query.trim().toLowerCase();
+    document.getElementById('clearBtn').style.display = currentQuery ? 'block' : 'none';
+
+    if (!currentQuery) {
+      document.getElementById('initialState').style.display = 'block';
+      document.getElementById('resultsState').style.display = 'none';
+      document.getElementById('emptyState').style.display   = 'none';
+      return;
+    }
+
+    document.getElementById('initialState').style.display = 'none';
+
+    let results = SEARCHABLE.filter(item =>
+      item.label.toLowerCase().includes(currentQuery) ||
+      item.sub.toLowerCase().includes(currentQuery)
+    );
+
+    if (activeCategory !== 'all') {
+      results = results.filter(r => r.type === activeCategory);
+    }
+
+    if (!results.length) {
+      document.getElementById('resultsState').style.display = 'none';
+      document.getElementById('emptyState').style.display   = 'block';
+      document.getElementById('emptyMsg').textContent        = `Nenhum resultado para "${query}"`;
+      return;
+    }
+
+    document.getElementById('resultsState').style.display = 'block';
+    document.getElementById('emptyState').style.display   = 'none';
+    document.getElementById('resultsCount').textContent    = `${results.length} resultado${results.length !== 1 ? 's' : ''} para "${query}"`;
+
+    const container = document.getElementById('resultsList');
+    container.innerHTML = '';
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'background:var(--card);border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin:0 0 8px;';
+
+    const typeLabel = { times:'Time', ligas:'Liga', jogadores:'Jogador' };
+
+    results.forEach(r => {
+      const item = document.createElement('div');
+      item.className = 'result-item';
+      item.innerHTML = `
+        <div class="result-item__icon">${r.icon}</div>
+        <div style="flex:1;">
+          <div class="result-item__label">${highlight(r.label, currentQuery)}</div>
+          <div class="result-item__sub">${r.sub}</div>
+        </div>
+        <span class="result-item__type type--${r.type}">${typeLabel[r.type]}</span>`;
+      item.addEventListener('click', () => window.location.href = r.link);
+      wrap.appendChild(item);
+    });
+
+    container.appendChild(wrap);
+  }
+
+  function highlight(text, query) {
+    if (!query) return text;
+    const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`, 'gi');
+    return text.replace(regex, `<span style="color:var(--green);font-weight:700;">$1</span>`);
+  }
+
+  // ── CATEGORIAS ────────────────────────────────────────────────
+  document.querySelectorAll('[data-cat]').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('[data-cat]').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      activeCategory = this.dataset.cat;
+      if (currentQuery) performSearch(currentQuery);
+    });
+  });
+
+  // ── INPUT ─────────────────────────────────────────────────────
+  document.getElementById('searchInput').addEventListener('input', function() {
+    performSearch(this.value);
+  });
+
+  document.getElementById('clearBtn').addEventListener('click', () => {
+    document.getElementById('searchInput').value = '';
+    performSearch('');
+    document.getElementById('searchInput').focus();
+  });
+
+  // ── INIT ─────────────────────────────────────────────────────
+  renderRecent();
+  renderTrending();
+
+  // Pré-preenche query da URL se houver
+  const q = new URLSearchParams(window.location.search).get('q');
+  if (q) {
+    document.getElementById('searchInput').value = q;
+    performSearch(q);
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ZebraStats — Liga</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/main.css" />
+</head>
+<body>
+<div class="phone">
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <button onclick="history.back()" style="background:none;border:none;color:var(--gray);font-size:1.375rem;cursor:pointer;padding:4px;line-height:1;">←</button>
+    <a href="home.html" class="navbar__brand" style="flex:1;text-align:center;">Zebra<span>Stats</span></a>
+    <button id="favLeagueBtn" class="navbar__icon" title="Favoritar liga">☆</button>
+  </nav>
+
+  <!-- HERO DA LIGA -->
+  <section id="leagueHero" style="padding:20px 16px 16px;background:linear-gradient(180deg,var(--card2) 0%,var(--bg) 100%);border-bottom:1px solid var(--border);">
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px;">
+      <div style="width:56px;height:56px;border-radius:var(--radius-md);background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:1.875rem;" id="leagueFlag">🇧🇷</div>
+      <div>
+        <div style="font-size:1.125rem;font-weight:700;" id="leagueName">Brasileirão Série A</div>
+        <div style="font-size:0.8125rem;color:var(--gray);" id="leagueSub">Brasil · Temporada 2025</div>
+      </div>
+    </div>
+    <!-- STATS DA TEMPORADA -->
+    <div style="display:flex;gap:0;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;">
+      <div style="flex:1;padding:10px 8px;text-align:center;border-right:1px solid var(--border);">
+        <div style="font-size:1rem;font-weight:700;">20</div>
+        <div style="font-size:0.625rem;color:var(--gray);margin-top:2px;">Times</div>
+      </div>
+      <div style="flex:1;padding:10px 8px;text-align:center;border-right:1px solid var(--border);">
+        <div style="font-size:1rem;font-weight:700;" id="statRodada">12ª</div>
+        <div style="font-size:0.625rem;color:var(--gray);margin-top:2px;">Rodada</div>
+      </div>
+      <div style="flex:1;padding:10px 8px;text-align:center;border-right:1px solid var(--border);">
+        <div style="font-size:1rem;font-weight:700;color:var(--green);" id="statLider">FLA</div>
+        <div style="font-size:0.625rem;color:var(--gray);margin-top:2px;">Líder</div>
+      </div>
+      <div style="flex:1;padding:10px 8px;text-align:center;">
+        <div style="font-size:1rem;font-weight:700;color:var(--gold);" id="statZebras">14</div>
+        <div style="font-size:0.625rem;color:var(--gray);margin-top:2px;">Zebras</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SELETOR DE LIGA -->
+  <section style="background:var(--card2);padding:10px 16px;border-bottom:1px solid var(--border);">
+    <div class="scroll-x" style="gap:8px;" id="leaguePicker">
+      <button class="filter-chip active" data-lid="BRA" data-flag="🇧🇷" data-name="Brasileirão Série A" data-sub="Brasil · Temporada 2025" data-lider="FLA" data-zebras="14" data-rodada="12ª">🇧🇷 Brasileirão</button>
+      <button class="filter-chip" data-lid="ENG" data-flag="🏴󠁧󠁢󠁥󠁮󠁧󠁿" data-name="Premier League" data-sub="Inglaterra · Temporada 2024/25" data-lider="LFC" data-zebras="21" data-rodada="37ª">🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier Lge</button>
+      <button class="filter-chip" data-lid="ESP" data-flag="🇪🇸" data-name="La Liga" data-sub="Espanha · Temporada 2024/25" data-lider="BAR" data-zebras="18" data-rodada="36ª">🇪🇸 La Liga</button>
+      <button class="filter-chip" data-lid="ITA" data-flag="🇮🇹" data-name="Serie A" data-sub="Itália · Temporada 2024/25" data-lider="INT" data-zebras="16" data-rodada="37ª">🇮🇹 Serie A</button>
+      <button class="filter-chip" data-lid="GER" data-flag="🇩🇪" data-name="Bundesliga" data-sub="Alemanha · Temporada 2024/25" data-lider="BAY" data-zebras="12" data-rodada="34ª">🇩🇪 Bundesliga</button>
+    </div>
+  </section>
+
+  <!-- TAB BAR -->
+  <div class="tab-bar" id="tabBar">
+    <button class="tab-bar__item active" data-tab="jogos">Jogos</button>
+    <button class="tab-bar__item" data-tab="tabela">Tabela</button>
+    <button class="tab-bar__item" data-tab="stats">Stats</button>
+    <button class="tab-bar__item" data-tab="zebras">🦓 Zebras</button>
+  </div>
+
+  <!-- CONTEÚDO DAS TABS -->
+  <main class="content">
+
+    <!-- TAB: JOGOS -->
+    <div id="tab-jogos">
+      <div class="scroll-x" style="gap:8px;margin-bottom:4px;">
+        <button class="filter-chip active" data-jfilter="proximos">⏰ Próximos</button>
+        <button class="filter-chip" data-jfilter="aovivo">🔴 Ao Vivo</button>
+        <button class="filter-chip" data-jfilter="encerrados">✓ Encerrados</button>
+      </div>
+
+      <div id="jogosList" style="display:flex;flex-direction:column;gap:10px;margin-top:4px;"></div>
+    </div>
+
+    <!-- TAB: TABELA -->
+    <div id="tab-tabela" style="display:none;">
+      <div style="margin-bottom:8px;font-size:0.75rem;color:var(--gray);">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--green);margin-right:4px;vertical-align:middle;"></span>CL &nbsp;
+        <span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--gold);margin-right:4px;vertical-align:middle;"></span>Sul-americana &nbsp;
+        <span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--red);margin-right:4px;vertical-align:middle;"></span>Rebaixamento
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;">
+        <table class="standings-table" id="standingsTable"></table>
+      </div>
+    </div>
+
+    <!-- TAB: STATS -->
+    <div id="tab-stats" style="display:none;">
+
+      <div class="section-header"><span class="section-title">⚽ Artilheiros</span></div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;margin-bottom:16px;" id="artilheiros"></div>
+
+      <div class="section-header"><span class="section-title">🅰️ Assistências</span></div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;margin-bottom:16px;" id="assistencias"></div>
+
+      <div class="section-header"><span class="section-title">📊 Clubes — Zebra Index</span></div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;" id="clubeStats"></div>
+    </div>
+
+    <!-- TAB: ZEBRAS -->
+    <div id="tab-zebras" style="display:none;">
+      <div class="section-header">
+        <span class="section-title">🦓 Maiores Zebras da Temporada</span>
+        <a href="zebras.html" class="section-link">Ver todas</a>
+      </div>
+      <div id="ligaZebras" style="display:flex;flex-direction:column;gap:10px;"></div>
+    </div>
+
+  </main>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <a href="home.html"   class="bottom-nav__item"><span class="bottom-nav__icon">🏠</span>Home</a>
+    <a href="zebras.html" class="bottom-nav__item"><span class="bottom-nav__icon">🦓</span>Zebras</a>
+    <a href="liga.html"   class="bottom-nav__item active"><span class="bottom-nav__icon">🏆</span>Ligas</a>
+    <a href="time.html"   class="bottom-nav__item"><span class="bottom-nav__icon">⭐</span>Times</a>
+    <a href="perfil.html" class="bottom-nav__item"><span class="bottom-nav__icon">👤</span>Perfil</a>
+  </nav>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="js/main.js"></script>
+<script>
+  // ── DATA ────────────────────────────────────────────────────────
+  const JOGOS = {
+    proximos: [
+      { home:'Flamengo',   away:'Botafogo',   time:'18/05 · 16h00', league:'Rodada 13' },
+      { home:'Palmeiras',  away:'São Paulo',  time:'18/05 · 18h30', league:'Rodada 13' },
+      { home:'Corinthians',away:'Santos',     time:'19/05 · 20h00', league:'Rodada 13' },
+      { home:'Grêmio',     away:'Internacional', time:'20/05 · 21h30', league:'Rodada 13' },
+    ],
+    aovivo: [
+      { home:'Atlético-MG',away:'Cruzeiro', hs:1, as:0, min:"54'", zebra:true  },
+      { home:'Vasco',      away:'Fluminense',hs:0, as:2, min:"71'", zebra:false },
+    ],
+    encerrados: [
+      { home:'Botafogo',  away:'Flamengo',  hs:3, as:0, date:'Ontem', zebra:true  },
+      { home:'São Paulo', away:'Palmeiras', hs:1, as:1, date:'12/05', zebra:false },
+      { home:'Grêmio',   away:'Corinthians',hs:2,as:1, date:'11/05', zebra:false },
+      { home:'Fortaleza', away:'Bahia',     hs:2, as:0, date:'10/05', zebra:false },
+    ],
+  };
+
+  const STANDINGS = [
+    { pos:1,  name:'Flamengo',    p:28, j:12, v:9, e:1, d:2, gp:28, gc:10, sg:18, zi:5.2, posClass:'cl' },
+    { pos:2,  name:'Palmeiras',   p:25, j:12, v:8, e:1, d:3, gp:22, gc:12, sg:10, zi:4.1, posClass:'cl' },
+    { pos:3,  name:'Atlético-MG', p:22, j:12, v:7, e:1, d:4, gp:18, gc:11, sg:7,  zi:3.8, posClass:'cl' },
+    { pos:4,  name:'São Paulo',   p:21, j:12, v:6, e:3, d:3, gp:15, gc:10, sg:5,  zi:2.9, posClass:'eur'},
+    { pos:5,  name:'Botafogo',    p:20, j:12, v:6, e:2, d:4, gp:20, gc:14, sg:6,  zi:6.4, posClass:'eur'},
+    { pos:6,  name:'Corinthians', p:18, j:12, v:5, e:3, d:4, gp:14, gc:13, sg:1,  zi:3.2, posClass:''   },
+    { pos:7,  name:'Fluminense',  p:17, j:12, v:5, e:2, d:5, gp:12, gc:14, sg:-2, zi:2.5, posClass:''   },
+    { pos:8,  name:'Internacional',p:16,j:12, v:5, e:1, d:6, gp:16, gc:17, sg:-1, zi:3.0, posClass:''   },
+    { pos:9,  name:'Vasco',       p:14, j:12, v:4, e:2, d:6, gp:11, gc:16, sg:-5, zi:2.2, posClass:''   },
+    { pos:10, name:'Grêmio',      p:13, j:12, v:3, e:4, d:5, gp:10, gc:14, sg:-4, zi:1.9, posClass:''   },
+    { pos:11, name:'Cruzeiro',    p:13, j:12, v:3, e:4, d:5, gp:11, gc:15, sg:-4, zi:2.1, posClass:''   },
+    { pos:12, name:'Bragantino',  p:12, j:12, v:3, e:3, d:6, gp:13, gc:18, sg:-5, zi:4.8, posClass:''   },
+    { pos:13, name:'Bahia',       p:11, j:12, v:3, e:2, d:7, gp:10, gc:17, sg:-7, zi:1.8, posClass:''   },
+    { pos:14, name:'Fortaleza',   p:10, j:12, v:2, e:4, d:6, gp:9,  gc:18, sg:-9, zi:1.5, posClass:''   },
+    { pos:15, name:'Santos',      p:9,  j:12, v:2, e:3, d:7, gp:8,  gc:19, sg:-11,zi:1.3, posClass:''   },
+    { pos:16, name:'Vitória',     p:8,  j:12, v:2, e:2, d:8, gp:7,  gc:21, sg:-14,zi:1.1, posClass:'rel'},
+    { pos:17, name:'Athletico',   p:7,  j:12, v:1, e:4, d:7, gp:6,  gc:18, sg:-12,zi:0.9, posClass:'rel'},
+    { pos:18, name:'Cuiabá',      p:6,  j:12, v:1, e:3, d:8, gp:5,  gc:22, sg:-17,zi:0.7, posClass:'rel'},
+    { pos:19, name:'América-MG',  p:5,  j:12, v:1, e:2, d:9, gp:4,  gc:25, sg:-21,zi:0.5, posClass:'rel'},
+    { pos:20, name:'Goiás',       p:4,  j:12, v:1, e:1, d:10,gp:3,  gc:28, sg:-25,zi:0.3, posClass:'rel'},
+  ];
+
+  const ARTILHEIROS = [
+    { name:'Pedro',      team:'Flamengo',   gols:10, flag:'🇧🇷' },
+    { name:'Rony',       team:'Palmeiras',  gols:8,  flag:'🇧🇷' },
+    { name:'Hulk',       team:'Atlético-MG',gols:7,  flag:'🇧🇷' },
+    { name:'Gabi',       team:'Flamengo',   gols:6,  flag:'🇧🇷' },
+    { name:'Calleri',    team:'São Paulo',  gols:5,  flag:'🇦🇷' },
+  ];
+
+  const ASSISTENCIAS = [
+    { name:'Arrascaeta', team:'Flamengo',   ast:7, flag:'🇺🇾' },
+    { name:'Raphael Veiga',team:'Palmeiras',ast:6, flag:'🇧🇷' },
+    { name:'De Pena',    team:'Fluminense', ast:5, flag:'🇺🇾' },
+    { name:'Canobbio',   team:'Athletico',  ast:4, flag:'🇺🇾' },
+    { name:'Praxedes',   team:'Flamengo',   ast:4, flag:'🇧🇷' },
+  ];
+
+  const CLUBE_STATS = [
+    { name:'Botafogo',   zi:6.4, won:3, suffered:4 },
+    { name:'Bragantino', zi:4.8, won:2, suffered:3 },
+    { name:'Flamengo',   zi:5.2, won:2, suffered:3 },
+    { name:'Palmeiras',  zi:4.1, won:1, suffered:3 },
+    { name:'Corinthians',zi:3.2, won:1, suffered:2 },
+  ];
+
+  const ZEBRAS_LIGA = [
+    { home:'Botafogo',   away:'Flamengo',   hs:3, as:0, zi:8.2, date:'Ontem' },
+    { home:'Bragantino', away:'Palmeiras',  hs:3, as:1, zi:4.3, date:'06/05' },
+    { home:'Fortaleza',  away:'Fluminense', hs:2, as:0, zi:5.1, date:'03/05' },
+  ];
+
+  let activeTab    = 'jogos';
+  let activeJfilt  = 'proximos';
+  let favLeague    = false;
+  let activeLid    = 'BRA';
+
+  // ── FAVORITAR LIGA ──────────────────────────────────────────────
+  document.getElementById('favLeagueBtn').addEventListener('click', function() {
+    favLeague = !favLeague;
+    this.textContent = favLeague ? '★' : '☆';
+    this.style.color = favLeague ? 'var(--gold)' : '';
+    showToast(favLeague ? '⭐ Liga favoritada!' : 'Liga removida dos favoritos');
+  });
+
+  // ── SELETOR DE LIGA ─────────────────────────────────────────────
+  document.querySelectorAll('#leaguePicker .filter-chip').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('#leaguePicker .filter-chip').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      activeLid = this.dataset.lid;
+      document.getElementById('leagueFlag').textContent = this.dataset.flag;
+      document.getElementById('leagueName').textContent = this.dataset.name;
+      document.getElementById('leagueSub').textContent  = this.dataset.sub;
+      document.getElementById('statLider').textContent  = this.dataset.lider;
+      document.getElementById('statZebras').textContent = this.dataset.zebras;
+      document.getElementById('statRodada').textContent = this.dataset.rodada;
+      favLeague = false;
+      document.getElementById('favLeagueBtn').textContent = '☆';
+      document.getElementById('favLeagueBtn').style.color = '';
+      renderJogos();
+    });
+  });
+
+  // ── TABS ─────────────────────────────────────────────────────────
+  document.querySelectorAll('.tab-bar__item').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.tab-bar__item').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      activeTab = this.dataset.tab;
+      ['jogos','tabela','stats','zebras'].forEach(t => {
+        document.getElementById(`tab-${t}`).style.display = t === activeTab ? 'block' : 'none';
+      });
+      if (activeTab === 'tabela')  renderTabela();
+      if (activeTab === 'stats')   renderStats();
+      if (activeTab === 'zebras')  renderZebrasTab();
+    });
+  });
+
+  // ── JOGOS ─────────────────────────────────────────────────────────
+  document.querySelectorAll('[data-jfilter]').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('[data-jfilter]').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      activeJfilt = this.dataset.jfilter;
+      renderJogos();
+    });
+  });
+
+  function renderJogos() {
+    const container = document.getElementById('jogosList');
+    container.innerHTML = '';
+    const list = JOGOS[activeJfilt] || [];
+
+    if (!list.length) {
+      container.innerHTML = `<p class="text-gray text-sm" style="text-align:center;padding:24px;">Nenhum jogo</p>`;
+      return;
+    }
+
+    list.forEach(g => {
+      const card = document.createElement('div');
+      card.className = `game-card${g.zebra ? ' game-card--zebra' : ''}`;
+
+      if (activeJfilt === 'proximos') {
+        card.innerHTML = `
+          <div class="game-card__league" style="display:flex;justify-content:space-between;">
+            <span>${g.league}</span>
+            <span style="color:var(--gold);font-weight:600;">${g.time}</span>
+          </div>
+          <div class="game-card__match">
+            <span class="game-card__team">${g.home}</span>
+            <span class="game-card__score" style="font-size:0.875rem;color:var(--gray);">vs</span>
+            <span class="game-card__team game-card__team--away">${g.away}</span>
+          </div>`;
+      } else if (activeJfilt === 'aovivo') {
+        card.innerHTML = `
+          <div class="game-card__league" style="display:flex;justify-content:space-between;">
+            <span>Brasileirão · Rodada 12</span>
+            <span class="badge badge--live">${g.min}</span>
+          </div>
+          <div class="game-card__match">
+            <span class="game-card__team">${g.home}</span>
+            <span class="game-card__score">${g.hs} – ${g.as}</span>
+            <span class="game-card__team game-card__team--away">${g.away}</span>
+          </div>
+          ${g.zebra ? `<div class="game-card__footer"><span class="badge badge--zebra">🦓 ZEBRA ALERT</span></div>` : ''}`;
+      } else {
+        const diff = g.hs - g.as;
+        const color = diff > 0 ? 'var(--green)' : diff < 0 ? 'var(--red)' : 'var(--gray)';
+        card.innerHTML = `
+          <div class="game-card__league" style="display:flex;justify-content:space-between;">
+            <span>Rodada 12</span>
+            <span style="font-size:0.75rem;color:var(--gray);">${g.date}</span>
+          </div>
+          <div class="game-card__match">
+            <span class="game-card__team">${g.home}</span>
+            <span class="game-card__score" style="color:${color};">${g.hs} – ${g.as}</span>
+            <span class="game-card__team game-card__team--away">${g.away}</span>
+          </div>
+          ${g.zebra ? `<div class="game-card__footer"><span class="badge badge--zebra">🦓 ZEBRA</span></div>` : ''}`;
+      }
+
+      card.addEventListener('click', () => window.location.href = 'partida.html');
+      container.appendChild(card);
+    });
+  }
+
+  // ── TABELA ────────────────────────────────────────────────────────
+  function renderTabela() {
+    const table = document.getElementById('standingsTable');
+    table.innerHTML = `
+      <thead>
+        <tr>
+          <th>Pos</th><th>Time</th><th>P</th><th>J</th>
+          <th>V</th><th>E</th><th>D</th><th>SG</th><th>🦓</th>
+        </tr>
+      </thead>
+      <tbody id="standingsTbody"></tbody>`;
+
+    const tbody = table.querySelector('tbody');
+    STANDINGS.forEach(t => {
+      const tr = document.createElement('tr');
+      if ([1,2,3,4].includes(t.pos)) tr.className = 'highlight-row';
+      const badgeClass = { cl:'pos-badge--cl', eur:'pos-badge--eur', rel:'pos-badge--rel' }[t.posClass] || '';
+      tr.innerHTML = `
+        <td><span class="pos-badge ${badgeClass}">${t.pos}</span></td>
+        <td>${t.name}</td>
+        <td style="font-weight:700;">${t.p}</td>
+        <td>${t.j}</td>
+        <td style="color:var(--green);">${t.v}</td>
+        <td>${t.e}</td>
+        <td style="color:var(--red);">${t.d}</td>
+        <td style="color:${t.sg > 0 ? 'var(--green)' : t.sg < 0 ? 'var(--red)' : 'var(--gray)'};">${t.sg > 0 ? '+' : ''}${t.sg}</td>
+        <td style="color:var(--gold);font-size:0.75rem;font-weight:600;">${t.zi}</td>`;
+      tr.addEventListener('click', () => window.location.href = 'time.html');
+      tbody.appendChild(tr);
+    });
+  }
+
+  // ── STATS ─────────────────────────────────────────────────────────
+  function renderStats() {
+    // Artilheiros
+    const artEl = document.getElementById('artilheiros');
+    artEl.innerHTML = '';
+    ARTILHEIROS.forEach((p, i) => {
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid var(--border);';
+      if (i === ARTILHEIROS.length - 1) row.style.borderBottom = 'none';
+      row.innerHTML = `
+        <span style="font-size:0.75rem;color:var(--gray);min-width:20px;font-weight:700;">#${i+1}</span>
+        <span style="font-size:1rem;">${p.flag}</span>
+        <div style="flex:1;">
+          <div style="font-size:0.9375rem;font-weight:600;">${p.name}</div>
+          <div style="font-size:0.75rem;color:var(--gray);">${p.team}</div>
+        </div>
+        <div style="text-align:right;">
+          <span style="font-size:1.125rem;font-weight:700;color:var(--green);">${p.gols}</span>
+          <div style="font-size:0.625rem;color:var(--gray);">gols</div>
+        </div>`;
+      artEl.appendChild(row);
+    });
+
+    // Assistências
+    const astEl = document.getElementById('assistencias');
+    astEl.innerHTML = '';
+    ASSISTENCIAS.forEach((p, i) => {
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid var(--border);';
+      if (i === ASSISTENCIAS.length - 1) row.style.borderBottom = 'none';
+      row.innerHTML = `
+        <span style="font-size:0.75rem;color:var(--gray);min-width:20px;font-weight:700;">#${i+1}</span>
+        <span style="font-size:1rem;">${p.flag}</span>
+        <div style="flex:1;">
+          <div style="font-size:0.9375rem;font-weight:600;">${p.name}</div>
+          <div style="font-size:0.75rem;color:var(--gray);">${p.team}</div>
+        </div>
+        <div style="text-align:right;">
+          <span style="font-size:1.125rem;font-weight:700;color:var(--gold);">${p.ast}</span>
+          <div style="font-size:0.625rem;color:var(--gray);">ast.</div>
+        </div>`;
+      astEl.appendChild(row);
+    });
+
+    // Clube stats
+    const csEl = document.getElementById('clubeStats');
+    csEl.innerHTML = '';
+    CLUBE_STATS.forEach((c, i) => {
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid var(--border);';
+      if (i === CLUBE_STATS.length - 1) row.style.borderBottom = 'none';
+      row.innerHTML = `
+        <div style="flex:1;">
+          <div style="font-size:0.9375rem;font-weight:600;">${c.name}</div>
+          <div style="font-size:0.75rem;color:var(--gray);">Causou ${c.won} · Sofreu ${c.suffered}</div>
+        </div>
+        <span style="font-size:1rem;font-weight:700;color:var(--red);">🦓 ${c.zi}</span>`;
+      csEl.appendChild(row);
+    });
+  }
+
+  // ── ZEBRAS DA LIGA ────────────────────────────────────────────────
+  function renderZebrasTab() {
+    const container = document.getElementById('ligaZebras');
+    container.innerHTML = '';
+    ZEBRAS_LIGA.forEach(z => {
+      const cls = z.zi >= 7 ? 'grande' : z.zi >= 4 ? 'media' : 'leve';
+      const card = document.createElement('div');
+      card.className = 'zebra-card';
+      card.innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <span class="text-xs text-gray">Brasileirão · ${z.date}</span>
+          <span class="zebra-index-badge zi--${cls}">🦓 ${z.zi}</span>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-size:0.9375rem;font-weight:600;flex:1;">${z.home}</span>
+          <span style="font-size:1.25rem;font-weight:700;min-width:64px;text-align:center;">${z.hs} – ${z.as}</span>
+          <span style="font-size:0.9375rem;font-weight:600;flex:1;text-align:right;">${z.away}</span>
+        </div>`;
+      card.addEventListener('click', () => window.location.href = 'partida.html');
+      container.appendChild(card);
+    });
+  }
+
+  // ── INIT ──────────────────────────────────────────────────────────
+  updatePlanBadge && updatePlanBadge();
+  renderJogos();
+</script>
+</body>
+</html>
