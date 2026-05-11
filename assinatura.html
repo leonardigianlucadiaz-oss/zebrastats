@@ -8,24 +8,28 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/main.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 </head>
 <body>
   <div class="phone">
 
     <!-- HEADER -->
     <nav class="navbar">
-      <button onclick="history.back()" class="navbar__icon" style="background:none;border:none;cursor:pointer;font-size:1.25rem;color:var(--white);">←</button>
+      <button onclick="history.back()" class="navbar__icon" style="background:none;border:none;cursor:pointer;color:var(--white);display:flex;align-items:center;justify-content:center;">
+        <i data-lucide="arrow-left" style="width:20px;height:20px;"></i>
+      </button>
       <span style="font-size:1rem;font-weight:600;">ZebraStats Pro</span>
       <div style="width:32px;"></div>
     </nav>
 
     <!-- HERO -->
     <div class="sub-hero">
-      <div class="sub-hero__icon">👑</div>
+      <div class="sub-hero__icon" style="background:var(--gold-dim);border:1px solid rgba(255,200,50,0.25);">
+        <i data-lucide="crown" style="width:36px;height:36px;color:var(--gold);stroke-width:1.5;"></i>
+      </div>
       <h2 class="sub-hero__title">Desbloqueie as Zebras</h2>
       <p class="sub-hero__sub">Dados exclusivos para apostadores sérios</p>
 
-      <!-- Toggle Mensal / Anual -->
       <div class="plan-toggle" id="planToggle">
         <button class="toggle-btn active" data-plan="monthly">Mensal</button>
         <button class="toggle-btn" data-plan="annual">
@@ -37,45 +41,46 @@
 
     <main class="content">
 
-      <!-- PLANO GRATUITO -->
-      <div class="plan-card">
-        <p class="plan-card__title text-gray" style="font-size:0.875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Gratuito</p>
-        <div class="plan-card__price" style="color:var(--white);">R$ 0</div>
-        <p class="plan-card__price-note">para sempre</p>
-        <div class="plan-card__perks">
-          <div class="plan-card__perk plan-card__perk--on"><span class="perk-icon">✅</span>Jogos ao vivo</div>
-          <div class="plan-card__perk plan-card__perk--on"><span class="perk-icon">✅</span>Times favoritos</div>
-          <div class="plan-card__perk plan-card__perk--on"><span class="perk-icon">✅</span>Agenda de partidas</div>
-          <div class="plan-card__perk plan-card__perk--off"><span class="perk-icon">🔒</span>Ranking de zebras por time</div>
-          <div class="plan-card__perk plan-card__perk--off"><span class="perk-icon">🔒</span>Histórico de zebras do jogador</div>
-          <div class="plan-card__perk plan-card__perk--off"><span class="perk-icon">🔒</span>Alertas de zebra em tempo real</div>
-          <div class="plan-card__perk plan-card__perk--off"><span class="perk-icon">🔒</span>Análise de padrões sazonais</div>
-        </div>
-        <button class="btn btn--outline" style="margin-top:16px;" onclick="window.location.href='home.html'">
-          Continuar grátis
-        </button>
-      </div>
-
-      <!-- PLANO PRO (destaque) -->
-      <div class="plan-card card--green-border" id="proPlanCard" style="margin-top:8px;">
+      <!-- PLANO PRO — DESTAQUE (primeiro) -->
+      <div class="plan-card plan-card--featured" id="proPlanCard">
         <div class="plan-card__floating-badge badge badge--popular">Mais popular</div>
 
-        <p class="plan-card__title text-green" style="font-size:0.875rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">Pro</p>
+        <p class="plan-card__label plan-card__label--pro">Pro</p>
 
-        <!-- Preço dinâmico -->
         <div id="priceDisplay">
           <div class="plan-card__price text-green" id="priceValue">R$ 50</div>
           <p class="plan-card__price-note" id="priceNote">/ mês · cobrado mensalmente</p>
         </div>
 
         <div class="plan-card__perks">
-          <div class="plan-card__perk plan-card__perk--on"><span class="perk-icon">✅</span>Tudo do plano Gratuito</div>
-          <div class="plan-card__perk plan-card__perk--on"><span class="perk-icon">🦓</span>Ranking de zebras por time</div>
-          <div class="plan-card__perk plan-card__perk--on"><span class="perk-icon">📊</span>Histórico completo de jogadores</div>
-          <div class="plan-card__perk plan-card__perk--on"><span class="perk-icon">🔔</span>Alertas de zebra em tempo real</div>
-          <div class="plan-card__perk plan-card__perk--on"><span class="perk-icon">📅</span>Análise de padrões sazonais</div>
-          <div class="plan-card__perk plan-card__perk--on" id="annualPerk" style="display:none;"><span class="perk-icon">📤</span>Relatórios exportáveis</div>
-          <div class="plan-card__perk plan-card__perk--on" id="earlyPerk"  style="display:none;"><span class="perk-icon">🚀</span>Acesso antecipado a novidades</div>
+          <div class="plan-card__perk plan-card__perk--on">
+            <i data-lucide="check-circle-2" class="perk-icon perk-icon--on"></i>
+            Tudo do plano Gratuito
+          </div>
+          <div class="plan-card__perk plan-card__perk--on">
+            <i data-lucide="activity" class="perk-icon perk-icon--on"></i>
+            Ranking de zebras por time
+          </div>
+          <div class="plan-card__perk plan-card__perk--on">
+            <i data-lucide="bar-chart-2" class="perk-icon perk-icon--on"></i>
+            Histórico completo de jogadores
+          </div>
+          <div class="plan-card__perk plan-card__perk--on">
+            <i data-lucide="bell" class="perk-icon perk-icon--on"></i>
+            Alertas de zebra em tempo real
+          </div>
+          <div class="plan-card__perk plan-card__perk--on">
+            <i data-lucide="calendar" class="perk-icon perk-icon--on"></i>
+            Análise de padrões sazonais
+          </div>
+          <div class="plan-card__perk plan-card__perk--on" id="annualPerk" style="display:none;">
+            <i data-lucide="file-text" class="perk-icon perk-icon--on"></i>
+            Relatórios exportáveis
+          </div>
+          <div class="plan-card__perk plan-card__perk--on" id="earlyPerk" style="display:none;">
+            <i data-lucide="zap" class="perk-icon perk-icon--on"></i>
+            Acesso antecipado a novidades
+          </div>
         </div>
 
         <button class="btn btn--primary" style="margin-top:16px;" id="subscribeBtnPro">
@@ -83,14 +88,56 @@
         </button>
       </div>
 
+      <!-- PLANO GRATUITO — SECUNDÁRIO (segundo) -->
+      <div class="plan-card plan-card--secondary" style="margin-top:10px;">
+        <p class="plan-card__label plan-card__label--free">Gratuito</p>
+        <div class="plan-card__price" style="color:var(--white);font-size:2rem;">R$ 0</div>
+        <p class="plan-card__price-note">para sempre</p>
+
+        <div class="plan-card__perks">
+          <div class="plan-card__perk plan-card__perk--on">
+            <i data-lucide="check-circle-2" class="perk-icon perk-icon--on"></i>
+            Jogos ao vivo
+          </div>
+          <div class="plan-card__perk plan-card__perk--on">
+            <i data-lucide="check-circle-2" class="perk-icon perk-icon--on"></i>
+            Times favoritos
+          </div>
+          <div class="plan-card__perk plan-card__perk--on">
+            <i data-lucide="check-circle-2" class="perk-icon perk-icon--on"></i>
+            Agenda de partidas
+          </div>
+          <div class="plan-card__perk plan-card__perk--off">
+            <i data-lucide="lock" class="perk-icon perk-icon--off"></i>
+            Ranking de zebras por time
+          </div>
+          <div class="plan-card__perk plan-card__perk--off">
+            <i data-lucide="lock" class="perk-icon perk-icon--off"></i>
+            Histórico de zebras do jogador
+          </div>
+          <div class="plan-card__perk plan-card__perk--off">
+            <i data-lucide="lock" class="perk-icon perk-icon--off"></i>
+            Alertas de zebra em tempo real
+          </div>
+          <div class="plan-card__perk plan-card__perk--off">
+            <i data-lucide="lock" class="perk-icon perk-icon--off"></i>
+            Análise de padrões sazonais
+          </div>
+        </div>
+
+        <button class="btn btn--outline" style="margin-top:16px;opacity:0.7;" onclick="window.location.href='home.html'">
+          Continuar grátis
+        </button>
+      </div>
+
       <!-- GARANTIA -->
-      <div style="text-align:center;padding:8px 0;display:flex;flex-direction:column;align-items:center;gap:4px;">
-        <span style="font-size:1.25rem;">🛡️</span>
+      <div style="text-align:center;padding:12px 0 4px;display:flex;align-items:center;justify-content:center;gap:8px;">
+        <i data-lucide="shield-check" style="width:16px;height:16px;color:var(--green);flex-shrink:0;"></i>
         <p class="text-xs text-gray">Cancele quando quiser · Sem fidelidade · Pagamento seguro</p>
       </div>
 
       <!-- FAQ -->
-      <div style="margin-top:8px;">
+      <div style="margin-top:16px;padding-bottom:8px;">
         <h3 style="font-size:0.9375rem;margin-bottom:12px;">Perguntas frequentes</h3>
         <div id="faqList" style="display:flex;flex-direction:column;gap:8px;"></div>
       </div>
@@ -99,19 +146,61 @@
 
     <!-- BOTTOM NAV -->
     <nav class="bottom-nav">
-      <a href="home.html"   class="bottom-nav__item"><span class="bottom-nav__icon">🏠</span>Home</a>
-      <a href="zebras.html" class="bottom-nav__item"><span class="bottom-nav__icon">🦓</span>Zebras</a>
-      <a href="liga.html"   class="bottom-nav__item"><span class="bottom-nav__icon">🏆</span>Ligas</a>
-      <a href="time.html"   class="bottom-nav__item"><span class="bottom-nav__icon">⭐</span>Times</a>
-      <a href="perfil.html" class="bottom-nav__item"><span class="bottom-nav__icon">👤</span>Perfil</a>
+      <a href="home.html"   class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="home"></i></span>Home</a>
+      <a href="zebras.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="activity"></i></span>Zebras</a>
+      <a href="liga.html"   class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="trophy"></i></span>Ligas</a>
+      <a href="time.html"   class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="star"></i></span>Times</a>
+      <a href="perfil.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="user"></i></span>Perfil</a>
     </nav>
 
   </div>
 
-  <!-- TOAST -->
   <div class="toast" id="toast"></div>
 
   <style>
+    /* ── Lucide icon helpers ──────────────────────────────── */
+    .perk-icon {
+      width: 15px;
+      height: 15px;
+      flex-shrink: 0;
+    }
+    .perk-icon--on  { color: var(--green); }
+    .perk-icon--off { color: var(--gray); opacity: 0.4; }
+
+    .bottom-nav__icon i {
+      width: 20px;
+      height: 20px;
+      display: block;
+    }
+
+    /* ── Plan cards ───────────────────────────────────────── */
+    .plan-card--featured {
+      background: linear-gradient(150deg, rgba(46,230,92,0.08) 0%, var(--card) 55%);
+      border: 1.5px solid rgba(46,230,92,0.5);
+      border-radius: var(--radius-md);
+      padding: 20px 16px 16px;
+      position: relative;
+    }
+    .plan-card--secondary {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      position: relative;
+      opacity: 0.8;
+    }
+
+    .plan-card__label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 4px;
+    }
+    .plan-card__label--pro  { color: var(--green); }
+    .plan-card__label--free { color: var(--gray); }
+
+    /* ── Toggle ───────────────────────────────────────────── */
     .plan-toggle {
       display: flex;
       background: var(--card);
@@ -143,6 +232,7 @@
       color: var(--dark-text);
     }
 
+    /* ── FAQ ──────────────────────────────────────────────── */
     .faq-item {
       background: var(--card);
       border: 1px solid var(--border);
@@ -154,6 +244,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 12px;
       padding: 14px 16px;
       background: none;
       border: none;
@@ -164,7 +255,12 @@
       cursor: pointer;
       text-align: left;
     }
-    .faq-arrow { transition: transform var(--transition); font-style: normal; }
+    .faq-arrow {
+      flex-shrink: 0;
+      color: var(--gray);
+      transition: transform var(--transition);
+    }
+    .faq-arrow i { width: 16px; height: 16px; display: block; }
     .faq-answer {
       padding: 0 16px;
       max-height: 0;
@@ -174,8 +270,8 @@
       color: var(--gray);
       line-height: 1.6;
     }
-    .faq-item.open .faq-answer   { max-height: 200px; padding: 0 16px 14px; }
-    .faq-item.open .faq-arrow    { transform: rotate(180deg); }
+    .faq-item.open .faq-answer { max-height: 200px; padding: 0 16px 14px; }
+    .faq-item.open .faq-arrow  { transform: rotate(180deg); }
   </style>
 
   <script src="js/main.js"></script>
@@ -202,21 +298,23 @@
       const card         = document.getElementById('proPlanCard');
 
       if (currentPlan === 'annual') {
-        priceValue.textContent   = 'R$ 500';
-        priceNote.textContent    = '/ ano · equivale a R$ 41,67/mês';
+        priceValue.textContent = 'R$ 500';
+        priceNote.textContent  = '/ ano · equivale a R$ 41,67/mês';
         subscribeBtn.textContent = 'Assinar Pro Anual — R$ 500/ano';
         annualPerk.style.display = 'flex';
         earlyPerk.style.display  = 'flex';
-        card.style.borderColor   = 'rgba(255,200,50,0.6)';
+        card.style.borderColor   = 'rgba(255,200,50,0.55)';
+        card.style.background    = 'linear-gradient(150deg, rgba(255,200,50,0.08) 0%, var(--card) 55%)';
         priceValue.style.color   = 'var(--gold)';
         subscribeBtn.className   = 'btn btn--gold';
       } else {
-        priceValue.textContent   = 'R$ 50';
-        priceNote.textContent    = '/ mês · cobrado mensalmente';
+        priceValue.textContent = 'R$ 50';
+        priceNote.textContent  = '/ mês · cobrado mensalmente';
         subscribeBtn.textContent = 'Assinar Pro — R$ 50/mês';
         annualPerk.style.display = 'none';
         earlyPerk.style.display  = 'none';
-        card.style.borderColor   = 'rgba(46,230,92,0.6)';
+        card.style.borderColor   = 'rgba(46,230,92,0.5)';
+        card.style.background    = 'linear-gradient(150deg, rgba(46,230,92,0.08) 0%, var(--card) 55%)';
         priceValue.style.color   = 'var(--green)';
         subscribeBtn.className   = 'btn btn--primary';
       }
@@ -226,7 +324,7 @@
       this.textContent = 'Processando...';
       this.disabled = true;
       setTimeout(() => {
-        showToast('🎉 Assinatura ativada com sucesso!');
+        showToast('Assinatura ativada com sucesso!');
         setTimeout(() => window.location.href = 'home.html', 1200);
       }, 1000);
     });
@@ -246,7 +344,7 @@
       item.innerHTML = `
         <button class="faq-question">
           ${f.q}
-          <i class="faq-arrow">▾</i>
+          <span class="faq-arrow"><i data-lucide="chevron-down"></i></span>
         </button>
         <div class="faq-answer">${f.a}</div>
       `;
@@ -257,6 +355,9 @@
       });
       faqList.appendChild(item);
     });
+
+    // ── LUCIDE — inicializa todos os ícones da página ─────
+    lucide.createIcons();
   </script>
 </body>
 </html>
