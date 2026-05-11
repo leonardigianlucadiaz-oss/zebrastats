@@ -8,13 +8,14 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/main.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 </head>
 <body>
 <div class="phone">
 
   <!-- NAVBAR -->
   <nav class="navbar">
-    <button onclick="history.back()" style="background:none;border:none;color:var(--gray);font-size:1.375rem;cursor:pointer;padding:4px;line-height:1;">←</button>
+    <button onclick="history.back()" class="navbar__icon" style="background:none;border:none;cursor:pointer;color:var(--white);display:flex;align-items:center;justify-content:center;"><i data-lucide="arrow-left" style="width:20px;height:20px;"></i></button>
     <span style="font-size:1rem;font-weight:700;flex:1;text-align:center;">Finalizar Assinatura</span>
     <div style="width:36px;"></div>
   </nav>
@@ -28,7 +29,7 @@
         <a href="assinatura.html" style="font-size:0.75rem;color:var(--green);text-decoration:none;font-weight:600;">Alterar plano</a>
       </div>
       <div style="display:flex;align-items:center;gap:14px;">
-        <div style="width:44px;height:44px;border-radius:var(--radius-sm);background:var(--gold-dim);border:1px solid rgba(255,200,50,0.4);display:flex;align-items:center;justify-content:center;font-size:1.375rem;flex-shrink:0;">👑</div>
+        <div style="width:44px;height:44px;border-radius:var(--radius-sm);background:var(--gold-dim);border:1px solid rgba(255,200,50,0.4);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--gold);"><i data-lucide="crown" style="width:24px;height:24px;"></i></div>
         <div style="flex:1;">
           <div style="font-weight:700;font-size:1rem;" id="planName">ZebraStats Pro</div>
           <div style="font-size:0.8125rem;color:var(--gray);" id="planCycle">Plano Anual · Renovação automática</div>
@@ -49,9 +50,9 @@
     <div>
       <div style="font-size:0.75rem;font-weight:600;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">Método de Pagamento</div>
       <div style="display:flex;gap:8px;">
-        <button class="payment-method-tab active" data-method="card">💳 Cartão</button>
-        <button class="payment-method-tab" data-method="pix">⚡ Pix</button>
-        <button class="payment-method-tab" data-method="boleto">📄 Boleto</button>
+        <button class="payment-method-tab active" data-method="card"><i data-lucide="credit-card" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;"></i>Cartão</button>
+        <button class="payment-method-tab" data-method="pix"><i data-lucide="zap" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;"></i>Pix</button>
+        <button class="payment-method-tab" data-method="boleto"><i data-lucide="file-text" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;"></i>Boleto</button>
       </div>
     </div>
 
@@ -96,7 +97,7 @@
         Escaneie o QR Code ou copie a chave abaixo.<br>Acesso liberado em <strong style="color:var(--white);">até 1 minuto</strong>.
       </div>
       <div style="width:164px;height:164px;background:var(--white);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;padding:16px;">
-        <div style="font-size:2.5rem;">⚡</div>
+        <i data-lucide="zap" style="width:40px;height:40px;color:#0D1A2A;"></i>
         <div style="font-size:0.6875rem;color:#0D1A2A;font-weight:600;">QR Code Pix</div>
       </div>
       <div style="width:100%;">
@@ -106,12 +107,12 @@
           <button onclick="showToast('✓ Chave copiada!')" style="background:none;border:none;color:var(--green);font-size:0.8125rem;font-weight:600;cursor:pointer;white-space:nowrap;font-family:inherit;">Copiar</button>
         </div>
       </div>
-      <div style="font-size:0.75rem;color:var(--gray);">⏱ Código expira em <span style="color:var(--gold);font-weight:600;" id="pixTimer">14:59</span></div>
+      <div style="font-size:0.75rem;color:var(--gray);display:flex;align-items:center;gap:4px;"><i data-lucide="timer" style="width:14px;height:14px;"></i> Código expira em <span style="color:var(--gold);font-weight:600;" id="pixTimer">14:59</span></div>
     </div>
 
     <!-- PAINEL BOLETO -->
     <div id="panel-boleto" class="card" style="display:none;flex-direction:column;align-items:center;gap:16px;text-align:center;">
-      <div style="font-size:2.5rem;">📄</div>
+      <i data-lucide="file-text" style="width:40px;height:40px;color:var(--gray);"></i>
       <div style="font-size:0.875rem;color:var(--gray);line-height:1.6;">
         O boleto vence em <strong style="color:var(--white);">3 dias úteis</strong>.<br>
         Após o pagamento, acesso liberado em <strong style="color:var(--white);">até 2 dias úteis</strong>.
@@ -127,14 +128,14 @@
     </div>
 
     <!-- CTA PRINCIPAL -->
-    <button class="btn btn--gold" id="confirmBtn">
-      🔒 Confirmar Pagamento · R$ 500,00
+    <button class="btn btn--gold" id="confirmBtn" style="display:flex;align-items:center;justify-content:center;gap:8px;">
+      <i data-lucide="lock" style="width:16px;height:16px;"></i> Confirmar Pagamento · R$ 500,00
     </button>
 
     <!-- SEGURANÇA -->
     <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
       <div style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--gray);">
-        <span>🔒</span><span>Pagamento seguro · Criptografia SSL 256-bit</span>
+        <i data-lucide="shield-check" style="width:14px;height:14px;color:var(--green);"></i><span>Pagamento seguro · Criptografia SSL 256-bit</span>
       </div>
       <div style="font-size:0.75rem;color:var(--gray);">Cancele quando quiser. Sem fidelidade.</div>
     </div>
@@ -162,7 +163,7 @@
   document.getElementById('planPrice').textContent = cfg.price;
   document.getElementById('planNote').textContent  = cfg.note;
   document.getElementById('planTotal').textContent = cfg.total;
-  document.getElementById('confirmBtn').textContent = `🔒 Confirmar Pagamento · ${cfg.total}`;
+  document.getElementById('confirmBtn').innerHTML = `<i data-lucide="lock" style="width:16px;height:16px;"></i> Confirmar Pagamento · ${cfg.total}`;
 
   if (!cfg.installments) {
     document.getElementById('installmentsGroup').style.display = 'none';
@@ -184,7 +185,7 @@
   document.getElementById('cardNumber').addEventListener('input', function() {
     let v = this.value.replace(/\D/g,'').slice(0,16);
     this.value = v.match(/.{1,4}/g)?.join('  ') || v;
-    const brands = { '4':'💳', '5':'🔴', '3':'🔵', '6':'🟠' };
+    const brands = { '4':'VISA', '5':'MC', '3':'AMEX', '6':'ELO' };
     document.getElementById('cardBrand').textContent = brands[v[0]] || '';
   });
 
@@ -220,21 +221,27 @@
       const num = document.getElementById('cardNumber').value.replace(/\s/g,'');
       const exp = document.getElementById('cardExpiry').value;
       const cvv = document.getElementById('cardCvv').value;
-      if (num.length < 16)  { showToast('⚠️ Número do cartão incompleto'); return; }
-      if (exp.length < 5)   { showToast('⚠️ Validade inválida'); return; }
-      if (cvv.length < 3)   { showToast('⚠️ CVV inválido'); return; }
+      if (num.length < 16)  { showToast('Número do cartão incompleto'); return; }
+      if (exp.length < 5)   { showToast('Validade inválida'); return; }
+      if (cvv.length < 3)   { showToast('CVV inválido'); return; }
     }
 
-    this.textContent = '⏳ Processando...';
+    this.textContent = 'Processando...';
     this.disabled = true;
     this.style.opacity = '0.7';
 
     setTimeout(() => {
       setUserPlan('pro');
-      showToast('✅ Pagamento aprovado! Bem-vindo ao Pro!');
+      showToast('Pagamento aprovado! Bem-vindo ao Pro!');
       setTimeout(() => window.location.href = 'home.html', 1800);
     }, 2200);
   });
+
+  lucide.createIcons();
 </script>
+<style>
+  .navbar__icon i { display: block; }
+  .payment-method-tab i { vertical-align: middle; }
+</style>
 </body>
 </html>

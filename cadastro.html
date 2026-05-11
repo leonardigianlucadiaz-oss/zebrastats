@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/main.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 </head>
 <body>
   <div class="phone">
@@ -68,8 +69,8 @@
                   style="padding-right:44px;"
                 />
                 <button type="button" class="toggle-pass" data-target="password"
-                  style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:1.1rem;color:var(--gray);">
-                  👁
+                  style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--gray);display:flex;align-items:center;">
+                  <i data-lucide="eye" style="width:18px;height:18px;"></i>
                 </button>
               </div>
               <!-- Barra de força da senha -->
@@ -106,11 +107,11 @@
             <div class="form-group">
               <label class="form-label">Seu time do coração (opcional)</label>
               <div class="scroll-x" style="padding:4px 0;">
-                <button type="button" class="team-chip active" data-team="Flamengo">🔴 Flamengo</button>
-                <button type="button" class="team-chip" data-team="Palmeiras">🟢 Palmeiras</button>
-                <button type="button" class="team-chip" data-team="Corinthians">⚫ Corinthians</button>
-                <button type="button" class="team-chip" data-team="São Paulo">🔴 São Paulo</button>
-                <button type="button" class="team-chip" data-team="Outro">➕ Outro</button>
+                <button type="button" class="team-chip active" data-team="Flamengo"><span class="team-dot" style="background:#CC1A1A;"></span>Flamengo</button>
+                <button type="button" class="team-chip" data-team="Palmeiras"><span class="team-dot" style="background:#1A7A1A;"></span>Palmeiras</button>
+                <button type="button" class="team-chip" data-team="Corinthians"><span class="team-dot" style="background:#444;"></span>Corinthians</button>
+                <button type="button" class="team-chip" data-team="São Paulo"><span class="team-dot" style="background:#CC1A1A;"></span>São Paulo</button>
+                <button type="button" class="team-chip" data-team="Outro"><i data-lucide="plus" style="width:12px;height:12px;vertical-align:middle;margin-right:2px;"></i>Outro</button>
               </div>
             </div>
 
@@ -136,6 +137,14 @@
   </div>
 
   <style>
+    .team-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 6px;
+      flex-shrink: 0;
+    }
     .team-chip {
       flex-shrink: 0;
       padding: 7px 14px;
@@ -164,7 +173,8 @@
       btn.addEventListener('click', function() {
         const input = document.getElementById(this.dataset.target);
         input.type = input.type === 'password' ? 'text' : 'password';
-        this.textContent = input.type === 'password' ? '👁' : '🙈';
+        this.innerHTML = `<i data-lucide="${input.type === 'password' ? 'eye' : 'eye-off'}" style="width:18px;height:18px;"></i>`;
+        lucide.createIcons();
       });
     });
 
@@ -248,6 +258,8 @@
         this.style.borderColor = '';
       });
     });
+
+    lucide.createIcons();
   </script>
 </body>
 </html>

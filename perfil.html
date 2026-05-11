@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/main.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 </head>
 <body>
 <div class="phone">
@@ -16,8 +17,8 @@
   <nav class="navbar">
     <a href="home.html" class="navbar__brand">Zebra<span>Stats</span></a>
     <div class="navbar__actions">
-      <a href="notificacoes.html" class="navbar__icon" title="Notificações">🔔</a>
-      <a href="busca.html" class="navbar__icon" title="Buscar">🔍</a>
+      <a href="notificacoes.html" class="navbar__icon" title="Notificações"><i data-lucide="bell" style="width:18px;height:18px;"></i></a>
+      <a href="busca.html" class="navbar__icon" title="Buscar"><i data-lucide="search" style="width:18px;height:18px;"></i></a>
     </div>
   </nav>
 
@@ -32,7 +33,7 @@
           <span class="badge badge--free" id="planBadge">FREE</span>
         </div>
       </div>
-      <a href="#editarDados" class="navbar__icon" title="Editar perfil" style="font-size:0.875rem;">✏️</a>
+      <a href="#editarDados" class="navbar__icon" onclick="openModal('editDadosModal');return false;" title="Editar perfil"><i data-lucide="pencil" style="width:18px;height:18px;"></i></a>
     </div>
 
     <!-- STATS RÁPIDOS -->
@@ -63,7 +64,7 @@
     <div style="background:var(--card);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
 
       <a id="editarDados" href="#" class="profile-menu-item" onclick="openModal('editDadosModal');return false;">
-        <div class="profile-menu-item__icon">👤</div>
+        <div class="profile-menu-item__icon"><i data-lucide="user" style="width:18px;height:18px;"></i></div>
         <div class="profile-menu-item__text">
           <div class="profile-menu-item__label">Editar Dados</div>
           <div class="profile-menu-item__sub">Nome, e-mail e foto</div>
@@ -72,7 +73,7 @@
       </a>
 
       <a href="#" class="profile-menu-item" onclick="openModal('senhaModal');return false;">
-        <div class="profile-menu-item__icon">🔑</div>
+        <div class="profile-menu-item__icon"><i data-lucide="key" style="width:18px;height:18px;"></i></div>
         <div class="profile-menu-item__text">
           <div class="profile-menu-item__label">Alterar Senha</div>
           <div class="profile-menu-item__sub">Senha atual e nova senha</div>
@@ -81,7 +82,7 @@
       </a>
 
       <a href="notificacoes.html" class="profile-menu-item">
-        <div class="profile-menu-item__icon">🔔</div>
+        <div class="profile-menu-item__icon"><i data-lucide="bell" style="width:18px;height:18px;"></i></div>
         <div class="profile-menu-item__text">
           <div class="profile-menu-item__label">Notificações</div>
           <div class="profile-menu-item__sub">Gerenciar alertas e avisos</div>
@@ -95,7 +96,7 @@
     <div style="background:var(--card);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
 
       <a href="time.html" class="profile-menu-item">
-        <div class="profile-menu-item__icon">⭐</div>
+        <div class="profile-menu-item__icon"><i data-lucide="star" style="width:18px;height:18px;"></i></div>
         <div class="profile-menu-item__text">
           <div class="profile-menu-item__label">Times Favoritos</div>
           <div class="profile-menu-item__sub" id="favTeamsCount">Flamengo, Palmeiras + 2</div>
@@ -104,7 +105,7 @@
       </a>
 
       <a href="liga.html" class="profile-menu-item">
-        <div class="profile-menu-item__icon">🏆</div>
+        <div class="profile-menu-item__icon"><i data-lucide="trophy" style="width:18px;height:18px;"></i></div>
         <div class="profile-menu-item__text">
           <div class="profile-menu-item__label">Ligas Favoritas</div>
           <div class="profile-menu-item__sub">Brasileirão, Premier League</div>
@@ -113,7 +114,7 @@
       </a>
 
       <a href="zebras.html" class="profile-menu-item">
-        <div class="profile-menu-item__icon">🦓</div>
+        <div class="profile-menu-item__icon"><i data-lucide="activity" style="width:18px;height:18px;"></i></div>
         <div class="profile-menu-item__text">
           <div class="profile-menu-item__label">Zebras Salvas</div>
           <div class="profile-menu-item__sub">Partidas marcadas para revisitar</div>
@@ -127,7 +128,7 @@
     <div style="background:var(--card);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
 
       <div class="profile-menu-item" id="planRow" style="cursor:default;">
-        <div class="profile-menu-item__icon" style="background:var(--gold-dim);color:var(--gold);">👑</div>
+        <div class="profile-menu-item__icon" style="background:var(--gold-dim);color:var(--gold);"><i data-lucide="crown" style="width:18px;height:18px;"></i></div>
         <div class="profile-menu-item__text">
           <div class="profile-menu-item__label" id="planLabel">Plano Free</div>
           <div class="profile-menu-item__sub" id="planSub">Recursos básicos</div>
@@ -136,7 +137,7 @@
       </div>
 
       <a href="assinatura.html" class="profile-menu-item">
-        <div class="profile-menu-item__icon" style="background:var(--green-dim);color:var(--green);">🚀</div>
+        <div class="profile-menu-item__icon" style="background:var(--green-dim);color:var(--green);"><i data-lucide="zap" style="width:18px;height:18px;"></i></div>
         <div class="profile-menu-item__text">
           <div class="profile-menu-item__label" style="color:var(--green);">Mudar de Plano</div>
           <div class="profile-menu-item__sub">Ver todos os planos disponíveis</div>
@@ -145,7 +146,7 @@
       </a>
 
       <a href="#" class="profile-menu-item" onclick="showToast('📧 Histórico enviado para seu e-mail');return false;">
-        <div class="profile-menu-item__icon">🧾</div>
+        <div class="profile-menu-item__icon"><i data-lucide="receipt" style="width:18px;height:18px;"></i></div>
         <div class="profile-menu-item__text">
           <div class="profile-menu-item__label">Histórico de Pagamentos</div>
           <div class="profile-menu-item__sub">Faturas e recibos</div>
@@ -159,7 +160,7 @@
     <div style="background:var(--card);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
 
       <div class="profile-menu-item" style="cursor:default;">
-        <div class="profile-menu-item__icon">🌐</div>
+        <div class="profile-menu-item__icon"><i data-lucide="globe" style="width:18px;height:18px;"></i></div>
         <div class="profile-menu-item__text">
           <div class="profile-menu-item__label">Idioma</div>
           <div class="profile-menu-item__sub">Português (Brasil)</div>
@@ -169,7 +170,7 @@
 
       <div class="profile-menu-item" style="justify-content:space-between;">
         <div style="display:flex;align-items:center;gap:14px;">
-          <div class="profile-menu-item__icon">🌙</div>
+          <div class="profile-menu-item__icon"><i data-lucide="moon" style="width:18px;height:18px;"></i></div>
           <div class="profile-menu-item__text">
             <div class="profile-menu-item__label">Modo Escuro</div>
             <div class="profile-menu-item__sub">Padrão do aplicativo</div>
@@ -183,7 +184,7 @@
 
       <div class="profile-menu-item" style="justify-content:space-between;">
         <div style="display:flex;align-items:center;gap:14px;">
-          <div class="profile-menu-item__icon">📳</div>
+          <div class="profile-menu-item__icon"><i data-lucide="bell-ring" style="width:18px;height:18px;"></i></div>
           <div class="profile-menu-item__text">
             <div class="profile-menu-item__label">Alertas de Zebra</div>
             <div class="profile-menu-item__sub">Push em tempo real</div>
@@ -201,7 +202,7 @@
     <div style="background:var(--card);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
 
       <a href="#" class="profile-menu-item" onclick="openModal('apiKeysModal');return false;">
-        <div class="profile-menu-item__icon">🔑</div>
+        <div class="profile-menu-item__icon"><i data-lucide="key" style="width:18px;height:18px;"></i></div>
         <div class="profile-menu-item__text">
           <div class="profile-menu-item__label">Chaves de API</div>
           <div class="profile-menu-item__sub" id="apiStatusSub">Configure fontes de dados externas</div>
@@ -216,7 +217,7 @@
     <div style="background:var(--card);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
 
       <a href="#" class="profile-menu-item" onclick="openModal('feedbackModal');return false;">
-        <div class="profile-menu-item__icon">💬</div>
+        <div class="profile-menu-item__icon"><i data-lucide="message-circle" style="width:18px;height:18px;"></i></div>
         <div class="profile-menu-item__text">
           <div class="profile-menu-item__label">Enviar Feedback</div>
           <div class="profile-menu-item__sub">Sugestões e opiniões</div>
@@ -225,7 +226,7 @@
       </a>
 
       <a href="#" class="profile-menu-item" onclick="showToast('📧 Fale conosco: suporte@zebrastats.com');return false;">
-        <div class="profile-menu-item__icon">🎧</div>
+        <div class="profile-menu-item__icon"><i data-lucide="headphones" style="width:18px;height:18px;"></i></div>
         <div class="profile-menu-item__text">
           <div class="profile-menu-item__label">Central de Ajuda</div>
           <div class="profile-menu-item__sub">FAQ e atendimento</div>
@@ -234,7 +235,7 @@
       </a>
 
       <a href="#" class="profile-menu-item" onclick="showToast('🐛 Bug reportado. Obrigado!');return false;">
-        <div class="profile-menu-item__icon">🐛</div>
+        <div class="profile-menu-item__icon"><i data-lucide="bug" style="width:18px;height:18px;"></i></div>
         <div class="profile-menu-item__text">
           <div class="profile-menu-item__label">Reportar Problema</div>
           <div class="profile-menu-item__sub">Algo não está funcionando?</div>
@@ -248,7 +249,7 @@
     <div style="background:var(--card);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
 
       <a href="#" class="profile-menu-item" onclick="showToast('📄 Termos de Uso');return false;">
-        <div class="profile-menu-item__icon">📄</div>
+        <div class="profile-menu-item__icon"><i data-lucide="file-text" style="width:18px;height:18px;"></i></div>
         <div class="profile-menu-item__text">
           <div class="profile-menu-item__label">Termos de Uso</div>
         </div>
@@ -256,7 +257,7 @@
       </a>
 
       <a href="#" class="profile-menu-item" onclick="showToast('🔒 Política de Privacidade');return false;">
-        <div class="profile-menu-item__icon">🔒</div>
+        <div class="profile-menu-item__icon"><i data-lucide="lock" style="width:18px;height:18px;"></i></div>
         <div class="profile-menu-item__text">
           <div class="profile-menu-item__label">Política de Privacidade</div>
         </div>
@@ -264,7 +265,7 @@
       </a>
 
       <div class="profile-menu-item" style="cursor:default;">
-        <div class="profile-menu-item__icon">ℹ️</div>
+        <div class="profile-menu-item__icon"><i data-lucide="info" style="width:18px;height:18px;"></i></div>
         <div class="profile-menu-item__text">
           <div class="profile-menu-item__label">Versão do App</div>
           <div class="profile-menu-item__sub">v1.0.0 · ZebraStats</div>
@@ -275,7 +276,7 @@
     <!-- SAIR -->
     <div style="padding:16px;">
       <button class="profile-menu-item profile-menu-item--red" style="border-radius:var(--radius-md);border:1px solid var(--border);" onclick="confirmLogout()">
-        <div class="profile-menu-item__icon">🚪</div>
+        <div class="profile-menu-item__icon"><i data-lucide="log-out" style="width:18px;height:18px;"></i></div>
         <div class="profile-menu-item__text">
           <div class="profile-menu-item__label">Sair da Conta</div>
         </div>
@@ -292,11 +293,11 @@
 
   <!-- BOTTOM NAV -->
   <nav class="bottom-nav">
-    <a href="home.html"   class="bottom-nav__item"><span class="bottom-nav__icon">🏠</span>Home</a>
-    <a href="zebras.html" class="bottom-nav__item"><span class="bottom-nav__icon">🦓</span>Zebras</a>
-    <a href="liga.html"   class="bottom-nav__item"><span class="bottom-nav__icon">🏆</span>Ligas</a>
-    <a href="time.html"   class="bottom-nav__item"><span class="bottom-nav__icon">⭐</span>Times</a>
-    <a href="perfil.html" class="bottom-nav__item active"><span class="bottom-nav__icon">👤</span>Perfil</a>
+    <a href="home.html"   class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="home"></i></span>Home</a>
+    <a href="zebras.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="activity"></i></span>Zebras</a>
+    <a href="liga.html"   class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="trophy"></i></span>Ligas</a>
+    <a href="time.html"   class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="star"></i></span>Times</a>
+    <a href="perfil.html" class="bottom-nav__item active"><span class="bottom-nav__icon"><i data-lucide="user"></i></span>Perfil</a>
   </nav>
 </div>
 
@@ -514,6 +515,12 @@
   // ── PREENCHE CAMPOS COM DADOS SALVOS ─────────────────────────
   document.getElementById('editName').value  = document.getElementById('userName').textContent;
   document.getElementById('editEmail').value = document.getElementById('userEmail').textContent;
+  lucide.createIcons();
 </script>
+<style>
+  .bottom-nav__icon i { width: 20px; height: 20px; display: block; }
+  .navbar__icon i { display: block; }
+  .profile-menu-item__icon i { display: block; }
+</style>
 </body>
 </html>
