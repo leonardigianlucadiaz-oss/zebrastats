@@ -8,15 +8,16 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/main.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 </head>
 <body>
   <div class="phone">
 
     <!-- HEADER -->
     <nav class="navbar">
-      <button onclick="history.back()" class="navbar__icon" style="background:none;border:none;cursor:pointer;font-size:1.25rem;color:var(--white);">←</button>
+      <button onclick="history.back()" class="navbar__icon" style="background:none;border:none;cursor:pointer;color:var(--white);display:flex;align-items:center;justify-content:center;"><i data-lucide="arrow-left" style="width:20px;height:20px;"></i></button>
       <span style="font-size:1rem;font-weight:600;" id="navTitle">Perfil do Time</span>
-      <button id="favBtn" class="navbar__icon" title="Favoritar" style="font-size:1.1rem;">☆</button>
+      <button id="favBtn" class="navbar__icon" title="Favoritar"><i data-lucide="star" style="width:18px;height:18px;"></i></button>
     </nav>
 
     <!-- HERO DO TIME -->
@@ -169,11 +170,11 @@
 
     <!-- BOTTOM NAV -->
     <nav class="bottom-nav">
-      <a href="home.html"   class="bottom-nav__item"><span class="bottom-nav__icon">🏠</span>Home</a>
-      <a href="zebras.html" class="bottom-nav__item"><span class="bottom-nav__icon">🦓</span>Zebras</a>
-      <a href="liga.html"   class="bottom-nav__item"><span class="bottom-nav__icon">🏆</span>Ligas</a>
-      <a href="time.html"   class="bottom-nav__item active"><span class="bottom-nav__icon">⭐</span>Times</a>
-      <a href="perfil.html" class="bottom-nav__item"><span class="bottom-nav__icon">👤</span>Perfil</a>
+      <a href="home.html"   class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="home"></i></span>Home</a>
+      <a href="zebras.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="activity"></i></span>Zebras</a>
+      <a href="liga.html"   class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="trophy"></i></span>Ligas</a>
+      <a href="time.html"   class="bottom-nav__item active"><span class="bottom-nav__icon"><i data-lucide="star"></i></span>Times</a>
+      <a href="perfil.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="user"></i></span>Perfil</a>
     </nav>
 
   </div>
@@ -388,16 +389,20 @@
 
       // Reset favorite
       isFavorited = false;
-      document.getElementById('favBtn').textContent = '☆';
+      document.getElementById('favBtn').innerHTML = '<i data-lucide="star" style="width:18px;height:18px;"></i>';
+      document.getElementById('favBtn').style.color = '';
+      lucide.createIcons();
     }
 
     // ── FAVORITE BUTTON ───────────────────────────────────
     document.getElementById('favBtn').addEventListener('click', function() {
       isFavorited = !isFavorited;
-      this.textContent = isFavorited ? '★' : '☆';
-      this.style.color = isFavorited ? 'var(--gold)' : '';
+      this.innerHTML = isFavorited
+        ? '<i data-lucide="star" style="width:18px;height:18px;fill:var(--gold);color:var(--gold);"></i>'
+        : '<i data-lucide="star" style="width:18px;height:18px;"></i>';
+      lucide.createIcons();
       showToast(isFavorited
-        ? `⭐ ${TEAMS[currentTeam].name} adicionado aos favoritos`
+        ? `${TEAMS[currentTeam].name} adicionado aos favoritos`
         : `${TEAMS[currentTeam].name} removido dos favoritos`
       );
     });
@@ -438,6 +443,11 @@
       } catch(e) { console.warn('SDB team search error:', e); }
     }
     initRealData();
+    lucide.createIcons();
   </script>
+  <style>
+    .bottom-nav__icon i { width: 20px; height: 20px; display: block; }
+    .navbar__icon i { display: block; }
+  </style>
 </body>
 </html>

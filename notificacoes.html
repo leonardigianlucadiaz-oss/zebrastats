@@ -8,13 +8,14 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/main.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 </head>
 <body>
 <div class="phone">
 
   <!-- NAVBAR -->
   <nav class="navbar">
-    <button onclick="history.back()" style="background:none;border:none;color:var(--gray);font-size:1.375rem;cursor:pointer;padding:4px;line-height:1;">←</button>
+    <button onclick="history.back()" class="navbar__icon" style="background:none;border:none;cursor:pointer;color:var(--white);display:flex;align-items:center;justify-content:center;"><i data-lucide="arrow-left" style="width:20px;height:20px;"></i></button>
     <span style="font-size:1rem;font-weight:700;flex:1;text-align:center;">Notificações</span>
     <button id="markAllBtn" style="background:none;border:none;color:var(--green);font-size:0.75rem;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;">Marcar lidas</button>
   </nav>
@@ -34,11 +35,11 @@
 
   <!-- BOTTOM NAV -->
   <nav class="bottom-nav">
-    <a href="home.html"   class="bottom-nav__item"><span class="bottom-nav__icon">🏠</span>Home</a>
-    <a href="zebras.html" class="bottom-nav__item"><span class="bottom-nav__icon">🦓</span>Zebras</a>
-    <a href="liga.html"   class="bottom-nav__item"><span class="bottom-nav__icon">🏆</span>Ligas</a>
-    <a href="time.html"   class="bottom-nav__item"><span class="bottom-nav__icon">⭐</span>Times</a>
-    <a href="perfil.html" class="bottom-nav__item"><span class="bottom-nav__icon">👤</span>Perfil</a>
+    <a href="home.html"   class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="home"></i></span>Home</a>
+    <a href="zebras.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="activity"></i></span>Zebras</a>
+    <a href="liga.html"   class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="trophy"></i></span>Ligas</a>
+    <a href="time.html"   class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="star"></i></span>Times</a>
+    <a href="perfil.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="user"></i></span>Perfil</a>
   </nav>
 </div>
 
@@ -142,6 +143,11 @@
 
   // ── INIT ─────────────────────────────────────────────────────
   renderNotifs();
+  lucide.createIcons();
 </script>
+<style>
+  .bottom-nav__icon i { width: 20px; height: 20px; display: block; }
+  .navbar__icon i { display: block; }
+</style>
 </body>
 </html>

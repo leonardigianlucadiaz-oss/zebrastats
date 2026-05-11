@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/main.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 </head>
 <body>
 <div class="phone">
@@ -17,8 +18,8 @@
     <a href="home.html" class="navbar__brand">Zebra<span>Stats</span></a>
     <div class="navbar__actions">
       <span class="badge badge--free" id="planBadge">FREE</span>
-      <a href="busca.html" class="navbar__icon" title="Buscar">🔍</a>
-      <a href="notificacoes.html" class="navbar__icon" title="Notificações">🔔</a>
+      <a href="busca.html" class="navbar__icon" title="Buscar"><i data-lucide="search" style="width:18px;height:18px;"></i></a>
+      <a href="notificacoes.html" class="navbar__icon" title="Notificações"><i data-lucide="bell" style="width:18px;height:18px;"></i></a>
     </div>
   </nav>
 
@@ -52,22 +53,22 @@
 
     <!-- LOCK BANNER PRO -->
     <div class="lock-banner" onclick="window.location.href='assinatura.html'">
-      <span style="font-size:1.2rem;">🔒</span>
+      <i data-lucide="lock" style="width:20px;height:20px;color:var(--gold);flex-shrink:0;"></i>
       <div>
         <div style="font-size:0.875rem;font-weight:600;">Histórico completo + alertas</div>
         <div style="font-size:0.75rem;font-weight:400;color:var(--gray);margin-top:2px;">Assine o Pro para acesso ilimitado</div>
       </div>
-      <span style="margin-left:auto;color:var(--green);">→</span>
+      <i data-lucide="arrow-right" style="margin-left:auto;color:var(--green);width:16px;height:16px;flex-shrink:0;"></i>
     </div>
   </main>
 
   <!-- BOTTOM NAV -->
   <nav class="bottom-nav">
-    <a href="home.html"   class="bottom-nav__item"><span class="bottom-nav__icon">🏠</span>Home</a>
-    <a href="zebras.html" class="bottom-nav__item active"><span class="bottom-nav__icon">🦓</span>Zebras</a>
-    <a href="liga.html"   class="bottom-nav__item"><span class="bottom-nav__icon">🏆</span>Ligas</a>
-    <a href="time.html"   class="bottom-nav__item"><span class="bottom-nav__icon">⭐</span>Times</a>
-    <a href="perfil.html" class="bottom-nav__item"><span class="bottom-nav__icon">👤</span>Perfil</a>
+    <a href="home.html"   class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="home"></i></span>Home</a>
+    <a href="zebras.html" class="bottom-nav__item active"><span class="bottom-nav__icon"><i data-lucide="activity"></i></span>Zebras</a>
+    <a href="liga.html"   class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="trophy"></i></span>Ligas</a>
+    <a href="time.html"   class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="star"></i></span>Times</a>
+    <a href="perfil.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="user"></i></span>Perfil</a>
   </nav>
 </div>
 
@@ -352,6 +353,11 @@
   }
 
   initRealData();
+  lucide.createIcons();
 </script>
+<style>
+  .bottom-nav__icon i { width: 20px; height: 20px; display: block; }
+  .navbar__icon i { display: block; }
+</style>
 </body>
 </html>
