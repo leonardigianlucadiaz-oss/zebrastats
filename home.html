@@ -156,156 +156,12 @@
   <script src="js/api.js"></script>
   <script src="js/main.js"></script>
   <script>
-    // ── DATA ──────────────────────────────────────────────
-    const FAV_TEAMS = [
-      { id: 'fla', abbr: 'FLA', name: 'Flamengo',  color: '#CC1A1A', active: true  },
-      { id: 'pal', abbr: 'PAL', name: 'Palmeiras', color: '#1A7A1A', active: false },
-      { id: 'cor', abbr: 'COR', name: 'Corinthians',color:'#222',   active: false },
-      { id: 'sao', abbr: 'SPF', name: 'São Paulo', color: '#CC1A1A', active: false },
-    ];
+    // ── STATE ──────────────────────────────────────────────
+    let LIVE_GAMES     = [];
+    let UPCOMING_GAMES = [];
+    let activeLeagueFilter = 'all';
 
-    const LIVE_GAMES = [
-      { home:'Flamengo', away:'Palmeiras', hs:1, as:2, min:"67'", league:'Brasileirão · Série A', league_id:'BRA', zebra:true  },
-      { home:'Man City',  away:'Arsenal',  hs:0, as:1, min:"34'", league:'Premier League',         league_id:'ENG', zebra:false },
-      { home:'Real Mad.', away:'Barcelona',hs:2, as:2, min:"82'", league:'La Liga',                league_id:'ESP', zebra:false },
-      { home:'Juventus',  away:'Inter',    hs:0, as:2, min:"51'", league:'Serie A',                league_id:'ITA', zebra:true  },
-    ];
-
-    const UPCOMING_GAMES = [
-      { home:'PSG',     away:'Lyon',     time:'20:00', league:'Ligue 1',         league_id:'FRA', favProb:'68% fav' },
-      { home:'Bayern',  away:'Dortmund', time:'21:30', league:'Bundesliga',      league_id:'GER', favProb:'74% fav' },
-      { home:'Chelsea', away:'Liverpool',time:'22:00', league:'Premier League',  league_id:'ENG', favProb:'52% fav' },
-    ];
-
-    const ZEBRA_RANKING = [
-      { pos:1, name:'Flamengo',   stars:'★★★★★', badge:'5.0', color:'var(--green)' },
-      { pos:2, name:'Torino FC',  stars:'★★★½☆', badge:'3.5', color:'var(--gold)'  },
-      { pos:3, name:'Getafe',     stars:'★★★☆☆', badge:'3.0', color:'var(--gold)'  },
-    ];
-
-    // ── RENDER FAV TEAMS BAR ──────────────────────────────
-    const bar = document.getElementById('favTeamsBar');
-    FAV_TEAMS.forEach(t => {
-      const pill = document.createElement('div');
-      pill.className = 'team-pill';
-      pill.innerHTML = `
-        <a href="time.html" class="team-pill__avatar ${t.active ? 'active' : ''}"
-           style="${t.active ? `border-color:${t.color};` : ''}"
-           title="${t.name}">
-          ${t.abbr}
-        </a>
-        <span class="team-pill__name">${t.name}</span>
-      `;
-      bar.appendChild(pill);
-    });
-
-    // Add button
-    const addPill = document.createElement('div');
-    addPill.className = 'team-pill';
-    addPill.innerHTML = `
-      <button class="team-pill__avatar" style="border-style:dashed;font-size:1.25rem;" title="Adicionar time">+</button>
-      <span class="team-pill__name">Adicionar</span>
-    `;
-    addPill.querySelector('button').addEventListener('click', () => showToast('⭐ Busque um time para favoritar'));
-    bar.appendChild(addPill);
-
-    // ── RENDER LIVE GAMES ─────────────────────────────────
-    function renderLive(filter = 'all') {
-      const container = document.getElementById('liveGames');
-      container.innerHTML = '';
-      const games = filter === 'all' ? LIVE_GAMES : LIVE_GAMES.filter(g => g.league_id === filter);
-
-      if (!games.length) {
-        container.innerHTML = `<p class="text-gray text-sm" style="text-align:center;padding:16px;">Nenhum jogo ao vivo nessa liga agora.</p>`;
-        return;
-      }
-
-      games.forEach(g => {
-        const card = document.createElement('div');
-        card.className = `game-card${g.zebra ? ' game-card--zebra' : ''}`;
-        card.innerHTML = `
-          <div class="game-card__league" style="display:flex;align-items:center;justify-content:space-between;">
-            <span>${g.league}</span>
-            <span class="badge badge--live">${g.min}</span>
-          </div>
-          <div class="game-card__match">
-            <span class="game-card__team">${g.home}</span>
-            <span class="game-card__score">${g.hs} – ${g.as}</span>
-            <span class="game-card__team game-card__team--away">${g.away}</span>
-          </div>
-          ${g.zebra ? `
-          <div class="game-card__footer">
-            <span class="badge badge--zebra">🦓 ZEBRA ALERT</span>
-            <span class="text-xs text-gray">Resultado improvável em andamento</span>
-          </div>` : ''}
-        `;
-        card.addEventListener('click', () => window.location.href = 'time.html');
-        container.appendChild(card);
-      });
-    }
-
-    // ── RENDER UPCOMING GAMES ─────────────────────────────
-    function renderUpcoming(filter = 'all') {
-      const container = document.getElementById('upcomingGames');
-      container.innerHTML = '';
-      const games = filter === 'all' ? UPCOMING_GAMES : UPCOMING_GAMES.filter(g => g.league_id === filter);
-
-      if (!games.length) {
-        container.innerHTML = `<p class="text-gray text-sm" style="text-align:center;padding:16px;">Nenhum jogo agendado nessa liga.</p>`;
-        return;
-      }
-
-      games.forEach(g => {
-        const card = document.createElement('div');
-        card.className = 'game-card';
-        card.innerHTML = `
-          <div class="game-card__league" style="display:flex;align-items:center;justify-content:space-between;">
-            <span>${g.league}</span>
-            <span style="color:var(--gold);font-size:0.8125rem;font-weight:600;">${g.time}</span>
-          </div>
-          <div class="game-card__match">
-            <span class="game-card__team">${g.home}</span>
-            <span class="game-card__score" style="font-size:0.875rem;color:var(--gray);">vs</span>
-            <span class="game-card__team game-card__team--away">${g.away}</span>
-          </div>
-          <div class="game-card__footer">
-            <span class="text-xs text-gray">${g.favProb}</span>
-          </div>
-        `;
-        container.appendChild(card);
-      });
-    }
-
-    // ── RENDER ZEBRA RANKING ──────────────────────────────
-    const rankContainer = document.getElementById('zebraRanking');
-    ZEBRA_RANKING.forEach(r => {
-      const row = document.createElement('div');
-      row.className = 'ranking-row';
-      row.innerHTML = `
-        <span class="ranking-row__pos">#${r.pos}</span>
-        <span class="ranking-row__name">${r.name}</span>
-        <span class="ranking-row__stars">${r.stars}</span>
-        <span class="badge ranking-row__badge" style="background:${r.color}22;color:${r.color};border:1px solid ${r.color}44;">${r.badge}</span>
-      `;
-      row.addEventListener('click', () => window.location.href = 'time.html');
-      rankContainer.appendChild(row);
-    });
-
-    // ── LEAGUE FILTER ─────────────────────────────────────
-    document.querySelectorAll('.league-pill').forEach(pill => {
-      pill.addEventListener('click', function() {
-        document.querySelectorAll('.league-pill').forEach(p => p.classList.remove('active'));
-        this.classList.add('active');
-        const league = this.dataset.league;
-        renderLive(league);
-        renderUpcoming(league);
-      });
-    });
-
-    // ── NOTIFICATION BUTTON ───────────────────────────────
-    document.getElementById('notifBtn').addEventListener('click', () => {
-      showToast('🔔 Notificações ativadas');
-    });
+    const LEAGUE_NAMES = { BRA:'Brasileirão', ENG:'Premier League', ESP:'La Liga', ITA:'Serie A', GER:'Bundesliga', FRA:'Ligue 1' };
 
     // ── SKELETON HELPERS ──────────────────────────────────
     function showSkeletonGames(containerId, count) {
@@ -329,59 +185,246 @@
       }
     }
 
-    // ── INITIAL RENDER ────────────────────────────────────
-    showSkeletonGames('liveGames', 2);
-    showSkeletonGames('upcomingGames', 3);
-    setTimeout(() => { renderLive(); renderUpcoming(); }, 600);
-
-    // ── API REAL DATA ─────────────────────────────────────
-    async function initRealData() {
-      const content = document.querySelector('.content');
-      if (!ZebraAPI.isConfigured.footballData()) {
-        const banner = document.createElement('div');
-        banner.style.cssText = 'background:rgba(255,200,50,0.12);border:1px solid rgba(255,200,50,0.3);border-radius:var(--radius-md);padding:10px 14px;margin-bottom:16px;font-size:0.8125rem;color:var(--gold);display:flex;align-items:center;gap:8px;';
-        banner.innerHTML = `⚠️ <span>Configure sua chave Football-Data.org em <a href="perfil.html" style="color:var(--gold);text-decoration:underline;">Perfil → Integração de Dados</a> para dados ao vivo.</span>`;
-        content.insertBefore(banner, content.firstChild);
-        return;
-      }
-      const banner = document.createElement('div');
-      banner.style.cssText = 'background:rgba(46,230,92,0.08);border:1px solid rgba(46,230,92,0.2);border-radius:var(--radius-md);padding:10px 14px;margin-bottom:16px;font-size:0.8125rem;color:var(--green);display:flex;align-items:center;gap:8px;';
-      banner.innerHTML = `✓ <span>Dados ao vivo ativos — Football-Data.org</span>`;
-      content.insertBefore(banner, content.firstChild);
-
-      const leagues = ['ENG','ESP','ITA','GER','BRA'];
-      try {
-        const [liveResults, upcomingResults] = await Promise.all([
-          Promise.all(leagues.map(lid => ZebraAPI.footballData.getMatches(lid,'IN_PLAY',4).catch(()=>[]))),
-          Promise.all(leagues.map(lid => ZebraAPI.footballData.getMatches(lid,'SCHEDULED',4).catch(()=>[]))),
-        ]);
-
-        const liveMatches = liveResults.flatMap(r => r?.matches || []).map(ZebraAPI.transform.fdMatch).filter(Boolean);
-        const upcomingMatches = upcomingResults.flatMap(r => r?.matches || []).map(ZebraAPI.transform.fdMatch).filter(Boolean);
-
-        if (liveMatches.length) {
-          LIVE_GAMES.length = 0;
-          liveMatches.forEach(m => LIVE_GAMES.push({
-            league: m.home.split(' ')[0], league_id: 'all',
-            home: m.home, away: m.away,
-            hs: m.hs ?? 0, as: m.as ?? 0,
-            min: m.time || '🔴', zebra: false,
-          }));
-          renderLive();
-        }
-
-        if (upcomingMatches.length) {
-          UPCOMING_GAMES.length = 0;
-          upcomingMatches.forEach(m => UPCOMING_GAMES.push({
-            league: m.home.split(' ')[0], league_id: 'all',
-            home: m.home, away: m.away,
-            time: m.time || '—', favProb: '',
-          }));
-          renderUpcoming();
-        }
-      } catch(e) { console.warn('ZebraStats API error:', e); }
+    function emptyState(containerId, msg) {
+      document.getElementById(containerId).innerHTML =
+        `<p class="text-gray text-sm" style="text-align:center;padding:16px;">${msg}</p>`;
     }
-    initRealData();
+
+    // ── RENDER LIVE GAMES ─────────────────────────────────
+    function renderLive() {
+      const container = document.getElementById('liveGames');
+      container.innerHTML = '';
+      const games = activeLeagueFilter === 'all'
+        ? LIVE_GAMES
+        : LIVE_GAMES.filter(g => g.league_id === activeLeagueFilter);
+
+      if (!games.length) { emptyState('liveGames', 'Nenhum jogo ao vivo agora.'); return; }
+
+      games.forEach(g => {
+        const card = document.createElement('div');
+        card.className = `game-card${g.zebra ? ' game-card--zebra' : ''}`;
+        const homeCrest = g.homeCrest ? `<img src="${g.homeCrest}" style="width:18px;height:18px;object-fit:contain;flex-shrink:0;" onerror="this.style.display='none'">` : '';
+        const awayCrest = g.awayCrest ? `<img src="${g.awayCrest}" style="width:18px;height:18px;object-fit:contain;flex-shrink:0;" onerror="this.style.display='none'">` : '';
+        card.innerHTML = `
+          <div class="game-card__league" style="display:flex;align-items:center;justify-content:space-between;">
+            <span>${g.league}</span>
+            <span class="badge badge--live">${g.min}</span>
+          </div>
+          <div class="game-card__match">
+            <span class="game-card__team" style="display:flex;align-items:center;gap:5px;">${homeCrest}${g.home}</span>
+            <span class="game-card__score">${g.hs} – ${g.as}</span>
+            <span class="game-card__team game-card__team--away" style="display:flex;align-items:center;justify-content:flex-end;gap:5px;">${g.away}${awayCrest}</span>
+          </div>
+          ${g.zebra ? `<div class="game-card__footer"><span class="badge badge--zebra">🦓 ZEBRA ALERT</span></div>` : ''}`;
+        card.addEventListener('click', () => window.location.href = 'partida.html');
+        container.appendChild(card);
+      });
+    }
+
+    // ── RENDER UPCOMING GAMES ─────────────────────────────
+    function renderUpcoming() {
+      const container = document.getElementById('upcomingGames');
+      container.innerHTML = '';
+      const games = activeLeagueFilter === 'all'
+        ? UPCOMING_GAMES
+        : UPCOMING_GAMES.filter(g => g.league_id === activeLeagueFilter);
+
+      if (!games.length) { emptyState('upcomingGames', 'Nenhum jogo agendado.'); return; }
+
+      games.forEach(g => {
+        const card = document.createElement('div');
+        card.className = 'game-card';
+        const homeCrest = g.homeCrest ? `<img src="${g.homeCrest}" style="width:18px;height:18px;object-fit:contain;flex-shrink:0;" onerror="this.style.display='none'">` : '';
+        const awayCrest = g.awayCrest ? `<img src="${g.awayCrest}" style="width:18px;height:18px;object-fit:contain;flex-shrink:0;" onerror="this.style.display='none'">` : '';
+        card.innerHTML = `
+          <div class="game-card__league" style="display:flex;align-items:center;justify-content:space-between;">
+            <span>${g.league}</span>
+            <span style="color:var(--gold);font-size:0.8125rem;font-weight:600;">${g.time}</span>
+          </div>
+          <div class="game-card__match">
+            <span class="game-card__team" style="display:flex;align-items:center;gap:5px;">${homeCrest}${g.home}</span>
+            <span class="game-card__score" style="font-size:0.875rem;color:var(--gray);">vs</span>
+            <span class="game-card__team game-card__team--away" style="display:flex;align-items:center;justify-content:flex-end;gap:5px;">${g.away}${awayCrest}</span>
+          </div>`;
+        card.addEventListener('click', () => window.location.href = 'partida.html');
+        container.appendChild(card);
+      });
+    }
+
+    // ── FAV TEAMS BAR ─────────────────────────────────────
+    async function initFavBar() {
+      const bar = document.getElementById('favTeamsBar');
+      bar.innerHTML = '';
+
+      const favIds   = getFavorites();
+      const favMeta  = getFavTeamsData();
+      const favNames = favIds.map(id => favMeta[id]?.name).filter(Boolean);
+
+      // Se não tem favoritos, sugerir times populares
+      const defaultTeams = ['Flamengo','Palmeiras','Corinthians'];
+      const teamsToShow  = favNames.length ? favNames : defaultTeams;
+
+      for (const name of teamsToShow) {
+        const pill = document.createElement('div');
+        pill.className = 'team-pill';
+        pill.innerHTML = `
+          <div class="team-pill__avatar" style="background:var(--card2);">
+            <div class="skel" style="width:100%;height:100%;border-radius:50%;"></div>
+          </div>
+          <span class="team-pill__name">${name}</span>`;
+        bar.appendChild(pill);
+
+        // Busca escudo no SDB
+        ZebraAPI.sportsDb.searchTeam(name).then(res => {
+          const team = res?.teams?.[0];
+          const logo = team?.strTeamBadge || team?.strBadge || '';
+          const avatar = pill.querySelector('.team-pill__avatar');
+          avatar.innerHTML = logo
+            ? `<img src="${logo}" alt="${name}" style="width:36px;height:36px;object-fit:contain;" onerror="this.parentElement.textContent='${name.substring(0,3).toUpperCase()}';">`
+            : name.substring(0,3).toUpperCase();
+          avatar.style.background = logo ? 'transparent' : '';
+          pill.querySelector('.team-pill__name').textContent = team?.strTeam || name;
+          pill.addEventListener('click', () => window.location.href = 'time.html');
+        }).catch(() => {});
+      }
+
+      // Botão adicionar
+      const addPill = document.createElement('div');
+      addPill.className = 'team-pill';
+      addPill.innerHTML = `
+        <button class="team-pill__avatar" style="border-style:dashed;font-size:1.4rem;background:none;" title="Adicionar time">+</button>
+        <span class="team-pill__name">Adicionar</span>`;
+      addPill.querySelector('button').addEventListener('click', () => window.location.href = 'busca.html');
+      bar.appendChild(addPill);
+    }
+
+    // ── LEAGUE PILLS COM LOGOS SDB ────────────────────────
+    async function initLeaguePills() {
+      const pills = document.querySelectorAll('.league-pill[data-league]');
+      const SDB_LIDS = { BRA:4351, ENG:4328, ESP:4335, ITA:4332, GER:4331 };
+      pills.forEach(async pill => {
+        const lid = pill.dataset.league;
+        if (lid === 'all' || !SDB_LIDS[lid]) return;
+        try {
+          const data = await ZebraAPI.sportsDb.getLeagueInfo(lid);
+          const league = data?.leagues?.[0];
+          const badge = league?.strBadge || league?.strLogo || '';
+          if (badge) {
+            const img = document.createElement('img');
+            img.src = badge;
+            img.style.cssText = 'width:16px;height:16px;object-fit:contain;vertical-align:middle;margin-right:5px;';
+            img.onerror = () => img.remove();
+            pill.prepend(img);
+            // remove emoji text flag at start if present
+            pill.childNodes.forEach(n => { if (n.nodeType === 3) n.textContent = n.textContent.replace(/^\s*[\uD83C][\uDDE6-\uDDFF][\uD83C][\uDDE6-\uDDFF]\s*/, ''); });
+          }
+        } catch {}
+      });
+    }
+
+    // ── LEAGUE FILTER ─────────────────────────────────────
+    document.querySelectorAll('.league-pill').forEach(pill => {
+      pill.addEventListener('click', function() {
+        document.querySelectorAll('.league-pill').forEach(p => p.classList.remove('active'));
+        this.classList.add('active');
+        activeLeagueFilter = this.dataset.league;
+        renderLive();
+        renderUpcoming();
+      });
+    });
+
+    // ── INIT GAMES FROM API ───────────────────────────────
+    async function initGames() {
+      showSkeletonGames('liveGames', 2);
+      showSkeletonGames('upcomingGames', 3);
+
+      const LEAGUES = ['ENG','ESP','ITA','GER','BRA'];
+      const LEAGUE_LABEL = { BRA:'Brasileirão', ENG:'Premier League', ESP:'La Liga', ITA:'Serie A', GER:'Bundesliga', FRA:'Ligue 1' };
+
+      let gotLive = false, gotUpcoming = false;
+
+      // ── RapidAPI — jogos ao vivo ──────────────────────────
+      if (ZebraAPI.isConfigured.rapidApi()) {
+        try {
+          const rapid = await ZebraAPI.rapidApi.getLiveMatches();
+          const matches = rapid?.response || rapid?.data || [];
+          if (Array.isArray(matches) && matches.length) {
+            matches.slice(0,8).forEach(m => {
+              LIVE_GAMES.push({
+                home: m.homeTeam?.name || m.home_name || '—',
+                away: m.awayTeam?.name || m.away_name || '—',
+                hs:   m.score?.home ?? m.homeScore ?? '?',
+                as:   m.score?.away ?? m.awayScore ?? '?',
+                min:  m.elapsed ? `${m.elapsed}'` : '🔴',
+                league: m.league?.name || m.competition || '—',
+                league_id: 'all',
+                homeCrest: m.homeTeam?.logo || '',
+                awayCrest: m.awayTeam?.logo || '',
+                zebra: false,
+              });
+            });
+            gotLive = true;
+          }
+        } catch(e) { console.warn('[RapidAPI] live:', e); }
+      }
+
+      // ── Football-Data.org — partidas ─────────────────────
+      if (ZebraAPI.isConfigured.footballData()) {
+        try {
+          const [liveRes, schedRes] = await Promise.all([
+            Promise.all(LEAGUES.map(l => ZebraAPI.footballData.getMatches(l,'IN_PLAY',4).catch(()=>null))),
+            Promise.all(LEAGUES.map(l => ZebraAPI.footballData.getMatches(l,'SCHEDULED',5).catch(()=>null))),
+          ]);
+
+          const fdLive = liveRes.flatMap((r,i) =>
+            (r?.matches||[]).map(m => {
+              const t = ZebraAPI.transform.fdMatch(m);
+              return t ? { ...t, league: LEAGUE_LABEL[LEAGUES[i]]||'—', league_id: LEAGUES[i] } : null;
+            }).filter(Boolean));
+
+          const fdUpcoming = schedRes.flatMap((r,i) =>
+            (r?.matches||[]).map(m => {
+              const t = ZebraAPI.transform.fdMatch(m);
+              return t ? { ...t, league: LEAGUE_LABEL[LEAGUES[i]]||'—', league_id: LEAGUES[i] } : null;
+            }).filter(Boolean));
+
+          if (fdLive.length && !gotLive) {
+            fdLive.forEach(m => LIVE_GAMES.push({ home:m.home, away:m.away, hs:m.hs??'?', as:m.as??'?', min:m.time||'🔴', league:m.league, league_id:m.league_id, homeCrest:m.homeCrest, awayCrest:m.awayCrest, zebra:false }));
+            gotLive = true;
+          }
+          if (fdUpcoming.length) {
+            fdUpcoming.slice(0,10).forEach(m => UPCOMING_GAMES.push({ home:m.home, away:m.away, time:m.time, league:m.league, league_id:m.league_id, homeCrest:m.homeCrest, awayCrest:m.awayCrest }));
+            gotUpcoming = true;
+          }
+        } catch(e) { console.warn('[FD] matches:', e); }
+      }
+
+      renderLive();
+      renderUpcoming();
+    }
+
+    // ── ZEBRA RANKING (estático com animação) ─────────────
+    const ZEBRA_RANKING = [
+      { pos:1, name:'Flamengo',  badge:'5.2', color:'var(--green)' },
+      { pos:2, name:'Torino FC', badge:'3.5', color:'var(--gold)'  },
+      { pos:3, name:'Getafe',    badge:'3.0', color:'var(--gold)'  },
+    ];
+    const rankContainer = document.getElementById('zebraRanking');
+    ZEBRA_RANKING.forEach(r => {
+      const row = document.createElement('div');
+      row.className = 'ranking-row';
+      row.innerHTML = `
+        <span class="ranking-row__pos">#${r.pos}</span>
+        <span class="ranking-row__name">${r.name}</span>
+        <span class="badge ranking-row__badge" style="background:${r.color}22;color:${r.color};border:1px solid ${r.color}44;">🦓 ${r.badge}</span>`;
+      row.addEventListener('click', () => window.location.href = 'time.html');
+      rankContainer.appendChild(row);
+    });
+
+    // ── INIT ──────────────────────────────────────────────
+    initFavBar();
+    initLeaguePills();
+    initGames();
     lucide.createIcons();
   </script>
 </body>

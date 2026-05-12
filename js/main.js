@@ -23,26 +23,30 @@ function showToast(message, duration = 2500) {
   toast._timeout = setTimeout(() => toast.classList.remove('show'), duration);
 }
 
-// ── FAVORITOS (localStorage) ───────────────────────────────────
-const FAVORITES_KEY = 'zebrastats_favorites';
+// ── FAVORITOS DE TIMES (localStorage) ────────────────────────
+const FAVORITES_KEY      = 'zebrastats_favorites';
+const FAV_TEAMS_DATA_KEY = 'zebrastats_fav_teams_data'; // {id → {name,crest,color}}
 
 function getFavorites() {
-  try {
-    return JSON.parse(localStorage.getItem(FAVORITES_KEY)) || [];
-  } catch {
-    return [];
-  }
+  try { return JSON.parse(localStorage.getItem(FAVORITES_KEY)) || []; }
+  catch { return []; }
 }
-
 function saveFavorites(favs) {
-  try {
-    localStorage.setItem(FAVORITES_KEY, JSON.stringify(favs));
-  } catch (e) {
-    console.warn('localStorage indisponível:', e);
-  }
+  try { localStorage.setItem(FAVORITES_KEY, JSON.stringify(favs)); }
+  catch (e) { console.warn('localStorage indisponível:', e); }
 }
-
-function toggleFavorite(teamId, teamName) {
+function getFavTeamsData() {
+  try { return JSON.parse(localStorage.getItem(FAV_TEAMS_DATA_KEY)) || {}; }
+  catch { return {}; }
+}
+function saveFavTeamMeta(id, meta) {
+  try {
+    const d = getFavTeamsData();
+    d[id] = meta;
+    localStorage.setItem(FAV_TEAMS_DATA_KEY, JSON.stringify(d));
+  } catch {}
+}
+function toggleFavorite(teamId, teamName, meta = {}) {
   const favs = getFavorites();
   const idx  = favs.indexOf(teamId);
   if (idx >= 0) {
@@ -50,14 +54,41 @@ function toggleFavorite(teamId, teamName) {
     showToast(`${teamName} removido dos favoritos`);
   } else {
     favs.push(teamId);
-    showToast(`⭐ ${teamName} adicionado aos favoritos`);
+    if (meta.crest || meta.color) saveFavTeamMeta(teamId, { name: teamName, ...meta });
+    showToast(`${teamName} adicionado aos favoritos!`);
   }
   saveFavorites(favs);
   return favs.includes(teamId);
 }
+function isFavorite(teamId) { return getFavorites().includes(teamId); }
 
-function isFavorite(teamId) {
-  return getFavorites().includes(teamId);
+// ── FAVORITOS DE LIGAS ────────────────────────────────────────
+const FAV_LEAGUES_KEY = 'zebrastats_fav_leagues';
+
+function getFavLeagues() {
+  try { return JSON.parse(localStorage.getItem(FAV_LEAGUES_KEY)) || []; }
+  catch { return []; }
+}
+function toggleFavLeague(lid, name) {
+  const favs = getFavLeagues();
+  const idx  = favs.indexOf(lid);
+  if (idx >= 0) {
+    favs.splice(idx, 1);
+    showToast(`${name} removida dos favoritos`);
+  } else {
+    favs.push(lid);
+    showToast(`${name} adicionada aos favoritos!`);
+  }
+  try { localStorage.setItem(FAV_LEAGUES_KEY, JSON.stringify(favs)); } catch {}
+  return favs.includes(lid);
+}
+function isFavLeague(lid) { return getFavLeagues().includes(lid); }
+
+// ── ANIMAÇÃO DE FAVORITO ──────────────────────────────────────
+function animFavBtn(btn) {
+  btn.classList.remove('fav-pop');
+  void btn.offsetWidth; // reflow
+  btn.classList.add('fav-pop');
 }
 
 // ── PLANO DO USUÁRIO (localStorage) ───────────────────────────
@@ -185,6 +216,14 @@ document.addEventListener('DOMContentLoaded', () => {
       from { opacity: 0; transform: translateY(16px); }
       to   { opacity: 1; transform: translateY(0); }
     }
+    @keyframes fav-pop {
+      0%   { transform: scale(1); }
+      35%  { transform: scale(1.55) rotate(-8deg); }
+      60%  { transform: scale(0.88) rotate(4deg); }
+      80%  { transform: scale(1.12); }
+      100% { transform: scale(1); }
+    }
+    .fav-pop { animation: fav-pop 0.42s cubic-bezier(.36,.07,.19,.97) both; }
     .fade-in-up {
       animation: fadeInUp 0.35s ease both;
     }
