@@ -54,6 +54,8 @@ body {
   margin: 0 auto;
   background: var(--bg);
   position: relative;
+  border-left:  1px solid var(--border);
+  border-right: 1px solid var(--border);
 }
 
 /* ── SIDEBAR (desktop only) ── */
