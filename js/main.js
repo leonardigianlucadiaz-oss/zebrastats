@@ -195,10 +195,10 @@ function formatBRL(value) {
   return new Intl.NumberFormat('pt-BR', { style:'currency', currency:'BRL' }).format(value);
 }
 
-// ── NAVEGAÇÃO ATIVA (bottom nav) ──────────────────────────────
+// ── NAVEGAÇÃO ATIVA (bottom nav + sidebar) ────────────────────
 function setActiveNavItem() {
   const current = window.location.pathname.split('/').pop() || 'index.html';
-  document.querySelectorAll('.bottom-nav__item').forEach(item => {
+  document.querySelectorAll('.bottom-nav__item, .sidebar__nav-item').forEach(item => {
     const href = item.getAttribute('href') || '';
     if (href && current.includes(href.replace('.html',''))) {
       item.classList.add('active');
