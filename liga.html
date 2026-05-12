@@ -208,10 +208,11 @@
     { home:'Fortaleza',  away:'Fluminense', hs:2, as:0, zi:5.1, date:'03/05' },
   ];
 
-  let activeTab    = 'jogos';
-  let activeJfilt  = 'proximos';
-  let favLeague    = false;
-  let activeLid    = 'BRA';
+  let activeTab          = 'jogos';
+  let activeJfilt        = 'proximos';
+  let favLeague          = false;
+  let activeLid          = 'BRA';
+  let sdbStandingsLoaded = false;
 
   // ── FAVORITAR LIGA ──────────────────────────────────────────────
   document.getElementById('favLeagueBtn').addEventListener('click', function() {
@@ -326,22 +327,38 @@
   // ── TABELA ────────────────────────────────────────────────────────
   function renderTabela() {
     const table = document.getElementById('standingsTable');
-    table.innerHTML = `
-      <thead>
-        <tr>
-          <th>Pos</th><th>Time</th><th>P</th><th>J</th>
-          <th>V</th><th>E</th><th>D</th><th>SG</th><th>🦓</th>
-        </tr>
-      </thead>
-      <tbody id="standingsTbody"></tbody>`;
+    const thead = `<thead><tr>
+        <th>Pos</th><th style="width:28px;"></th><th>Time</th><th>P</th><th>J</th>
+        <th>V</th><th>E</th><th>D</th><th>SG</th><th>🦓</th>
+      </tr></thead>`;
 
+    if (!sdbStandingsLoaded) {
+      table.innerHTML = thead + `<tbody id="standingsTbody"></tbody>`;
+      const tbody = table.querySelector('tbody');
+      for (let i = 0; i < 10; i++) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><div class="skel" style="width:20px;height:20px;border-radius:4px;"></div></td>
+          <td><div class="skel" style="width:22px;height:22px;border-radius:50%;margin:0 auto;"></div></td>
+          <td><div class="skel" style="height:12px;width:80px;border-radius:6px;"></div></td>
+          <td colspan="7"><div class="skel" style="height:12px;border-radius:6px;"></div></td>`;
+        tbody.appendChild(tr);
+      }
+      return;
+    }
+
+    table.innerHTML = thead + `<tbody id="standingsTbody"></tbody>`;
     const tbody = table.querySelector('tbody');
     STANDINGS.forEach(t => {
       const tr = document.createElement('tr');
       if ([1,2,3,4].includes(t.pos)) tr.className = 'highlight-row';
       const badgeClass = { cl:'pos-badge--cl', eur:'pos-badge--eur', rel:'pos-badge--rel' }[t.posClass] || '';
+      const crestHtml = t.crest
+        ? `<img src="${t.crest}" alt="${t.name}" style="width:22px;height:22px;object-fit:contain;display:block;margin:0 auto;" loading="lazy" onerror="this.style.opacity=0;">`
+        : `<span style="font-size:0.5rem;font-weight:700;color:var(--gray);display:block;text-align:center;">${(t.abbr||t.name.substring(0,3)).toUpperCase()}</span>`;
       tr.innerHTML = `
         <td><span class="pos-badge ${badgeClass}">${t.pos}</span></td>
+        <td>${crestHtml}</td>
         <td>${t.name}</td>
         <td style="font-weight:700;">${t.p}</td>
         <td>${t.j}</td>
@@ -456,16 +473,18 @@
           STANDINGS.length = 0;
           rows.forEach((r, i) => STANDINGS.push({
             pos: r.pos, name: r.name, abbr: r.name.substring(0,3).toUpperCase(),
+            crest: r.crest || '',
             p: r.p, j: r.j, v: r.v, e: r.e, d: r.d,
             gp: r.gp, gc: r.gc, sg: r.sg,
             zi: '—',
             posClass: r.pos <= 4 ? 'cl' : r.pos >= 18 ? 'rel' : r.pos <= 6 ? 'eur' : '',
           }));
+          sdbStandingsLoaded = true;
           if (activeTab === 'tabela') renderTabela();
           const lider = STANDINGS[0];
           if (lider) document.getElementById('statLider').textContent = lider.abbr || lider.name.substring(0,3).toUpperCase();
         }
-      } catch(e) { console.warn('SDB standings error:', e); }
+      } catch(e) { console.warn('SDB standings error:', e); sdbStandingsLoaded = true; if (activeTab === 'tabela') renderTabela(); }
     }
 
     // Football-Data.org — requer chave

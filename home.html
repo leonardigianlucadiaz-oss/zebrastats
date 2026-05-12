@@ -307,9 +307,32 @@
       showToast('🔔 Notificações ativadas');
     });
 
+    // ── SKELETON HELPERS ──────────────────────────────────
+    function showSkeletonGames(containerId, count) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = '';
+      for (let i = 0; i < count; i++) {
+        const card = document.createElement('div');
+        card.className = 'skel-card';
+        card.style.cssText = 'display:flex;flex-direction:column;gap:10px;';
+        card.innerHTML = `
+          <div style="display:flex;justify-content:space-between;">
+            <div class="skel" style="height:11px;width:110px;border-radius:5px;"></div>
+            <div class="skel" style="height:11px;width:44px;border-radius:5px;"></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div class="skel" style="height:14px;flex:1;border-radius:6px;"></div>
+            <div class="skel" style="height:22px;width:44px;border-radius:6px;"></div>
+            <div class="skel" style="height:14px;flex:1;border-radius:6px;"></div>
+          </div>`;
+        container.appendChild(card);
+      }
+    }
+
     // ── INITIAL RENDER ────────────────────────────────────
-    renderLive();
-    renderUpcoming();
+    showSkeletonGames('liveGames', 2);
+    showSkeletonGames('upcomingGames', 3);
+    setTimeout(() => { renderLive(); renderUpcoming(); }, 600);
 
     // ── API REAL DATA ─────────────────────────────────────
     async function initRealData() {
