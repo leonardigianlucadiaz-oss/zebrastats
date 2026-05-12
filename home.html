@@ -185,9 +185,12 @@
       }
     }
 
-    function emptyState(containerId, msg) {
+    function emptyState(containerId, msg, sub = '') {
       document.getElementById(containerId).innerHTML =
-        `<p class="text-gray text-sm" style="text-align:center;padding:16px;">${msg}</p>`;
+        `<div style="text-align:center;padding:16px 8px;">
+          <p class="text-gray text-sm">${msg}</p>
+          ${sub ? `<p style="font-size:0.6875rem;color:var(--border);margin-top:6px;">${sub}</p>` : ''}
+        </div>`;
     }
 
     // ── RENDER LIVE GAMES ─────────────────────────────────
@@ -198,7 +201,7 @@
         ? LIVE_GAMES
         : LIVE_GAMES.filter(g => g.league_id === activeLeagueFilter);
 
-      if (!games.length) { emptyState('liveGames', 'Nenhum jogo ao vivo agora.'); return; }
+      if (!games.length) { emptyState('liveGames', 'Nenhum jogo ao vivo agora.', ZebraAPI.isConfigured.footballData() || ZebraAPI.isConfigured.rapidApi() ? '' : 'Configure chaves de API em Perfil → Integração para dados ao vivo.'); return; }
 
       games.forEach(g => {
         const card = document.createElement('div');
@@ -229,7 +232,7 @@
         ? UPCOMING_GAMES
         : UPCOMING_GAMES.filter(g => g.league_id === activeLeagueFilter);
 
-      if (!games.length) { emptyState('upcomingGames', 'Nenhum jogo agendado.'); return; }
+      if (!games.length) { emptyState('upcomingGames', 'Nenhum jogo agendado.', ZebraAPI.isConfigured.footballData() ? '' : 'Configure sua chave Football-Data.org em Perfil.'); return; }
 
       games.forEach(g => {
         const card = document.createElement('div');
@@ -256,36 +259,63 @@
       const bar = document.getElementById('favTeamsBar');
       bar.innerHTML = '';
 
-      const favIds   = getFavorites();
-      const favMeta  = getFavTeamsData();
-      const favNames = favIds.map(id => favMeta[id]?.name).filter(Boolean);
+      // Monta lista: favoritos reais (sem duplicatas) + completar com defaults até 5
+      const favIds  = [...new Set(getFavorites())];
+      const favMeta = getFavTeamsData();
 
-      // Se não tem favoritos, sugerir times populares
-      const defaultTeams = ['Flamengo','Palmeiras','Corinthians'];
-      const teamsToShow  = favNames.length ? favNames : defaultTeams;
+      // Times com meta salva (nome + crest já conhecido)
+      const fromMeta = favIds
+        .map(id => favMeta[id])
+        .filter(Boolean)
+        .reduce((acc, m) => {
+          if (!acc.find(x => x.name === m.name)) acc.push(m);
+          return acc;
+        }, []);
 
-      for (const name of teamsToShow) {
+      // Times padrão de ligas variadas se não tiver favoritos suficientes
+      const DEFAULTS = [
+        { name:'Flamengo' },
+        { name:'Real Madrid' },
+        { name:'Manchester City' },
+        { name:'Bayern Munich' },
+        { name:'Juventus' },
+      ];
+      const shownNames = new Set(fromMeta.map(m => m.name));
+      const extras = DEFAULTS.filter(d => !shownNames.has(d.name));
+      const toShow = [...fromMeta, ...extras].slice(0, 5);
+
+      for (const item of toShow) {
+        const name = item.name;
         const pill = document.createElement('div');
         pill.className = 'team-pill';
+
+        // Se já tem crest no meta, mostra direto; senão skeleton
+        const knownLogo = item.crest || '';
         pill.innerHTML = `
-          <div class="team-pill__avatar" style="background:var(--card2);">
-            <div class="skel" style="width:100%;height:100%;border-radius:50%;"></div>
+          <div class="team-pill__avatar" style="${knownLogo ? 'background:transparent;border:none;' : 'background:var(--card2);'}">
+            ${knownLogo
+              ? `<img src="${knownLogo}" alt="${name}" style="width:36px;height:36px;object-fit:contain;">`
+              : `<div class="skel" style="width:100%;height:100%;border-radius:50%;"></div>`}
           </div>
           <span class="team-pill__name">${name}</span>`;
+        pill.addEventListener('click', () => window.location.href = 'time.html');
         bar.appendChild(pill);
 
-        // Busca escudo no SDB
-        ZebraAPI.sportsDb.searchTeam(name).then(res => {
-          const team = res?.teams?.[0];
-          const logo = team?.strTeamBadge || team?.strBadge || '';
-          const avatar = pill.querySelector('.team-pill__avatar');
-          avatar.innerHTML = logo
-            ? `<img src="${logo}" alt="${name}" style="width:36px;height:36px;object-fit:contain;" onerror="this.parentElement.textContent='${name.substring(0,3).toUpperCase()}';">`
-            : name.substring(0,3).toUpperCase();
-          avatar.style.background = logo ? 'transparent' : '';
-          pill.querySelector('.team-pill__name').textContent = team?.strTeam || name;
-          pill.addEventListener('click', () => window.location.href = 'time.html');
-        }).catch(() => {});
+        // Busca SDB apenas se não tem logo ainda
+        if (!knownLogo) {
+          ZebraAPI.sportsDb.searchTeam(name).then(res => {
+            const team = res?.teams?.[0];
+            const logo = team?.strTeamBadge || team?.strBadge || '';
+            const avatar = pill.querySelector('.team-pill__avatar');
+            if (logo) {
+              avatar.innerHTML = `<img src="${logo}" alt="${name}" style="width:36px;height:36px;object-fit:contain;" onerror="this.style.display='none';">`;
+              avatar.style.cssText = 'background:transparent;border:none;';
+            } else {
+              avatar.innerHTML = name.substring(0,3).toUpperCase();
+            }
+            if (team?.strTeam) pill.querySelector('.team-pill__name').textContent = team.strTeam;
+          }).catch(() => {});
+        }
       }
 
       // Botão adicionar
@@ -312,11 +342,12 @@
           if (badge) {
             const img = document.createElement('img');
             img.src = badge;
-            img.style.cssText = 'width:16px;height:16px;object-fit:contain;vertical-align:middle;margin-right:5px;';
+            img.style.cssText = 'width:16px;height:16px;object-fit:contain;vertical-align:middle;margin-right:5px;flex-shrink:0;';
             img.onerror = () => img.remove();
+            // Troca texto completo pela label limpa (sem emoji de bandeira de nenhum tipo)
+            const LEAGUE_LABELS = { BRA:'Brasileirão', ENG:'Premier League', ESP:'La Liga', ITA:'Serie A', GER:'Bundesliga' };
+            pill.textContent = LEAGUE_LABELS[lid] || pill.textContent.replace(/^[\s\S]{1,4}\s/, '').trim();
             pill.prepend(img);
-            // remove emoji text flag at start if present
-            pill.childNodes.forEach(n => { if (n.nodeType === 3) n.textContent = n.textContent.replace(/^\s*[\uD83C][\uDDE6-\uDDFF][\uD83C][\uDDE6-\uDDFF]\s*/, ''); });
           }
         } catch {}
       });
@@ -403,9 +434,9 @@
       renderUpcoming();
     }
 
-    // ── ZEBRA RANKING (estático com animação) ─────────────
+    // ── ZEBRA RANKING (ZI máx 5.0) ───────────────────────
     const ZEBRA_RANKING = [
-      { pos:1, name:'Flamengo',  badge:'5.2', color:'var(--green)' },
+      { pos:1, name:'Flamengo',  badge:'5.0', color:'var(--green)' },
       { pos:2, name:'Torino FC', badge:'3.5', color:'var(--gold)'  },
       { pos:3, name:'Getafe',    badge:'3.0', color:'var(--gold)'  },
     ];
