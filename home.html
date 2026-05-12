@@ -165,6 +165,41 @@
       color: var(--white);
     }
 
+    /* ── RICH GAME CARD ─────────────────────────────────────── */
+    .gc-teams {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 10px;
+      margin: 10px 0;
+    }
+    .gc-team-block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      text-align: center;
+    }
+    .gc-team-block.away { align-items: center; }
+    .gc-crest {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      background: var(--card2);
+      border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.625rem; font-weight: 700; color: var(--gray);
+      overflow: hidden; flex-shrink: 0;
+    }
+    .gc-crest img { width: 36px; height: 36px; object-fit: contain; }
+    .gc-team-name { font-size: 0.8125rem; font-weight: 600; line-height: 1.2; }
+    .gc-score-block { text-align: center; flex-shrink: 0; }
+    .gc-score { font-size: 1.75rem; font-weight: 800; line-height: 1; letter-spacing: -1px; }
+    .gc-vs    { font-size: 0.875rem; font-weight: 600; color: var(--gray); }
+    .gc-zi-wrap { margin-top: 4px; display: flex; gap: 2px; height: 3px; }
+    .gc-zi-fill  { flex: var(--w); background: var(--green); border-radius: 2px; }
+    .gc-zi-empty { flex: var(--e); background: var(--border); border-radius: 2px; }
+
+    /* ── RANKING ─────────────────────────────────────────────── */
     .ranking-row {
       display: flex;
       align-items: center;
@@ -174,13 +209,45 @@
       border: 1px solid var(--border);
       border-radius: var(--radius-md);
       cursor: pointer;
+      transition: border-color var(--transition), transform var(--transition);
+    }
+    .ranking-row:hover { border-color: var(--green); transform: translateX(2px); }
+    .ranking-row__pos  { font-size: 1.25rem; min-width: 28px; text-align: center; }
+    .ranking-row__name { flex: 1; font-size: 0.9375rem; font-weight: 500; }
+    .ranking-row__bar  { flex: 1; max-width: 60px; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+    .ranking-row__bar-fill { height: 100%; border-radius: 2px; }
+    .ranking-row__badge{ flex-shrink: 0; }
+
+    /* ── ZEBRA DIA HERO ──────────────────────────────────────── */
+    .zebra-dia-hero {
+      background: linear-gradient(135deg, rgba(46,230,92,0.08) 0%, rgba(255,200,50,0.08) 100%);
+      border: 1px solid rgba(46,230,92,0.3);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      cursor: pointer;
       transition: border-color var(--transition);
     }
-    .ranking-row:hover { border-color: var(--green); }
-    .ranking-row__pos  { font-size: 1rem; font-weight: 700; color: var(--gray); min-width: 22px; }
-    .ranking-row__name { flex: 1; font-size: 0.9375rem; font-weight: 500; }
-    .ranking-row__stars{ color: var(--gold); font-size: 0.875rem; }
-    .ranking-row__badge{ flex-shrink: 0; }
+    .zebra-dia-hero:hover { border-color: var(--green); }
+    .zebra-dia-hero__badge {
+      font-size: 0.625rem; font-weight: 700; letter-spacing: 0.5px;
+      text-transform: uppercase; color: var(--gold);
+      background: var(--gold-dim); border-radius: var(--radius-pill);
+      padding: 3px 10px; display: inline-flex; align-items: center; gap: 4px;
+      margin-bottom: 10px;
+    }
+    .zebra-dia-hero__teams {
+      display: grid; grid-template-columns: 1fr auto 1fr;
+      align-items: center; gap: 8px;
+    }
+    .zebra-dia-hero__team { display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; }
+    .zebra-dia-hero__team.away { align-items: center; }
+    .zebra-dia-hero__team-name { font-size: 0.875rem; font-weight: 600; }
+    .zebra-dia-hero__team-role { font-size: 0.625rem; color: var(--gray); }
+    .zebra-dia-hero__score { text-align: center; }
+    .zebra-dia-hero__score-val { font-size: 2rem; font-weight: 800; line-height: 1; }
+    .zebra-dia-hero__zi { font-size: 0.75rem; color: var(--green); font-weight: 700; margin-top: 2px; }
+    .zebra-dia-hero__footer { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.06); font-size: 0.75rem; color: var(--gray); }
+    .zebra-dia-hero__odd { color: var(--gold); font-weight: 700; background: var(--gold-dim); padding: 2px 8px; border-radius: var(--radius-pill); }
   </style>
 
   <script src="js/config.js"></script>
@@ -224,6 +291,13 @@
         </div>`;
     }
 
+    // ── CREST BLOCK HELPER ────────────────────────────────
+    function crestBlock(url, abbr) {
+      return `<div class="gc-crest">${url
+        ? `<img src="${url}" alt="${abbr}" onerror="this.parentElement.textContent='${abbr.substring(0,3).toUpperCase()}';">`
+        : `<span>${abbr.substring(0,3).toUpperCase()}</span>`}</div>`;
+    }
+
     // ── RENDER LIVE GAMES ─────────────────────────────────
     function renderLive() {
       const container = document.getElementById('liveGames');
@@ -237,19 +311,28 @@
       games.forEach(g => {
         const card = document.createElement('div');
         card.className = `game-card${g.zebra ? ' game-card--zebra' : ''}`;
-        const homeCrest = g.homeCrest ? `<img src="${g.homeCrest}" style="width:18px;height:18px;object-fit:contain;flex-shrink:0;" onerror="this.style.display='none'">` : '';
-        const awayCrest = g.awayCrest ? `<img src="${g.awayCrest}" style="width:18px;height:18px;object-fit:contain;flex-shrink:0;" onerror="this.style.display='none'">` : '';
+        const leagueLogo = LEAGUE_LOGOS[g.league_id]
+          ? `<img src="${LEAGUE_LOGOS[g.league_id]}" style="width:13px;height:13px;object-fit:contain;margin-right:4px;vertical-align:middle;" onerror="this.remove();">`
+          : '';
         card.innerHTML = `
           <div class="game-card__league" style="display:flex;align-items:center;justify-content:space-between;">
-            <span>${g.league}</span>
+            <span style="display:flex;align-items:center;">${leagueLogo}${g.league}</span>
             <span class="badge badge--live">${g.min}</span>
           </div>
-          <div class="game-card__match">
-            <span class="game-card__team" style="display:flex;align-items:center;gap:5px;">${homeCrest}${g.home}</span>
-            <span class="game-card__score">${g.hs} – ${g.as}</span>
-            <span class="game-card__team game-card__team--away" style="display:flex;align-items:center;justify-content:flex-end;gap:5px;">${g.away}${awayCrest}</span>
-          </div>
-          ${g.zebra ? `<div class="game-card__footer"><span class="badge badge--zebra">🦓 ZEBRA ALERT</span></div>` : ''}`;
+          <div class="gc-teams">
+            <div class="gc-team-block">
+              ${crestBlock(g.homeCrest, g.home)}
+              <span class="gc-team-name">${g.home}</span>
+            </div>
+            <div class="gc-score-block">
+              <div class="gc-score">${g.hs}<span style="color:var(--gray);font-size:1.25rem;margin:0 3px;">–</span>${g.as}</div>
+              ${g.zebra ? `<div style="font-size:0.625rem;color:var(--green);font-weight:700;margin-top:4px;text-align:center;">🦓 ZEBRA</div>` : ''}
+            </div>
+            <div class="gc-team-block away">
+              ${crestBlock(g.awayCrest, g.away)}
+              <span class="gc-team-name">${g.away}</span>
+            </div>
+          </div>`;
         card.addEventListener('click', () => window.location.href = 'partida.html');
         container.appendChild(card);
       });
@@ -268,17 +351,26 @@
       games.forEach(g => {
         const card = document.createElement('div');
         card.className = 'game-card';
-        const homeCrest = g.homeCrest ? `<img src="${g.homeCrest}" style="width:18px;height:18px;object-fit:contain;flex-shrink:0;" onerror="this.style.display='none'">` : '';
-        const awayCrest = g.awayCrest ? `<img src="${g.awayCrest}" style="width:18px;height:18px;object-fit:contain;flex-shrink:0;" onerror="this.style.display='none'">` : '';
+        const leagueLogo = LEAGUE_LOGOS[g.league_id]
+          ? `<img src="${LEAGUE_LOGOS[g.league_id]}" style="width:13px;height:13px;object-fit:contain;margin-right:4px;vertical-align:middle;" onerror="this.remove();">`
+          : '';
         card.innerHTML = `
           <div class="game-card__league" style="display:flex;align-items:center;justify-content:space-between;">
-            <span>${g.league}</span>
+            <span style="display:flex;align-items:center;">${leagueLogo}${g.league}</span>
             <span style="color:var(--gold);font-size:0.8125rem;font-weight:600;">${g.time}</span>
           </div>
-          <div class="game-card__match">
-            <span class="game-card__team" style="display:flex;align-items:center;gap:5px;">${homeCrest}${g.home}</span>
-            <span class="game-card__score" style="font-size:0.875rem;color:var(--gray);">vs</span>
-            <span class="game-card__team game-card__team--away" style="display:flex;align-items:center;justify-content:flex-end;gap:5px;">${g.away}${awayCrest}</span>
+          <div class="gc-teams">
+            <div class="gc-team-block">
+              ${crestBlock(g.homeCrest, g.home)}
+              <span class="gc-team-name">${g.home}</span>
+            </div>
+            <div class="gc-score-block">
+              <div class="gc-vs">VS</div>
+            </div>
+            <div class="gc-team-block away">
+              ${crestBlock(g.awayCrest, g.away)}
+              <span class="gc-team-name">${g.away}</span>
+            </div>
           </div>`;
         card.addEventListener('click', () => window.location.href = 'partida.html');
         container.appendChild(card);
@@ -465,20 +557,31 @@
       renderUpcoming();
     }
 
-    // ── ZEBRA RANKING (ZI máx 5.0) ───────────────────────
+    // ── ZEBRA RANKING (ZI máx 10.0) ──────────────────────
+    const MEDALS = { 1:'🥇', 2:'🥈', 3:'🥉' };
     const ZEBRA_RANKING = [
-      { pos:1, name:'Flamengo',  badge:'5.0', color:'var(--green)' },
-      { pos:2, name:'Torino FC', badge:'3.5', color:'var(--gold)'  },
-      { pos:3, name:'Getafe',    badge:'3.0', color:'var(--gold)'  },
+      { pos:1, name:'Luton Town',  league:'Premier League', badge:'9.1', zi:9.1, color:'var(--green)' },
+      { pos:2, name:'Augsburg',    league:'Bundesliga',     badge:'8.7', zi:8.7, color:'var(--green)' },
+      { pos:3, name:'Botafogo',    league:'Brasileirão',    badge:'8.2', zi:8.2, color:'var(--gold)'  },
+      { pos:4, name:'Lecce',       league:'Serie A',        badge:'7.9', zi:7.9, color:'var(--gold)'  },
+      { pos:5, name:'Angers',      league:'Ligue 1',        badge:'9.4', zi:9.4, color:'var(--gold)'  },
     ];
     const rankContainer = document.getElementById('zebraRanking');
-    ZEBRA_RANKING.forEach(r => {
+    ZEBRA_RANKING.forEach((r, idx) => {
       const row = document.createElement('div');
-      row.className = 'ranking-row';
+      row.className = 'ranking-row fade-in-up';
+      row.style.animationDelay = `${idx * 55}ms`;
+      const pct = Math.round((r.zi / 10) * 100);
       row.innerHTML = `
-        <span class="ranking-row__pos">#${r.pos}</span>
-        <span class="ranking-row__name">${r.name}</span>
-        <span class="badge ranking-row__badge" style="background:${r.color}22;color:${r.color};border:1px solid ${r.color}44;">🦓 ${r.badge}</span>`;
+        <span class="ranking-row__pos">${MEDALS[r.pos] || '#' + r.pos}</span>
+        <div style="flex:1;">
+          <div class="ranking-row__name">${r.name}</div>
+          <div style="font-size:0.6875rem;color:var(--gray);margin-top:1px;">${r.league}</div>
+        </div>
+        <div class="ranking-row__bar" style="min-width:50px;">
+          <div class="ranking-row__bar-fill" style="width:${pct}%;background:${r.color};"></div>
+        </div>
+        <span class="badge ranking-row__badge" style="background:${r.color}22;color:${r.color};border:1px solid ${r.color}44;font-size:0.6875rem;">🦓 ${r.badge}</span>`;
       row.addEventListener('click', () => window.location.href = 'time.html');
       rankContainer.appendChild(row);
     });
@@ -490,35 +593,75 @@
       const sectionLink = document.querySelector('.section-link.text-gold');
 
       if (isPro && lockBanner) {
-        // Esconde banner de lock
         lockBanner.style.display = 'none';
         if (sectionLink) sectionLink.style.display = 'none';
 
-        // Injeta preview das zebras do dia
-        const container = document.createElement('div');
-        container.style.cssText = 'display:flex;flex-direction:column;gap:8px;';
         const zebrasDia = [
-          { home:'Bragantino', away:'Flamengo',   zi:'4.8', odds:'6.20', liga:'Brasileirão' },
-          { home:'Getafe',     away:'Barcelona',  zi:'4.5', odds:'7.50', liga:'La Liga'     },
-          { home:'Empoli',     away:'Inter',      zi:'4.1', odds:'5.80', liga:'Serie A'     },
+          { home:'Bragantino', away:'Flamengo',   zi:'4.8', score:'3–1', odds:'6.20', liga:'Brasileirão', homeRole:'Azarão', awayRole:'Favorito' },
+          { home:'Getafe',     away:'Barcelona',  zi:'4.5', score:'1–0', odds:'7.50', liga:'La Liga',      homeRole:'Azarão', awayRole:'Favorito' },
+          { home:'Empoli',     away:'Inter',      zi:'4.1', score:'2–2', odds:'5.80', liga:'Serie A',      homeRole:'Azarão', awayRole:'Favorito' },
         ];
-        zebrasDia.forEach(z => {
+
+        const container = document.createElement('div');
+        container.style.cssText = 'display:flex;flex-direction:column;gap:10px;';
+
+        // Primeiro item como hero card grande
+        const [hero, ...rest] = zebrasDia;
+        const heroCard = document.createElement('div');
+        heroCard.className = 'zebra-dia-hero';
+        heroCard.onclick = () => window.location.href = 'zebras.html';
+        heroCard.innerHTML = `
+          <div class="zebra-dia-hero__badge">🦓 MAIOR ZEBRA DO DIA</div>
+          <div class="zebra-dia-hero__teams">
+            <div class="zebra-dia-hero__team">
+              <div class="gc-crest" style="width:48px;height:48px;">${crestImg(hero.home,40) || `<span>${hero.home.substring(0,3).toUpperCase()}</span>`}</div>
+              <div class="zebra-dia-hero__team-name">${hero.home}</div>
+              <div class="zebra-dia-hero__team-role" style="color:var(--green);">${hero.homeRole}</div>
+            </div>
+            <div class="zebra-dia-hero__score">
+              <div class="zebra-dia-hero__score-val">${hero.score}</div>
+              <div class="zebra-dia-hero__zi">ZI ${hero.zi}</div>
+            </div>
+            <div class="zebra-dia-hero__team away">
+              <div class="gc-crest" style="width:48px;height:48px;">${crestImg(hero.away,40) || `<span>${hero.away.substring(0,3).toUpperCase()}</span>`}</div>
+              <div class="zebra-dia-hero__team-name">${hero.away}</div>
+              <div class="zebra-dia-hero__team-role">${hero.awayRole}</div>
+            </div>
+          </div>
+          <div class="zebra-dia-hero__footer">
+            <span>${hero.liga}</span>
+            <span class="zebra-dia-hero__odd">odd ${hero.odds}</span>
+          </div>`;
+        container.appendChild(heroCard);
+
+        // Demais itens como game-cards compactos
+        rest.forEach(z => {
           const card = document.createElement('div');
           card.className = 'game-card game-card--zebra';
           card.style.cursor = 'pointer';
           card.onclick = () => window.location.href = 'zebras.html';
           card.innerHTML = `
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-              <span style="font-size:0.6875rem;color:var(--gray);">${z.liga}</span>
+            <div class="game-card__league" style="display:flex;justify-content:space-between;">
+              <span>${z.liga}</span>
               <span class="zebra-index-badge zi--grande">🦓 ZI ${z.zi}</span>
             </div>
-            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
-              <span style="font-size:0.9375rem;font-weight:600;flex:1;">${crestImg(z.home,18)} ${z.home}</span>
-              <span style="font-size:0.75rem;color:var(--gold);font-weight:700;background:var(--gold-dim);padding:3px 8px;border-radius:var(--radius-pill);">odd ${z.odds}</span>
-              <span style="font-size:0.9375rem;font-weight:600;flex:1;text-align:right;">${z.away} ${crestImg(z.away,18)}</span>
+            <div class="gc-teams" style="margin:8px 0;">
+              <div class="gc-team-block">
+                <div class="gc-crest">${crestImg(z.home,32) || `<span>${z.home.substring(0,3).toUpperCase()}</span>`}</div>
+                <span class="gc-team-name">${z.home}</span>
+              </div>
+              <div class="gc-score-block">
+                <div style="font-size:1.375rem;font-weight:700;">${z.score}</div>
+                <div style="font-size:0.6875rem;color:var(--gold);font-weight:600;">odd ${z.odds}</div>
+              </div>
+              <div class="gc-team-block away">
+                <div class="gc-crest">${crestImg(z.away,32) || `<span>${z.away.substring(0,3).toUpperCase()}</span>`}</div>
+                <span class="gc-team-name">${z.away}</span>
+              </div>
             </div>`;
           container.appendChild(card);
         });
+
         lockBanner.parentNode.insertBefore(container, lockBanner.nextSibling);
       }
     }

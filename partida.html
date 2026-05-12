@@ -51,33 +51,47 @@
   </nav>
 
   <!-- PLACAR HERO -->
-  <section style="background:linear-gradient(180deg,var(--card2) 0%,var(--bg) 100%);padding:20px 16px 16px;border-bottom:1px solid var(--border);">
+  <section style="background:linear-gradient(180deg,rgba(46,230,92,0.06) 0%,var(--card2) 40%,var(--bg) 100%);padding:20px 16px 16px;border-bottom:1px solid var(--border);">
     <!-- Liga e status -->
     <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px;">
       <span id="matchCompetition" style="font-size:0.75rem;color:var(--gray);">🇧🇷 Brasileirão Série A · Rodada 12</span>
       <span id="zebraBadge" class="badge badge--zebra">🦓 ZEBRA</span>
     </div>
 
-    <!-- Times e placar -->
+    <!-- Times e placar com escudos reais -->
     <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:16px;">
       <div style="flex:1;text-align:center;">
-        <div id="matchHomeAbbr" style="width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,0.1);border:2px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:1.125rem;font-weight:700;margin:0 auto 8px;">BOT</div>
+        <div id="matchHomeShield" style="width:60px;height:60px;border-radius:50%;background:rgba(255,255,255,0.08);border:2px solid rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-size:1.125rem;font-weight:700;margin:0 auto 8px;overflow:hidden;" data-abbr="BOT">BOT</div>
         <div id="matchHomeName" style="font-size:0.9375rem;font-weight:600;">Botafogo</div>
-        <div id="matchHomeRole" style="font-size:0.75rem;color:var(--gray);margin-top:2px;">Azarão</div>
+        <div id="matchHomeRole" style="font-size:0.6875rem;margin-top:3px;color:var(--green);font-weight:700;background:rgba(46,230,92,0.12);border-radius:var(--radius-pill);padding:2px 8px;display:inline-block;">Azarão</div>
       </div>
 
       <div style="text-align:center;flex-shrink:0;">
-        <div id="matchScore" style="font-size:3rem;font-weight:700;line-height:1;letter-spacing:-2px;">3<span style="color:var(--gray);font-size:2rem;margin:0 4px;">–</span>0</div>
+        <div id="matchScore" style="font-size:3rem;font-weight:800;line-height:1;letter-spacing:-2px;">3<span style="color:var(--gray);font-size:2rem;margin:0 4px;">–</span>0</div>
         <div style="margin-top:8px;display:flex;flex-direction:column;gap:4px;align-items:center;">
           <span id="matchStatus" style="background:var(--red-dim);color:var(--red);border:1px solid rgba(238,68,68,0.3);padding:3px 12px;border-radius:var(--radius-pill);font-size:0.75rem;font-weight:700;">ENCERRADO</span>
-          <span id="matchVenue" style="font-size:0.75rem;color:var(--gray);">Estádio Nilton Santos</span>
+          <span id="matchVenue" style="font-size:0.6875rem;color:var(--gray);">Estádio Nilton Santos</span>
         </div>
       </div>
 
       <div style="flex:1;text-align:center;">
-        <div id="matchAwayAbbr" style="width:52px;height:52px;border-radius:50%;background:rgba(204,26,26,0.15);border:2px solid rgba(204,26,26,0.3);display:flex;align-items:center;justify-content:center;font-size:1.125rem;font-weight:700;color:#CC1A1A;margin:0 auto 8px;">FLA</div>
+        <div id="matchAwayShield" style="width:60px;height:60px;border-radius:50%;background:rgba(204,26,26,0.1);border:2px solid rgba(204,26,26,0.25);display:flex;align-items:center;justify-content:center;font-size:1.125rem;font-weight:700;color:#CC1A1A;margin:0 auto 8px;overflow:hidden;" data-abbr="FLA">FLA</div>
         <div id="matchAwayName" style="font-size:0.9375rem;font-weight:600;">Flamengo</div>
-        <div id="matchAwayRole" style="font-size:0.75rem;color:var(--gray);margin-top:2px;">Favorito</div>
+        <div id="matchAwayRole" style="font-size:0.6875rem;margin-top:3px;color:var(--gray);background:var(--card2);border-radius:var(--radius-pill);padding:2px 8px;display:inline-block;">Favorito</div>
+      </div>
+    </div>
+
+    <!-- PROBABILITY BAR PRÉ-JOGO -->
+    <div style="margin-bottom:12px;">
+      <div style="display:flex;justify-content:space-between;font-size:0.625rem;color:var(--gray);margin-bottom:4px;">
+        <span id="homeProb" style="color:var(--green);font-weight:600;">22% Botafogo</span>
+        <span>26% Empate</span>
+        <span id="awayProb" style="color:var(--red);font-weight:600;">52% Flamengo</span>
+      </div>
+      <div style="display:flex;gap:2px;height:6px;border-radius:3px;overflow:hidden;">
+        <div id="probBarHome" style="flex:22;background:var(--green);"></div>
+        <div id="probBarDraw" style="flex:26;background:var(--border);"></div>
+        <div id="probBarAway" style="flex:52;background:var(--red);"></div>
       </div>
     </div>
 
@@ -267,13 +281,13 @@
 
   // ── TIMELINE ────────────────────────────────────────────────────
   const EVENTS = [
-    { min:12, team:'BOT', type:'gol',    icon:'⚽', player:'Tiquinho Soares',   desc:'Gol de cabeça após escanteio' },
-    { min:38, team:'FLA', type:'amarelo',icon:'🟨', player:'Léo Pereira',       desc:'Falta dura no meio-campo' },
-    { min:55, team:'BOT', type:'gol',    icon:'⚽', player:'Júnior Santos',     desc:'Finalização de fora da área' },
-    { min:63, team:'FLA', type:'sub',    icon:'🔄', player:'Gabigol → Éverton', desc:'Substituição Flamengo' },
-    { min:78, team:'BOT', type:'gol',    icon:'⚽', player:'Luiz Henrique',     desc:'Contra-ataque decisivo' },
-    { min:82, team:'FLA', type:'vermelho',icon:'🟥',player:'Fabrício Bruno',    desc:'Segundo cartão amarelo' },
-    { min:90, team:'BOT', type:'fim',    icon:'🏁', player:'Fim de Jogo',       desc:'Botafogo 3×0 Flamengo' },
+    { min:12, team:'BOT', type:'gol',     lucide:'circle-dot',    color:'var(--green)',  player:'Tiquinho Soares',   desc:'Gol de cabeça após escanteio' },
+    { min:38, team:'FLA', type:'amarelo', lucide:'square',         color:'var(--gold)',   player:'Léo Pereira',       desc:'Falta dura no meio-campo' },
+    { min:55, team:'BOT', type:'gol',     lucide:'circle-dot',    color:'var(--green)',  player:'Júnior Santos',     desc:'Finalização de fora da área' },
+    { min:63, team:'FLA', type:'sub',     lucide:'arrow-left-right',color:'var(--gray)', player:'Gabigol → Éverton', desc:'Substituição Flamengo' },
+    { min:78, team:'BOT', type:'gol',     lucide:'circle-dot',    color:'var(--green)',  player:'Luiz Henrique',     desc:'Contra-ataque decisivo' },
+    { min:82, team:'FLA', type:'vermelho',lucide:'square',         color:'var(--red)',    player:'Fabrício Bruno',    desc:'Segundo cartão amarelo' },
+    { min:90, team:'BOT', type:'fim',     lucide:'flag',           color:'var(--gray)',   player:'Fim de Jogo',       desc:'Botafogo 3×0 Flamengo' },
   ];
 
   const timeline = document.getElementById('timeline');
@@ -281,18 +295,21 @@
     const isBot = e.team === 'BOT';
     const isLast = i === EVENTS.length - 1;
     const row = document.createElement('div');
-    row.style.cssText = `display:flex;align-items:center;gap:10px;padding:10px 14px;${isLast ? '' : 'border-bottom:1px solid var(--border);'}`;
+    row.style.cssText = `display:flex;align-items:center;gap:12px;padding:10px 14px;${isLast ? '' : 'border-bottom:1px solid var(--border);'}`;
     row.innerHTML = `
-      <span style="font-size:0.75rem;font-weight:700;color:var(--gray);min-width:28px;">${e.min}'</span>
-      <span style="font-size:1.125rem;">${e.icon}</span>
+      <span style="font-size:0.75rem;font-weight:700;color:var(--gray);min-width:28px;text-align:right;">${e.min}'</span>
+      <div style="width:28px;height:28px;border-radius:50%;background:${e.color}22;border:1px solid ${e.color}44;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <i data-lucide="${e.lucide}" style="width:14px;height:14px;color:${e.color};"></i>
+      </div>
       <div style="flex:1;">
         <div style="font-size:0.875rem;font-weight:600;">${e.player}</div>
-        <div style="font-size:0.75rem;color:var(--gray);">${e.desc}</div>
+        <div style="font-size:0.75rem;color:var(--gray);margin-top:1px;">${e.desc}</div>
       </div>
-      <span style="font-size:0.6875rem;font-weight:700;padding:3px 8px;border-radius:var(--radius-pill);background:${isBot ? 'rgba(46,230,92,0.12)' : 'var(--red-dim)'};color:${isBot ? 'var(--green)' : 'var(--red)'};">${e.team}</span>
+      <span style="font-size:0.625rem;font-weight:700;padding:3px 8px;border-radius:var(--radius-pill);background:${isBot ? 'rgba(46,230,92,0.12)' : 'var(--red-dim)'};color:${isBot ? 'var(--green)' : 'var(--red)'};">${e.team}</span>
     `;
     timeline.appendChild(row);
   });
+  lucide.createIcons();
 
   // ── ESCALAÇÕES ─────────────────────────────────────────────────
   const BOT_SQUAD = ['John (GK)','Damián Suárez','Adryelson','Barboza','Marçal','Tchê Tchê','Gregore','Marlon Freitas','Tiquinho','Júnior Santos','Luiz Henrique'];
@@ -403,10 +420,37 @@
       const round    = rawMatch.matchday ? `Rodada ${rawMatch.matchday}` : m.date;
 
       document.getElementById('matchCompetition').textContent = `${compName} · ${round}`;
-      document.getElementById('matchHomeAbbr').textContent    = homeAbbr;
       document.getElementById('matchHomeName').textContent    = m.home;
-      document.getElementById('matchAwayAbbr').textContent    = awayAbbr;
       document.getElementById('matchAwayName').textContent    = m.away;
+
+      // Update shield abbr text (fallback if no logo)
+      const homeShield = document.getElementById('matchHomeShield');
+      const awayShield = document.getElementById('matchAwayShield');
+      if (homeShield) homeShield.textContent = homeAbbr;
+      if (awayShield) awayShield.textContent = awayAbbr;
+
+      // Load real shields from SDB
+      async function loadMatchShields() {
+        try {
+          const [hRes, aRes] = await Promise.all([
+            ZebraAPI.sportsDb.searchTeam(m.home),
+            ZebraAPI.sportsDb.searchTeam(m.away),
+          ]);
+          const hLogo = hRes?.teams?.[0]?.strTeamBadge || '';
+          const aLogo = aRes?.teams?.[0]?.strTeamBadge || '';
+          if (hLogo && homeShield) {
+            homeShield.innerHTML = `<img src="${hLogo}" alt="${m.home}" style="width:52px;height:52px;object-fit:contain;" onerror="this.parentElement.textContent='${homeAbbr}'">`;
+            homeShield.style.background = 'transparent';
+            homeShield.style.border = 'none';
+          }
+          if (aLogo && awayShield) {
+            awayShield.innerHTML = `<img src="${aLogo}" alt="${m.away}" style="width:52px;height:52px;object-fit:contain;" onerror="this.parentElement.textContent='${awayAbbr}'">`;
+            awayShield.style.background = 'transparent';
+            awayShield.style.border = 'none';
+          }
+        } catch {}
+      }
+      loadMatchShields();
 
       if (m.isFinished && m.hs !== null && m.as !== null) {
         document.getElementById('matchScore').innerHTML =
