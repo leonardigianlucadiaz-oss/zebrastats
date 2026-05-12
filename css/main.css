@@ -918,7 +918,8 @@ p  { font-size: 0.875rem; line-height: 1.5; color: var(--gray); }
   border-bottom: 1px solid var(--border);
 }
 .standings-table th:first-child  { text-align: left; min-width: 28px; }
-.standings-table th:nth-child(2) { text-align: left; width: 100%; }
+.standings-table th:nth-child(2) { text-align: center; width: 28px; }
+.standings-table th:nth-child(3) { text-align: left; width: 100%; }
 .standings-table td {
   padding: 9px 5px;
   text-align: center;
@@ -926,7 +927,8 @@ p  { font-size: 0.875rem; line-height: 1.5; color: var(--gray); }
   vertical-align: middle;
 }
 .standings-table td:first-child  { text-align: left; color: var(--gray); font-size: 0.75rem; }
-.standings-table td:nth-child(2) { text-align: left; font-weight: 500; }
+.standings-table td:nth-child(2) { text-align: center; width: 28px; padding: 6px 4px; }
+.standings-table td:nth-child(3) { text-align: left; font-weight: 500; }
 .standings-table tr:hover td { background: rgba(14,31,51,0.6); }
 .standings-table .highlight-row td { background: rgba(46,230,92,0.04); }
 
@@ -1150,3 +1152,21 @@ input:checked + .toggle-slider::before { transform: translateX(20px); }
 .result-pill--v { background: var(--green-dim); color: var(--green); border: 1px solid rgba(46,230,92,0.4); }
 .result-pill--d { background: var(--red-dim);   color: var(--red);   border: 1px solid rgba(238,68,68,0.4); }
 .result-pill--e { background: var(--gray-dim);  color: var(--gray);  border: 1px solid rgba(136,154,170,0.3); }
+
+/* ── SKELETON LOADING ── */
+@keyframes skeleton-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+.skel {
+  background: linear-gradient(90deg, var(--card2) 25%, rgba(255,255,255,0.06) 50%, var(--card2) 75%);
+  background-size: 400% 100%;
+  animation: skeleton-shimmer 1.4s ease infinite;
+  border-radius: var(--radius-sm);
+}
+.skel-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+}
