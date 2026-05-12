@@ -84,40 +84,51 @@
 
     <main class="content">
 
-      <!-- ÍNDICE ZEBRA (STAR RATING) -->
+      <!-- ÍNDICE ZEBRA (VISUAL STAR BAR) -->
       <div class="card">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-          <span class="section-title" style="font-size:0.875rem;color:var(--gray);">Índice Zebra do Time</span>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+          <span class="section-title" style="font-size:0.875rem;color:var(--gray);">Índice Zebra</span>
           <a href="assinatura.html" class="badge badge--pro" style="font-size:0.6875rem;">Pro</a>
         </div>
 
-        <div style="display:flex;align-items:center;gap:12px;">
-          <div class="stars" id="starDisplay"></div>
-          <div>
-            <span style="font-size:1.75rem;font-weight:700;color:var(--gold);" id="starScore">3.5</span>
-            <span style="font-size:0.875rem;color:var(--gray);"> / 5</span>
+        <!-- Score grande + barra degradê -->
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:14px;">
+          <div style="text-align:center;flex-shrink:0;">
+            <div style="font-size:3rem;font-weight:800;line-height:1;" id="starScore">3.5</div>
+            <div style="font-size:0.6875rem;color:var(--gray);margin-top:2px;">/ 5.0</div>
+          </div>
+          <div style="flex:1;">
+            <div style="display:flex;justify-content:space-between;font-size:0.625rem;color:var(--gray);margin-bottom:6px;">
+              <span>Baixo</span><span>Médio</span><span>Alto</span>
+            </div>
+            <div style="height:10px;border-radius:5px;background:linear-gradient(90deg,var(--green),var(--gold),var(--red));position:relative;overflow:visible;">
+              <div id="ziThumb" style="position:absolute;top:50%;width:16px;height:16px;border-radius:50%;background:white;border:2px solid var(--bg);box-shadow:0 2px 6px rgba(0,0,0,0.4);transform:translate(-50%,-50%);transition:left 0.5s ease;left:70%;"></div>
+            </div>
+            <div style="margin-top:8px;" id="starDisplay">
+              <!-- estrelas renderizadas por JS -->
+            </div>
           </div>
         </div>
 
-        <p style="font-size:0.8125rem;color:var(--gray);margin-top:8px;" id="starDescription">
+        <p style="font-size:0.8125rem;color:var(--gray);border-top:1px solid var(--border);padding-top:10px;" id="starDescription">
           Alta frequência de resultados inesperados nas últimas 3 temporadas.
         </p>
 
         <!-- Barra de distribuição -->
-        <div style="margin-top:14px;display:flex;flex-direction:column;gap:6px;">
+        <div style="margin-top:12px;display:flex;flex-direction:column;gap:8px;">
           <div style="display:flex;align-items:center;gap:8px;">
-            <span style="font-size:0.75rem;color:var(--gray);min-width:70px;">Como zebra</span>
+            <span style="font-size:0.75rem;color:var(--gray);min-width:78px;">Como zebra</span>
             <div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;">
-              <div style="width:65%;height:100%;background:var(--green);border-radius:3px;"></div>
+              <div id="barAsUnderdog" style="width:65%;height:100%;background:var(--green);border-radius:3px;transition:width 0.6s ease;"></div>
             </div>
-            <span style="font-size:0.75rem;color:var(--green);min-width:30px;">65%</span>
+            <span style="font-size:0.75rem;color:var(--green);min-width:34px;" id="barAsUnderdogLabel">65%</span>
           </div>
           <div style="display:flex;align-items:center;gap:8px;">
-            <span style="font-size:0.75rem;color:var(--gray);min-width:70px;">Causou zebra</span>
+            <span style="font-size:0.75rem;color:var(--gray);min-width:78px;">Causou zebra</span>
             <div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;">
-              <div style="width:42%;height:100%;background:var(--gold);border-radius:3px;"></div>
+              <div id="barCaused" style="width:42%;height:100%;background:var(--gold);border-radius:3px;transition:width 0.6s ease;"></div>
             </div>
-            <span style="font-size:0.75rem;color:var(--gold);min-width:30px;">42%</span>
+            <span style="font-size:0.75rem;color:var(--gold);min-width:34px;" id="barCausedLabel">42%</span>
           </div>
         </div>
       </div>
@@ -184,6 +195,15 @@
           <a href="#" class="section-link">Ver todas</a>
         </div>
         <div id="lastMatchesList" style="display:flex;flex-direction:column;gap:8px;"></div>
+      </div>
+
+      <!-- MAIORES ZEBRAS DO TIME -->
+      <div>
+        <div class="section-header">
+          <span class="section-title">🏆 Maiores Zebras do Time</span>
+          <a href="zebras.html" class="section-link">Ver todas</a>
+        </div>
+        <div id="biggestZebrasList" style="display:flex;flex-direction:column;gap:8px;"></div>
       </div>
 
       <!-- BANNER PREMIUM (escondido para PRO via updatePlanBadge) -->
@@ -312,26 +332,66 @@
       selectorEl.appendChild(btn);
     });
 
-    // ── RENDER STARS ──────────────────────────────────────
+    // ── RENDER ZI VISUAL ──────────────────────────────────
     function renderStars(rating) {
+      // Atualiza thumb na barra
+      const thumb = document.getElementById('ziThumb');
+      if (thumb) thumb.style.left = `${(rating / 5) * 100}%`;
+
+      // Estrelas como mini indicadores
       const el = document.getElementById('starDisplay');
       el.innerHTML = '';
+      const wrap = document.createElement('div');
+      wrap.style.cssText = 'display:flex;gap:3px;align-items:center;';
       for (let i = 1; i <= 5; i++) {
         const star = document.createElement('span');
-        if (rating >= i) {
-          star.className = 'star';
-          star.textContent = '★';
-        } else if (rating >= i - 0.5) {
-          star.className = 'star star--half';
-          star.textContent = '★';
-          star.style.cssText = 'position:relative;';
-          star.innerHTML = `<span style="color:var(--border);">★</span><span style="position:absolute;left:0;top:0;width:50%;overflow:hidden;display:inline-block;color:var(--gold);">★</span>`;
-        } else {
-          star.className = 'star star--empty';
-          star.textContent = '★';
-        }
-        el.appendChild(star);
+        const filled = rating >= i;
+        const half   = !filled && rating >= i - 0.5;
+        star.style.cssText = `font-size:1.125rem;color:${filled || half ? 'var(--gold)' : 'var(--border)'};transition:color 0.3s;`;
+        star.textContent = '★';
+        wrap.appendChild(star);
       }
+      el.appendChild(wrap);
+    }
+
+    // ── RENDER BIGGEST ZEBRAS ─────────────────────────────
+    function renderBiggestZebras(teamName) {
+      const container = document.getElementById('biggestZebrasList');
+      if (!container) return;
+      // Mock zebras mais improváveis do time
+      const BIGGEST = {
+        torino: [
+          { home:'Lecce', away:'Torino',   hs:1, as:2, zi:6.1, date:'28/04', odds:'5.20' },
+          { home:'Empoli',away:'Torino',   hs:0, as:1, zi:5.5, date:'14/04', odds:'4.80' },
+          { home:'Torino',away:'Juventus', hs:2, as:1, zi:7.3, date:'11/02', odds:'6.00' },
+        ],
+        flamengo: [
+          { home:'Flamengo', away:'Palmeiras',hs:3, as:0, zi:5.8, date:'10/03', odds:'4.50' },
+          { home:'Bahia',    away:'Flamengo', hs:0, as:3, zi:4.9, date:'29/04', odds:'3.80' },
+          { home:'Flamengo', away:'Atl.-MG',  hs:2, as:1, zi:6.2, date:'18/01', odds:'5.10' },
+        ],
+      };
+      const list = BIGGEST[currentTeam] || BIGGEST.torino;
+      container.innerHTML = '';
+      list.forEach((z, i) => {
+        const cls = z.zi >= 7 ? 'grande' : z.zi >= 4 ? 'media' : 'leve';
+        const hc = crestImg(z.home, 20);
+        const ac = crestImg(z.away, 20);
+        const card = document.createElement('div');
+        card.style.cssText = 'background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:10px 14px;cursor:pointer;';
+        card.innerHTML = `
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+            <span style="font-size:0.6875rem;color:var(--gray);">${z.date} · odd ${z.odds}</span>
+            <span class="zebra-index-badge zi--${cls}">🦓 ZI ${z.zi}</span>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <span style="display:flex;align-items:center;gap:5px;font-size:0.875rem;font-weight:600;flex:1;">${hc}${z.home}</span>
+            <span style="font-size:1.25rem;font-weight:700;min-width:56px;text-align:center;color:var(--green);">${z.hs} – ${z.as}</span>
+            <span style="display:flex;align-items:center;justify-content:flex-end;gap:5px;font-size:0.875rem;font-weight:600;flex:1;">${z.away}${ac}</span>
+          </div>`;
+        card.addEventListener('click', () => window.location.href = 'partida.html');
+        container.appendChild(card);
+      });
     }
 
     // ── RENDER CONFRONTOS ─────────────────────────────────
@@ -380,23 +440,28 @@
       const el = document.getElementById('lastMatchesList');
       el.innerHTML = '';
       matches.forEach(m => {
-        const colors = { W:'var(--green)', D:'var(--red)', E:'var(--gold)' };
-        const labels = { W:'V', D:'D', E:'E' };
+        const RES = {
+          W: { label:'V', color:'var(--green)', bg:'rgba(46,230,92,0.12)', border:'rgba(46,230,92,0.3)' },
+          D: { label:'D', color:'var(--red)',   bg:'rgba(238,68,68,0.12)',  border:'rgba(238,68,68,0.3)'  },
+          E: { label:'E', color:'var(--gold)',  bg:'rgba(255,200,50,0.12)', border:'rgba(255,200,50,0.3)' },
+        };
+        const r = RES[m.result] || RES.E;
+        const hCrest = crestImg(m.home, 20);
+        const aCrest = crestImg(m.away, 20);
         const row = document.createElement('div');
-        row.className = 'game-card';
+        row.style.cssText = `display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);border-left:3px solid ${r.color};cursor:pointer;`;
         row.innerHTML = `
-          <div class="game-card__match">
-            <span class="game-card__team" style="font-size:0.875rem;">${m.home}</span>
-            <span class="game-card__score" style="font-size:1rem;">${m.hs} – ${m.as}</span>
-            <span class="game-card__team game-card__team--away" style="font-size:0.875rem;">${m.away}</span>
-          </div>
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px;">
-            <span class="text-xs text-gray">${m.date}</span>
-            <span style="font-size:0.75rem;font-weight:700;color:${colors[m.result]};background:${colors[m.result]}22;padding:2px 8px;border-radius:4px;">
-              ${labels[m.result]}
-            </span>
+          <div style="width:32px;height:32px;border-radius:50%;background:${r.bg};border:1px solid ${r.border};display:flex;align-items:center;justify-content:center;font-size:0.875rem;font-weight:800;color:${r.color};flex-shrink:0;">${r.label}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <span style="display:flex;align-items:center;gap:4px;font-size:0.875rem;font-weight:600;">${hCrest || ''}${m.home}</span>
+              <span style="font-size:1.125rem;font-weight:700;margin:0 6px;">${m.hs} – ${m.as}</span>
+              <span style="display:flex;align-items:center;gap:4px;font-size:0.875rem;font-weight:600;">${m.away}${aCrest || ''}</span>
+            </div>
+            <div style="font-size:0.6875rem;color:var(--gray);margin-top:3px;">${m.date}</div>
           </div>
         `;
+        row.addEventListener('click', () => window.location.href = 'partida.html');
         el.appendChild(row);
       });
     }
@@ -431,6 +496,20 @@
 
       // Last matches
       renderLastMatches(t.lastMatches);
+
+      // Biggest zebras
+      renderBiggestZebras(key);
+
+      // Update ZI distribution bars
+      const ratingPct = Math.round((t.rating / 5) * 100);
+      const asUnderdog = Math.min(95, ratingPct + 10);
+      const caused = Math.max(15, ratingPct - 10);
+      const barU = document.getElementById('barAsUnderdog');
+      const barC = document.getElementById('barCaused');
+      const lblU = document.getElementById('barAsUnderdogLabel');
+      const lblC = document.getElementById('barCausedLabel');
+      if (barU) { barU.style.width = `${asUnderdog}%`; lblU.textContent = `${asUnderdog}%`; }
+      if (barC) { barC.style.width = `${caused}%`;     lblC.textContent = `${caused}%`; }
 
       // Update selector
       document.querySelectorAll('#teamSelector button').forEach(b => {

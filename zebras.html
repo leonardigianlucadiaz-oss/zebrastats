@@ -241,6 +241,14 @@
       return;
     }
 
+    function zbCrest(url, name) {
+      const abbr = name.substring(0,3).toUpperCase();
+      const inner = url
+        ? `<img src="${url}" alt="${name}" style="width:36px;height:36px;object-fit:contain;" loading="lazy" onerror="this.style.display='none';">`
+        : `<span style="font-size:0.5625rem;font-weight:700;color:var(--gray);">${abbr}</span>`;
+      return `<div style="width:40px;height:40px;border-radius:50%;background:var(--card2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;">${inner}</div>`;
+    }
+
     list.forEach((z, i) => {
       const cls   = ziClass(z);
       const label = ziLabel(cls);
@@ -254,22 +262,38 @@
         ? `<img src="${leagueBadge}" style="width:12px;height:12px;object-fit:contain;vertical-align:middle;margin-right:3px;" onerror="this.remove();">`
         : '';
 
-      const homeCrest = crestImg(z.home, 22);
-      const awayCrest = crestImg(z.away, 22);
+      const hcUrl = getCrest(z.home);
+      const acUrl = getCrest(z.away);
+
+      // Barra de probabilidade (proporção de odds)
+      const hOdd = parseFloat(z.odds_h) || 4.5;
+      const aOdd = parseFloat(z.odds_a) || 1.7;
+      const probH = Math.round((1/hOdd) * 100);
+      const probA = Math.round((1/aOdd) * 100);
+      const probE = Math.max(0, 100 - probH - probA);
 
       if (locked) {
+        card.style.cssText = 'position:relative;overflow:hidden;';
         card.innerHTML = `
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
             <span class="text-xs text-gray">${leagueLogoHtml}${z.league} · ${z.date}</span>
             <span class="zebra-index-badge zi--${cls}">🦓 ${z.zi} ${label}</span>
           </div>
-          <div style="filter:blur(5px);pointer-events:none;user-select:none;display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-            <span style="display:flex;align-items:center;gap:6px;font-size:0.9375rem;font-weight:600;flex:1;">${homeCrest}${z.home}</span>
-            <span style="font-size:1.375rem;font-weight:700;min-width:72px;text-align:center;">${z.hs} – ${z.as}</span>
-            <span style="display:flex;align-items:center;justify-content:flex-end;gap:6px;font-size:0.9375rem;font-weight:600;flex:1;">${z.away}${awayCrest}</span>
+          <div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;margin-bottom:10px;filter:blur(4px);pointer-events:none;user-select:none;">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:5px;">
+              ${zbCrest(hcUrl, z.home)}
+              <span style="font-size:0.8125rem;font-weight:600;text-align:center;">${z.home}</span>
+            </div>
+            <div style="text-align:center;">
+              <div style="font-size:1.625rem;font-weight:800;letter-spacing:-1px;">${z.hs} – ${z.as}</div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:5px;">
+              ${zbCrest(acUrl, z.away)}
+              <span style="font-size:0.8125rem;font-weight:600;text-align:center;">${z.away}</span>
+            </div>
           </div>
-          <div style="text-align:center;padding-top:4px;">
-            <a href="assinatura.html" style="font-size:0.75rem;color:var(--green);font-weight:600;text-decoration:none;">🔒 Assine o Pro para ver →</a>
+          <div style="position:absolute;inset:0;background:linear-gradient(180deg,transparent 30%,var(--card) 70%);display:flex;align-items:flex-end;justify-content:center;padding:14px;">
+            <a href="assinatura.html" style="font-size:0.8125rem;color:var(--green);font-weight:700;text-decoration:none;background:var(--green-dim);border:1px solid rgba(46,230,92,0.3);padding:8px 20px;border-radius:var(--radius-pill);">🔒 Ver com Pro</a>
           </div>`;
       } else {
         card.innerHTML = `
@@ -277,27 +301,51 @@
             <span class="text-xs text-gray">${leagueLogoHtml}${z.league} · ${z.date}</span>
             <span class="zebra-index-badge zi--${cls}">🦓 ${z.zi} ${label}</span>
           </div>
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-            <span style="display:flex;align-items:center;gap:6px;font-size:0.9375rem;font-weight:600;flex:1;">${homeCrest}${z.home}</span>
-            <span style="font-size:1.375rem;font-weight:700;min-width:72px;text-align:center;">${z.hs} – ${z.as}</span>
-            <span style="display:flex;align-items:center;justify-content:flex-end;gap:6px;font-size:0.9375rem;font-weight:600;flex:1;">${z.away}${awayCrest}</span>
+          <div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;margin-bottom:12px;">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:5px;">
+              ${zbCrest(hcUrl, z.home)}
+              <span style="font-size:0.8125rem;font-weight:600;text-align:center;">${z.home}</span>
+              <span style="font-size:0.625rem;color:var(--green);font-weight:700;">Azarão</span>
+            </div>
+            <div style="text-align:center;">
+              <div style="font-size:1.75rem;font-weight:800;letter-spacing:-1px;">${z.hs} – ${z.as}</div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:5px;">
+              ${zbCrest(acUrl, z.away)}
+              <span style="font-size:0.8125rem;font-weight:600;text-align:center;">${z.away}</span>
+              <span style="font-size:0.625rem;color:var(--gray);">Favorito</span>
+            </div>
           </div>
-          <div style="display:flex;gap:16px;padding-top:10px;border-top:1px solid var(--border);align-items:center;">
+          <div style="margin-bottom:12px;">
+            <div style="display:flex;justify-content:space-between;font-size:0.625rem;color:var(--gray);margin-bottom:4px;">
+              <span>${z.home} ${probH}%</span>
+              <span>Empate ${probE}%</span>
+              <span>${z.away} ${probA}%</span>
+            </div>
+            <div style="display:flex;gap:2px;height:5px;border-radius:3px;overflow:hidden;">
+              <div style="flex:${probH};background:var(--green);"></div>
+              <div style="flex:${probE};background:var(--border);"></div>
+              <div style="flex:${probA};background:var(--red);"></div>
+            </div>
+          </div>
+          <div style="display:flex;gap:12px;padding-top:10px;border-top:1px solid var(--border);align-items:center;">
             <div>
               <div style="font-size:0.625rem;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px;">Odd azarão</div>
-              <div style="font-size:0.875rem;font-weight:700;color:var(--white);">${z.odds_h}</div>
+              <div style="font-size:0.9375rem;font-weight:700;color:var(--green);">${z.odds_h}</div>
             </div>
             <div>
               <div style="font-size:0.625rem;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px;">Odd favorito</div>
-              <div style="font-size:0.875rem;font-weight:700;color:var(--red);">${z.odds_a}</div>
+              <div style="font-size:0.9375rem;font-weight:700;color:var(--red);">${z.odds_a}</div>
             </div>
-            <a href="partida.html" style="margin-left:auto;font-size:0.75rem;color:var(--green);font-weight:600;text-decoration:none;">Ver detalhes →</a>
+            <a href="partida.html" style="margin-left:auto;font-size:0.75rem;color:var(--green);font-weight:600;text-decoration:none;display:flex;align-items:center;gap:3px;">Ver detalhes <i data-lucide="arrow-right" style="width:13px;height:13px;"></i></a>
           </div>`;
       }
 
       card.addEventListener('click', e => { if (e.target.tagName !== 'A') window.location.href = 'partida.html'; });
       container.appendChild(card);
     });
+    // Re-render lucide icons for arrow-right inside cards
+    if (typeof lucide !== 'undefined') lucide.createIcons();
   }
 
   // ── FILTROS ──────────────────────────────────────────────────

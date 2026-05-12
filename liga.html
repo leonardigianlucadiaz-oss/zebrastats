@@ -51,12 +51,18 @@
   </nav>
 
   <!-- HERO DA LIGA -->
-  <section id="leagueHero" style="padding:20px 16px 16px;background:linear-gradient(180deg,var(--card2) 0%,var(--bg) 100%);border-bottom:1px solid var(--border);">
-    <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px;">
-      <div style="width:56px;height:56px;border-radius:var(--radius-md);background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:1.875rem;overflow:hidden;" id="leagueFlag">🇧🇷</div>
+  <section id="leagueHero" style="padding:20px 16px 16px;background:linear-gradient(135deg,rgba(46,230,92,0.07) 0%,var(--card2) 50%,var(--bg) 100%);border-bottom:1px solid var(--border);position:relative;overflow:hidden;">
+    <!-- Fundo decorativo -->
+    <div style="position:absolute;top:-20px;right:-20px;width:120px;height:120px;border-radius:50%;background:rgba(46,230,92,0.04);pointer-events:none;"></div>
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:14px;">
+      <div style="width:64px;height:64px;border-radius:var(--radius-md);background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:2rem;overflow:hidden;flex-shrink:0;box-shadow:0 4px 16px rgba(0,0,0,0.3);" id="leagueFlag">🇧🇷</div>
       <div>
-        <div style="font-size:1.125rem;font-weight:700;" id="leagueName">Brasileirão Série A</div>
-        <div style="font-size:0.8125rem;color:var(--gray);" id="leagueSub">Brasil · Temporada 2025</div>
+        <div style="font-size:1.25rem;font-weight:700;line-height:1.2;" id="leagueName">Brasileirão Série A</div>
+        <div style="font-size:0.8125rem;color:var(--gray);margin-top:3px;" id="leagueSub">Brasil · Temporada 2025</div>
+        <div style="display:flex;align-items:center;gap:6px;margin-top:6px;">
+          <span style="width:6px;height:6px;border-radius:50%;background:var(--green);display:inline-block;animation:pulse 1.5s infinite;"></span>
+          <span style="font-size:0.6875rem;color:var(--green);font-weight:600;">Em andamento</span>
+        </div>
       </div>
     </div>
     <!-- STATS DA TEMPORADA -->
@@ -75,7 +81,7 @@
       </div>
       <div style="flex:1;padding:10px 8px;text-align:center;">
         <div style="font-size:1rem;font-weight:700;color:var(--gold);" id="statZebras">14</div>
-        <div style="font-size:0.625rem;color:var(--gray);margin-top:2px;">Zebras</div>
+        <div style="font-size:0.625rem;color:var(--gray);margin-top:2px;">Zebras 🦓</div>
       </div>
     </div>
   </section>
@@ -417,22 +423,29 @@
     const tbody = table.querySelector('tbody');
     STANDINGS.forEach(t => {
       const tr = document.createElement('tr');
+      const ziNum = parseFloat(t.zi) || 0;
+      const isZebraRow = ziNum >= 4.5;
       if ([1,2,3,4].includes(t.pos)) tr.className = 'highlight-row';
+      if (isZebraRow) {
+        tr.style.cssText = 'border-left:2px solid var(--gold);background:rgba(255,200,50,0.04);';
+      }
       const badgeClass = { cl:'pos-badge--cl', eur:'pos-badge--eur', rel:'pos-badge--rel' }[t.posClass] || '';
       const crestHtml = t.crest
         ? `<img src="${t.crest}" alt="${t.name}" style="width:22px;height:22px;object-fit:contain;display:block;margin:0 auto;" loading="lazy" onerror="this.style.opacity=0;">`
         : `<span style="font-size:0.5rem;font-weight:700;color:var(--gray);display:block;text-align:center;">${(t.abbr||t.name.substring(0,3)).toUpperCase()}</span>`;
+      const ziColor = ziNum >= 6 ? 'var(--gold)' : ziNum >= 4 ? 'var(--gold)' : 'var(--gray)';
+      const ziDisplay = isZebraRow ? `🦓 ${t.zi}` : t.zi;
       tr.innerHTML = `
         <td><span class="pos-badge ${badgeClass}">${t.pos}</span></td>
         <td>${crestHtml}</td>
-        <td>${t.name}</td>
+        <td style="font-weight:${isZebraRow ? '600' : '400'};">${t.name}</td>
         <td style="font-weight:700;">${t.p}</td>
         <td>${t.j}</td>
         <td style="color:var(--green);">${t.v}</td>
         <td>${t.e}</td>
         <td style="color:var(--red);">${t.d}</td>
         <td style="color:${t.sg > 0 ? 'var(--green)' : t.sg < 0 ? 'var(--red)' : 'var(--gray)'};">${t.sg > 0 ? '+' : ''}${t.sg}</td>
-        <td style="color:var(--gold);font-size:0.75rem;font-weight:600;">${t.zi}</td>`;
+        <td style="color:${ziColor};font-size:0.75rem;font-weight:600;">${ziDisplay}</td>`;
       tr.addEventListener('click', () => window.location.href = 'time.html');
       tbody.appendChild(tr);
     });
@@ -440,43 +453,50 @@
 
   // ── STATS ─────────────────────────────────────────────────────────
   function renderStats() {
-    // Artilheiros
+    // Artilheiros com avatar
+    function playerAvatar(name, flag) {
+      const initials = name.split(' ').map(w => w[0]).join('').substring(0,2).toUpperCase();
+      return `<div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--card2),var(--border));border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;flex-shrink:0;position:relative;">
+        ${initials}<span style="position:absolute;bottom:-2px;right:-2px;font-size:0.75rem;line-height:1;">${flag}</span>
+      </div>`;
+    }
+
     const artEl = document.getElementById('artilheiros');
     artEl.innerHTML = '';
     ARTILHEIROS.forEach((p, i) => {
       const row = document.createElement('div');
-      row.style.cssText = 'display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid var(--border);';
-      if (i === ARTILHEIROS.length - 1) row.style.borderBottom = 'none';
+      row.style.cssText = 'display:flex;align-items:center;gap:12px;padding:10px 14px;' + (i < ARTILHEIROS.length-1 ? 'border-bottom:1px solid var(--border);' : '');
+      const medal = {0:'🥇',1:'🥈',2:'🥉'}[i] || `#${i+1}`;
       row.innerHTML = `
-        <span style="font-size:0.75rem;color:var(--gray);min-width:20px;font-weight:700;">#${i+1}</span>
-        <span style="font-size:1rem;">${p.flag}</span>
+        <span style="font-size:1.125rem;min-width:28px;text-align:center;">${medal}</span>
+        ${playerAvatar(p.name, p.flag)}
         <div style="flex:1;">
           <div style="font-size:0.9375rem;font-weight:600;">${p.name}</div>
           <div style="font-size:0.75rem;color:var(--gray);">${p.team}</div>
         </div>
-        <div style="text-align:right;">
-          <span style="font-size:1.125rem;font-weight:700;color:var(--green);">${p.gols}</span>
+        <div style="text-align:center;min-width:40px;">
+          <span style="font-size:1.375rem;font-weight:700;color:var(--green);">${p.gols}</span>
           <div style="font-size:0.625rem;color:var(--gray);">gols</div>
         </div>`;
       artEl.appendChild(row);
     });
 
-    // Assistências
+    // Assistências com avatar
     const astEl = document.getElementById('assistencias');
     astEl.innerHTML = '';
     ASSISTENCIAS.forEach((p, i) => {
       const row = document.createElement('div');
-      row.style.cssText = 'display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid var(--border);';
-      if (i === ASSISTENCIAS.length - 1) row.style.borderBottom = 'none';
+      row.style.cssText = 'display:flex;align-items:center;gap:12px;padding:10px 14px;' + (i < ASSISTENCIAS.length-1 ? 'border-bottom:1px solid var(--border);' : '');
+      const medal = {0:'🥇',1:'🥈',2:'🥉'}[i] || `#${i+1}`;
       row.innerHTML = `
-        <span style="font-size:0.75rem;color:var(--gray);min-width:20px;font-weight:700;">#${i+1}</span>
-        <span style="font-size:1rem;">${p.flag}</span>
+        <span style="font-size:1.125rem;min-width:28px;text-align:center;">${medal}</span>
+        ${playerAvatar(p.name, p.flag)}
         <div style="flex:1;">
           <div style="font-size:0.9375rem;font-weight:600;">${p.name}</div>
           <div style="font-size:0.75rem;color:var(--gray);">${p.team}</div>
         </div>
-        <div style="text-align:right;">
-          <span style="font-size:1.125rem;font-weight:700;color:var(--gold);">${p.ast}</span>
+        <div style="text-align:center;min-width:40px;">
+          <span style="font-size:1.375rem;font-weight:700;color:var(--gold);">${p.ast}</span>
           <div style="font-size:0.625rem;color:var(--gray);">ast.</div>
         </div>`;
       astEl.appendChild(row);
@@ -610,6 +630,10 @@
 <style>
   .bottom-nav__icon i { width: 20px; height: 20px; display: block; }
   .navbar__icon i { display: block; }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
 </style>
 </body>
 </html>
