@@ -23,7 +23,7 @@
   <!-- HERO DA LIGA -->
   <section id="leagueHero" style="padding:20px 16px 16px;background:linear-gradient(180deg,var(--card2) 0%,var(--bg) 100%);border-bottom:1px solid var(--border);">
     <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px;">
-      <div style="width:56px;height:56px;border-radius:var(--radius-md);background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:1.875rem;" id="leagueFlag">🇧🇷</div>
+      <div style="width:56px;height:56px;border-radius:var(--radius-md);background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:1.875rem;overflow:hidden;" id="leagueFlag">🇧🇷</div>
       <div>
         <div style="font-size:1.125rem;font-weight:700;" id="leagueName">Brasileirão Série A</div>
         <div style="font-size:0.8125rem;color:var(--gray);" id="leagueSub">Brasil · Temporada 2025</div>
@@ -215,11 +215,23 @@
   let sdbStandingsLoaded = false;
 
   // ── FAVORITAR LIGA ──────────────────────────────────────────────
-  document.getElementById('favLeagueBtn').addEventListener('click', function() {
-    favLeague = !favLeague;
-    this.innerHTML = favLeague ? '<i data-lucide="star" style="width:18px;height:18px;fill:var(--gold);color:var(--gold);"></i>' : '<i data-lucide="star" style="width:18px;height:18px;"></i>';
+  function syncFavBtn() {
+    const btn = document.getElementById('favLeagueBtn');
+    favLeague = isFavLeague(activeLid);
+    btn.innerHTML = favLeague
+      ? '<i data-lucide="star" style="width:18px;height:18px;fill:var(--gold);color:var(--gold);"></i>'
+      : '<i data-lucide="star" style="width:18px;height:18px;"></i>';
     lucide.createIcons();
-    showToast(favLeague ? 'Liga favoritada!' : 'Liga removida dos favoritos');
+  }
+
+  document.getElementById('favLeagueBtn').addEventListener('click', function() {
+    const name = document.getElementById('leagueName').textContent;
+    favLeague = toggleFavLeague(activeLid, name);
+    this.innerHTML = favLeague
+      ? '<i data-lucide="star" style="width:18px;height:18px;fill:var(--gold);color:var(--gold);"></i>'
+      : '<i data-lucide="star" style="width:18px;height:18px;"></i>';
+    lucide.createIcons();
+    animFavBtn(this);
   });
 
   // ── SELETOR DE LIGA ─────────────────────────────────────────────
@@ -228,18 +240,34 @@
       document.querySelectorAll('#leaguePicker .filter-chip').forEach(b => b.classList.remove('active'));
       this.classList.add('active');
       activeLid = this.dataset.lid;
-      document.getElementById('leagueFlag').textContent = this.dataset.flag;
       document.getElementById('leagueName').textContent = this.dataset.name;
       document.getElementById('leagueSub').textContent  = this.dataset.sub;
       document.getElementById('statLider').textContent  = this.dataset.lider;
       document.getElementById('statZebras').textContent = this.dataset.zebras;
       document.getElementById('statRodada').textContent = this.dataset.rodada;
-      favLeague = false;
-      document.getElementById('favLeagueBtn').innerHTML = '<i data-lucide="star" style="width:18px;height:18px;"></i>';
-      lucide.createIcons();
+      // reset standings state for new league
+      sdbStandingsLoaded = false;
+      STANDINGS.length = 0;
+      syncFavBtn();
+      loadLeagueLogo(activeLid);
       renderJogos();
+      if (activeTab === 'tabela') renderTabela();
+      initRealData();
     });
   });
+
+  // ── LOGO DA LIGA (SDB) ──────────────────────────────────────────
+  async function loadLeagueLogo(lid) {
+    const flagEl = document.getElementById('leagueFlag');
+    try {
+      const data = await ZebraAPI.sportsDb.getLeagueInfo(lid);
+      const league = data?.leagues?.[0];
+      const badge = league?.strBadge || league?.strLogo || '';
+      if (badge) {
+        flagEl.innerHTML = `<img src="${badge}" alt="${lid}" style="width:48px;height:48px;object-fit:contain;" onerror="this.parentElement.textContent='⚽';">`;
+      }
+    } catch {}
+  }
 
   // ── TABS ─────────────────────────────────────────────────────────
   document.querySelectorAll('.tab-bar__item').forEach(btn => {
@@ -458,6 +486,8 @@
 
   // ── INIT ──────────────────────────────────────────────────────────
   updatePlanBadge && updatePlanBadge();
+  syncFavBtn();
+  loadLeagueLogo('BRA');
   renderJogos();
 
   // ── API REAL DATA ──────────────────────────────────────────────────
