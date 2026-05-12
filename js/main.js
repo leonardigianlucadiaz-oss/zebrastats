@@ -163,14 +163,57 @@ function setUserPlan(plan) {
   localStorage.setItem(PLAN_KEY, plan);
 }
 
-// ── BADGE DE PLANO NA NAVBAR ───────────────────────────────────
+// ── BADGE DE PLANO + DESBLOQUEIO PRO ──────────────────────────
 function updatePlanBadge() {
-  const badge = document.querySelector('.badge--free, .badge--pro');
-  if (!badge) return;
   const plan = getUserPlan();
-  if (plan === 'pro') {
-    badge.textContent = 'PRO';
-    badge.className   = badge.className.replace('badge--free', 'badge--pro');
+  const isPro = plan === 'pro';
+
+  // 1. Atualiza todos os badges de plano na página
+  document.querySelectorAll('.badge--free').forEach(badge => {
+    if (isPro) {
+      badge.textContent = 'PRO';
+      badge.className = badge.className.replace('badge--free', 'badge--pro');
+    }
+  });
+
+  // 2. Atualiza texto de plano na sidebar
+  document.querySelectorAll('.sidebar__user-plan').forEach(el => {
+    el.textContent = isPro ? 'Plano Pro' : 'Plano Free';
+  });
+
+  // 3. Atualiza o botão CTA da sidebar
+  document.querySelectorAll('.sidebar__footer > a.badge--free, .sidebar__footer > a.badge--pro').forEach(el => {
+    if (isPro) {
+      el.textContent = '✓ Pro Ativo';
+      el.className   = el.className.replace('badge--free','badge--pro');
+      el.style.pointerEvents = 'none';
+      el.style.opacity = '0.8';
+    }
+  });
+
+  // 4. Remove lock-banners para usuários PRO
+  if (isPro) {
+    document.querySelectorAll('.lock-banner').forEach(el => {
+      el.style.display = 'none';
+    });
+    // Remove link "🔒 Pro" no header de seção
+    document.querySelectorAll('.section-link.text-gold').forEach(el => {
+      el.style.display = 'none';
+    });
+    // Mostra conteúdo PRO escondido
+    document.querySelectorAll('.pro-content').forEach(el => {
+      el.style.display = '';
+    });
+  }
+
+  // 5. Atualiza plano no perfil (se estiver na página)
+  const planLabel  = document.getElementById('planLabel');
+  const planSub    = document.getElementById('planSub');
+  const planBadge2 = document.getElementById('planBadge2');
+  if (isPro) {
+    if (planLabel)  planLabel.textContent  = 'ZebraStats Pro';
+    if (planSub)    planSub.textContent    = 'Acesso completo · Renovação anual';
+    if (planBadge2) { planBadge2.textContent = 'PRO'; planBadge2.className = 'badge badge--pro'; }
   }
 }
 

@@ -176,6 +176,44 @@
   </div><!-- /app-main -->
 </div><!-- /app-wrapper -->
 
+<!-- ── TELA DE SUCESSO ──────────────────────────────────────────── -->
+<div id="successOverlay" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:9999;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:32px;text-align:center;">
+
+  <!-- Ícone animado -->
+  <div id="successIcon" style="width:96px;height:96px;border-radius:50%;background:var(--green-dim);border:2px solid var(--green);display:flex;align-items:center;justify-content:center;box-shadow:0 0 48px rgba(46,230,92,0.25);transform:scale(0);transition:transform 0.5s cubic-bezier(.34,1.56,.64,1);">
+    <i data-lucide="check" style="width:48px;height:48px;color:var(--green);stroke-width:2.5;"></i>
+  </div>
+
+  <div>
+    <div style="font-size:1.875rem;font-weight:800;margin-bottom:6px;">Pagamento aprovado!</div>
+    <div style="font-size:1rem;color:var(--gray);">Bem-vindo ao ZebraStats Pro 🦓</div>
+  </div>
+
+  <!-- Badge PRO animado -->
+  <div style="background:linear-gradient(135deg,var(--gold-dim),rgba(255,200,50,0.25));border:1.5px solid rgba(255,200,50,0.6);border-radius:var(--radius-pill);padding:8px 24px;display:flex;align-items:center;gap:8px;transform:scale(0);transition:transform 0.5s cubic-bezier(.34,1.56,.64,1) 0.15s;" id="proBadgeSuccess">
+    <i data-lucide="crown" style="width:18px;height:18px;color:var(--gold);"></i>
+    <span style="font-size:0.9375rem;font-weight:700;color:var(--gold);">Plano Pro Ativo</span>
+  </div>
+
+  <!-- Lista de benefícios desbloqueados -->
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;width:100%;max-width:400px;display:flex;flex-direction:column;gap:10px;">
+    <div style="font-size:0.75rem;font-weight:600;color:var(--gray);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:4px;">Desbloqueado agora</div>
+    <div style="display:flex;align-items:center;gap:10px;font-size:0.9375rem;"><i data-lucide="unlock" style="width:16px;height:16px;color:var(--green);flex-shrink:0;"></i> Histórico completo de zebras</div>
+    <div style="display:flex;align-items:center;gap:10px;font-size:0.9375rem;"><i data-lucide="unlock" style="width:16px;height:16px;color:var(--green);flex-shrink:0;"></i> Análises de probabilidade</div>
+    <div style="display:flex;align-items:center;gap:10px;font-size:0.9375rem;"><i data-lucide="unlock" style="width:16px;height:16px;color:var(--green);flex-shrink:0;"></i> Alertas em tempo real</div>
+    <div style="display:flex;align-items:center;gap:10px;font-size:0.9375rem;"><i data-lucide="unlock" style="width:16px;height:16px;color:var(--green);flex-shrink:0;"></i> Padrões sazonais por time</div>
+  </div>
+
+  <!-- Contador regressivo + botão -->
+  <div style="display:flex;flex-direction:column;align-items:center;gap:12px;width:100%;max-width:400px;">
+    <a href="home.html" class="btn btn--primary" style="font-size:1rem;padding:16px 24px;">
+      Explorar o Pro <i data-lucide="arrow-right" style="width:18px;height:18px;"></i>
+    </a>
+    <div style="font-size:0.8125rem;color:var(--gray);">Redirecionando em <span id="redirectCountdown" style="color:var(--white);font-weight:600;">5</span>s...</div>
+  </div>
+
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script src="js/main.js"></script>
@@ -264,10 +302,38 @@
 
     setTimeout(() => {
       setUserPlan('pro');
-      showToast('Pagamento aprovado! Bem-vindo ao Pro!');
-      setTimeout(() => window.location.href = 'home.html', 1800);
+      showSuccessScreen();
     }, 2200);
   });
+
+  // ── TELA DE SUCESSO ───────────────────────────────────────────
+  function showSuccessScreen() {
+    const overlay = document.getElementById('successOverlay');
+    overlay.style.display = 'flex';
+    lucide.createIcons(); // re-render icons inside overlay
+
+    // Animações de entrada com delay
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        document.getElementById('successIcon').style.transform = 'scale(1)';
+      }, 80);
+      setTimeout(() => {
+        document.getElementById('proBadgeSuccess').style.transform = 'scale(1)';
+      }, 220);
+    });
+
+    // Contador regressivo + redirect
+    let count = 5;
+    const el = document.getElementById('redirectCountdown');
+    const timer = setInterval(() => {
+      count--;
+      if (el) el.textContent = count;
+      if (count <= 0) {
+        clearInterval(timer);
+        window.location.href = 'home.html';
+      }
+    }, 1000);
+  }
 
   lucide.createIcons();
 </script>

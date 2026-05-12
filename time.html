@@ -186,14 +186,35 @@
         <div id="lastMatchesList" style="display:flex;flex-direction:column;gap:8px;"></div>
       </div>
 
-      <!-- BANNER PREMIUM -->
-      <div class="lock-banner" onclick="window.location.href='assinatura.html'">
+      <!-- BANNER PREMIUM (escondido para PRO via updatePlanBadge) -->
+      <div class="lock-banner" id="timeLockBanner" onclick="window.location.href='assinatura.html'">
         <span style="font-size:1.2rem;">🔒</span>
         <div>
           <div style="font-size:0.875rem;font-weight:600;">Análise completa de zebras</div>
           <div style="font-size:0.75rem;font-weight:400;color:var(--gray);margin-top:2px;">Histórico de jogadores, relatórios e alertas em tempo real</div>
         </div>
         <span style="margin-left:auto;font-size:1rem;">→</span>
+      </div>
+
+      <!-- CONTEÚDO PRO (visível apenas para assinantes) -->
+      <div class="pro-content" style="display:none;flex-direction:column;gap:8px;">
+        <div style="background:var(--green-dim);border:1px solid rgba(46,230,92,0.25);border-radius:var(--radius-md);padding:14px 16px;">
+          <div style="font-size:0.6875rem;color:var(--green);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">🦓 Análise Pro Ativa</div>
+          <div style="display:flex;gap:16px;">
+            <div style="flex:1;text-align:center;">
+              <div style="font-size:1.25rem;font-weight:700;color:var(--white);" id="proZebraCount">—</div>
+              <div style="font-size:0.625rem;color:var(--gray);margin-top:2px;">Zebras na temporada</div>
+            </div>
+            <div style="flex:1;text-align:center;">
+              <div style="font-size:1.25rem;font-weight:700;color:var(--gold);" id="proZebraRate">—</div>
+              <div style="font-size:0.625rem;color:var(--gray);margin-top:2px;">Taxa como azarão</div>
+            </div>
+            <div style="flex:1;text-align:center;">
+              <div style="font-size:1.25rem;font-weight:700;color:var(--green);" id="proAvgOdd">—</div>
+              <div style="font-size:0.625rem;color:var(--gray);margin-top:2px;">Odd média</div>
+            </div>
+          </div>
+        </div>
       </div>
 
     </main>
@@ -506,7 +527,29 @@
         }
       } catch(e) { console.warn('SDB team search error:', e); }
     }
+    // ── BLOCO PRO: preenche estatísticas quando assinante ─────────
+    function initProContent() {
+      if (getUserPlan() !== 'pro') return;
+      const proBlock = document.querySelector('.pro-content');
+      if (!proBlock) return;
+      proBlock.style.display = 'flex';
+
+      // Preenche com dados do time atual (mock enquanto API real não está integrada)
+      const key = currentTeam;
+      const t   = TEAMS[key] || {};
+      const zi  = (t.zi || 3.0).toFixed(1);
+      const rate = Math.round((parseFloat(zi) / 5) * 38) + '%';
+      const odd  = (3.5 + parseFloat(zi) * 0.4).toFixed(2);
+      const countEl = document.getElementById('proZebraCount');
+      const rateEl  = document.getElementById('proZebraRate');
+      const oddEl   = document.getElementById('proAvgOdd');
+      if (countEl) countEl.textContent = Math.round(parseFloat(zi) * 2);
+      if (rateEl)  rateEl.textContent  = rate;
+      if (oddEl)   oddEl.textContent   = odd;
+    }
+
     initRealData();
+    initProContent();
     lucide.createIcons();
   </script>
   <style>
