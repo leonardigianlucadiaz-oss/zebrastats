@@ -483,10 +483,51 @@
       rankContainer.appendChild(row);
     });
 
+    // ── ZEBRAS DO DIA — conteúdo PRO ─────────────────────
+    function initZebrasDoDia() {
+      const isPro = getUserPlan() === 'pro';
+      const lockBanner = document.querySelector('.lock-banner');
+      const sectionLink = document.querySelector('.section-link.text-gold');
+
+      if (isPro && lockBanner) {
+        // Esconde banner de lock
+        lockBanner.style.display = 'none';
+        if (sectionLink) sectionLink.style.display = 'none';
+
+        // Injeta preview das zebras do dia
+        const container = document.createElement('div');
+        container.style.cssText = 'display:flex;flex-direction:column;gap:8px;';
+        const zebrasDia = [
+          { home:'Bragantino', away:'Flamengo',   zi:'4.8', odds:'6.20', liga:'Brasileirão' },
+          { home:'Getafe',     away:'Barcelona',  zi:'4.5', odds:'7.50', liga:'La Liga'     },
+          { home:'Empoli',     away:'Inter',      zi:'4.1', odds:'5.80', liga:'Serie A'     },
+        ];
+        zebrasDia.forEach(z => {
+          const card = document.createElement('div');
+          card.className = 'game-card game-card--zebra';
+          card.style.cursor = 'pointer';
+          card.onclick = () => window.location.href = 'zebras.html';
+          card.innerHTML = `
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+              <span style="font-size:0.6875rem;color:var(--gray);">${z.liga}</span>
+              <span class="zebra-index-badge zi--grande">🦓 ZI ${z.zi}</span>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+              <span style="font-size:0.9375rem;font-weight:600;flex:1;">${crestImg(z.home,18)} ${z.home}</span>
+              <span style="font-size:0.75rem;color:var(--gold);font-weight:700;background:var(--gold-dim);padding:3px 8px;border-radius:var(--radius-pill);">odd ${z.odds}</span>
+              <span style="font-size:0.9375rem;font-weight:600;flex:1;text-align:right;">${z.away} ${crestImg(z.away,18)}</span>
+            </div>`;
+          container.appendChild(card);
+        });
+        lockBanner.parentNode.insertBefore(container, lockBanner.nextSibling);
+      }
+    }
+
     // ── INIT ──────────────────────────────────────────────
     initFavBar();
     initLeaguePills();
     initGames();
+    initZebrasDoDia();
     lucide.createIcons();
   </script>
 </body>

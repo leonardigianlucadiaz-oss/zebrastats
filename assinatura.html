@@ -352,12 +352,7 @@
     }
 
     document.getElementById('subscribeBtnPro').addEventListener('click', function() {
-      this.textContent = 'Processando...';
-      this.disabled = true;
-      setTimeout(() => {
-        showToast('Assinatura ativada com sucesso!');
-        setTimeout(() => window.location.href = 'home.html', 1200);
-      }, 1000);
+      window.location.href = `pagamento.html?plan=${currentPlan === 'annual' ? 'anual' : 'mensal'}`;
     });
 
     // ── FAQ ───────────────────────────────────────────────
