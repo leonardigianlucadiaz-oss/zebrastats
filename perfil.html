@@ -197,21 +197,6 @@
       </div>
     </div>
 
-    <!-- INTEGRAÇÃO DE DADOS -->
-    <div class="profile-section-title">Integração de Dados</div>
-    <div style="background:var(--card);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
-
-      <a href="#" class="profile-menu-item" onclick="openModal('apiKeysModal');return false;">
-        <div class="profile-menu-item__icon"><i data-lucide="key" style="width:18px;height:18px;"></i></div>
-        <div class="profile-menu-item__text">
-          <div class="profile-menu-item__label">Chaves de API</div>
-          <div class="profile-menu-item__sub" id="apiStatusSub">Configure fontes de dados externas</div>
-        </div>
-        <span class="profile-menu-item__arrow">›</span>
-      </a>
-
-    </div>
-
     <!-- SUPORTE -->
     <div class="profile-section-title">Suporte</div>
     <div style="background:var(--card);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
@@ -352,38 +337,6 @@
 </div>
 
 <!-- MODAL FEEDBACK -->
-<!-- MODAL CHAVES DE API -->
-<div class="modal-overlay" id="apiKeysModal">
-  <div class="modal">
-    <div class="modal__header">
-      <span class="modal__title">Chaves de API</span>
-      <button class="modal__close" onclick="closeModal('apiKeysModal')">✕</button>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:16px;padding-bottom:4px;">
-
-      <div>
-        <label class="form-label">Football-Data.org <span style="color:var(--gray);font-weight:400;">(jogos ao vivo, tabelas, artilheiros)</span></label>
-        <input class="form-input" type="password" id="fdKeyInput" placeholder="Cole sua chave aqui..." autocomplete="off" />
-        <div style="margin-top:6px;font-size:0.75rem;color:var(--gray);">Gratuito em <a href="https://www.football-data.org/client/register" target="_blank" style="color:var(--green);">football-data.org</a> · 10 req/min</div>
-      </div>
-
-      <div>
-        <label class="form-label">RapidAPI — Live Football <span style="color:var(--gray);font-weight:400;">(odds e dados extras)</span></label>
-        <input class="form-input" type="password" id="rapidKeyInput" placeholder="Cole sua chave RapidAPI..." autocomplete="off" />
-        <div style="margin-top:6px;font-size:0.75rem;color:var(--gray);">Disponível em <a href="https://rapidapi.com" target="_blank" style="color:var(--green);">rapidapi.com</a></div>
-      </div>
-
-      <div style="background:rgba(46,230,92,0.08);border:1px solid rgba(46,230,92,0.2);border-radius:var(--radius-md);padding:10px 14px;">
-        <div style="font-size:0.8125rem;color:var(--green);font-weight:600;margin-bottom:2px;">✓ TheSportsDB</div>
-        <div style="font-size:0.75rem;color:var(--gray);">Já configurado automaticamente — escudos, estadios e tabelas</div>
-      </div>
-
-      <button class="btn btn--primary" onclick="saveApiKeys()">Salvar Chaves</button>
-      <button class="btn" onclick="clearApiKeys()" style="background:transparent;border:1px solid var(--border);color:var(--gray);font-size:0.8125rem;">Remover todas as chaves</button>
-    </div>
-  </div>
-</div>
-
 <div class="modal-overlay" id="feedbackModal">
   <div class="modal">
     <div class="modal__header">
@@ -462,45 +415,6 @@
       setTimeout(() => window.location.href = 'index.html', 1200);
     }
   }
-
-  // ── API KEYS ──────────────────────────────────────────────────
-  function loadApiKeyFields() {
-    const fdKey    = localStorage.getItem('zs_fd_key')    || '';
-    const rapidKey = localStorage.getItem('zs_rapid_key') || '';
-    document.getElementById('fdKeyInput').value    = fdKey;
-    document.getElementById('rapidKeyInput').value = rapidKey;
-    // Update status sub-label
-    const configured = [fdKey, rapidKey].filter(Boolean).length;
-    const sub = document.getElementById('apiStatusSub');
-    if (configured > 0) {
-      sub.textContent = `${configured} fonte${configured > 1 ? 's' : ''} configurada${configured > 1 ? 's' : ''} · TheSportsDB ativo`;
-      sub.style.color = 'var(--green)';
-    } else {
-      sub.textContent = 'TheSportsDB ativo · outras fontes aguardando chave';
-    }
-  }
-
-  function saveApiKeys() {
-    const fd    = document.getElementById('fdKeyInput').value.trim();
-    const rapid = document.getElementById('rapidKeyInput').value.trim();
-    if (fd)    localStorage.setItem('zs_fd_key',    fd);
-    else       localStorage.removeItem('zs_fd_key');
-    if (rapid) localStorage.setItem('zs_rapid_key', rapid);
-    else       localStorage.removeItem('zs_rapid_key');
-    closeModal('apiKeysModal');
-    loadApiKeyFields();
-    showToast('🔑 Chaves salvas com sucesso!');
-  }
-
-  function clearApiKeys() {
-    ['zs_fd_key','zs_rapid_key'].forEach(k => localStorage.removeItem(k));
-    document.getElementById('fdKeyInput').value    = '';
-    document.getElementById('rapidKeyInput').value = '';
-    loadApiKeyFields();
-    showToast('🗑️ Chaves removidas.');
-  }
-
-  loadApiKeyFields();
 
   // ── PLAN INFO ────────────────────────────────────────────────
   updatePlanBadge();

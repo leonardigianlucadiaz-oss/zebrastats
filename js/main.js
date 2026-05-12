@@ -91,6 +91,67 @@ function animFavBtn(btn) {
   btn.classList.add('fav-pop');
 }
 
+// ── CACHE GLOBAL DE ESCUDOS ───────────────────────────────────
+window.TEAM_LOGOS  = window.TEAM_LOGOS  || {};
+window.LEAGUE_LOGOS = window.LEAGUE_LOGOS || {};
+
+function _crestKeys(name) {
+  const k = name.toLowerCase().trim();
+  return [
+    k,
+    k.replace(/\s+fc$/i, ''),
+    k.replace(/^fc\s+/i, ''),
+    k.replace(/\s+afc$/i, ''),
+    k.split(' ')[0],          // primeiro token ("man" city → "man")
+    k.split(' ').slice(-1)[0], // último token (botafogo "rj" → "rj")
+  ];
+}
+
+function cacheCrest(name, url) {
+  if (!name || !url) return;
+  _crestKeys(name).forEach(k => { if (k.length > 1) TEAM_LOGOS[k] = url; });
+}
+
+function getCrest(name) {
+  if (!name) return '';
+  for (const k of _crestKeys(name)) {
+    if (TEAM_LOGOS[k]) return TEAM_LOGOS[k];
+  }
+  return '';
+}
+
+function crestImg(name, size = 20) {
+  const url = getCrest(name);
+  if (!url) return '';
+  return `<img src="${url}" alt="${name}" style="width:${size}px;height:${size}px;object-fit:contain;flex-shrink:0;vertical-align:middle;" loading="lazy" onerror="this.style.display='none'">`;
+}
+
+async function loadLeagueCrests(lid) {
+  if (!window.ZebraAPI) return;
+  try {
+    const data = await ZebraAPI.sportsDb.getAllTeams(lid);
+    (data?.teams || []).forEach(t => {
+      const logo = t.strTeamBadge || t.strBadge || '';
+      if (logo) {
+        cacheCrest(t.strTeam, logo);
+        if (t.strTeamShort) cacheCrest(t.strTeamShort, logo);
+        if (t.strAlternate) cacheCrest(t.strAlternate, logo);
+      }
+    });
+  } catch(e) { console.warn(`[Crests] ${lid}:`, e.message); }
+}
+
+async function loadLeagueLogo(lid) {
+  if (!window.ZebraAPI) return '';
+  if (LEAGUE_LOGOS[lid]) return LEAGUE_LOGOS[lid];
+  try {
+    const data = await ZebraAPI.sportsDb.getLeagueInfo(lid);
+    const badge = data?.leagues?.[0]?.strBadge || data?.leagues?.[0]?.strLogo || '';
+    if (badge) LEAGUE_LOGOS[lid] = badge;
+    return badge;
+  } catch { return ''; }
+}
+
 // ── PLANO DO USUÁRIO (localStorage) ───────────────────────────
 const PLAN_KEY = 'zebrastats_plan';
 

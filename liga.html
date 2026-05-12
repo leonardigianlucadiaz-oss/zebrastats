@@ -250,6 +250,7 @@
       STANDINGS.length = 0;
       syncFavBtn();
       loadLeagueLogo(activeLid);
+      loadLeagueCrests(activeLid);
       renderJogos();
       if (activeTab === 'tabela') renderTabela();
       initRealData();
@@ -308,27 +309,32 @@
       const card = document.createElement('div');
       card.className = `game-card${g.zebra ? ' game-card--zebra' : ''}`;
 
+      const hc = crestImg(g.home, 18);
+      const ac = crestImg(g.away, 18);
+      const leagueBadge = LEAGUE_LOGOS[activeLid] || '';
+      const leagueIcon = leagueBadge ? `<img src="${leagueBadge}" style="width:13px;height:13px;object-fit:contain;margin-right:4px;vertical-align:middle;" onerror="this.remove();">` : '';
+
       if (activeJfilt === 'proximos') {
         card.innerHTML = `
           <div class="game-card__league" style="display:flex;justify-content:space-between;">
-            <span>${g.league}</span>
+            <span>${leagueIcon}${g.league}</span>
             <span style="color:var(--gold);font-weight:600;">${g.time}</span>
           </div>
           <div class="game-card__match">
-            <span class="game-card__team">${g.home}</span>
+            <span class="game-card__team" style="display:flex;align-items:center;gap:5px;">${hc}${g.home}</span>
             <span class="game-card__score" style="font-size:0.875rem;color:var(--gray);">vs</span>
-            <span class="game-card__team game-card__team--away">${g.away}</span>
+            <span class="game-card__team game-card__team--away" style="display:flex;align-items:center;justify-content:flex-end;gap:5px;">${g.away}${ac}</span>
           </div>`;
       } else if (activeJfilt === 'aovivo') {
         card.innerHTML = `
           <div class="game-card__league" style="display:flex;justify-content:space-between;">
-            <span>Brasileirão · Rodada 12</span>
+            <span>${leagueIcon}Rodada 12</span>
             <span class="badge badge--live">${g.min}</span>
           </div>
           <div class="game-card__match">
-            <span class="game-card__team">${g.home}</span>
+            <span class="game-card__team" style="display:flex;align-items:center;gap:5px;">${hc}${g.home}</span>
             <span class="game-card__score">${g.hs} – ${g.as}</span>
-            <span class="game-card__team game-card__team--away">${g.away}</span>
+            <span class="game-card__team game-card__team--away" style="display:flex;align-items:center;justify-content:flex-end;gap:5px;">${g.away}${ac}</span>
           </div>
           ${g.zebra ? `<div class="game-card__footer"><span class="badge badge--zebra">🦓 ZEBRA ALERT</span></div>` : ''}`;
       } else {
@@ -336,13 +342,13 @@
         const color = diff > 0 ? 'var(--green)' : diff < 0 ? 'var(--red)' : 'var(--gray)';
         card.innerHTML = `
           <div class="game-card__league" style="display:flex;justify-content:space-between;">
-            <span>Rodada 12</span>
+            <span>${leagueIcon}Rodada 12</span>
             <span style="font-size:0.75rem;color:var(--gray);">${g.date}</span>
           </div>
           <div class="game-card__match">
-            <span class="game-card__team">${g.home}</span>
+            <span class="game-card__team" style="display:flex;align-items:center;gap:5px;">${hc}${g.home}</span>
             <span class="game-card__score" style="color:${color};">${g.hs} – ${g.as}</span>
-            <span class="game-card__team game-card__team--away">${g.away}</span>
+            <span class="game-card__team game-card__team--away" style="display:flex;align-items:center;justify-content:flex-end;gap:5px;">${g.away}${ac}</span>
           </div>
           ${g.zebra ? `<div class="game-card__footer"><span class="badge badge--zebra">🦓 ZEBRA</span></div>` : ''}`;
       }
@@ -565,6 +571,7 @@
     loadFDMatches();
     loadFDScorers();
   }
+  loadLeagueCrests(activeLid);
   initRealData();
   lucide.createIcons();
 </script>

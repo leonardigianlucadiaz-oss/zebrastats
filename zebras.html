@@ -141,25 +141,50 @@
 
     const allPill = document.createElement('div');
     allPill.className = `league-fav-pill${activeLeague === 'all' ? ' active-league' : ''}`;
-    allPill.innerHTML = `<span class="league-fav-pill__label" style="padding:6px 14px;">⚽ Todas</span>`;
-    allPill.addEventListener('click', () => { activeLeague = 'all'; renderLeagueBar(); renderZebras(); });
+    allPill.innerHTML = `<span class="league-fav-pill__label" style="padding:6px 14px;display:flex;align-items:center;gap:5px;"><i data-lucide="globe" style="width:13px;height:13px;"></i> Todas</span>`;
+    allPill.addEventListener('click', () => { activeLeague = 'all'; renderLeagueBar(); renderZebras(); lucide.createIcons(); });
     bar.appendChild(allPill);
 
     LEAGUES.forEach(l => {
+      const cached = LEAGUE_LOGOS[l.id] || '';
+      const logoHtml = cached
+        ? `<img src="${cached}" style="width:14px;height:14px;object-fit:contain;flex-shrink:0;" onerror="this.remove();">`
+        : `<span>${l.flag}</span>`;
+      const shortName = l.name.split(' ')[0];
+
       const pill = document.createElement('div');
       pill.className = `league-fav-pill${activeLeague === l.id ? ' active-league' : ''}`;
       pill.innerHTML = `
-        <span class="league-fav-pill__label" data-lid="${l.id}">${l.flag} ${l.name.split(' ')[0]}</span>
+        <span class="league-fav-pill__label" data-lid="${l.id}" style="display:flex;align-items:center;gap:5px;">${logoHtml}${shortName}</span>
         <button class="league-fav-pill__star${l.faved ? ' faved' : ''}" data-star="${l.id}" title="${l.faved ? 'Remover' : 'Favoritar'}">★</button>
       `;
-      pill.querySelector('[data-lid]').addEventListener('click', () => { activeLeague = l.id; renderLeagueBar(); renderZebras(); });
+      pill.querySelector('[data-lid]').addEventListener('click', () => {
+        activeLeague = l.id;
+        renderLeagueBar();
+        renderZebras();
+        loadLeagueCrests(l.id);
+      });
       pill.querySelector('[data-star]').addEventListener('click', e => {
         e.stopPropagation();
+        const wasFaved = l.faved;
         l.faved = !l.faved;
+        toggleFavLeague(l.id, l.name);
         renderLeagueBar();
-        showToast(l.faved ? `⭐ ${l.name} favoritada` : `${l.name} removida`);
+        if (!wasFaved) loadLeagueLogo(l.id).then(() => renderLeagueBar());
       });
       bar.appendChild(pill);
+
+      // Carrega logo SDB se ainda não tem
+      if (!cached) {
+        loadLeagueLogo(l.id).then(badge => {
+          if (badge) {
+            const labelEl = bar.querySelector(`[data-lid="${l.id}"]`);
+            if (labelEl) {
+              labelEl.innerHTML = `<img src="${badge}" style="width:14px;height:14px;object-fit:contain;flex-shrink:0;" onerror="this.remove();">${shortName}`;
+            }
+          }
+        });
+      }
     });
   }
 
@@ -192,16 +217,24 @@
       const card = document.createElement('div');
       card.className = 'zebra-card';
 
+      const leagueBadge = LEAGUE_LOGOS[z.lid] || '';
+      const leagueLogoHtml = leagueBadge
+        ? `<img src="${leagueBadge}" style="width:12px;height:12px;object-fit:contain;vertical-align:middle;margin-right:3px;" onerror="this.remove();">`
+        : '';
+
+      const homeCrest = crestImg(z.home, 22);
+      const awayCrest = crestImg(z.away, 22);
+
       if (locked) {
         card.innerHTML = `
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-            <span class="text-xs text-gray">${z.league} · ${z.date}</span>
+            <span class="text-xs text-gray">${leagueLogoHtml}${z.league} · ${z.date}</span>
             <span class="zebra-index-badge zi--${cls}">🦓 ${z.zi} ${label}</span>
           </div>
           <div style="filter:blur(5px);pointer-events:none;user-select:none;display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-            <span style="font-size:0.9375rem;font-weight:600;flex:1;">${z.home}</span>
+            <span style="display:flex;align-items:center;gap:6px;font-size:0.9375rem;font-weight:600;flex:1;">${homeCrest}${z.home}</span>
             <span style="font-size:1.375rem;font-weight:700;min-width:72px;text-align:center;">${z.hs} – ${z.as}</span>
-            <span style="font-size:0.9375rem;font-weight:600;flex:1;text-align:right;">${z.away}</span>
+            <span style="display:flex;align-items:center;justify-content:flex-end;gap:6px;font-size:0.9375rem;font-weight:600;flex:1;">${z.away}${awayCrest}</span>
           </div>
           <div style="text-align:center;padding-top:4px;">
             <a href="assinatura.html" style="font-size:0.75rem;color:var(--green);font-weight:600;text-decoration:none;">🔒 Assine o Pro para ver →</a>
@@ -209,13 +242,13 @@
       } else {
         card.innerHTML = `
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-            <span class="text-xs text-gray">${z.league} · ${z.date}</span>
+            <span class="text-xs text-gray">${leagueLogoHtml}${z.league} · ${z.date}</span>
             <span class="zebra-index-badge zi--${cls}">🦓 ${z.zi} ${label}</span>
           </div>
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-            <span style="font-size:0.9375rem;font-weight:600;flex:1;">${z.home}</span>
+            <span style="display:flex;align-items:center;gap:6px;font-size:0.9375rem;font-weight:600;flex:1;">${homeCrest}${z.home}</span>
             <span style="font-size:1.375rem;font-weight:700;min-width:72px;text-align:center;">${z.hs} – ${z.as}</span>
-            <span style="font-size:0.9375rem;font-weight:600;flex:1;text-align:right;">${z.away}</span>
+            <span style="display:flex;align-items:center;justify-content:flex-end;gap:6px;font-size:0.9375rem;font-weight:600;flex:1;">${z.away}${awayCrest}</span>
           </div>
           <div style="display:flex;gap:16px;padding-top:10px;border-top:1px solid var(--border);align-items:center;">
             <div>
@@ -294,18 +327,20 @@
   renderLeagueBar();
   renderZebras();
 
+  // Pré-carrega logos de ligas e escudos das ligas padrão
+  (async () => {
+    const favLids = LEAGUES.filter(l => l.faved).map(l => l.id);
+    await Promise.all(favLids.map(lid => loadLeagueLogo(lid)));
+    renderLeagueBar(); // re-renderiza com logos
+    lucide.createIcons();
+    await Promise.all(favLids.map(lid => loadLeagueCrests(lid)));
+    renderZebras(); // re-renderiza com escudos
+  })();
+
   // ── INTEGRAÇÃO COM APIS ──────────────────────────────────────
   async function initRealData() {
     if (typeof ZebraAPI === 'undefined') return;
-
-    if (!ZebraAPI.isConfigured.footballData()) {
-      const tip = document.createElement('div');
-      tip.style.cssText = 'background:rgba(255,200,50,0.08);border:1px solid rgba(255,200,50,0.2);border-radius:var(--radius-sm);padding:10px 14px;display:flex;align-items:center;gap:8px;font-size:0.75rem;color:var(--gold);cursor:pointer;';
-      tip.innerHTML = '⚙️ Configure Football-Data.org no Perfil para zebras com dados reais <span style="margin-left:auto;color:var(--green);">→</span>';
-      tip.addEventListener('click', () => window.location.href = 'perfil.html');
-      document.querySelector('.content').prepend(tip);
-      return;
-    }
+    if (!ZebraAPI.isConfigured.footballData()) return;
 
     const lid = activeLeague === 'all' ? 'ENG' : activeLeague;
     const NAMES = { ENG:'Prem. League', ESP:'La Liga', ITA:'Serie A', GER:'Bundesliga', BRA:'Brasileirão', FRA:'Ligue 1' };
