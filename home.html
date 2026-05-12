@@ -201,7 +201,7 @@
         ? LIVE_GAMES
         : LIVE_GAMES.filter(g => g.league_id === activeLeagueFilter);
 
-      if (!games.length) { emptyState('liveGames', 'Nenhum jogo ao vivo agora.', ZebraAPI.isConfigured.footballData() || ZebraAPI.isConfigured.rapidApi() ? '' : 'Configure chaves de API em Perfil → Integração para dados ao vivo.'); return; }
+      if (!games.length) { emptyState('liveGames', 'Nenhum jogo ao vivo agora.'); return; }
 
       games.forEach(g => {
         const card = document.createElement('div');
@@ -232,7 +232,7 @@
         ? UPCOMING_GAMES
         : UPCOMING_GAMES.filter(g => g.league_id === activeLeagueFilter);
 
-      if (!games.length) { emptyState('upcomingGames', 'Nenhum jogo agendado.', ZebraAPI.isConfigured.footballData() ? '' : 'Configure sua chave Football-Data.org em Perfil.'); return; }
+      if (!games.length) { emptyState('upcomingGames', 'Nenhum jogo agendado.'); return; }
 
       games.forEach(g => {
         const card = document.createElement('div');
