@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ZebraStats — Configurar conta</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/main.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config = { corePlugins: { preflight: false } }</script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+</head>
+<body>
+
+<div class="phone" style="min-height:100vh;display:flex;flex-direction:column;position:relative;overflow:hidden;">
+
+  <!-- ── TOPO: LOGO + BARRA DE PROGRESSO ─────────────────────── -->
+  <div style="padding:24px 24px 0;flex-shrink:0;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div style="width:28px;height:28px;border-radius:6px;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:0.875rem;font-weight:700;color:#000;">Z</div>
+        <span style="font-size:0.9375rem;font-weight:700;">Zebra<span style="color:var(--green);">Stats</span></span>
+      </div>
+      <button id="skipAllBtn" style="background:none;border:none;color:var(--gray);font-size:0.8125rem;cursor:pointer;font-family:inherit;padding:4px 8px;">Pular tudo</button>
+    </div>
+
+    <!-- Progresso: 3 segmentos -->
+    <div style="display:flex;gap:6px;margin-bottom:6px;">
+      <div class="ob-seg" id="seg1" style="flex:1;height:4px;border-radius:2px;background:var(--green);transition:background 0.4s;"></div>
+      <div class="ob-seg" id="seg2" style="flex:1;height:4px;border-radius:2px;background:var(--border);transition:background 0.4s;"></div>
+      <div class="ob-seg" id="seg3" style="flex:1;height:4px;border-radius:2px;background:var(--border);transition:background 0.4s;"></div>
+    </div>
+    <div style="font-size:0.6875rem;color:var(--gray);" id="stepLabel">Passo 1 de 3</div>
+  </div>
+
+  <!-- ── CONTEÚDO DOS PASSOS ─────────────────────────────────── -->
+  <div style="flex:1;overflow:hidden;position:relative;" id="stepsWrapper">
+
+    <!-- ═══ PASSO 1 — LIGAS ═══════════════════════════════════ -->
+    <div class="ob-step" id="step1" style="padding:24px;height:100%;overflow-y:auto;">
+      <div style="margin-bottom:20px;">
+        <div style="font-size:1.75rem;margin-bottom:8px;">🏆</div>
+        <h1 style="font-size:1.375rem;font-weight:700;line-height:1.25;margin-bottom:6px;">Quais ligas você quer acompanhar?</h1>
+        <p style="font-size:0.875rem;color:var(--gray);">Selecione pelo menos <strong style="color:var(--white);">3 ligas</strong> para personalizar seu feed.</p>
+      </div>
+
+      <!-- Contador -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <span style="font-size:0.75rem;color:var(--gray);">Populares</span>
+        <span id="leagueCount" style="font-size:0.75rem;font-weight:600;color:var(--green);background:var(--green-dim);padding:3px 10px;border-radius:var(--radius-pill);">0 selecionadas</span>
+      </div>
+
+      <!-- Grid de ligas -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;" id="leagueGrid">
+        <!-- Renderizado por JS -->
+      </div>
+    </div>
+
+    <!-- ═══ PASSO 2 — TIMES ═══════════════════════════════════ -->
+    <div class="ob-step" id="step2" style="padding:24px;height:100%;overflow-y:auto;display:none;">
+      <div style="margin-bottom:20px;">
+        <div style="font-size:1.75rem;margin-bottom:8px;">⭐</div>
+        <h1 style="font-size:1.375rem;font-weight:700;line-height:1.25;margin-bottom:6px;">Escolha seus times favoritos</h1>
+        <p style="font-size:0.875rem;color:var(--gray);">Adicione pelo menos <strong style="color:var(--white);">1 time</strong> para receber alertas personalizados.</p>
+      </div>
+
+      <!-- Times selecionados (chips removíveis) -->
+      <div id="selectedTeamsWrap" style="display:none;margin-bottom:14px;">
+        <div style="font-size:0.75rem;color:var(--gray);margin-bottom:8px;">Selecionados</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;" id="selectedTeamsRow"></div>
+      </div>
+
+      <!-- Campo de busca -->
+      <div style="position:relative;margin-bottom:14px;">
+        <i data-lucide="search" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--gray);pointer-events:none;"></i>
+        <input id="teamSearchInput" type="text" placeholder="Buscar time..." class="form-input" style="padding-left:38px;" autocomplete="off" />
+        <div id="searchSpinner" style="display:none;position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:0.875rem;animation:spin 0.8s linear infinite;">⚽</div>
+      </div>
+
+      <!-- Contador -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <span id="teamSugLabel" style="font-size:0.75rem;color:var(--gray);">Sugestões</span>
+        <span id="teamCount" style="font-size:0.75rem;font-weight:600;color:var(--green);background:var(--green-dim);padding:3px 10px;border-radius:var(--radius-pill);">0 selecionados</span>
+      </div>
+
+      <!-- Grid de times -->
+      <div style="display:flex;flex-direction:column;gap:8px;" id="teamGrid">
+        <!-- Renderizado por JS -->
+      </div>
+    </div>
+
+    <!-- ═══ PASSO 3 — NOTIFICAÇÕES ════════════════════════════ -->
+    <div class="ob-step" id="step3" style="padding:24px 24px 32px;height:100%;overflow-y:auto;display:none;display:flex;flex-direction:column;justify-content:center;">
+      <!-- Ilustração -->
+      <div style="text-align:center;margin-bottom:32px;">
+        <div style="width:96px;height:96px;border-radius:50%;background:linear-gradient(135deg,var(--green-dim),rgba(255,200,50,0.15));border:2px solid rgba(46,230,92,0.3);display:flex;align-items:center;justify-content:center;font-size:3rem;margin:0 auto 16px;">🦓</div>
+        <h1 style="font-size:1.375rem;font-weight:700;line-height:1.3;margin-bottom:8px;">Fique por dentro das zebras</h1>
+        <p style="font-size:0.875rem;color:var(--gray);line-height:1.6;">Ative as notificações para receber alertas em tempo real quando uma zebra estiver prestes a acontecer.</p>
+      </div>
+
+      <!-- Benefícios -->
+      <div style="display:flex;flex-direction:column;gap:14px;margin-bottom:32px;">
+        <div style="display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px;">
+          <div style="width:40px;height:40px;border-radius:50%;background:var(--green-dim);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <i data-lucide="zap" style="width:18px;height:18px;color:var(--green);"></i>
+          </div>
+          <div>
+            <div style="font-size:0.875rem;font-weight:600;margin-bottom:2px;">Alertas em tempo real</div>
+            <div style="font-size:0.75rem;color:var(--gray);">Saiba quando ZI > 4.0 antes do apito</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px;">
+          <div style="width:40px;height:40px;border-radius:50%;background:var(--gold-dim);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <i data-lucide="star" style="width:18px;height:18px;color:var(--gold);"></i>
+          </div>
+          <div>
+            <div style="font-size:0.875rem;font-weight:600;margin-bottom:2px;">Seus times em destaque</div>
+            <div style="font-size:0.75rem;color:var(--gray);">Notificações priorizadas pelos seus favoritos</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px;">
+          <div style="width:40px;height:40px;border-radius:50%;background:rgba(46,230,92,0.08);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <i data-lucide="bell-ring" style="width:18px;height:18px;color:var(--green);"></i>
+          </div>
+          <div>
+            <div style="font-size:0.875rem;font-weight:600;margin-bottom:2px;">Resumo semanal</div>
+            <div style="font-size:0.75rem;color:var(--gray);">Top 5 zebras da semana toda segunda-feira</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Botões de ação -->
+      <button id="enableNotifBtn" class="btn btn--primary" style="margin-bottom:12px;display:flex;align-items:center;justify-content:center;gap:8px;">
+        <i data-lucide="bell" style="width:18px;height:18px;"></i>
+        Ativar notificações
+      </button>
+      <button id="skipNotifBtn" style="background:none;border:none;color:var(--gray);font-size:0.875rem;cursor:pointer;font-family:inherit;padding:8px;width:100%;text-align:center;">
+        Agora não
+      </button>
+    </div>
+
+  </div><!-- /stepsWrapper -->
+
+  <!-- ── RODAPÉ: BOTÃO CONTINUAR ─────────────────────────────── -->
+  <div style="padding:16px 24px 28px;flex-shrink:0;border-top:1px solid var(--border);background:var(--bg);" id="footerNav">
+    <button class="btn btn--primary" id="nextBtn" style="display:flex;align-items:center;justify-content:center;gap:8px;" disabled>
+      Continuar
+      <i data-lucide="arrow-right" style="width:18px;height:18px;"></i>
+    </button>
+    <button id="backBtn" style="background:none;border:none;color:var(--gray);font-size:0.875rem;cursor:pointer;font-family:inherit;padding:10px;width:100%;text-align:center;margin-top:4px;display:none;">
+      ← Voltar
+    </button>
+  </div>
+
+</div><!-- /phone -->
+
+<div class="toast" id="toast"></div>
+
+<style>
+  /* ── STEP ANIMATIONS ───────────────────────────────────────── */
+  @keyframes slideInRight {
+    from { opacity: 0; transform: translateX(40px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes slideOutLeft {
+    from { opacity: 1; transform: translateX(0); }
+    to   { opacity: 0; transform: translateX(-40px); }
+  }
+  @keyframes slideInLeft {
+    from { opacity: 0; transform: translateX(-40px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes spin {
+    to { transform: translateY(-50%) rotate(360deg); }
+  }
+
+  .ob-step { transition: opacity 0.25s ease; }
+  .ob-step.enter  { animation: slideInRight 0.3s ease both; }
+  .ob-step.enter-back { animation: slideInLeft 0.3s ease both; }
+
+  /* ── LEAGUE CARD ───────────────────────────────────────────── */
+  .league-card {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 12px 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all var(--transition);
+    text-align: center;
+    user-select: none;
+  }
+  .league-card:hover { border-color: rgba(46,230,92,0.4); }
+  .league-card.selected {
+    background: var(--green-dim);
+    border-color: var(--green);
+  }
+  .league-card.selected .lc-name { color: var(--white); }
+  .league-card__check {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    background: transparent;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+    font-size: 0.625rem;
+    align-self: flex-end;
+  }
+  .league-card.selected .league-card__check {
+    background: var(--green);
+    border-color: var(--green);
+    color: #000;
+  }
+  .lc-flag { font-size: 1.75rem; line-height: 1; }
+  .lc-logo { width: 40px; height: 40px; object-fit: contain; }
+  .lc-name { font-size: 0.75rem; font-weight: 600; color: var(--gray); line-height: 1.3; }
+
+  /* ── TEAM ROW ──────────────────────────────────────────────── */
+  .team-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: all var(--transition);
+    user-select: none;
+  }
+  .team-row:hover { border-color: rgba(46,230,92,0.4); }
+  .team-row.selected { background: var(--green-dim); border-color: var(--green); }
+  .team-row__crest {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--card2); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden; flex-shrink: 0; font-size: 0.5rem; font-weight: 700; color: var(--gray);
+  }
+  .team-row__crest img { width: 30px; height: 30px; object-fit: contain; }
+  .team-row__info { flex: 1; min-width: 0; }
+  .team-row__name  { font-size: 0.9375rem; font-weight: 600; }
+  .team-row__league{ font-size: 0.6875rem; color: var(--gray); margin-top: 1px; }
+  .team-row__check {
+    width: 22px; height: 22px; border-radius: 50%;
+    border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: all 0.2s; font-size: 0.75rem;
+  }
+  .team-row.selected .team-row__check { background: var(--green); border-color: var(--green); color: #000; }
+  .team-row.selected .team-row__name  { color: var(--white); }
+
+  /* ── SELECTED TEAM CHIP ────────────────────────────────────── */
+  .sel-chip {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--green-dim); border: 1px solid rgba(46,230,92,0.4);
+    border-radius: var(--radius-pill); padding: 5px 10px;
+    font-size: 0.75rem; font-weight: 600; color: var(--green);
+    cursor: pointer;
+  }
+  .sel-chip:hover { background: rgba(238,68,68,0.12); border-color: var(--red); color: var(--red); }
+
+  /* ── NOTIF BUTTON STATES ───────────────────────────────────── */
+  #enableNotifBtn.loading {
+    opacity: 0.7; pointer-events: none;
+  }
+  #enableNotifBtn.granted {
+    background: var(--green); color: #000;
+  }
+</style>
+
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/main.js"></script>
+<script>
+  // ── STATE ─────────────────────────────────────────────────────
+  let currentStep = 1;
+  let selectedLeagues = new Set();
+  let selectedTeams   = new Map(); // id → { name, crest, league }
+  let searchTimeout   = null;
+
+  // ── DADOS DAS LIGAS ───────────────────────────────────────────
+  const LEAGUES = [
+    { id:'BRA', name:'Brasileirão',      flag:'🇧🇷', sdbId:'4351' },
+    { id:'ENG', name:'Premier League',   flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', sdbId:'4328' },
+    { id:'ESP', name:'La Liga',           flag:'🇪🇸', sdbId:'4335' },
+    { id:'ITA', name:'Serie A',           flag:'🇮🇹', sdbId:'4332' },
+    { id:'GER', name:'Bundesliga',        flag:'🇩🇪', sdbId:'4331' },
+    { id:'FRA', name:'Ligue 1',           flag:'🇫🇷', sdbId:'4334' },
+    { id:'UCL', name:'Champions League',  flag:'🌍', sdbId:'4480' },
+    { id:'PRT', name:'Primeira Liga',     flag:'🇵🇹', sdbId:'4344' },
+    { id:'ARG', name:'Liga Argentina',    flag:'🇦🇷', sdbId:'4406' },
+    { id:'MEX', name:'Liga MX',           flag:'🇲🇽', sdbId:'4350' },
+    { id:'NED', name:'Eredivisie',        flag:'🇳🇱', sdbId:'4337' },
+    { id:'USA', name:'MLS',               flag:'🇺🇸', sdbId:'4346' },
+  ];
+
+  // Times sugeridos (populares)
+  const DEFAULT_TEAMS = [
+    { id:'t-flamengo',  name:'Flamengo',         league:'Brasileirão', crest:'' },
+    { id:'t-palmeiras', name:'Palmeiras',         league:'Brasileirão', crest:'' },
+    { id:'t-corinthians',name:'Corinthians',      league:'Brasileirão', crest:'' },
+    { id:'t-botafogo',  name:'Botafogo',          league:'Brasileirão', crest:'' },
+    { id:'t-real',      name:'Real Madrid',       league:'La Liga',     crest:'' },
+    { id:'t-barca',     name:'Barcelona',         league:'La Liga',     crest:'' },
+    { id:'t-mancity',   name:'Manchester City',   league:'Premier League', crest:'' },
+    { id:'t-arsenal',   name:'Arsenal',           league:'Premier League', crest:'' },
+    { id:'t-liverpool', name:'Liverpool',         league:'Premier League', crest:'' },
+    { id:'t-juventus',  name:'Juventus',          league:'Serie A',     crest:'' },
+    { id:'t-inter',     name:'Inter Milan',       league:'Serie A',     crest:'' },
+    { id:'t-bayern',    name:'Bayern Munich',     league:'Bundesliga',  crest:'' },
+    { id:'t-psg',       name:'PSG',               league:'Ligue 1',     crest:'' },
+  ];
+
+  // ── PASSO 1: LIGAS ────────────────────────────────────────────
+  function renderLeagues() {
+    const grid = document.getElementById('leagueGrid');
+    grid.innerHTML = '';
+    LEAGUES.forEach(l => {
+      const card = document.createElement('div');
+      card.className = 'league-card' + (selectedLeagues.has(l.id) ? ' selected' : '');
+      card.dataset.id = l.id;
+      card.innerHTML = `
+        <div style="display:flex;width:100%;justify-content:flex-end;">
+          <div class="league-card__check">${selectedLeagues.has(l.id) ? '✓' : ''}</div>
+        </div>
+        <div class="lc-flag" id="lf-${l.id}">${l.flag}</div>
+        <div class="lc-name">${l.name}</div>`;
+      card.addEventListener('click', () => toggleLeague(l.id, l.name, card));
+      grid.appendChild(card);
+    });
+    // Tenta carregar logos das ligas via SDB de forma assíncrona
+    loadLeagueLogosForOnboarding();
+  }
+
+  async function loadLeagueLogosForOnboarding() {
+    if (!window.ZebraAPI) return;
+    for (const l of LEAGUES.slice(0, 8)) {
+      try {
+        const data = await ZebraAPI.sportsDb.getLeagueInfo(l.id);
+        const badge = data?.leagues?.[0]?.strBadge || data?.leagues?.[0]?.strLogo || '';
+        if (badge) {
+          const el = document.getElementById(`lf-${l.id}`);
+          if (el) el.innerHTML = `<img src="${badge}" class="lc-logo" onerror="this.parentElement.textContent='${l.flag}';">`;
+        }
+      } catch {}
+    }
+  }
+
+  function toggleLeague(id, name, card) {
+    if (selectedLeagues.has(id)) {
+      selectedLeagues.delete(id);
+      card.classList.remove('selected');
+      card.querySelector('.league-card__check').textContent = '';
+    } else {
+      selectedLeagues.add(id);
+      card.classList.add('selected');
+      card.querySelector('.league-card__check').textContent = '✓';
+    }
+    updateLeagueCount();
+  }
+
+  function updateLeagueCount() {
+    const n = selectedLeagues.size;
+    const el = document.getElementById('leagueCount');
+    el.textContent = `${n} selecionada${n !== 1 ? 's' : ''}`;
+    el.style.color = n >= 3 ? 'var(--green)' : 'var(--gold)';
+    el.style.background = n >= 3 ? 'var(--green-dim)' : 'var(--gold-dim)';
+    document.getElementById('nextBtn').disabled = n < 3;
+  }
+
+  // ── PASSO 2: TIMES ────────────────────────────────────────────
+  function renderDefaultTeams() {
+    renderTeamGrid(DEFAULT_TEAMS);
+    // Carrega crests dos times padrão
+    DEFAULT_TEAMS.forEach(t => loadTeamCrest(t.id, t.name));
+  }
+
+  function renderTeamGrid(teams) {
+    const grid = document.getElementById('teamGrid');
+    grid.innerHTML = '';
+    if (!teams.length) {
+      grid.innerHTML = `<p style="text-align:center;color:var(--gray);font-size:0.875rem;padding:16px;">Nenhum time encontrado.</p>`;
+      return;
+    }
+    teams.forEach(t => {
+      const isSel = selectedTeams.has(t.id);
+      const row = document.createElement('div');
+      row.className = 'team-row' + (isSel ? ' selected' : '');
+      row.dataset.id = t.id;
+      row.innerHTML = `
+        <div class="team-row__crest" id="cr-${t.id}">
+          ${t.crest ? `<img src="${t.crest}" alt="${t.name}" onerror="this.style.display='none'">` : t.name.substring(0,3).toUpperCase()}
+        </div>
+        <div class="team-row__info">
+          <div class="team-row__name">${t.name}</div>
+          <div class="team-row__league">${t.league}</div>
+        </div>
+        <div class="team-row__check">${isSel ? '✓' : ''}</div>`;
+      row.addEventListener('click', () => toggleTeam(t, row));
+      grid.appendChild(row);
+    });
+  }
+
+  async function loadTeamCrest(id, name) {
+    if (!window.ZebraAPI) return;
+    try {
+      const data = await ZebraAPI.sportsDb.searchTeam(name);
+      const team = data?.teams?.[0];
+      const logo = team?.strTeamBadge || '';
+      if (logo) {
+        const el = document.getElementById(`cr-${id}`);
+        if (el) {
+          el.innerHTML = `<img src="${logo}" alt="${name}" style="width:30px;height:30px;object-fit:contain;" onerror="this.style.display='none'">`;
+        }
+        // Update selected chip if already selected
+        if (selectedTeams.has(id)) {
+          selectedTeams.get(id).crest = logo;
+          refreshSelectedChips();
+        }
+      }
+    } catch {}
+  }
+
+  function toggleTeam(t, row) {
+    if (selectedTeams.has(t.id)) {
+      selectedTeams.delete(t.id);
+      row.classList.remove('selected');
+      row.querySelector('.team-row__check').textContent = '';
+    } else {
+      selectedTeams.set(t.id, { name: t.name, crest: t.crest || '', league: t.league });
+      row.classList.add('selected');
+      row.querySelector('.team-row__check').textContent = '✓';
+    }
+    refreshSelectedChips();
+    updateTeamCount();
+  }
+
+  function refreshSelectedChips() {
+    const wrap = document.getElementById('selectedTeamsWrap');
+    const row  = document.getElementById('selectedTeamsRow');
+    if (selectedTeams.size === 0) {
+      wrap.style.display = 'none'; return;
+    }
+    wrap.style.display = 'block';
+    row.innerHTML = '';
+    selectedTeams.forEach((meta, id) => {
+      const chip = document.createElement('div');
+      chip.className = 'sel-chip';
+      chip.title = 'Remover';
+      chip.innerHTML = `
+        ${meta.crest ? `<img src="${meta.crest}" style="width:16px;height:16px;object-fit:contain;" onerror="this.style.display='none'">` : ''}
+        ${meta.name}
+        <i data-lucide="x" style="width:12px;height:12px;"></i>`;
+      chip.addEventListener('click', () => {
+        selectedTeams.delete(id);
+        // Unselect in grid
+        const gridRow = document.querySelector(`.team-row[data-id="${id}"]`);
+        if (gridRow) {
+          gridRow.classList.remove('selected');
+          gridRow.querySelector('.team-row__check').textContent = '';
+        }
+        refreshSelectedChips();
+        updateTeamCount();
+      });
+      row.appendChild(chip);
+    });
+    lucide.createIcons();
+  }
+
+  function updateTeamCount() {
+    const n = selectedTeams.size;
+    document.getElementById('teamCount').textContent = `${n} selecionado${n !== 1 ? 's' : ''}`;
+    document.getElementById('nextBtn').disabled = n < 1;
+  }
+
+  // ── BUSCA DE TIMES ────────────────────────────────────────────
+  document.getElementById('teamSearchInput').addEventListener('input', function() {
+    clearTimeout(searchTimeout);
+    const q = this.value.trim();
+    if (!q) {
+      document.getElementById('teamSugLabel').textContent = 'Sugestões';
+      renderDefaultTeams();
+      return;
+    }
+    document.getElementById('teamSugLabel').textContent = `Resultados para "${q}"`;
+    document.getElementById('searchSpinner').style.display = 'block';
+    searchTimeout = setTimeout(() => searchTeams(q), 350);
+  });
+
+  async function searchTeams(query) {
+    try {
+      const data = await ZebraAPI.sportsDb.searchTeam(query);
+      const teams = (data?.teams || []).slice(0, 8).map(t => ({
+        id: `sdb-${t.idTeam}`,
+        name: t.strTeam,
+        league: t.strLeague || '—',
+        crest: t.strTeamBadge || '',
+      }));
+      document.getElementById('searchSpinner').style.display = 'none';
+      renderTeamGrid(teams.length ? teams : DEFAULT_TEAMS);
+      if (!teams.length) document.getElementById('teamSugLabel').textContent = 'Nenhum resultado — mostrando sugestões';
+    } catch {
+      document.getElementById('searchSpinner').style.display = 'none';
+      renderDefaultTeams();
+    }
+  }
+
+  // ── NAVEGAÇÃO ENTRE PASSOS ────────────────────────────────────
+  function goToStep(n, direction = 'forward') {
+    const prev = document.getElementById(`step${currentStep}`);
+    const next = document.getElementById(`step${n}`);
+
+    prev.style.display = 'none';
+    next.style.display = n === 3 ? 'flex' : 'block';
+    next.classList.add(direction === 'forward' ? 'enter' : 'enter-back');
+    setTimeout(() => next.classList.remove('enter', 'enter-back'), 350);
+
+    currentStep = n;
+    updateProgressUI();
+  }
+
+  function updateProgressUI() {
+    // Segmentos
+    ['seg1','seg2','seg3'].forEach((id, i) => {
+      document.getElementById(id).style.background = (i + 1) <= currentStep ? 'var(--green)' : 'var(--border)';
+    });
+    // Label
+    document.getElementById('stepLabel').textContent = `Passo ${currentStep} de 3`;
+    // Botão voltar
+    document.getElementById('backBtn').style.display = currentStep > 1 ? 'block' : 'none';
+    // Botão continuar: step 3 fica escondido (tem seus próprios botões)
+    const footer = document.getElementById('footerNav');
+    footer.style.display = currentStep === 3 ? 'none' : 'block';
+    // Texto do botão
+    const btn = document.getElementById('nextBtn');
+    btn.innerHTML = `Continuar <i data-lucide="arrow-right" style="width:18px;height:18px;"></i>`;
+    lucide.createIcons();
+
+    // Validação do estado atual
+    if (currentStep === 1) updateLeagueCount();
+    if (currentStep === 2) updateTeamCount();
+  }
+
+  document.getElementById('nextBtn').addEventListener('click', () => {
+    if (currentStep === 1) {
+      goToStep(2);
+      renderDefaultTeams();
+    } else if (currentStep === 2) {
+      goToStep(3);
+    }
+  });
+
+  document.getElementById('backBtn').addEventListener('click', () => {
+    goToStep(currentStep - 1, 'back');
+  });
+
+  document.getElementById('skipAllBtn').addEventListener('click', () => {
+    if (confirm('Pular configuração? Você poderá configurar depois no perfil.')) {
+      finish();
+    }
+  });
+
+  // ── STEP 3: NOTIFICAÇÕES ─────────────────────────────────────
+  document.getElementById('enableNotifBtn').addEventListener('click', async function() {
+    this.classList.add('loading');
+    this.innerHTML = `<i data-lucide="loader" style="width:18px;height:18px;animation:spin 0.8s linear infinite;"></i> Solicitando...`;
+    lucide.createIcons();
+
+    try {
+      if ('Notification' in window) {
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+          this.classList.remove('loading');
+          this.classList.add('granted');
+          this.innerHTML = `<i data-lucide="check" style="width:18px;height:18px;"></i> Notificações ativadas!`;
+          lucide.createIcons();
+          localStorage.setItem('zs_notif_enabled', '1');
+          setTimeout(() => finish(), 1200);
+        } else {
+          this.classList.remove('loading');
+          this.textContent = 'Permissão negada — tudo bem!';
+          setTimeout(() => finish(), 1200);
+        }
+      } else {
+        this.classList.remove('loading');
+        this.textContent = 'Não suportado neste browser';
+        setTimeout(() => finish(), 1200);
+      }
+    } catch {
+      this.classList.remove('loading');
+      this.textContent = 'Ativar notificações';
+    }
+  });
+
+  document.getElementById('skipNotifBtn').addEventListener('click', () => finish());
+
+  // ── SALVAR E FINALIZAR ────────────────────────────────────────
+  function finish() {
+    // Salva ligas favoritas
+    selectedLeagues.forEach(lid => {
+      const l = LEAGUES.find(x => x.id === lid);
+      if (l && !isFavLeague(lid)) toggleFavLeague(lid, l.name);
+    });
+
+    // Salva times favoritos
+    selectedTeams.forEach((meta, id) => {
+      const favs = getFavorites();
+      if (!favs.includes(id)) {
+        toggleFavorite(id, meta.name, { crest: meta.crest });
+      }
+    });
+
+    // Marca onboarding como concluído
+    localStorage.setItem('zs_onboarded', '1');
+
+    // Redireciona para home com toast
+    localStorage.setItem('zs_welcome_toast', '🎉 Tudo pronto! Bem-vindo ao ZebraStats!');
+    window.location.href = 'home.html';
+  }
+
+  // ── INIT ─────────────────────────────────────────────────────
+  // Se já passou pelo onboarding, vai direto pra home
+  if (localStorage.getItem('zs_onboarded')) {
+    window.location.href = 'home.html';
+  }
+
+  // Personaliza com nome do usuário
+  const savedName = localStorage.getItem('zs_user_name');
+  if (savedName) {
+    const firstName = savedName.split(' ')[0];
+    const h1 = document.querySelector('#step1 h1');
+    if (h1) h1.textContent = `Olá, ${firstName}! Quais ligas você quer acompanhar?`;
+  }
+
+  renderLeagues();
+  updateProgressUI();
+  lucide.createIcons();
+</script>
+</body>
+</html>

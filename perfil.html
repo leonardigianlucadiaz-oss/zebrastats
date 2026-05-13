@@ -545,9 +545,33 @@
     });
   }
 
-  // ── PREENCHE CAMPOS COM DADOS SALVOS ─────────────────────────
-  document.getElementById('editName').value  = document.getElementById('userName').textContent;
-  document.getElementById('editEmail').value = document.getElementById('userEmail').textContent;
+  // ── PREENCHE DADOS DO USUÁRIO DO localStorage ────────────────
+  const savedName  = localStorage.getItem('zs_user_name');
+  const savedEmail = localStorage.getItem('zs_user_email');
+  if (savedName) {
+    document.getElementById('userName').textContent  = savedName;
+    document.getElementById('avatarEl').textContent  = savedName[0].toUpperCase();
+    document.getElementById('editName').value        = savedName;
+  }
+  if (savedEmail) {
+    document.getElementById('userEmail').textContent = savedEmail;
+    document.getElementById('editEmail').value       = savedEmail;
+  }
+
+  // Atualiza nome ao salvar perfil
+  const origSaveProfile = window.saveProfile;
+  window.saveProfile = function() {
+    const name  = document.getElementById('editName').value.trim();
+    const email = document.getElementById('editEmail').value.trim();
+    if (name)  { localStorage.setItem('zs_user_name', name); }
+    if (email) { localStorage.setItem('zs_user_email', email); }
+    if (name)  document.getElementById('userName').textContent  = name;
+    if (email) document.getElementById('userEmail').textContent = email;
+    if (name)  document.getElementById('avatarEl').textContent  = name[0].toUpperCase();
+    closeModal('editDadosModal');
+    showToast('✓ Dados atualizados!');
+  };
+
   lucide.createIcons();
 </script>
 <style>
