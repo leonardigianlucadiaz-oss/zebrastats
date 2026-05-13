@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ZebraStats — Ranking de Zebras</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/main.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config = { corePlugins: { preflight: false } }</script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+</head>
+<body>
+<div class="app-wrapper">
+
+  <!-- SIDEBAR (desktop) -->
+  <aside class="app-sidebar">
+    <a href="home.html" class="sidebar__brand">
+      <div class="sidebar__brand-icon">Z</div>
+      Zebra<span>Stats</span>
+    </a>
+    <nav class="sidebar__nav">
+      <a href="home.html"    class="sidebar__nav-item"><i data-lucide="home"></i><span>Home</span></a>
+      <a href="zebras.html"  class="sidebar__nav-item"><i data-lucide="activity"></i><span>Zebras</span></a>
+      <a href="ranking.html" class="sidebar__nav-item active"><i data-lucide="medal"></i><span>Ranking</span></a>
+      <a href="liga.html"    class="sidebar__nav-item"><i data-lucide="trophy"></i><span>Ligas</span></a>
+      <a href="time.html"    class="sidebar__nav-item"><i data-lucide="star"></i><span>Times</span></a>
+      <a href="perfil.html"  class="sidebar__nav-item"><i data-lucide="user"></i><span>Perfil</span></a>
+    </nav>
+    <div class="sidebar__footer">
+      <div class="sidebar__user">
+        <div class="sidebar__user-avatar">G</div>
+        <div class="sidebar__user-info">
+          <div class="sidebar__user-name">Gianluca</div>
+          <div class="sidebar__user-plan">Plano Free</div>
+        </div>
+      </div>
+      <a href="assinatura.html" class="badge badge--free" style="text-decoration:none;cursor:pointer;">FREE → PRO</a>
+    </div>
+  </aside>
+
+  <!-- MAIN AREA -->
+  <div class="app-main">
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a href="home.html" class="navbar__brand">Zebra<span>Stats</span></a>
+    <div class="navbar__actions">
+      <span class="badge badge--free" id="planBadge">FREE</span>
+      <a href="busca.html" class="navbar__icon" title="Buscar"><i data-lucide="search" style="width:18px;height:18px;"></i></a>
+      <a href="notificacoes.html" class="navbar__icon" title="Notificações"><i data-lucide="bell" style="width:18px;height:18px;"></i></a>
+    </div>
+  </nav>
+
+  <!-- HERO DO RANKING -->
+  <section style="background:linear-gradient(135deg,var(--card2) 0%,rgba(46,230,92,0.06) 100%);padding:20px 16px 14px;border-bottom:1px solid var(--border);">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;">
+      <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--gold),#f59e0b);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <i data-lucide="medal" style="width:18px;height:18px;color:#1a1a1a;"></i>
+      </div>
+      <div>
+        <div style="font-size:1.125rem;font-weight:800;line-height:1.2;">Ranking Global</div>
+        <div style="font-size:0.75rem;color:var(--gray);font-weight:400;">As maiores zebras do futebol mundial</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABAS DE PERÍODO -->
+  <div class="tab-bar" id="periodBar" style="background:var(--card2);border-bottom:1px solid var(--border);">
+    <button class="tab-bar__item active" data-period="all"><i data-lucide="infinity" class="tab-ic"></i>Todos os tempos</button>
+    <button class="tab-bar__item" data-period="week"><i data-lucide="calendar" class="tab-ic"></i>Esta semana</button>
+    <button class="tab-bar__item" data-period="month"><i data-lucide="calendar-days" class="tab-ic"></i>Este mês</button>
+  </div>
+
+  <!-- FILTRO DE LIGAS -->
+  <section style="background:var(--card2);padding:10px 16px;border-bottom:1px solid var(--border);">
+    <div class="scroll-x" id="leagueFilterRow" style="gap:8px;">
+      <button class="filter-chip active" data-rleague="all">Todas</button>
+      <!-- populated by JS -->
+    </div>
+  </section>
+
+  <!-- LISTA DE RANKING -->
+  <main class="content" id="rankingMain" style="padding-bottom:80px;">
+    <!-- skeleton -->
+    <div id="skeletonList">
+      <div class="rank-skeleton"></div>
+      <div class="rank-skeleton"></div>
+      <div class="rank-skeleton"></div>
+      <div class="rank-skeleton"></div>
+      <div class="rank-skeleton"></div>
+    </div>
+    <div id="rankingList" style="display:none;display:flex;flex-direction:column;gap:10px;"></div>
+
+    <!-- LOCK BANNER PRO -->
+    <div class="lock-banner" id="rankLockBanner" style="display:none;" onclick="window.location.href='assinatura.html'">
+      <i data-lucide="lock" style="width:20px;height:20px;color:var(--gold);flex-shrink:0;"></i>
+      <div>
+        <div style="font-size:0.875rem;font-weight:600;">Ranking completo desbloqueado no Pro</div>
+        <div style="font-size:0.75rem;font-weight:400;color:var(--gray);margin-top:2px;">Veja todas as zebras históricas sem limite</div>
+      </div>
+      <i data-lucide="arrow-right" style="margin-left:auto;color:var(--green);width:16px;height:16px;flex-shrink:0;"></i>
+    </div>
+  </main>
+
+  <!-- BOTTOM NAV (mobile only) -->
+  <nav class="bottom-nav">
+    <a href="home.html"   class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="home"></i></span>Home</a>
+    <a href="zebras.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="activity"></i></span>Zebras</a>
+    <a href="liga.html"   class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="trophy"></i></span>Ligas</a>
+    <a href="time.html"   class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="star"></i></span>Times</a>
+    <a href="perfil.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="user"></i></span>Perfil</a>
+  </nav>
+
+  </div><!-- /app-main -->
+</div><!-- /app-wrapper -->
+
+<div class="toast" id="toast"></div>
+
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/main.js"></script>
+<script>
+// ── DATASET ──────────────────────────────────────────────────────────────────
+// period: 'all' | 'week' | 'month'
+const RANKING_DATA = [
+  // ── Top all-time (zi desc order originally, will be sorted by JS) ──
+  { id:1,  home:'Angers',     away:'PSG',          hs:2, as:0, league:'Ligue 1',       lid:'FRA', date:'05/05/2024', period:'month', zi:9.4, odds_h:'8.50', odds_a:'1.38' },
+  { id:2,  home:'Luton',      away:'Man City',      hs:1, as:0, league:'Prem. League',  lid:'ENG', date:'02/05/2024', period:'month', zi:9.1, odds_h:'7.00', odds_a:'1.43' },
+  { id:3,  home:'Augsburg',   away:'Bayern',        hs:2, as:1, league:'Bundesliga',    lid:'GER', date:'07/05/2024', period:'week',  zi:8.7, odds_h:'6.00', odds_a:'1.50' },
+  { id:4,  home:'Botafogo',   away:'Flamengo',      hs:3, as:0, league:'Brasileirão',   lid:'BRA', date:'13/05/2024', period:'week',  zi:8.2, odds_h:'4.50', odds_a:'1.75' },
+  { id:5,  home:'Granada',    away:'Barça',         hs:1, as:0, league:'La Liga',       lid:'ESP', date:'04/05/2024', period:'week',  zi:8.0, odds_h:'5.80', odds_a:'1.55' },
+  { id:6,  home:'Lecce',      away:'Juventus',      hs:2, as:1, league:'Serie A',       lid:'ITA', date:'13/05/2024', period:'week',  zi:7.9, odds_h:'5.20', odds_a:'1.62' },
+  { id:7,  home:'Clermont',   away:'PSG',           hs:2, as:0, league:'Ligue 1',       lid:'FRA', date:'22/04/2024', period:'month', zi:7.7, odds_h:'7.20', odds_a:'1.40' },
+  { id:8,  home:'St. Pauli',  away:'Bayern',        hs:3, as:1, league:'Bundesliga',    lid:'GER', date:'29/04/2024', period:'month', zi:7.4, odds_h:'5.90', odds_a:'1.52' },
+  { id:9,  home:'Famalicão',  away:'Benfica',       hs:1, as:0, league:'Liga Portugal', lid:'POR', date:'15/04/2024', period:'month', zi:7.2, odds_h:'5.50', odds_a:'1.58' },
+  { id:10, home:'Bochum',     away:'Dortmund',      hs:2, as:0, league:'Bundesliga',    lid:'GER', date:'10/04/2024', period:'month', zi:7.1, odds_h:'5.10', odds_a:'1.65' },
+  { id:11, home:'Mallorca',   away:'Real Madrid',   hs:1, as:0, league:'La Liga',       lid:'ESP', date:'09/05/2024', period:'week',  zi:6.4, odds_h:'4.10', odds_a:'1.85' },
+  { id:12, home:'Bragantino', away:'Palmeiras',     hs:3, as:1, league:'Brasileirão',   lid:'BRA', date:'06/05/2024', period:'week',  zi:4.3, odds_h:'3.10', odds_a:'2.15' },
+  { id:13, home:'Empoli',     away:'Inter',         hs:2, as:2, league:'Serie A',       lid:'ITA', date:'08/05/2024', period:'week',  zi:5.1, odds_h:'5.50', odds_a:'1.55' },
+  { id:14, home:'Clermont',   away:'Monaco',        hs:3, as:2, league:'Ligue 1',       lid:'FRA', date:'03/05/2024', period:'week',  zi:3.8, odds_h:'2.90', odds_a:'2.30' },
+  { id:15, home:'Almería',    away:'Atlético',      hs:2, as:1, league:'La Liga',       lid:'ESP', date:'28/04/2024', period:'month', zi:6.9, odds_h:'4.80', odds_a:'1.70' },
+  { id:16, home:'Caen',       away:'Marseille',     hs:2, as:0, league:'Ligue 1',       lid:'FRA', date:'20/04/2024', period:'month', zi:6.1, odds_h:'4.30', odds_a:'1.80' },
+  { id:17, home:'Frosinone',  away:'Napoli',        hs:1, as:0, league:'Serie A',       lid:'ITA', date:'17/04/2024', period:'month', zi:5.8, odds_h:'4.00', odds_a:'1.90' },
+  { id:18, home:'Cuiabá',     away:'Fluminense',    hs:2, as:0, league:'Brasileirão',   lid:'BRA', date:'11/04/2024', period:'month', zi:5.5, odds_h:'3.80', odds_a:'2.00' },
+  { id:19, home:'Willem II',  away:'Ajax',          hs:3, as:1, league:'Eredivisie',    lid:'HOL', date:'06/04/2024', period:'month', zi:7.0, odds_h:'5.30', odds_a:'1.60' },
+  { id:20, home:'Las Palmas', away:'Girona',        hs:2, as:1, league:'La Liga',       lid:'ESP', date:'01/04/2024', period:'month', zi:4.7, odds_h:'3.30', odds_a:'2.10' },
+];
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let activePeriod  = 'all';
+let activeLeague  = 'all';
+
+const LEAGUE_META = [
+  { id:'BRA', name:'Brasileirão' },
+  { id:'ENG', name:'Premier League' },
+  { id:'ESP', name:'La Liga' },
+  { id:'ITA', name:'Serie A' },
+  { id:'GER', name:'Bundesliga' },
+  { id:'FRA', name:'Ligue 1' },
+  { id:'POR', name:'Liga Portugal' },
+  { id:'HOL', name:'Eredivisie' },
+  { id:'UCL', name:'Champions' },
+];
+
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+function ziClass(zi) {
+  if (zi >= 7) return 'grande';
+  if (zi >= 4) return 'media';
+  return 'leve';
+}
+const ziColors = { grande: 'var(--red)', media: 'var(--gold)', leve: 'var(--gray)' };
+const ziLabels = { grande: 'Grande', media: 'Média', leve: 'Leve' };
+
+function positionBadge(pos) {
+  const medals = { 1:'🥇', 2:'🥈', 3:'🥉' };
+  if (medals[pos]) {
+    return `<div style="width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:1.375rem;flex-shrink:0;">${medals[pos]}</div>`;
+  }
+  const bg = pos <= 10 ? 'rgba(46,230,92,0.1)' : 'var(--card2)';
+  const color = pos <= 10 ? 'var(--green)' : 'var(--gray)';
+  return `<div style="width:36px;height:36px;border-radius:50%;background:${bg};display:flex;align-items:center;justify-content:center;font-size:0.6875rem;font-weight:800;color:${color};flex-shrink:0;">#${pos}</div>`;
+}
+
+function teamCrest(url, name) {
+  if (!url) return '';
+  return `<img src="${url}" alt="${name}" style="width:24px;height:24px;object-fit:contain;flex-shrink:0;" loading="lazy" onerror="this.style.display='none';">`;
+}
+
+// ── LEAGUE FILTER ROW ─────────────────────────────────────────────────────────
+function renderLeagueFilters() {
+  const row = document.getElementById('leagueFilterRow');
+  row.innerHTML = '';
+
+  // "Todas" pill
+  const allChip = document.createElement('button');
+  allChip.className = `filter-chip${activeLeague === 'all' ? ' active' : ''}`;
+  allChip.dataset.rleague = 'all';
+  allChip.textContent = 'Todas';
+  allChip.addEventListener('click', () => { activeLeague = 'all'; renderLeagueFilters(); renderRanking(); });
+  row.appendChild(allChip);
+
+  LEAGUE_META.forEach(l => {
+    const chip = document.createElement('button');
+    chip.className = `filter-chip${activeLeague === l.id ? ' active' : ''}`;
+    chip.dataset.rleague = l.id;
+    chip.style.gap = '5px';
+
+    const logoSlot = document.createElement('span');
+    logoSlot.id = `rfl-${l.id}`;
+    logoSlot.innerHTML = flagImg(l.id, 12);
+    chip.appendChild(logoSlot);
+    chip.appendChild(document.createTextNode(l.name.split(' ')[0]));
+
+    chip.addEventListener('click', () => { activeLeague = l.id; renderLeagueFilters(); renderRanking(); });
+    row.appendChild(chip);
+
+    // Async upgrade to official logo
+    const cached = LEAGUE_LOGOS[l.id];
+    if (cached) {
+      logoSlot.innerHTML = `<img src="${cached}" style="width:13px;height:13px;object-fit:contain;" onerror="this.style.display='none';">`;
+    } else {
+      loadLeagueLogo(l.id).then(badge => {
+        if (!badge) return;
+        const slot = document.getElementById(`rfl-${l.id}`);
+        if (slot) slot.innerHTML = `<img src="${badge}" style="width:13px;height:13px;object-fit:contain;" onerror="this.style.display='none';">`;
+      });
+    }
+  });
+}
+
+// ── SHARE ─────────────────────────────────────────────────────────────────────
+async function shareZebra(z, pos) {
+  const text = `#${pos} 🦓 ${z.home} ${z.hs}×${z.as} ${z.away} — Zebra Index ${z.zi} | ${z.league} · ${z.date}`;
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: 'ZebraStats — Ranking Global', text, url: window.location.href });
+    } catch(e) { /* user cancelled */ }
+  } else {
+    navigator.clipboard?.writeText(text).then(() => showToast('✓ Copiado para a área de transferência'));
+  }
+}
+
+// ── RENDER RANKING ────────────────────────────────────────────────────────────
+function renderRanking() {
+  const container  = document.getElementById('rankingList');
+  const lockBanner = document.getElementById('rankLockBanner');
+  container.innerHTML = '';
+
+  const isPro  = getUserPlan() !== 'free';
+  const LIMIT  = isPro ? Infinity : 5;
+
+  let list = [...RANKING_DATA];
+
+  // Period filter
+  if (activePeriod === 'week')  list = list.filter(z => z.period === 'week');
+  if (activePeriod === 'month') list = list.filter(z => z.period === 'week' || z.period === 'month');
+
+  // League filter
+  if (activeLeague !== 'all') list = list.filter(z => z.lid === activeLeague);
+
+  // Sort by ZI desc
+  list.sort((a, b) => b.zi - a.zi);
+
+  if (!list.length) {
+    container.innerHTML = `<div style="text-align:center;padding:48px 16px;color:var(--gray);">
+      <div style="font-size:2.5rem;margin-bottom:12px;">🏆</div>
+      <div style="font-weight:600;margin-bottom:4px;">Nenhuma zebra encontrada</div>
+      <div style="font-size:0.8125rem;">Tente outro período ou liga</div>
+    </div>`;
+    lockBanner.style.display = 'none';
+    return;
+  }
+
+  const visible   = list.slice(0, LIMIT);
+  const hasLocked = !isPro && list.length > LIMIT;
+
+  visible.forEach((z, idx) => {
+    const pos  = idx + 1;
+    const cls  = ziClass(z.zi);
+    const card = buildRankCard(z, pos, cls);
+    container.appendChild(card);
+  });
+
+  // Blurred preview of 6th card for free users
+  if (hasLocked) {
+    const preview = list[LIMIT];
+    const cls     = ziClass(preview.zi);
+    const ghost   = buildRankCard(preview, LIMIT + 1, cls, true);
+    container.appendChild(ghost);
+  }
+
+  lockBanner.style.display = hasLocked ? 'flex' : 'none';
+
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function buildRankCard(z, pos, cls, locked = false) {
+  const hcUrl  = getCrest(z.home);
+  const acUrl  = getCrest(z.away);
+  const color  = ziColors[cls];
+  const label  = ziLabels[cls];
+
+  const leagueLogo = LEAGUE_LOGOS[z.lid]
+    ? `<img src="${LEAGUE_LOGOS[z.lid]}" style="width:11px;height:11px;object-fit:contain;vertical-align:middle;margin-right:2px;" onerror="this.remove();">`
+    : flagImg(z.lid, 11);
+
+  const card = document.createElement('div');
+  card.className = 'zebra-card';
+  card.style.cssText = `cursor:pointer;${locked ? 'position:relative;overflow:hidden;' : ''}`;
+
+  // ZI bar fill width
+  const bw = Math.min(100, Math.round((z.zi / 10) * 100));
+
+  card.innerHTML = `
+    <div style="display:flex;align-items:flex-start;gap:12px;${locked ? 'filter:blur(5px);pointer-events:none;user-select:none;' : ''}">
+      <!-- Position -->
+      ${positionBadge(pos)}
+
+      <!-- Match info -->
+      <div style="flex:1;min-width:0;">
+        <!-- Teams row -->
+        <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:6px;">
+          <div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:6px;">
+            <div style="display:flex;align-items:center;gap:5px;min-width:0;">
+              ${hcUrl ? teamCrest(hcUrl, z.home) : ''}
+              <span style="font-size:0.875rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${z.home}</span>
+            </div>
+            <span style="font-size:1.25rem;font-weight:800;letter-spacing:-0.5px;color:var(--white);flex-shrink:0;text-align:center;padding:0 4px;">${z.hs}–${z.as}</span>
+            <div style="display:flex;align-items:center;justify-content:flex-end;gap:5px;min-width:0;">
+              <span style="font-size:0.875rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:right;">${z.away}</span>
+              ${acUrl ? teamCrest(acUrl, z.away) : ''}
+            </div>
+          </div>
+          <!-- ZI bar -->
+          <div style="height:3px;border-radius:2px;background:var(--border);overflow:hidden;">
+            <div style="height:100%;width:${bw}%;background:${color};border-radius:2px;transition:width .4s;"></div>
+          </div>
+        </div>
+
+        <!-- Meta row -->
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+          <span style="font-size:0.6875rem;color:var(--gray);display:flex;align-items:center;gap:3px;">${leagueLogo}${z.league} · ${z.date}</span>
+          <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+            <!-- Odds chips -->
+            <span style="font-size:0.625rem;background:rgba(46,230,92,0.1);color:var(--green);padding:2px 5px;border-radius:4px;font-weight:700;">${z.odds_h}</span>
+            <!-- ZI badge -->
+            <span style="font-size:0.625rem;font-weight:800;padding:2px 6px;border-radius:4px;background:${color}22;color:${color};white-space:nowrap;">ZI ${z.zi} · ${label}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    ${locked ? `
+    <div style="position:absolute;inset:0;background:linear-gradient(180deg,transparent 10%,var(--card) 60%);display:flex;align-items:flex-end;justify-content:center;padding-bottom:14px;">
+      <a href="assinatura.html" style="font-size:0.8125rem;color:var(--green);font-weight:700;text-decoration:none;background:var(--green-dim);border:1px solid rgba(46,230,92,0.3);padding:8px 22px;border-radius:var(--radius-pill);display:inline-flex;align-items:center;gap:6px;">
+        <i data-lucide="lock" style="width:13px;height:13px;"></i>Ver com Pro
+      </a>
+    </div>` : `
+    <!-- Share + Details footer -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);">
+      <button class="share-btn" data-id="${z.id}" style="background:none;border:none;cursor:pointer;color:var(--gray);font-size:0.75rem;font-weight:500;font-family:inherit;display:inline-flex;align-items:center;gap:4px;padding:0;">
+        <i data-lucide="share-2" style="width:13px;height:13px;"></i>Compartilhar
+      </button>
+      <a href="partida.html" style="font-size:0.75rem;color:var(--green);font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:3px;">
+        Ver partida <i data-lucide="arrow-right" style="width:13px;height:13px;"></i>
+      </a>
+    </div>`}
+  `;
+
+  if (!locked) {
+    card.querySelector('.share-btn')?.addEventListener('click', e => {
+      e.stopPropagation();
+      shareZebra(z, pos);
+    });
+    card.addEventListener('click', e => {
+      if (e.target.tagName !== 'A' && !e.target.closest('.share-btn')) {
+        window.location.href = 'partida.html';
+      }
+    });
+  }
+
+  return card;
+}
+
+// ── PERIOD TABS ───────────────────────────────────────────────────────────────
+document.querySelectorAll('#periodBar .tab-bar__item').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('#periodBar .tab-bar__item').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    activePeriod = this.dataset.period;
+    renderRanking();
+  });
+});
+
+// ── SKELETON HIDE ─────────────────────────────────────────────────────────────
+function showRanking() {
+  document.getElementById('skeletonList').style.display = 'none';
+  const list = document.getElementById('rankingList');
+  list.style.display = 'flex';
+  list.style.flexDirection = 'column';
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+updatePlanBadge();
+renderLeagueFilters();
+
+// Brief skeleton delay to simulate loading feel
+setTimeout(() => {
+  showRanking();
+  renderRanking();
+
+  // Async: try to upgrade crests + league logos
+  (async () => {
+    const lids = [...new Set(RANKING_DATA.map(z => z.lid))];
+    await Promise.all(lids.map(lid => loadLeagueLogo(lid)));
+    renderLeagueFilters();
+    await Promise.all(lids.map(lid => loadLeagueCrests(lid)));
+    renderRanking();
+  })();
+}, 500);
+
+lucide.createIcons();
+</script>
+<style>
+  .bottom-nav__icon i { width: 20px; height: 20px; display: block; }
+  .chip-ic { width: 12px; height: 12px; display: block; flex-shrink: 0; }
+  .tab-ic  { width: 13px; height: 13px; display: block; flex-shrink: 0; }
+  .navbar__icon i { display: block; }
+  .filter-chip { display: inline-flex; align-items: center; gap: 5px; }
+  .tab-bar__item { display: inline-flex; align-items: center; gap: 5px; }
+
+  /* Skeleton loader */
+  .rank-skeleton {
+    height: 96px;
+    border-radius: var(--radius);
+    background: linear-gradient(90deg, var(--card2) 25%, var(--border) 50%, var(--card2) 75%);
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.4s infinite;
+    margin-bottom: 10px;
+  }
+  @keyframes skeleton-shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* Share button hover */
+  .share-btn:hover { color: var(--green) !important; }
+</style>
+</body>
+</html>
