@@ -10,12 +10,19 @@
  * conhecidas (3 por padrão no mock — ids n1, n2, n3).
  * Chamado em cada página que inclui main.js.
  */
-const _KNOWN_UNREAD_IDS = ['n1','n2','n3']; // IDs das notifs unread no mock
+const _MOCK_NOTIF_IDS = ['n1','n2','n3']; // IDs das notifs fixas do mock
 
 function _getNotifUnreadCount() {
   try {
     const read = new Set(JSON.parse(localStorage.getItem('zs_notifs_read') || '[]'));
-    return _KNOWN_UNREAD_IDS.filter(id => !read.has(id)).length;
+    // IDs fixas do mock
+    const staticIds = _MOCK_NOTIF_IDS;
+    // IDs dinâmicas geradas por alertas (armazenadas em zs_alert_notifs)
+    const alertNotifs = JSON.parse(localStorage.getItem('zs_alert_notifs') || '[]');
+    const dynamicIds  = alertNotifs.map(n => n.id).filter(Boolean);
+    // Combina e deduplica
+    const allIds = [...new Set([...staticIds, ...dynamicIds])];
+    return allIds.filter(id => !read.has(id)).length;
   } catch { return 0; }
 }
 

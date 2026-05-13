@@ -681,6 +681,15 @@ function renderAll() {
   renderAlertsList();
 }
 
+// ── PLAN BADGE ────────────────────────────────────────────────────────────────
+function updatePlanBadge() {
+  const badge = document.getElementById('planBadge');
+  if (!badge) return; // safe no-op if element absent
+  const alerts = loadAlerts();
+  const isPro  = false; // TODO: link to auth state
+  badge.textContent = isPro ? 'PRO' : `FREE ${alerts.length}/${FREE_LIMIT}`;
+}
+
 // ── INIT ──────────────────────────────────────────────────────────────────────
 updatePlanBadge();
 renderLeagueChips();
