@@ -122,8 +122,22 @@ function flagImg(lid, size = 14) {
 }
 
 // ── CACHE GLOBAL DE ESCUDOS ───────────────────────────────────
+// LEAGUE_LOGOS pré-baked: URLs diretas do CDN r2.thesportsdb.com
+// Motivo: chave gratuita "123" da SDB é instável (rate-limit, CORS,
+// resultados errados). URLs são estáveis no CDN deles.
 window.TEAM_LOGOS  = window.TEAM_LOGOS  || {};
-window.LEAGUE_LOGOS = window.LEAGUE_LOGOS || {};
+window.LEAGUE_LOGOS = Object.assign({
+  BRA: 'https://r2.thesportsdb.com/images/media/league/badge/lywv7t1766787179.png',
+  ENG: 'https://r2.thesportsdb.com/images/media/league/badge/gasy9d1737743125.png',
+  ESP: 'https://r2.thesportsdb.com/images/media/league/badge/ja4it51687628717.png',
+  ITA: 'https://r2.thesportsdb.com/images/media/league/badge/67q3q21679951383.png',
+  GER: 'https://r2.thesportsdb.com/images/media/league/badge/teqh1b1679952008.png',
+  FRA: 'https://r2.thesportsdb.com/images/media/league/badge/9f7z9d1742983155.png',
+  POR: 'https://r2.thesportsdb.com/images/media/league/badge/lkfko71751917970.png',
+  UCL: 'https://r2.thesportsdb.com/images/media/league/badge/facv1u1742998896.png',
+  HOL: 'https://r2.thesportsdb.com/images/media/league/badge/o6qdtj1534771842.png',
+  NED: 'https://r2.thesportsdb.com/images/media/league/badge/o6qdtj1534771842.png',
+}, window.LEAGUE_LOGOS || {});
 
 function _crestKeys(name) {
   const k = name.toLowerCase().trim();
