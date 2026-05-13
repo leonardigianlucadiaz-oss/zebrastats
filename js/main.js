@@ -91,6 +91,36 @@ function animFavBtn(btn) {
   btn.classList.add('fav-pop');
 }
 
+// ── BANDEIRAS DE PAÍS (flagcdn.com — universal, sem emoji) ────
+const _FLAG_CDN = {
+  BRA: 'https://flagcdn.com/w20/br.png',
+  ENG: 'https://flagcdn.com/w20/gb-eng.png',
+  ESP: 'https://flagcdn.com/w20/es.png',
+  ITA: 'https://flagcdn.com/w20/it.png',
+  GER: 'https://flagcdn.com/w20/de.png',
+  FRA: 'https://flagcdn.com/w20/fr.png',
+  POR: 'https://flagcdn.com/w20/pt.png',
+  HOL: 'https://flagcdn.com/w20/nl.png',
+  NED: 'https://flagcdn.com/w20/nl.png',
+  ARG: 'https://flagcdn.com/w20/ar.png',
+  MLS: 'https://flagcdn.com/w20/us.png',
+  MEX: 'https://flagcdn.com/w20/mx.png',
+  UCL: 'https://flagcdn.com/w20/eu.png',
+  UEL: 'https://flagcdn.com/w20/eu.png',
+};
+
+/**
+ * Retorna HTML de imagem da bandeira do país da liga.
+ * Fallback seguro para qualquer browser (sem emoji regional).
+ * @param {string} lid  - Código de liga (BRA, ENG, ESP…)
+ * @param {number} size - Tamanho em px (padrão 14)
+ */
+function flagImg(lid, size = 14) {
+  const url = _FLAG_CDN[lid];
+  if (!url) return '';
+  return `<img src="${url}" alt="${lid}" style="width:${size}px;height:${Math.round(size*0.75)}px;object-fit:cover;border-radius:1px;flex-shrink:0;vertical-align:middle;" loading="lazy">`;
+}
+
 // ── CACHE GLOBAL DE ESCUDOS ───────────────────────────────────
 window.TEAM_LOGOS  = window.TEAM_LOGOS  || {};
 window.LEAGUE_LOGOS = window.LEAGUE_LOGOS || {};

@@ -509,22 +509,23 @@ function renderPopularLeagues() {
   POPULAR_LEAGUES.forEach(l => {
     const card = document.createElement('div');
     card.className = 'pop-league-card';
+    // Usa flagcdn como fallback imediato (sem emoji regional)
+    const fallback = flagImg(l.id, 24) || `<span style="font-size:1.25rem;">${l.flag}</span>`;
     card.innerHTML = `
-      <div class="pop-league-card__flag" id="plf-${l.id}">${l.flag}</div>
+      <div class="pop-league-card__flag" id="plf-${l.id}">${fallback}</div>
       <div class="pop-league-card__name">${l.name}</div>`;
     card.addEventListener('click', () => {
       localStorage.setItem('zs_search_league', l.id);
       window.location.href = 'liga.html';
     });
     container.appendChild(card);
-    // Carrega logo oficial SDB de forma assíncrona
+    // Logo oficial SDB substitui a bandeira
     loadPopularLeagueLogo(l.id);
   });
 }
 
 async function loadPopularLeagueLogo(lid) {
-  if (!window.loadLeagueLogo) return;
-  const logo = await loadLeagueLogo(lid);
+  const logo = await loadLeagueLogo(lid);  // global main.js
   if (!logo) return;
   const el = document.getElementById(`plf-${lid}`);
   if (el) el.innerHTML = `<img src="${logo}" onerror="this.style.display='none'">`;
@@ -700,8 +701,8 @@ function buildLeagueItem(l, query) {
   const isFav = isFavLeague(l.id);
 
   row.innerHTML = `
-    <div class="result-item__crest result-item__crest--league" style="border-radius:var(--radius-sm);font-size:1.5rem;" id="rl-${l.id}">
-      ${l.flag}
+    <div class="result-item__crest result-item__crest--league" style="border-radius:var(--radius-sm);" id="rl-${l.id}">
+      ${flagImg(l.id, 28) || `<span style="font-size:1.25rem;">${l.flag}</span>`}
     </div>
     <div class="result-item__body">
       <div class="result-item__label">${highlight(l.name, query)}</div>

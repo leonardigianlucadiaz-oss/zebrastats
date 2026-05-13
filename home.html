@@ -82,13 +82,13 @@
       <!-- FILTRO DE LIGAS -->
       <div class="scroll-x" id="leagueFilter" style="margin-top:4px;gap:8px;">
         <button class="league-pill active" data-league="all">Todos</button>
-        <button class="league-pill" data-league="BRA"><span class="pill-logo" data-logo-lid="BRA">🇧🇷</span> Brasileirão</button>
-        <button class="league-pill" data-league="ENG"><span class="pill-logo" data-logo-lid="ENG">🏴󠁧󠁢󠁥󠁮󠁧󠁿</span> Premier Lge</button>
-        <button class="league-pill" data-league="ESP"><span class="pill-logo" data-logo-lid="ESP">🇪🇸</span> La Liga</button>
-        <button class="league-pill" data-league="ITA"><span class="pill-logo" data-logo-lid="ITA">🇮🇹</span> Serie A</button>
-        <button class="league-pill" data-league="GER"><span class="pill-logo" data-logo-lid="GER">🇩🇪</span> Bundesliga</button>
-        <button class="league-pill" data-league="FRA"><span class="pill-logo" data-logo-lid="FRA">🇫🇷</span> Ligue 1</button>
-        <button class="league-pill" data-league="UCL"><span class="pill-logo" data-logo-lid="UCL">🏆</span> Champions</button>
+        <button class="league-pill" data-league="BRA"><span class="pill-logo" id="hpl-BRA"></span> Brasileirão</button>
+        <button class="league-pill" data-league="ENG"><span class="pill-logo" id="hpl-ENG"></span> Premier Lge</button>
+        <button class="league-pill" data-league="ESP"><span class="pill-logo" id="hpl-ESP"></span> La Liga</button>
+        <button class="league-pill" data-league="ITA"><span class="pill-logo" id="hpl-ITA"></span> Serie A</button>
+        <button class="league-pill" data-league="GER"><span class="pill-logo" id="hpl-GER"></span> Bundesliga</button>
+        <button class="league-pill" data-league="FRA"><span class="pill-logo" id="hpl-FRA"></span> Ligue 1</button>
+        <button class="league-pill" data-league="UCL"><span class="pill-logo" id="hpl-UCL"></span> Champions</button>
       </div>
 
       <!-- EM BREVE -->
@@ -473,14 +473,16 @@
     }
 
     // ── LEAGUE PILLS COM LOGOS SDB ────────────────────────
-    // Substitui os spans data-logo-lid pelo logo oficial da SDB
+    // 1) Bandeira do país via flagcdn (imediata, sem emoji regional)
+    // 2) Logo oficial SDB quando carregar
     async function initLeaguePills() {
-      document.querySelectorAll('[data-logo-lid]').forEach(async span => {
-        const lid = span.dataset.logoLid;
-        if (!lid) return;
-        const logo = await loadLeagueLogo(lid);
-        if (!logo) return;
-        span.innerHTML = `<img src="${logo}" onerror="this.style.display='none'">`;
+      const lids = ['BRA','ENG','ESP','ITA','GER','FRA','UCL'];
+      lids.forEach(async lid => {
+        const span = document.getElementById(`hpl-${lid}`);
+        if (!span) return;
+        span.innerHTML = flagImg(lid, 13);          // bandeira imediata
+        const logo = await loadLeagueLogo(lid);     // global main.js
+        if (logo) span.innerHTML = `<img src="${logo}" style="width:15px;height:15px;object-fit:contain;" onerror="this.style.display='none'">`;
       });
     }
 

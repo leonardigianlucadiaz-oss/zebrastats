@@ -178,16 +178,17 @@
     bar.appendChild(allPill);
 
     LEAGUES.forEach(l => {
-      const cached = LEAGUE_LOGOS[l.id] || '';
-      const logoHtml = cached
-        ? `<img src="${cached}" style="width:14px;height:14px;object-fit:contain;flex-shrink:0;" onerror="this.remove();">`
-        : `<span>${l.flag}</span>`;
+      const cached    = LEAGUE_LOGOS[l.id] || '';
+      // Usa logo SDB cacheado OU bandeira via flagcdn (jamais emoji regional)
+      const logoHtml  = cached
+        ? `<img src="${cached}" style="width:14px;height:14px;object-fit:contain;flex-shrink:0;" onerror="this.style.display='none';">`
+        : flagImg(l.id, 14);
       const shortName = l.name.split(' ')[0];
 
       const pill = document.createElement('div');
       pill.className = `league-fav-pill${activeLeague === l.id ? ' active-league' : ''}`;
       pill.innerHTML = `
-        <span class="league-fav-pill__label" data-lid="${l.id}" style="display:flex;align-items:center;gap:5px;">${logoHtml}${shortName}</span>
+        <span class="league-fav-pill__label" data-lid="${l.id}" style="display:flex;align-items:center;gap:5px;"><span id="zbl-${l.id}">${logoHtml}</span>${shortName}</span>
         <button class="league-fav-pill__star${l.faved ? ' faved' : ''}" data-star="${l.id}" title="${l.faved ? 'Remover' : 'Favoritar'}">★</button>
       `;
       pill.querySelector('[data-lid]').addEventListener('click', () => {
@@ -206,15 +207,12 @@
       });
       bar.appendChild(pill);
 
-      // Carrega logo SDB se ainda não tem
+      // Carrega logo SDB (logo oficial substitui a bandeira)
       if (!cached) {
         loadLeagueLogo(l.id).then(badge => {
-          if (badge) {
-            const labelEl = bar.querySelector(`[data-lid="${l.id}"]`);
-            if (labelEl) {
-              labelEl.innerHTML = `<img src="${badge}" style="width:14px;height:14px;object-fit:contain;flex-shrink:0;" onerror="this.remove();">${shortName}`;
-            }
-          }
+          if (!badge) return;
+          const slot = document.getElementById(`zbl-${l.id}`);
+          if (slot) slot.innerHTML = `<img src="${badge}" style="width:14px;height:14px;object-fit:contain;flex-shrink:0;" onerror="this.style.display='none';">`;
         });
       }
     });
