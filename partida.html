@@ -22,11 +22,14 @@
       Zebra<span>Stats</span>
     </a>
     <nav class="sidebar__nav">
-      <a href="home.html"   class="sidebar__nav-item"><i data-lucide="home"></i><span>Home</span></a>
-      <a href="zebras.html" class="sidebar__nav-item"><i data-lucide="activity"></i><span>Zebras</span></a>
-      <a href="liga.html"   class="sidebar__nav-item"><i data-lucide="trophy"></i><span>Ligas</span></a>
-      <a href="time.html"   class="sidebar__nav-item"><i data-lucide="star"></i><span>Times</span></a>
-      <a href="perfil.html" class="sidebar__nav-item"><i data-lucide="user"></i><span>Perfil</span></a>
+      <a href="home.html"    class="sidebar__nav-item"><i data-lucide="home"></i><span>Home</span></a>
+      <a href="zebras.html"  class="sidebar__nav-item"><i data-lucide="activity"></i><span>Zebras</span></a>
+      <a href="ranking.html" class="sidebar__nav-item"><i data-lucide="medal"></i><span>Ranking</span></a>
+      <a href="comparar.html"class="sidebar__nav-item"><i data-lucide="git-compare"></i><span>Comparar</span></a>
+      <a href="alertas.html" class="sidebar__nav-item"><i data-lucide="bell-ring"></i><span>Alertas</span></a>
+      <a href="liga.html"    class="sidebar__nav-item"><i data-lucide="trophy"></i><span>Ligas</span></a>
+      <a href="time.html"    class="sidebar__nav-item"><i data-lucide="star"></i><span>Times</span></a>
+      <a href="perfil.html"  class="sidebar__nav-item"><i data-lucide="user"></i><span>Perfil</span></a>
     </nav>
     <div class="sidebar__footer">
       <div class="sidebar__user">
@@ -47,7 +50,7 @@
   <nav class="navbar">
     <button onclick="history.back()" class="navbar__icon" style="background:none;border:none;cursor:pointer;color:var(--white);display:flex;align-items:center;justify-content:center;"><i data-lucide="arrow-left" style="width:20px;height:20px;"></i></button>
     <span style="font-size:0.9375rem;font-weight:600;flex:1;text-align:center;">Detalhes da Partida</span>
-    <button class="navbar__icon" onclick="showToast('Link copiado!')" title="Compartilhar"><i data-lucide="link" style="width:18px;height:18px;"></i></button>
+    <button class="navbar__icon" onclick="shareMatch()" title="Compartilhar"><i data-lucide="share-2" style="width:18px;height:18px;"></i></button>
   </nav>
 
   <!-- PLACAR HERO -->
@@ -218,7 +221,7 @@
             </div>
           </div>
           <div style="display:flex;gap:10px;align-items:flex-start;">
-            <span style="font-size:1rem;flex-shrink:0;">📊</span>
+            <span style="flex-shrink:0;display:flex;align-items:center;"><i data-lucide="bar-chart-2" style="width:16px;height:16px;color:var(--gold);"></i></span>
             <div>
               <div style="font-size:0.8125rem;font-weight:600;">xG favorável ao Botafogo nos últimos 3 jogos</div>
               <div style="font-size:0.75rem;color:var(--gray);">Expected Goals indicavam oportunidades reais de gol</div>
@@ -267,6 +270,16 @@
 <script src="js/api.js"></script>
 <script src="js/main.js"></script>
 <script>
+  // ── SHARE ───────────────────────────────────────────────────────
+  function shareMatch() {
+    const text = `🦓 ZebraStats — Botafogo vs Flamengo\nZI 7.8 · Odd 4.20\n${window.location.href}`;
+    if (navigator.share) {
+      navigator.share({ title: 'ZebraStats', text, url: window.location.href }).catch(() => {});
+    } else {
+      navigator.clipboard.writeText(text).then(() => showToast('Link copiado!')).catch(() => showToast('Erro ao copiar'));
+    }
+  }
+
   // ── TABS ────────────────────────────────────────────────────────
   document.querySelectorAll('.tab-bar__item').forEach(btn => {
     btn.addEventListener('click', function() {
