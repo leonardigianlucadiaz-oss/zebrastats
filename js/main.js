@@ -3,6 +3,51 @@
    Utilitários globais compartilhados entre todas as telas
    ============================================================ */
 
+// ── BELL BADGE (contador de notificações não lidas) ───────────
+/**
+ * Injeta/atualiza o badge de contagem no ícone de sino em qualquer página.
+ * Lê zs_notifs_read do localStorage e subtrai das notificações não lidas
+ * conhecidas (3 por padrão no mock — ids n1, n2, n3).
+ * Chamado em cada página que inclui main.js.
+ */
+const _KNOWN_UNREAD_IDS = ['n1','n2','n3']; // IDs das notifs unread no mock
+
+function _getNotifUnreadCount() {
+  try {
+    const read = new Set(JSON.parse(localStorage.getItem('zs_notifs_read') || '[]'));
+    return _KNOWN_UNREAD_IDS.filter(id => !read.has(id)).length;
+  } catch { return 0; }
+}
+
+function updateBellBadge() {
+  const count = _getNotifUnreadCount();
+  document.querySelectorAll('.zs-bell-badge').forEach(b => {
+    b.textContent = count > 9 ? '9+' : count;
+    b.style.display = count > 0 ? 'flex' : 'none';
+  });
+}
+
+function initBellBadge() {
+  // Find the bell icon link and inject a badge span if not already present
+  document.querySelectorAll('a[href="notificacoes.html"].navbar__icon').forEach(link => {
+    if (link.querySelector('.zs-bell-badge')) return; // already injected
+    link.style.position = 'relative';
+    const badge = document.createElement('span');
+    badge.className = 'zs-bell-badge';
+    badge.style.cssText = [
+      'position:absolute', 'top:-4px', 'right:-4px',
+      'min-width:16px', 'height:16px', 'border-radius:8px',
+      'background:var(--red)', 'color:#fff',
+      'font-size:0.5625rem', 'font-weight:800',
+      'display:flex', 'align-items:center', 'justify-content:center',
+      'padding:0 3px', 'pointer-events:none',
+      'border:1.5px solid var(--bg,#0d1117)',
+    ].join(';');
+    link.appendChild(badge);
+  });
+  updateBellBadge();
+}
+
 // ── TOAST ─────────────────────────────────────────────────────
 /**
  * Exibe uma mensagem toast temporária na parte inferior da tela.

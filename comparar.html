@@ -769,6 +769,7 @@ const ta = params.get('a'), tb = params.get('b');
 if (ta) { const t = ALL_TEAMS.find(t=>t.id===ta); if(t) selectTeam('A',t); }
 if (tb) { const t = ALL_TEAMS.find(t=>t.id===tb); if(t) selectTeam('B',t); }
 
+initBellBadge();
 lucide.createIcons();
 </script>
 

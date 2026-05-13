@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ZebraStats — Alertas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/main.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config = { corePlugins: { preflight: false } }</script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+</head>
+<body>
+<div class="app-wrapper">
+
+  <!-- SIDEBAR (desktop) -->
+  <aside class="app-sidebar">
+    <a href="home.html" class="sidebar__brand">
+      <div class="sidebar__brand-icon">Z</div>
+      Zebra<span>Stats</span>
+    </a>
+    <nav class="sidebar__nav">
+      <a href="home.html"    class="sidebar__nav-item"><i data-lucide="home"></i><span>Home</span></a>
+      <a href="zebras.html"  class="sidebar__nav-item"><i data-lucide="activity"></i><span>Zebras</span></a>
+      <a href="ranking.html" class="sidebar__nav-item"><i data-lucide="medal"></i><span>Ranking</span></a>
+      <a href="comparar.html"class="sidebar__nav-item"><i data-lucide="git-compare"></i><span>Comparar</span></a>
+      <a href="alertas.html" class="sidebar__nav-item active"><i data-lucide="bell-ring"></i><span>Alertas</span></a>
+      <a href="liga.html"    class="sidebar__nav-item"><i data-lucide="trophy"></i><span>Ligas</span></a>
+      <a href="time.html"    class="sidebar__nav-item"><i data-lucide="star"></i><span>Times</span></a>
+      <a href="perfil.html"  class="sidebar__nav-item"><i data-lucide="user"></i><span>Perfil</span></a>
+    </nav>
+    <div class="sidebar__footer">
+      <div class="sidebar__user">
+        <div class="sidebar__user-avatar">G</div>
+        <div class="sidebar__user-info">
+          <div class="sidebar__user-name">Gianluca</div>
+          <div class="sidebar__user-plan">Plano Free</div>
+        </div>
+      </div>
+      <a href="assinatura.html" class="badge badge--free" style="text-decoration:none;cursor:pointer;">FREE → PRO</a>
+    </div>
+  </aside>
+
+  <!-- MAIN AREA -->
+  <div class="app-main">
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <button onclick="history.back()" class="navbar__icon" style="background:none;border:none;cursor:pointer;color:var(--white);display:flex;align-items:center;justify-content:center;">
+      <i data-lucide="arrow-left" style="width:20px;height:20px;"></i>
+    </button>
+    <span style="font-size:1rem;font-weight:700;flex:1;text-align:center;">Alertas</span>
+    <a href="notificacoes.html" class="navbar__icon" id="bellBtn" style="position:relative;">
+      <i data-lucide="bell" style="width:18px;height:18px;"></i>
+    </a>
+  </nav>
+
+  <!-- RESUMO ──────────────────────────────────────────────── -->
+  <section style="background:linear-gradient(135deg,var(--card2) 0%,rgba(46,230,92,0.05) 100%);padding:16px;border-bottom:1px solid var(--border);">
+    <div style="display:flex;align-items:center;gap:16px;">
+      <div style="flex:1;">
+        <div style="font-size:1.5rem;font-weight:900;" id="activeCount">0</div>
+        <div style="font-size:0.75rem;color:var(--gray);">alertas ativos</div>
+      </div>
+      <div style="flex:1;text-align:center;">
+        <div style="font-size:1.5rem;font-weight:900;" id="totalTriggered">0</div>
+        <div style="font-size:0.75rem;color:var(--gray);">disparados hoje</div>
+      </div>
+      <div style="flex:1;text-align:right;">
+        <div style="font-size:1.5rem;font-weight:900;color:var(--gold);" id="limitCount">3/3</div>
+        <div style="font-size:0.75rem;color:var(--gray);">limite free</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ATALHOS (templates) ──────────────────────────────────── -->
+  <section style="padding:16px 16px 0;">
+    <div class="section-header" style="margin-bottom:10px;">
+      <span class="section-title"><i data-lucide="zap" class="sec-ic"></i>Atalhos</span>
+      <span style="font-size:0.6875rem;color:var(--gray);">Alertas prontos</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;" id="templatesList"></div>
+  </section>
+
+  <!-- MEUS ALERTAS ────────────────────────────────────────── -->
+  <section style="padding:16px;" id="myAlertsSection">
+    <div class="section-header" style="margin-bottom:10px;">
+      <span class="section-title"><i data-lucide="bell-ring" class="sec-ic"></i>Meus Alertas</span>
+      <button id="clearAllBtn" style="background:none;border:none;color:var(--gray);font-size:0.75rem;font-weight:600;cursor:pointer;font-family:inherit;display:none;">Limpar todos</button>
+    </div>
+    <div id="alertsList"></div>
+  </section>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <a href="home.html"   class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="home"></i></span>Home</a>
+    <a href="zebras.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="activity"></i></span>Zebras</a>
+    <a href="liga.html"   class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="trophy"></i></span>Ligas</a>
+    <a href="time.html"   class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="star"></i></span>Times</a>
+    <a href="perfil.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="user"></i></span>Perfil</a>
+  </nav>
+
+  </div><!-- /app-main -->
+</div><!-- /app-wrapper -->
+
+<!-- FAB NOVO ALERTA -->
+<button id="fabBtn" class="fab-btn">
+  <i data-lucide="plus" style="width:22px;height:22px;"></i>
+  <span>Novo Alerta</span>
+</button>
+
+<!-- MODAL CRIAR ALERTA ──────────────────────────────────────── -->
+<div class="modal-overlay" id="alertModal">
+  <div class="modal alert-modal">
+    <div class="modal__header">
+      <span class="modal__title" id="modalTitle">Novo Alerta</span>
+      <button class="modal__close" id="closeModal"><i data-lucide="x" style="width:16px;height:16px;"></i></button>
+    </div>
+
+    <!-- TIPO DE ALERTA -->
+    <div class="alert-section">
+      <div class="alert-section__label">Tipo de Alerta</div>
+      <div style="display:flex;flex-direction:column;gap:6px;" id="typeOptions">
+        <label class="alert-type-opt active" data-type="zi_league">
+          <div class="alert-type-opt__icon" style="background:var(--green-dim);color:var(--green);">
+            <i data-lucide="zap" style="width:14px;height:14px;"></i>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:0.875rem;font-weight:600;">Zebra por Liga</div>
+            <div style="font-size:0.6875rem;color:var(--gray);">Avise quando ZI superar o limite em uma liga</div>
+          </div>
+          <div class="alert-type-opt__check"><i data-lucide="check" style="width:12px;height:12px;"></i></div>
+        </label>
+        <label class="alert-type-opt" data-type="zi_team">
+          <div class="alert-type-opt__icon" style="background:rgba(30,58,85,0.8);color:var(--blue-light,#60a5fa);">
+            <i data-lucide="shield" style="width:14px;height:14px;"></i>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:0.875rem;font-weight:600;">Zebra por Time</div>
+            <div style="font-size:0.6875rem;color:var(--gray);">Avise quando um time causar ou sofrer zebra</div>
+          </div>
+          <div class="alert-type-opt__check" style="display:none;"><i data-lucide="check" style="width:12px;height:12px;"></i></div>
+        </label>
+        <label class="alert-type-opt" data-type="match">
+          <div class="alert-type-opt__icon" style="background:var(--gold-dim);color:var(--gold);">
+            <i data-lucide="timer" style="width:14px;height:14px;"></i>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:0.875rem;font-weight:600;">Jogo ao Vivo</div>
+            <div style="font-size:0.6875rem;color:var(--gray);">Avise quando meu time favorito começar a jogar</div>
+          </div>
+          <div class="alert-type-opt__check" style="display:none;"><i data-lucide="check" style="width:12px;height:12px;"></i></div>
+        </label>
+      </div>
+    </div>
+
+    <!-- CONFIGURAR (muda conforme tipo) -->
+    <div class="alert-section" id="configSection">
+      <!-- ZEBRA POR LIGA -->
+      <div id="cfgLeague">
+        <div class="alert-section__label">Liga</div>
+        <div class="scroll-x" id="leagueChips" style="gap:6px;padding-bottom:4px;"></div>
+
+        <div class="alert-section__label" style="margin-top:14px;">
+          Limite de ZI: <strong id="ziValDisplay">6.0</strong>
+          <span style="font-size:0.625rem;color:var(--gray);margin-left:4px;">ou superior</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:0.6875rem;color:var(--gray);">3</span>
+          <input type="range" id="ziSlider" min="3" max="9.5" step="0.5" value="6" class="zi-slider" />
+          <span style="font-size:0.6875rem;color:var(--gray);">9.5</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:6px;">
+          <span class="zi-pill zi-leve">Leve (&lt;4)</span>
+          <span class="zi-pill zi-media">Média (4–7)</span>
+          <span class="zi-pill zi-grande">Grande (7+)</span>
+        </div>
+      </div>
+
+      <!-- ZEBRA POR TIME -->
+      <div id="cfgTeam" style="display:none;">
+        <div class="alert-section__label">Time</div>
+        <div style="position:relative;">
+          <div class="slot-search-wrap" style="background:var(--bg);">
+            <i data-lucide="search" class="slot-search-ic"></i>
+            <input type="text" id="teamSearchInput" class="slot-input" placeholder="Buscar time..." autocomplete="off" />
+          </div>
+          <div class="slot-dropdown" id="teamDropdown"></div>
+        </div>
+        <div id="selectedTeamBadge" style="display:none;margin-top:8px;display:none;align-items:center;gap:8px;background:var(--green-dim);border:1px solid rgba(46,230,92,0.3);border-radius:var(--radius);padding:8px 10px;">
+          <i data-lucide="shield-check" style="width:16px;height:16px;color:var(--green);flex-shrink:0;"></i>
+          <span id="selectedTeamName" style="font-size:0.875rem;font-weight:600;flex:1;"></span>
+          <button id="clearTeam" style="background:none;border:none;color:var(--gray);cursor:pointer;padding:0;"><i data-lucide="x" style="width:14px;height:14px;"></i></button>
+        </div>
+
+        <div class="alert-section__label" style="margin-top:14px;">
+          Limite de ZI: <strong id="ziValDisplay2">5.0</strong>
+          <span style="font-size:0.625rem;color:var(--gray);margin-left:4px;">ou superior</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:0.6875rem;color:var(--gray);">3</span>
+          <input type="range" id="ziSlider2" min="3" max="9.5" step="0.5" value="5" class="zi-slider" />
+          <span style="font-size:0.6875rem;color:var(--gray);">9.5</span>
+        </div>
+      </div>
+
+      <!-- JOGO AO VIVO -->
+      <div id="cfgMatch" style="display:none;">
+        <div class="alert-section__label">Time favorito</div>
+        <div style="background:var(--card2);border:1px solid var(--border);border-radius:var(--radius);padding:12px;display:flex;align-items:center;gap:10px;">
+          <i data-lucide="star" style="width:16px;height:16px;color:var(--gold);flex-shrink:0;"></i>
+          <div>
+            <div style="font-size:0.875rem;font-weight:600;" id="favTeamName">Flamengo</div>
+            <div style="font-size:0.6875rem;color:var(--gray);">Definido nos favoritos</div>
+          </div>
+        </div>
+
+        <div class="alert-section__label" style="margin-top:14px;">Avisar com antecedência</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;" id="advanceOpts">
+          <button class="alert-time-chip active" data-adv="15">15 min</button>
+          <button class="alert-time-chip" data-adv="30">30 min</button>
+          <button class="alert-time-chip" data-adv="60">1 hora</button>
+          <button class="alert-time-chip" data-adv="0">No início</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- QUANDO NOTIFICAR -->
+    <div class="alert-section">
+      <div class="alert-section__label">Quando notificar</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;" id="timeOpts">
+        <button class="alert-time-chip active" data-tw="any">Qualquer hora</button>
+        <button class="alert-time-chip" data-tw="morning">Manhã (6–12h)</button>
+        <button class="alert-time-chip" data-tw="afternoon">Tarde (12–18h)</button>
+        <button class="alert-time-chip" data-tw="evening">Noite (18–23h)</button>
+      </div>
+    </div>
+
+    <!-- SAVE BTN -->
+    <button id="saveAlertBtn" class="btn-primary" style="width:100%;margin-top:4px;">
+      <i data-lucide="bell-ring" style="width:16px;height:16px;"></i>
+      Criar Alerta
+    </button>
+  </div>
+</div>
+
+<!-- PRO MODAL -->
+<div class="modal-overlay" id="proModal">
+  <div class="modal" style="text-align:center;padding:24px;">
+    <div style="font-size:2.5rem;margin-bottom:12px;">🔒</div>
+    <div style="font-size:1rem;font-weight:700;margin-bottom:8px;">Limite de alertas</div>
+    <div style="font-size:0.8125rem;color:var(--gray);margin-bottom:20px;line-height:1.5;">O plano Free permite até 3 alertas. Faça upgrade para Pro e crie alertas ilimitados com notificações em tempo real.</div>
+    <a href="assinatura.html" style="display:block;background:var(--green);color:#000;font-weight:700;padding:12px;border-radius:var(--radius-pill);text-decoration:none;font-size:0.9375rem;margin-bottom:10px;">Fazer Upgrade → Pro</a>
+    <button onclick="document.getElementById('proModal').classList.remove('show')" style="background:none;border:none;color:var(--gray);font-size:0.8125rem;cursor:pointer;font-family:inherit;">Agora não</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/main.js"></script>
+<script>
+// ── CONSTANTS ─────────────────────────────────────────────────────────────────
+const ALERTS_KEY  = 'zs_alerts';
+const FREE_LIMIT  = 3;
+
+const LEAGUES_META = [
+  { id:'BRA', name:'Brasileirão' },
+  { id:'ENG', name:'Premier League' },
+  { id:'ESP', name:'La Liga' },
+  { id:'ITA', name:'Serie A' },
+  { id:'GER', name:'Bundesliga' },
+  { id:'FRA', name:'Ligue 1' },
+  { id:'POR', name:'Liga Portugal' },
+  { id:'UCL', name:'Champions' },
+  { id:'HOL', name:'Eredivisie' },
+];
+
+const TEAMS_LIST = [
+  'Flamengo','Palmeiras','Botafogo','Fluminense','Corinthians','São Paulo','Grêmio','Internacional','Atlético-MG',
+  'Man City','Liverpool','Arsenal','Chelsea','Man United','Tottenham',
+  'Real Madrid','Barcelona','Atlético','Sevilla',
+  'Bayern','Dortmund','Leverkusen',
+  'Juventus','Inter','AC Milan','Napoli',
+  'PSG','Marseille','Monaco',
+  'Benfica','Porto','Sporting CP',
+];
+
+const TEMPLATES = [
+  { type:'zi_league', lid:'all',  threshold:7.0, label:'Zebras Grandes (ZI > 7)',      sub:'Qualquer liga · Apenas zebras grandes',    tw:'any', icon:'zap',      iconBg:'var(--red)',   isPro:false },
+  { type:'zi_league', lid:'BRA',  threshold:5.0, label:'Zebras no Brasileirão (ZI > 5)', sub:'Brasileirão · Zebras médias e grandes',  tw:'any', icon:'zap',      iconBg:'var(--green)', isPro:false },
+  { type:'zi_team',   team:'Flamengo', threshold:4.0, label:'Alerta Flamengo (ZI > 4)', sub:'Quando o Flamengo causar/sofrer zebra',  tw:'any', icon:'shield',    iconBg:'#dc2626',      isPro:false },
+  { type:'zi_league', lid:'UCL',  threshold:6.5, label:'Champions League (ZI > 6.5)',  sub:'Champions League · Zebras impactantes',   tw:'any', icon:'trophy',    iconBg:'var(--gold)',  isPro:true  },
+  { type:'match',     team:'auto',threshold:0,   label:'Jogo do meu time favorito',    sub:'Avisa 30 min antes do jogo começar',      tw:'any', icon:'timer',     iconBg:'var(--gold)',  isPro:true  },
+];
+
+// ── STORAGE ───────────────────────────────────────────────────────────────────
+function loadAlerts() {
+  try { return JSON.parse(localStorage.getItem(ALERTS_KEY)) || []; }
+  catch { return []; }
+}
+function saveAlerts(list) {
+  try { localStorage.setItem(ALERTS_KEY, JSON.stringify(list)); }
+  catch {}
+}
+function genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let alerts = loadAlerts();
+let editId = null; // null = create mode
+let selectedAlertType = 'zi_league';
+let selectedLid   = 'BRA';
+let selectedTeam  = null;
+let selectedTw    = 'any';
+let selectedAdv   = 15;
+
+// ── HEADER COUNTS ─────────────────────────────────────────────────────────────
+function updateCounts() {
+  const active = alerts.filter(a => a.active).length;
+  const triggered = alerts.reduce((s,a) => s + (a.triggeredToday||0), 0);
+  const isPro = getUserPlan() !== 'free';
+  document.getElementById('activeCount').textContent   = active;
+  document.getElementById('totalTriggered').textContent= triggered;
+  document.getElementById('limitCount').textContent    = isPro ? '∞' : `${alerts.length}/${FREE_LIMIT}`;
+  document.getElementById('limitCount').style.color    = (!isPro && alerts.length >= FREE_LIMIT) ? 'var(--red)' : 'var(--gold)';
+}
+
+// ── TEMPLATES ─────────────────────────────────────────────────────────────────
+function renderTemplates() {
+  const container = document.getElementById('templatesList');
+  container.innerHTML = '';
+  const isPro = getUserPlan() !== 'free';
+
+  TEMPLATES.forEach(tpl => {
+    const alreadyAdded = alerts.some(a =>
+      a.type === tpl.type &&
+      (tpl.type === 'zi_league' ? a.lid === tpl.lid && a.threshold === tpl.threshold :
+       tpl.type === 'zi_team'   ? a.team === tpl.team && a.threshold === tpl.threshold : false)
+    );
+    const locked = tpl.isPro && !isPro;
+
+    const card = document.createElement('div');
+    card.className = 'template-card';
+    card.innerHTML = `
+      <div class="template-card__icon" style="background:${tpl.iconBg}22;color:${tpl.iconBg};">
+        <i data-lucide="${tpl.icon}" style="width:14px;height:14px;"></i>
+      </div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:0.875rem;font-weight:600;display:flex;align-items:center;gap:5px;">
+          ${tpl.label}
+          ${locked ? '<span style="font-size:0.5625rem;background:var(--gold-dim);color:var(--gold);padding:1px 5px;border-radius:4px;font-weight:700;">PRO</span>' : ''}
+        </div>
+        <div style="font-size:0.6875rem;color:var(--gray);">${tpl.sub}</div>
+      </div>
+      <button class="tpl-add-btn${alreadyAdded?' tpl-add-btn--done':''}" data-locked="${locked}">
+        ${alreadyAdded
+          ? '<i data-lucide="check" style="width:14px;height:14px;"></i>'
+          : locked
+            ? '<i data-lucide="lock" style="width:14px;height:14px;"></i>'
+            : '<i data-lucide="plus" style="width:14px;height:14px;"></i>'
+        }
+      </button>`;
+
+    card.querySelector('.tpl-add-btn').addEventListener('click', () => {
+      if (alreadyAdded) return;
+      if (locked) { document.getElementById('proModal').classList.add('show'); return; }
+      addFromTemplate(tpl);
+    });
+    container.appendChild(card);
+  });
+  lucide.createIcons();
+}
+
+function addFromTemplate(tpl) {
+  const isPro = getUserPlan() !== 'free';
+  if (!isPro && alerts.length >= FREE_LIMIT) {
+    document.getElementById('proModal').classList.add('show'); return;
+  }
+  const alert = {
+    id: genId(), type: tpl.type, label: tpl.label, sub: tpl.sub,
+    lid: tpl.lid||null, team: tpl.team||null, threshold: tpl.threshold,
+    tw: tpl.tw, advance: tpl.advance||0, active: true,
+    icon: tpl.icon, iconBg: tpl.iconBg,
+    createdAt: Date.now(), triggeredCount:0, triggeredToday:0, lastTriggered:null,
+  };
+  alerts.unshift(alert);
+  saveAlerts(alerts);
+  renderAll();
+  showToast(`✓ Alerta criado: ${tpl.label}`);
+}
+
+// ── MY ALERTS LIST ────────────────────────────────────────────────────────────
+function renderAlertsList() {
+  const container = document.getElementById('alertsList');
+  const clearBtn  = document.getElementById('clearAllBtn');
+  container.innerHTML = '';
+
+  if (!alerts.length) {
+    container.innerHTML = `
+      <div style="text-align:center;padding:32px 16px;color:var(--gray);">
+        <div style="width:48px;height:48px;border-radius:14px;background:var(--card2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
+          <i data-lucide="bell-off" style="width:22px;height:22px;color:var(--gray);opacity:0.5;"></i>
+        </div>
+        <div style="font-weight:600;margin-bottom:4px;">Nenhum alerta criado</div>
+        <div style="font-size:0.8125rem;line-height:1.5;">Use os atalhos acima ou o botão <strong style="color:var(--green);">+ Novo Alerta</strong></div>
+      </div>`;
+    clearBtn.style.display = 'none';
+    lucide.createIcons();
+    return;
+  }
+
+  clearBtn.style.display = 'inline';
+
+  alerts.forEach((a, idx) => {
+    const card = document.createElement('div');
+    card.className = 'alert-card';
+    card.dataset.id = a.id;
+
+    const timeLabel = { any:'Qualquer hora', morning:'Manhã (6–12h)', afternoon:'Tarde (12–18h)', evening:'Noite (18–23h)' }[a.tw] || 'Qualquer hora';
+    const lastTrig  = a.lastTriggered
+      ? `Último disparo: ${new Date(a.lastTriggered).toLocaleDateString('pt-BR')}`
+      : `Disparado ${a.triggeredCount}x`;
+
+    card.innerHTML = `
+      <div style="display:flex;align-items:flex-start;gap:10px;">
+        <div class="alert-card__icon" style="background:${a.iconBg}22;color:${a.iconBg};">
+          <i data-lucide="${a.icon||'bell'}" style="width:14px;height:14px;"></i>
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:0.875rem;font-weight:700;margin-bottom:2px;">${a.label}</div>
+          <div style="font-size:0.6875rem;color:var(--gray);margin-bottom:6px;">${a.sub||''}</div>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <span class="alert-meta-chip"><i data-lucide="clock" style="width:10px;height:10px;"></i>${timeLabel}</span>
+            <span class="alert-meta-chip"><i data-lucide="zap" style="width:10px;height:10px;"></i>${lastTrig}</span>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0;">
+          <!-- Toggle -->
+          <label class="alert-toggle">
+            <input type="checkbox" ${a.active?'checked':''} data-toggle="${a.id}" />
+            <span class="alert-toggle__track"></span>
+          </label>
+          <!-- Delete -->
+          <button class="alert-delete-btn" data-delete="${a.id}" title="Excluir">
+            <i data-lucide="trash-2" style="width:13px;height:13px;"></i>
+          </button>
+        </div>
+      </div>
+      ${idx < alerts.length - 1 ? '<div style="height:1px;background:var(--border);margin-top:12px;"></div>' : ''}`;
+    container.appendChild(card);
+  });
+
+  // Events
+  container.querySelectorAll('[data-toggle]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      const a = alerts.find(x => x.id === cb.dataset.toggle);
+      if (a) { a.active = cb.checked; saveAlerts(alerts); updateCounts(); }
+    });
+  });
+  container.querySelectorAll('[data-delete]').forEach(btn => {
+    btn.addEventListener('click', () => deleteAlert(btn.dataset.delete));
+  });
+
+  lucide.createIcons();
+}
+
+function deleteAlert(id) {
+  alerts = alerts.filter(a => a.id !== id);
+  saveAlerts(alerts);
+  renderAll();
+  showToast('Alerta removido');
+}
+
+// ── CLEAR ALL ─────────────────────────────────────────────────────────────────
+document.getElementById('clearAllBtn').addEventListener('click', () => {
+  if (!alerts.length) return;
+  alerts = [];
+  saveAlerts(alerts);
+  renderAll();
+  showToast('Todos os alertas removidos');
+});
+
+// ── MODAL ─────────────────────────────────────────────────────────────────────
+const modal = document.getElementById('alertModal');
+
+function openModal() {
+  editId = null;
+  document.getElementById('modalTitle').textContent = 'Novo Alerta';
+  resetForm();
+  modal.classList.add('show');
+  lucide.createIcons();
+}
+function closeModal() { modal.classList.remove('show'); }
+
+document.getElementById('fabBtn').addEventListener('click', () => {
+  const isPro = getUserPlan() !== 'free';
+  if (!isPro && alerts.length >= FREE_LIMIT) {
+    document.getElementById('proModal').classList.add('show'); return;
+  }
+  openModal();
+});
+document.getElementById('closeModal').addEventListener('click', closeModal);
+modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+
+// ── FORM HELPERS ──────────────────────────────────────────────────────────────
+function resetForm() {
+  selectedAlertType = 'zi_league';
+  selectedLid = 'BRA';
+  selectedTeam = null;
+  selectedTw = 'any';
+  selectedAdv = 15;
+  setType('zi_league');
+  document.querySelectorAll('[data-tw]').forEach(b => { b.classList.toggle('active', b.dataset.tw === 'any'); });
+  document.querySelectorAll('[data-adv]').forEach(b => { b.classList.toggle('active', b.dataset.adv === '15'); });
+  document.getElementById('ziSlider').value  = 6;
+  document.getElementById('ziSlider2').value = 5;
+  document.getElementById('ziValDisplay').textContent  = '6.0';
+  document.getElementById('ziValDisplay2').textContent = '5.0';
+  document.getElementById('teamSearchInput').value = '';
+  selectedTeamDisplay(null);
+}
+
+// ── TYPE SELECTOR ─────────────────────────────────────────────────────────────
+document.querySelectorAll('#typeOptions .alert-type-opt').forEach(opt => {
+  opt.addEventListener('click', () => setType(opt.dataset.type));
+});
+
+function setType(type) {
+  selectedAlertType = type;
+  document.querySelectorAll('#typeOptions .alert-type-opt').forEach(o => {
+    const active = o.dataset.type === type;
+    o.classList.toggle('active', active);
+    o.querySelector('.alert-type-opt__check').style.display = active ? 'flex' : 'none';
+  });
+  document.getElementById('cfgLeague').style.display = type === 'zi_league' ? 'block' : 'none';
+  document.getElementById('cfgTeam').style.display   = type === 'zi_team'   ? 'block' : 'none';
+  document.getElementById('cfgMatch').style.display  = type === 'match'     ? 'block' : 'none';
+  lucide.createIcons();
+}
+
+// ── LEAGUE CHIPS ──────────────────────────────────────────────────────────────
+function renderLeagueChips() {
+  const row = document.getElementById('leagueChips');
+  row.innerHTML = '';
+
+  // "Todas" option
+  const allChip = document.createElement('button');
+  allChip.className = `filter-chip${selectedLid === 'all' ? ' active' : ''}`;
+  allChip.dataset.lid = 'all';
+  allChip.textContent = 'Todas';
+  allChip.addEventListener('click', () => { selectedLid = 'all'; renderLeagueChips(); });
+  row.appendChild(allChip);
+
+  LEAGUES_META.forEach(l => {
+    const chip = document.createElement('button');
+    chip.className = `filter-chip${selectedLid === l.id ? ' active' : ''}`;
+    chip.dataset.lid = l.id;
+    chip.style.display = 'inline-flex';
+    chip.style.alignItems = 'center';
+    chip.style.gap = '4px';
+
+    const slot = document.createElement('span');
+    slot.innerHTML = flagImg(l.id, 11);
+    chip.appendChild(slot);
+    chip.appendChild(document.createTextNode(l.name.split(' ')[0]));
+    chip.addEventListener('click', () => { selectedLid = l.id; renderLeagueChips(); });
+    row.appendChild(chip);
+
+    // Async logo upgrade
+    const cached = LEAGUE_LOGOS[l.id];
+    if (cached) {
+      slot.innerHTML = `<img src="${cached}" style="width:12px;height:12px;object-fit:contain;">`;
+    } else {
+      loadLeagueLogo(l.id).then(badge => {
+        if (badge) slot.innerHTML = `<img src="${badge}" style="width:12px;height:12px;object-fit:contain;">`;
+      });
+    }
+  });
+}
+
+// ── SLIDERS ───────────────────────────────────────────────────────────────────
+document.getElementById('ziSlider').addEventListener('input', function() {
+  document.getElementById('ziValDisplay').textContent = parseFloat(this.value).toFixed(1);
+});
+document.getElementById('ziSlider2').addEventListener('input', function() {
+  document.getElementById('ziValDisplay2').textContent = parseFloat(this.value).toFixed(1);
+});
+
+// ── TEAM SEARCH IN MODAL ──────────────────────────────────────────────────────
+const teamInput    = document.getElementById('teamSearchInput');
+const teamDropdown = document.getElementById('teamDropdown');
+
+teamInput.addEventListener('input', () => {
+  const q = teamInput.value.trim().toLowerCase();
+  if (!q) { teamDropdown.style.display='none'; return; }
+  const results = TEAMS_LIST.filter(t => t.toLowerCase().includes(q)).slice(0,5);
+  if (!results.length) { teamDropdown.innerHTML='<div class="slot-dd-empty">Nenhum time encontrado</div>'; teamDropdown.style.display='block'; return; }
+  teamDropdown.innerHTML = '';
+  results.forEach(name => {
+    const item = document.createElement('div');
+    item.className = 'slot-dd-item';
+    item.innerHTML = `<div class="slot-dd-crest">${name.substring(0,3).toUpperCase()}</div><span style="font-size:0.875rem;font-weight:600;">${name}</span>`;
+    item.addEventListener('click', () => { selectedTeam = name; selectedTeamDisplay(name); teamInput.value=''; teamDropdown.style.display='none'; });
+    teamDropdown.appendChild(item);
+  });
+  teamDropdown.style.display = 'block';
+});
+document.addEventListener('click', e => { if(!e.target.closest('#cfgTeam')) teamDropdown.style.display='none'; });
+document.getElementById('clearTeam').addEventListener('click', () => { selectedTeam=null; selectedTeamDisplay(null); });
+
+function selectedTeamDisplay(name) {
+  const badge = document.getElementById('selectedTeamBadge');
+  if (name) {
+    badge.style.display = 'flex';
+    document.getElementById('selectedTeamName').textContent = name;
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+// ── TIME WINDOW ───────────────────────────────────────────────────────────────
+document.querySelectorAll('[data-tw]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    selectedTw = btn.dataset.tw;
+    document.querySelectorAll('[data-tw]').forEach(b => b.classList.toggle('active', b.dataset.tw === selectedTw));
+  });
+});
+document.querySelectorAll('[data-adv]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    selectedAdv = +btn.dataset.adv;
+    document.querySelectorAll('[data-adv]').forEach(b => b.classList.toggle('active', b.dataset.adv === btn.dataset.adv));
+  });
+});
+
+// ── SAVE ALERT ────────────────────────────────────────────────────────────────
+document.getElementById('saveAlertBtn').addEventListener('click', () => {
+  const type = selectedAlertType;
+  let label, sub, lid=null, team=null, threshold=0, icon='bell', iconBg='var(--green)';
+
+  if (type === 'zi_league') {
+    threshold = parseFloat(document.getElementById('ziSlider').value);
+    lid = selectedLid;
+    const lgName = lid === 'all' ? 'Todas as ligas' : (LEAGUES_META.find(l=>l.id===lid)?.name||lid);
+    label = `ZI > ${threshold.toFixed(1)} — ${lgName.split(' ')[0]}`;
+    sub   = `${lgName} · ${threshold >= 7 ? 'Zebras grandes' : threshold >= 4 ? 'Zebras médias e grandes' : 'Qualquer zebra'}`;
+    icon  = 'zap'; iconBg = threshold >= 7 ? 'var(--red)' : 'var(--green)';
+  } else if (type === 'zi_team') {
+    if (!selectedTeam) { showToast('Selecione um time!'); return; }
+    threshold = parseFloat(document.getElementById('ziSlider2').value);
+    team  = selectedTeam;
+    label = `${team} · ZI > ${threshold.toFixed(1)}`;
+    sub   = `Quando ${team} causar ou sofrer uma zebra`;
+    icon  = 'shield'; iconBg = 'var(--blue-light,#60a5fa)';
+  } else {
+    team  = 'auto';
+    label = `Jogo do meu time favorito`;
+    sub   = `Aviso com ${selectedAdv || 0} min de antecedência`;
+    icon  = 'timer'; iconBg = 'var(--gold)';
+  }
+
+  const alert = {
+    id: genId(), type, label, sub, lid, team, threshold, tw: selectedTw,
+    advance: selectedAdv, active: true, icon, iconBg,
+    createdAt: Date.now(), triggeredCount:0, triggeredToday:0, lastTriggered:null,
+  };
+
+  alerts.unshift(alert);
+  saveAlerts(alerts);
+  closeModal();
+  renderAll();
+  showToast(`✓ Alerta criado!`);
+});
+
+// ── RENDER ALL ────────────────────────────────────────────────────────────────
+function renderAll() {
+  updateCounts();
+  renderTemplates();
+  renderAlertsList();
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+updatePlanBadge();
+renderLeagueChips();
+renderAll();
+initBellBadge();
+lucide.createIcons();
+</script>
+
+<style>
+  /* ── ICONS ──────────────────── */
+  .bottom-nav__icon i { width:20px;height:20px;display:block; }
+  .navbar__icon i { display:block; }
+  .sec-ic { width:14px;height:14px;display:inline-block;vertical-align:middle;margin-right:5px;flex-shrink:0; }
+  .section-title { display:inline-flex;align-items:center; }
+  .filter-chip { display:inline-flex;align-items:center;gap:4px; }
+
+  /* ── FAB ────────────────────── */
+  .fab-btn {
+    position:fixed; bottom:80px; right:16px; z-index:200;
+    background:var(--green); color:#000; border:none; cursor:pointer;
+    font-family:inherit; font-weight:700; font-size:0.875rem;
+    padding:12px 18px; border-radius:var(--radius-pill);
+    display:flex; align-items:center; gap:6px;
+    box-shadow:0 4px 16px rgba(46,230,92,0.4);
+    transition:transform .15s, box-shadow .15s;
+  }
+  .fab-btn:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(46,230,92,0.5); }
+  @media (min-width:768px) { .fab-btn { bottom:20px; } }
+
+  /* ── ALERT MODAL ────────────── */
+  .alert-modal { max-height:88vh; overflow-y:auto; }
+  .alert-section { margin-bottom:18px; }
+  .alert-section__label { font-size:0.6875rem;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:8px; }
+
+  /* Alert type options */
+  .alert-type-opt {
+    display:flex; align-items:center; gap:10px; padding:10px 12px;
+    border:1.5px solid var(--border); border-radius:var(--radius); cursor:pointer;
+    transition:border-color .15s, background .15s;
+  }
+  .alert-type-opt.active { border-color:var(--green); background:var(--green-dim); }
+  .alert-type-opt__icon { width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+  .alert-type-opt__check { width:18px;height:18px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#000; }
+
+  /* ZI slider */
+  .zi-slider {
+    flex:1; -webkit-appearance:none; height:4px;
+    border-radius:2px; background:var(--border); outline:none; cursor:pointer;
+  }
+  .zi-slider::-webkit-slider-thumb {
+    -webkit-appearance:none; width:16px; height:16px; border-radius:50%;
+    background:var(--green); cursor:pointer; box-shadow:0 0 0 3px var(--green-dim);
+  }
+  .zi-pill {
+    font-size:0.5625rem; font-weight:700; padding:2px 6px; border-radius:4px;
+  }
+  .zi-leve   { background:rgba(107,114,128,0.15); color:var(--gray); }
+  .zi-media  { background:rgba(251,191,36,0.12);  color:var(--gold); }
+  .zi-grande { background:rgba(220,38,38,0.12);   color:var(--red);  }
+
+  /* Time chips */
+  .alert-time-chip {
+    padding:5px 10px; border:1px solid var(--border); border-radius:var(--radius-pill);
+    background:var(--card); color:var(--gray); font-size:0.75rem; font-weight:500;
+    font-family:inherit; cursor:pointer; transition:all .15s;
+  }
+  .alert-time-chip.active { background:var(--green-dim); border-color:var(--green); color:var(--white); font-weight:600; }
+
+  /* Primary button */
+  .btn-primary {
+    background:var(--green); color:#000; border:none; cursor:pointer;
+    font-family:inherit; font-weight:700; font-size:0.9375rem;
+    padding:13px; border-radius:var(--radius-pill);
+    display:flex; align-items:center; justify-content:center; gap:6px;
+    transition:opacity .15s;
+  }
+  .btn-primary:hover { opacity:.9; }
+
+  /* ── TEMPLATE CARDS ─────────── */
+  .template-card {
+    display:flex; align-items:center; gap:10px;
+    background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
+    padding:10px 12px;
+  }
+  .template-card__icon { width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+  .tpl-add-btn {
+    width:28px;height:28px;border-radius:50%;border:1.5px solid var(--green);
+    background:var(--green-dim);color:var(--green);cursor:pointer;
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+    transition:background .15s;
+  }
+  .tpl-add-btn--done { background:var(--green);color:#000;border-color:var(--green); }
+  .tpl-add-btn[data-locked="true"] { border-color:var(--gold);background:var(--gold-dim);color:var(--gold); }
+
+  /* ── ALERT CARDS ────────────── */
+  .alert-card { padding:12px 0; }
+  .alert-card:first-child { padding-top:0; }
+  .alert-card__icon { width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+  .alert-meta-chip {
+    display:inline-flex;align-items:center;gap:3px;
+    font-size:0.625rem;color:var(--gray);background:var(--card2);
+    border:1px solid var(--border);border-radius:4px;padding:2px 5px;
+  }
+  .alert-meta-chip i { flex-shrink:0; }
+
+  /* Toggle switch */
+  .alert-toggle { position:relative;display:inline-block;width:36px;height:20px;cursor:pointer; }
+  .alert-toggle input { opacity:0;width:0;height:0;position:absolute; }
+  .alert-toggle__track {
+    position:absolute;inset:0;border-radius:10px;
+    background:var(--border);transition:background .2s;
+  }
+  .alert-toggle__track::after {
+    content:'';position:absolute;top:2px;left:2px;
+    width:16px;height:16px;border-radius:50%;background:#fff;
+    transition:transform .2s;
+  }
+  .alert-toggle input:checked + .alert-toggle__track { background:var(--green); }
+  .alert-toggle input:checked + .alert-toggle__track::after { transform:translateX(16px); }
+
+  /* Delete button */
+  .alert-delete-btn {
+    background:none;border:none;color:var(--gray);cursor:pointer;
+    padding:4px;display:flex;align-items:center;
+    border-radius:4px;transition:color .15s,background .15s;
+  }
+  .alert-delete-btn:hover { color:var(--red);background:rgba(220,38,38,0.1); }
+</style>
+</body>
+</html>
