@@ -81,7 +81,7 @@ const ZebraAPI = (() => {
   /* ── THESPORTSDB ────────────────────────────────────────────── */
   const SDB = {
     BASE    : 'https://www.thesportsdb.com/api/v1/json',
-    LEAGUES : { BRA:4351, ENG:4328, ESP:4335, ITA:4332, GER:4331, FRA:4334, POR:4344, UCL:2008, HOL:4337, NED:4337, ARG:4406, MLS:4346, MEX:4350, UEL:2009 },
+    LEAGUES : { BRA:4351, ENG:4328, ESP:4335, ITA:4332, GER:4331, FRA:4334, POR:4344, UCL:4480, HOL:4337, NED:4337, ARG:4406, MLS:4346, MEX:4350, UEL:4481 },
     SEASONS : { BRA:'2025', ENG:'2024-2025', ESP:'2024-2025', ITA:'2024-2025', GER:'2024-2025', FRA:'2024-2025' },
 
     key() {
