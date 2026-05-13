@@ -50,6 +50,20 @@
     <button id="favLeagueBtn" class="navbar__icon" title="Favoritar liga"><i data-lucide="star" style="width:18px;height:18px;"></i></button>
   </nav>
 
+  <!-- SELETOR DE LIGA (acima do hero) -->
+  <section style="background:var(--card2);padding:10px 16px;border-bottom:1px solid var(--border);">
+    <div class="scroll-x" style="gap:8px;" id="leaguePicker">
+      <button class="filter-chip active" data-lid="BRA" data-flag="🇧🇷" data-name="Brasileirão Série A" data-sub="Brasil · Temporada 2025" data-lider="FLA" data-zebras="14" data-rodada="12ª"><span class="picker-logo" data-logo-lid="BRA">🇧🇷</span> Brasileirão</button>
+      <button class="filter-chip" data-lid="ENG" data-flag="🏴󠁧󠁢󠁥󠁮󠁧󠁿" data-name="Premier League" data-sub="Inglaterra · Temporada 2024/25" data-lider="LFC" data-zebras="21" data-rodada="37ª"><span class="picker-logo" data-logo-lid="ENG">🏴󠁧󠁢󠁥󠁮󠁧󠁿</span> Premier Lge</button>
+      <button class="filter-chip" data-lid="ESP" data-flag="🇪🇸" data-name="La Liga" data-sub="Espanha · Temporada 2024/25" data-lider="BAR" data-zebras="18" data-rodada="36ª"><span class="picker-logo" data-logo-lid="ESP">🇪🇸</span> La Liga</button>
+      <button class="filter-chip" data-lid="ITA" data-flag="🇮🇹" data-name="Serie A" data-sub="Itália · Temporada 2024/25" data-lider="INT" data-zebras="16" data-rodada="37ª"><span class="picker-logo" data-logo-lid="ITA">🇮🇹</span> Serie A</button>
+      <button class="filter-chip" data-lid="GER" data-flag="🇩🇪" data-name="Bundesliga" data-sub="Alemanha · Temporada 2024/25" data-lider="BAY" data-zebras="12" data-rodada="34ª"><span class="picker-logo" data-logo-lid="GER">🇩🇪</span> Bundesliga</button>
+      <button class="filter-chip" data-lid="FRA" data-flag="🇫🇷" data-name="Ligue 1" data-sub="França · Temporada 2024/25" data-lider="PSG" data-zebras="11" data-rodada="34ª"><span class="picker-logo" data-logo-lid="FRA">🇫🇷</span> Ligue 1</button>
+      <button class="filter-chip" data-lid="POR" data-flag="🇵🇹" data-name="Liga Portugal" data-sub="Portugal · Temporada 2024/25" data-lider="BEN" data-zebras="9" data-rodada="34ª"><span class="picker-logo" data-logo-lid="POR">🇵🇹</span> Liga PT</button>
+      <button class="filter-chip" data-lid="UCL" data-flag="🏆" data-name="Champions League" data-sub="Europa · Temporada 2024/25" data-lider="RMA" data-zebras="7" data-rodada="SF"><span class="picker-logo" data-logo-lid="UCL">🏆</span> Champions</button>
+    </div>
+  </section>
+
   <!-- HERO DA LIGA -->
   <section id="leagueHero" style="padding:20px 16px 16px;background:linear-gradient(135deg,rgba(46,230,92,0.07) 0%,var(--card2) 50%,var(--bg) 100%);border-bottom:1px solid var(--border);position:relative;overflow:hidden;">
     <!-- Fundo decorativo -->
@@ -83,17 +97,6 @@
         <div style="font-size:1rem;font-weight:700;color:var(--gold);" id="statZebras">14</div>
         <div style="font-size:0.625rem;color:var(--gray);margin-top:2px;">Zebras 🦓</div>
       </div>
-    </div>
-  </section>
-
-  <!-- SELETOR DE LIGA -->
-  <section style="background:var(--card2);padding:10px 16px;border-bottom:1px solid var(--border);">
-    <div class="scroll-x" style="gap:8px;" id="leaguePicker">
-      <button class="filter-chip active" data-lid="BRA" data-flag="🇧🇷" data-name="Brasileirão Série A" data-sub="Brasil · Temporada 2025" data-lider="FLA" data-zebras="14" data-rodada="12ª">🇧🇷 Brasileirão</button>
-      <button class="filter-chip" data-lid="ENG" data-flag="🏴󠁧󠁢󠁥󠁮󠁧󠁿" data-name="Premier League" data-sub="Inglaterra · Temporada 2024/25" data-lider="LFC" data-zebras="21" data-rodada="37ª">🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier Lge</button>
-      <button class="filter-chip" data-lid="ESP" data-flag="🇪🇸" data-name="La Liga" data-sub="Espanha · Temporada 2024/25" data-lider="BAR" data-zebras="18" data-rodada="36ª">🇪🇸 La Liga</button>
-      <button class="filter-chip" data-lid="ITA" data-flag="🇮🇹" data-name="Serie A" data-sub="Itália · Temporada 2024/25" data-lider="INT" data-zebras="16" data-rodada="37ª">🇮🇹 Serie A</button>
-      <button class="filter-chip" data-lid="GER" data-flag="🇩🇪" data-name="Bundesliga" data-sub="Alemanha · Temporada 2024/25" data-lider="BAY" data-zebras="12" data-rodada="34ª">🇩🇪 Bundesliga</button>
     </div>
   </section>
 
@@ -626,6 +629,18 @@
   loadLeagueCrests(activeLid);
   initRealData();
   lucide.createIcons();
+
+  // ── LOGOS NOS CHIPS DO PICKER ─────────────────────────────────
+  async function initPickerLogos() {
+    const spans = document.querySelectorAll('#leaguePicker [data-logo-lid]');
+    spans.forEach(async span => {
+      const lid = span.dataset.logoLid;
+      const logo = await loadLeagueLogo(lid);
+      if (!logo) return;
+      span.innerHTML = `<img src="${logo}" onerror="this.style.display='none'">`;
+    });
+  }
+  initPickerLogos();
 </script>
 <style>
   .bottom-nav__icon i { width: 20px; height: 20px; display: block; }
@@ -633,6 +648,23 @@
   @keyframes pulse {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.3; }
+  }
+  /* logo inline nos chips de liga */
+  .picker-logo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    vertical-align: middle;
+    flex-shrink: 0;
+    font-size: 0.875rem; /* tamanho da bandeira emoji */
+    line-height: 1;
+  }
+  .picker-logo img {
+    width: 16px;
+    height: 16px;
+    object-fit: contain;
   }
 </style>
 </body>
