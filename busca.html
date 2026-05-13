@@ -285,7 +285,13 @@
     text-align: center;
   }
   .pop-league-card:hover { border-color: var(--green); background: var(--green-dim); }
-  .pop-league-card__flag { font-size: 1.5rem; line-height: 1; }
+  .pop-league-card__flag {
+    font-size: 1.5rem; line-height: 1;
+    width: 36px; height: 36px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .pop-league-card__flag img { width: 32px; height: 32px; object-fit: contain; }
   .pop-league-card__name { font-size: 0.6875rem; font-weight: 600; color: var(--gray); line-height: 1.3; }
 
   /* ── RECENT CHIP ──────────────────────────────────────────── */
@@ -504,14 +510,24 @@ function renderPopularLeagues() {
     const card = document.createElement('div');
     card.className = 'pop-league-card';
     card.innerHTML = `
-      <div class="pop-league-card__flag">${l.flag}</div>
+      <div class="pop-league-card__flag" id="plf-${l.id}">${l.flag}</div>
       <div class="pop-league-card__name">${l.name}</div>`;
     card.addEventListener('click', () => {
       localStorage.setItem('zs_search_league', l.id);
       window.location.href = 'liga.html';
     });
     container.appendChild(card);
+    // Carrega logo oficial SDB de forma assíncrona
+    loadPopularLeagueLogo(l.id);
   });
+}
+
+async function loadPopularLeagueLogo(lid) {
+  if (!window.loadLeagueLogo) return;
+  const logo = await loadLeagueLogo(lid);
+  if (!logo) return;
+  const el = document.getElementById(`plf-${lid}`);
+  if (el) el.innerHTML = `<img src="${logo}" onerror="this.style.display='none'">`;
 }
 
 // ═══════════════════════════════════════════════════════════════

@@ -82,11 +82,13 @@
       <!-- FILTRO DE LIGAS -->
       <div class="scroll-x" id="leagueFilter" style="margin-top:4px;gap:8px;">
         <button class="league-pill active" data-league="all">Todos</button>
-        <button class="league-pill" data-league="BRA">🇧🇷 Brasileirão</button>
-        <button class="league-pill" data-league="ENG">🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League</button>
-        <button class="league-pill" data-league="ESP">🇪🇸 La Liga</button>
-        <button class="league-pill" data-league="ITA">🇮🇹 Serie A</button>
-        <button class="league-pill" data-league="GER">🇩🇪 Bundesliga</button>
+        <button class="league-pill" data-league="BRA"><span class="pill-logo" data-logo-lid="BRA">🇧🇷</span> Brasileirão</button>
+        <button class="league-pill" data-league="ENG"><span class="pill-logo" data-logo-lid="ENG">🏴󠁧󠁢󠁥󠁮󠁧󠁿</span> Premier Lge</button>
+        <button class="league-pill" data-league="ESP"><span class="pill-logo" data-logo-lid="ESP">🇪🇸</span> La Liga</button>
+        <button class="league-pill" data-league="ITA"><span class="pill-logo" data-logo-lid="ITA">🇮🇹</span> Serie A</button>
+        <button class="league-pill" data-league="GER"><span class="pill-logo" data-logo-lid="GER">🇩🇪</span> Bundesliga</button>
+        <button class="league-pill" data-league="FRA"><span class="pill-logo" data-logo-lid="FRA">🇫🇷</span> Ligue 1</button>
+        <button class="league-pill" data-league="UCL"><span class="pill-logo" data-logo-lid="UCL">🏆</span> Champions</button>
       </div>
 
       <!-- EM BREVE -->
@@ -157,12 +159,31 @@
       cursor: pointer;
       transition: all var(--transition);
       white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
     }
     .league-pill.active,
     .league-pill:hover {
       background: var(--green-dim);
       border-color: var(--green);
       color: var(--white);
+    }
+    /* logo inline nos pills de liga */
+    .pill-logo {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 15px;
+      height: 15px;
+      flex-shrink: 0;
+      font-size: 0.875rem;
+      line-height: 1;
+    }
+    .pill-logo img {
+      width: 15px;
+      height: 15px;
+      object-fit: contain;
     }
 
     /* ── RICH GAME CARD ─────────────────────────────────────── */
@@ -452,27 +473,14 @@
     }
 
     // ── LEAGUE PILLS COM LOGOS SDB ────────────────────────
+    // Substitui os spans data-logo-lid pelo logo oficial da SDB
     async function initLeaguePills() {
-      const pills = document.querySelectorAll('.league-pill[data-league]');
-      const SDB_LIDS = { BRA:4351, ENG:4328, ESP:4335, ITA:4332, GER:4331 };
-      pills.forEach(async pill => {
-        const lid = pill.dataset.league;
-        if (lid === 'all' || !SDB_LIDS[lid]) return;
-        try {
-          const data = await ZebraAPI.sportsDb.getLeagueInfo(lid);
-          const league = data?.leagues?.[0];
-          const badge = league?.strBadge || league?.strLogo || '';
-          if (badge) {
-            const img = document.createElement('img');
-            img.src = badge;
-            img.style.cssText = 'width:16px;height:16px;object-fit:contain;vertical-align:middle;margin-right:5px;flex-shrink:0;';
-            img.onerror = () => img.remove();
-            // Troca texto completo pela label limpa (sem emoji de bandeira de nenhum tipo)
-            const LEAGUE_LABELS = { BRA:'Brasileirão', ENG:'Premier League', ESP:'La Liga', ITA:'Serie A', GER:'Bundesliga' };
-            pill.textContent = LEAGUE_LABELS[lid] || pill.textContent.replace(/^[\s\S]{1,4}\s/, '').trim();
-            pill.prepend(img);
-          }
-        } catch {}
+      document.querySelectorAll('[data-logo-lid]').forEach(async span => {
+        const lid = span.dataset.logoLid;
+        if (!lid) return;
+        const logo = await loadLeagueLogo(lid);
+        if (!logo) return;
+        span.innerHTML = `<img src="${logo}" onerror="this.style.display='none'">`;
       });
     }
 
