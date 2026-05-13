@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ZebraStats — Comparar Times</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/main.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config = { corePlugins: { preflight: false } }</script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+</head>
+<body>
+<div class="app-wrapper">
+
+  <!-- SIDEBAR (desktop) -->
+  <aside class="app-sidebar">
+    <a href="home.html" class="sidebar__brand">
+      <div class="sidebar__brand-icon">Z</div>
+      Zebra<span>Stats</span>
+    </a>
+    <nav class="sidebar__nav">
+      <a href="home.html"     class="sidebar__nav-item"><i data-lucide="home"></i><span>Home</span></a>
+      <a href="zebras.html"   class="sidebar__nav-item"><i data-lucide="activity"></i><span>Zebras</span></a>
+      <a href="ranking.html"  class="sidebar__nav-item"><i data-lucide="medal"></i><span>Ranking</span></a>
+      <a href="comparar.html" class="sidebar__nav-item active"><i data-lucide="git-compare"></i><span>Comparar</span></a>
+      <a href="liga.html"     class="sidebar__nav-item"><i data-lucide="trophy"></i><span>Ligas</span></a>
+      <a href="time.html"     class="sidebar__nav-item"><i data-lucide="star"></i><span>Times</span></a>
+      <a href="perfil.html"   class="sidebar__nav-item"><i data-lucide="user"></i><span>Perfil</span></a>
+    </nav>
+    <div class="sidebar__footer">
+      <div class="sidebar__user">
+        <div class="sidebar__user-avatar">G</div>
+        <div class="sidebar__user-info">
+          <div class="sidebar__user-name">Gianluca</div>
+          <div class="sidebar__user-plan">Plano Free</div>
+        </div>
+      </div>
+      <a href="assinatura.html" class="badge badge--free" style="text-decoration:none;cursor:pointer;">FREE → PRO</a>
+    </div>
+  </aside>
+
+  <!-- MAIN AREA -->
+  <div class="app-main">
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a href="home.html" class="navbar__brand">Zebra<span>Stats</span></a>
+    <div class="navbar__actions">
+      <span class="badge badge--free" id="planBadge">FREE</span>
+      <a href="busca.html"         class="navbar__icon"><i data-lucide="search"  style="width:18px;height:18px;"></i></a>
+      <a href="notificacoes.html"  class="navbar__icon"><i data-lucide="bell"    style="width:18px;height:18px;"></i></a>
+    </div>
+  </nav>
+
+  <!-- SELETOR DE TIMES ──────────────────────────────────── -->
+  <section style="background:linear-gradient(135deg,var(--card2) 0%,rgba(46,230,92,0.05) 100%);padding:16px;border-bottom:1px solid var(--border);">
+
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+      <div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,rgba(46,230,92,0.2),rgba(46,230,92,0.05));display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid rgba(46,230,92,0.2);">
+        <i data-lucide="git-compare" style="width:16px;height:16px;color:var(--green);"></i>
+      </div>
+      <div>
+        <div style="font-size:1rem;font-weight:800;">Head-to-Head</div>
+        <div style="font-size:0.6875rem;color:var(--gray);">Compare dois times, confrontos e estatísticas</div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:start;">
+      <!-- SLOT A -->
+      <div class="team-slot" id="slotA" data-slot="A">
+        <div class="slot-empty" id="emptyA">
+          <div class="slot-search-wrap">
+            <i data-lucide="search" class="slot-search-ic"></i>
+            <input type="text" class="slot-input" id="inputA" placeholder="Time A…" autocomplete="off" />
+          </div>
+          <div class="slot-dropdown" id="dropdownA"></div>
+        </div>
+        <div class="slot-filled" id="filledA" style="display:none;">
+          <div class="slot-crest" id="crestA"></div>
+          <div style="flex:1;min-width:0;">
+            <div class="slot-name" id="nameA">—</div>
+            <div class="slot-league" id="leagueA">—</div>
+          </div>
+          <button class="slot-clear" id="clearA" title="Trocar time"><i data-lucide="x" style="width:14px;height:14px;"></i></button>
+        </div>
+      </div>
+
+      <!-- VS -->
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding-top:10px;gap:3px;">
+        <div style="font-size:0.6875rem;font-weight:800;color:var(--gray);letter-spacing:1px;">VS</div>
+        <div style="width:1px;height:20px;background:var(--border);"></div>
+      </div>
+
+      <!-- SLOT B -->
+      <div class="team-slot" id="slotB" data-slot="B">
+        <div class="slot-empty" id="emptyB">
+          <div class="slot-search-wrap">
+            <i data-lucide="search" class="slot-search-ic"></i>
+            <input type="text" class="slot-input" id="inputB" placeholder="Time B…" autocomplete="off" />
+          </div>
+          <div class="slot-dropdown" id="dropdownB"></div>
+        </div>
+        <div class="slot-filled" id="filledB" style="display:none;">
+          <div class="slot-crest" id="crestB"></div>
+          <div style="flex:1;min-width:0;">
+            <div class="slot-name" id="nameB">—</div>
+            <div class="slot-league" id="leagueB">—</div>
+          </div>
+          <button class="slot-clear" id="clearB" title="Trocar time"><i data-lucide="x" style="width:14px;height:14px;"></i></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Swapbutton -->
+    <div style="display:flex;justify-content:center;margin-top:10px;" id="swapRow" style="display:none;">
+      <button id="swapBtn" style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-pill);padding:5px 14px;color:var(--gray);font-size:0.75rem;font-weight:600;font-family:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:5px;">
+        <i data-lucide="arrow-left-right" style="width:12px;height:12px;"></i>Inverter
+      </button>
+    </div>
+  </section>
+
+  <!-- ESTADO VAZIO ──────────────────────────────────────── -->
+  <div id="emptyState" style="text-align:center;padding:56px 24px;color:var(--gray);">
+    <div style="width:56px;height:56px;border-radius:16px;background:var(--card2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+      <i data-lucide="git-compare" style="width:26px;height:26px;color:var(--green);opacity:0.5;"></i>
+    </div>
+    <div style="font-weight:700;font-size:0.9375rem;margin-bottom:6px;">Escolha dois times</div>
+    <div style="font-size:0.8125rem;line-height:1.5;max-width:260px;margin:0 auto;">Busque e selecione um time em cada campo para ver o comparativo completo</div>
+  </div>
+
+  <!-- RESULTADOS ────────────────────────────────────────── -->
+  <main id="compResults" style="display:none;padding-bottom:80px;">
+
+    <!-- PLACAR DO H2H ──────────────────────────── -->
+    <section style="padding:16px;background:var(--card2);border-bottom:1px solid var(--border);">
+      <div class="section-header" style="margin-bottom:12px;">
+        <span class="section-title"><i data-lucide="shield-half" class="sec-ic"></i>Confrontos Diretos</span>
+        <span class="text-xs text-gray" id="h2hTotal"></span>
+      </div>
+
+      <!-- Placar geral -->
+      <div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;margin-bottom:14px;">
+        <div style="text-align:center;">
+          <div class="h2h-big-num" id="winsA">0</div>
+          <div style="font-size:0.6875rem;color:var(--gray);margin-top:2px;" id="h2hNameA">Time A</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-size:1rem;font-weight:700;color:var(--gray);" id="draws">0</div>
+          <div style="font-size:0.625rem;color:var(--gray);margin-top:2px;letter-spacing:.5px;">EMPATES</div>
+        </div>
+        <div style="text-align:center;">
+          <div class="h2h-big-num" id="winsB">0</div>
+          <div style="font-size:0.6875rem;color:var(--gray);margin-top:2px;" id="h2hNameB">Time B</div>
+        </div>
+      </div>
+
+      <!-- Barra de domínio -->
+      <div style="display:flex;height:8px;border-radius:4px;overflow:hidden;gap:2px;" id="domBar">
+        <div id="domA" style="background:var(--green);transition:flex .5s;"></div>
+        <div id="domD" style="background:var(--border);transition:flex .5s;"></div>
+        <div id="domB" style="background:var(--red);transition:flex .5s;"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-top:5px;font-size:0.625rem;color:var(--gray);">
+        <span id="pctA">—</span>
+        <span style="letter-spacing:.5px;">DOMÍNIO</span>
+        <span id="pctB">—</span>
+      </div>
+    </section>
+
+    <!-- STATS COMPARATIVAS ─────────────────────── -->
+    <section style="padding:16px;border-bottom:1px solid var(--border);">
+      <div class="section-header" style="margin-bottom:14px;">
+        <span class="section-title"><i data-lucide="bar-chart-2" class="sec-ic"></i>Estatísticas Comparativas</span>
+      </div>
+
+      <!-- Cabeçalho com nomes dos times -->
+      <div style="display:grid;grid-template-columns:1fr 90px 1fr;margin-bottom:10px;">
+        <div class="stat-team-head" id="statHeadA">Time A</div>
+        <div></div>
+        <div class="stat-team-head" id="statHeadB" style="text-align:right;">Time B</div>
+      </div>
+
+      <div id="statRows" style="display:flex;flex-direction:column;gap:14px;"></div>
+    </section>
+
+    <!-- ÚLTIMOS CONFRONTOS ─────────────────────── -->
+    <section style="padding:16px;border-bottom:1px solid var(--border);">
+      <div class="section-header" style="margin-bottom:12px;">
+        <span class="section-title"><i data-lucide="clock" class="sec-ic"></i>Últimos Confrontos</span>
+        <span class="text-xs text-gray" id="h2hSubtitle"></span>
+      </div>
+      <div id="h2hList" style="display:flex;flex-direction:column;gap:8px;"></div>
+    </section>
+
+    <!-- FORMA RECENTE ──────────────────────────── -->
+    <section style="padding:16px;">
+      <div class="section-header" style="margin-bottom:14px;">
+        <span class="section-title"><i data-lucide="trending-up" class="sec-ic"></i>Forma Recente</span>
+        <span class="text-xs text-gray">Últimos 10 jogos</span>
+      </div>
+
+      <!-- Time A forma -->
+      <div style="margin-bottom:18px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <span class="form-team-label" id="formNameA">Time A</span>
+          <span class="form-record" id="formRecordA"></span>
+        </div>
+        <div id="formDotsA" class="form-dots-row"></div>
+        <div id="formSparkA" class="form-spark-wrap"></div>
+      </div>
+
+      <!-- Divisor -->
+      <div style="height:1px;background:var(--border);margin-bottom:18px;"></div>
+
+      <!-- Time B forma -->
+      <div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <span class="form-team-label" id="formNameB">Time B</span>
+          <span class="form-record" id="formRecordB"></span>
+        </div>
+        <div id="formDotsB" class="form-dots-row"></div>
+        <div id="formSparkB" class="form-spark-wrap"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <a href="home.html"   class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="home"></i></span>Home</a>
+    <a href="zebras.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="activity"></i></span>Zebras</a>
+    <a href="liga.html"   class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="trophy"></i></span>Ligas</a>
+    <a href="time.html"   class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="star"></i></span>Times</a>
+    <a href="perfil.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="user"></i></span>Perfil</a>
+  </nav>
+
+  </div><!-- /app-main -->
+</div><!-- /app-wrapper -->
+
+<div class="toast" id="toast"></div>
+
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/main.js"></script>
+<script>
+// ── DATASET ───────────────────────────────────────────────────────────────────
+const ALL_TEAMS = [
+  { id:'FLA', name:'Flamengo',       lid:'BRA', league:'Brasileirão'    },
+  { id:'PAL', name:'Palmeiras',      lid:'BRA', league:'Brasileirão'    },
+  { id:'BOT', name:'Botafogo',       lid:'BRA', league:'Brasileirão'    },
+  { id:'FLU', name:'Fluminense',     lid:'BRA', league:'Brasileirão'    },
+  { id:'SPO', name:'São Paulo',      lid:'BRA', league:'Brasileirão'    },
+  { id:'COR', name:'Corinthians',    lid:'BRA', league:'Brasileirão'    },
+  { id:'GRE', name:'Grêmio',         lid:'BRA', league:'Brasileirão'    },
+  { id:'INT', name:'Internacional',  lid:'BRA', league:'Brasileirão'    },
+  { id:'CAM', name:'Atlético-MG',    lid:'BRA', league:'Brasileirão'    },
+  { id:'BRG', name:'Bragantino',     lid:'BRA', league:'Brasileirão'    },
+  { id:'MCI', name:'Man City',       lid:'ENG', league:'Premier League' },
+  { id:'LIV', name:'Liverpool',      lid:'ENG', league:'Premier League' },
+  { id:'ARS', name:'Arsenal',        lid:'ENG', league:'Premier League' },
+  { id:'CHE', name:'Chelsea',        lid:'ENG', league:'Premier League' },
+  { id:'MUN', name:'Man United',     lid:'ENG', league:'Premier League' },
+  { id:'TOT', name:'Tottenham',      lid:'ENG', league:'Premier League' },
+  { id:'NEW', name:'Newcastle',      lid:'ENG', league:'Premier League' },
+  { id:'RMA', name:'Real Madrid',    lid:'ESP', league:'La Liga'        },
+  { id:'BAR', name:'Barcelona',      lid:'ESP', league:'La Liga'        },
+  { id:'ATL', name:'Atlético',       lid:'ESP', league:'La Liga'        },
+  { id:'SEV', name:'Sevilla',        lid:'ESP', league:'La Liga'        },
+  { id:'VIL', name:'Villarreal',     lid:'ESP', league:'La Liga'        },
+  { id:'BAY', name:'Bayern',         lid:'GER', league:'Bundesliga'     },
+  { id:'BVB', name:'Dortmund',       lid:'GER', league:'Bundesliga'     },
+  { id:'LEV', name:'Leverkusen',     lid:'GER', league:'Bundesliga'     },
+  { id:'AUG', name:'Augsburg',       lid:'GER', league:'Bundesliga'     },
+  { id:'JUV', name:'Juventus',       lid:'ITA', league:'Serie A'        },
+  { id:'ITR', name:'Inter',          lid:'ITA', league:'Serie A'        },
+  { id:'MIL', name:'AC Milan',       lid:'ITA', league:'Serie A'        },
+  { id:'NAP', name:'Napoli',         lid:'ITA', league:'Serie A'        },
+  { id:'ROM', name:'Roma',           lid:'ITA', league:'Serie A'        },
+  { id:'PSG', name:'PSG',            lid:'FRA', league:'Ligue 1'        },
+  { id:'MRS', name:'Marseille',      lid:'FRA', league:'Ligue 1'        },
+  { id:'MON', name:'Monaco',         lid:'FRA', league:'Ligue 1'        },
+  { id:'LYO', name:'Lyon',           lid:'FRA', league:'Ligue 1'        },
+  { id:'BEN', name:'Benfica',        lid:'POR', league:'Liga Portugal'  },
+  { id:'POR2',name:'Porto',          lid:'POR', league:'Liga Portugal'  },
+  { id:'SPO2',name:'Sporting CP',    lid:'POR', league:'Liga Portugal'  },
+  { id:'AJX', name:'Ajax',           lid:'HOL', league:'Eredivisie'     },
+];
+
+// ── STATS POR TIME ────────────────────────────────────────────────────────────
+// ziAvg: ZI médio nos últimos 10 jogos
+// asUnderdog: % vitorias como zebra (0-100)
+// causingUpset: % derrotas como favorito (0-100)
+// goalsFor/goalsAgainst: média por jogo
+// form: últimos 10 ('W','D','L') — índice 0 = jogo mais recente
+// ziHistory: ZI dos últimos 10 jogos (0 = sem zebra envolvida)
+const TEAM_STATS = {
+  FLA: { ziAvg:5.1, asUnderdog:22, causingUpset:14, goalsFor:2.1, goalsAgainst:1.0, form:['W','W','D','W','L','W','W','D','W','L'], ziH:[6.2,0,0,4.1,7.9,0,0,3.2,0,5.5] },
+  PAL: { ziAvg:3.8, asUnderdog:12, causingUpset:8,  goalsFor:1.9, goalsAgainst:0.8, form:['W','W','W','D','W','L','W','W','D','W'], ziH:[0,0,0,3.5,0,5.1,0,0,4.2,0] },
+  BOT: { ziAvg:6.4, asUnderdog:35, causingUpset:18, goalsFor:1.7, goalsAgainst:1.3, form:['W','L','W','W','D','W','L','W','W','D'], ziH:[8.2,5.5,0,0,3.1,0,6.4,0,0,4.8] },
+  FLU: { ziAvg:4.2, asUnderdog:18, causingUpset:20, goalsFor:1.5, goalsAgainst:1.4, form:['D','W','L','W','D','L','W','L','W','W'], ziH:[3.2,0,4.8,0,3.1,5.5,0,6.0,0,0] },
+  COR: { ziAvg:3.5, asUnderdog:15, causingUpset:25, goalsFor:1.3, goalsAgainst:1.5, form:['L','D','W','L','W','L','D','W','L','W'], ziH:[4.5,3.0,0,5.2,0,4.8,3.5,0,4.2,0] },
+  SPO: { ziAvg:3.2, asUnderdog:10, causingUpset:22, goalsFor:1.4, goalsAgainst:1.4, form:['W','D','L','D','W','W','L','D','W','L'], ziH:[0,3.1,4.3,3.5,0,0,5.0,3.2,0,4.1] },
+  GRE: { ziAvg:4.0, asUnderdog:20, causingUpset:15, goalsFor:1.6, goalsAgainst:1.3, form:['W','W','D','L','W','D','W','L','W','D'], ziH:[0,0,3.5,4.8,0,3.2,0,5.5,0,3.8] },
+  INT: { ziAvg:3.7, asUnderdog:16, causingUpset:18, goalsFor:1.5, goalsAgainst:1.4, form:['L','W','W','D','L','W','W','D','L','W'], ziH:[5.0,0,0,3.5,4.2,0,0,3.8,4.5,0] },
+  CAM: { ziAvg:4.5, asUnderdog:25, causingUpset:16, goalsFor:1.8, goalsAgainst:1.2, form:['W','W','L','W','W','D','L','W','D','W'], ziH:[0,0,5.2,0,0,3.5,4.8,0,3.2,0] },
+  BRG: { ziAvg:5.0, asUnderdog:28, causingUpset:12, goalsFor:1.9, goalsAgainst:1.3, form:['W','D','W','L','W','W','D','L','W','W'], ziH:[4.3,3.5,0,5.5,0,0,3.8,4.2,0,0] },
+  // Premier League
+  MCI: { ziAvg:2.8, asUnderdog:5,  causingUpset:28, goalsFor:2.8, goalsAgainst:0.9, form:['W','W','W','D','W','L','W','W','W','D'], ziH:[0,0,0,2.5,0,7.0,0,0,0,3.1] },
+  LIV: { ziAvg:3.2, asUnderdog:8,  causingUpset:22, goalsFor:2.5, goalsAgainst:1.0, form:['W','W','D','W','W','L','W','D','W','W'], ziH:[0,0,3.1,0,0,6.2,0,3.5,0,0] },
+  ARS: { ziAvg:3.5, asUnderdog:10, causingUpset:20, goalsFor:2.3, goalsAgainst:0.9, form:['W','W','W','D','L','W','W','W','D','W'], ziH:[0,0,0,3.2,5.5,0,0,0,3.8,0] },
+  MUN: { ziAvg:5.5, asUnderdog:18, causingUpset:38, goalsFor:1.6, goalsAgainst:1.6, form:['L','W','D','L','W','L','D','W','L','D'], ziH:[5.2,0,3.5,6.0,0,4.8,3.2,0,5.5,4.1] },
+  CHE: { ziAvg:4.8, asUnderdog:14, causingUpset:32, goalsFor:1.7, goalsAgainst:1.5, form:['D','L','W','D','W','L','W','D','L','W'], ziH:[3.5,5.0,0,3.8,0,5.5,0,3.2,4.8,0] },
+  TOT: { ziAvg:4.2, asUnderdog:15, causingUpset:28, goalsFor:2.0, goalsAgainst:1.8, form:['W','L','W','D','L','W','D','L','W','W'], ziH:[0,5.8,0,3.5,4.2,0,3.8,5.5,0,0] },
+  NEW: { ziAvg:3.8, asUnderdog:18, causingUpset:20, goalsFor:1.8, goalsAgainst:1.2, form:['W','W','D','W','L','W','D','W','W','L'], ziH:[0,0,3.5,0,5.2,0,3.8,0,0,4.5] },
+  // La Liga
+  RMA: { ziAvg:2.5, asUnderdog:4,  causingUpset:25, goalsFor:2.9, goalsAgainst:0.8, form:['W','W','W','W','D','W','L','W','W','W'], ziH:[0,0,0,0,2.8,0,6.4,0,0,0] },
+  BAR: { ziAvg:3.1, asUnderdog:6,  causingUpset:30, goalsFor:2.7, goalsAgainst:1.0, form:['W','L','W','W','W','D','W','L','W','W'], ziH:[0,5.8,0,0,0,3.2,0,4.8,0,0] },
+  ATL: { ziAvg:3.5, asUnderdog:12, causingUpset:18, goalsFor:1.9, goalsAgainst:0.9, form:['W','D','W','L','W','W','D','W','W','D'], ziH:[0,3.5,0,5.0,0,0,3.8,0,0,3.2] },
+  SEV: { ziAvg:4.5, asUnderdog:20, causingUpset:22, goalsFor:1.7, goalsAgainst:1.5, form:['L','W','D','W','L','D','W','L','W','W'], ziH:[5.2,0,3.8,0,4.5,3.5,0,5.8,0,0] },
+  // Bundesliga
+  BAY: { ziAvg:2.2, asUnderdog:3,  causingUpset:30, goalsFor:3.2, goalsAgainst:0.9, form:['W','W','W','D','W','W','L','W','W','W'], ziH:[0,0,0,2.5,0,0,8.7,0,0,0] },
+  BVB: { ziAvg:3.8, asUnderdog:10, causingUpset:22, goalsFor:2.4, goalsAgainst:1.4, form:['W','D','L','W','W','W','D','L','W','D'], ziH:[0,3.5,4.8,0,0,0,3.2,5.5,0,3.8] },
+  LEV: { ziAvg:3.0, asUnderdog:8,  causingUpset:12, goalsFor:2.5, goalsAgainst:0.8, form:['W','W','W','W','D','W','W','L','W','W'], ziH:[0,0,0,0,3.0,0,0,5.2,0,0] },
+  AUG: { ziAvg:6.2, asUnderdog:42, causingUpset:10, goalsFor:1.5, goalsAgainst:1.6, form:['W','L','D','W','L','W','D','L','W','L'], ziH:[8.7,4.5,3.5,0,4.8,0,3.2,5.5,0,4.2] },
+  // Serie A
+  ITR: { ziAvg:2.8, asUnderdog:5,  causingUpset:18, goalsFor:2.5, goalsAgainst:0.9, form:['W','W','W','D','W','W','W','D','L','W'], ziH:[0,0,0,2.8,0,0,0,3.1,5.1,0] },
+  JUV: { ziAvg:4.5, asUnderdog:10, causingUpset:35, goalsFor:1.8, goalsAgainst:1.2, form:['D','L','W','D','W','L','D','W','L','W'], ziH:[3.5,7.9,0,4.2,0,6.0,3.8,0,5.2,0] },
+  MIL: { ziAvg:4.0, asUnderdog:12, causingUpset:28, goalsFor:1.9, goalsAgainst:1.3, form:['W','D','L','W','W','D','L','W','D','W'], ziH:[0,3.5,5.2,0,0,3.8,4.5,0,3.2,0] },
+  NAP: { ziAvg:3.5, asUnderdog:8,  causingUpset:22, goalsFor:2.2, goalsAgainst:1.0, form:['W','W','D','W','L','W','W','D','W','L'], ziH:[0,0,3.2,0,5.8,0,0,3.5,0,4.2] },
+  // Ligue 1
+  PSG: { ziAvg:3.0, asUnderdog:4,  causingUpset:35, goalsFor:3.0, goalsAgainst:0.9, form:['W','W','W','L','W','W','D','W','L','W'], ziH:[0,0,0,9.4,0,0,3.2,0,7.7,0] },
+  MRS: { ziAvg:4.2, asUnderdog:15, causingUpset:22, goalsFor:2.0, goalsAgainst:1.4, form:['W','L','W','D','W','L','W','D','L','W'], ziH:[0,5.5,0,3.5,0,4.8,0,3.2,5.0,0] },
+  // Portugal
+  BEN: { ziAvg:3.5, asUnderdog:8,  causingUpset:20, goalsFor:2.4, goalsAgainst:0.9, form:['W','W','D','W','W','L','W','W','D','W'], ziH:[0,0,3.2,0,0,7.2,0,0,3.5,0] },
+};
+
+// Fallback stats para times sem dados específicos
+function getStats(id) {
+  return TEAM_STATS[id] || {
+    ziAvg: 3.5 + Math.random()*2,
+    asUnderdog: 10 + Math.floor(Math.random()*20),
+    causingUpset: 10 + Math.floor(Math.random()*20),
+    goalsFor: 1.4 + Math.random()*0.8,
+    goalsAgainst: 1.0 + Math.random()*0.7,
+    form: ['W','D','L','W','W','D','L','W','D','W'],
+    ziH: [0,3.5,4.2,0,0,5.1,3.8,0,4.5,0],
+  };
+}
+
+// ── H2H CONFRONTOS HISTÓRICOS ─────────────────────────────────────────────────
+const H2H_MATCHES = [
+  // Flamengo × Botafogo
+  { a:'FLA', b:'BOT', home:'Flamengo',  away:'Botafogo',     hs:3,as:0, league:'Brasileirão', date:'13/05/2024', zi:8.2, winner:'home' },
+  { a:'FLA', b:'BOT', home:'Botafogo',  away:'Flamengo',     hs:1,as:1, league:'Brasileirão', date:'12/10/2023', zi:0,   winner:'draw' },
+  { a:'FLA', b:'BOT', home:'Flamengo',  away:'Botafogo',     hs:2,as:1, league:'Brasileirão', date:'04/06/2023', zi:0,   winner:'home' },
+  { a:'FLA', b:'BOT', home:'Botafogo',  away:'Flamengo',     hs:2,as:0, league:'Brasileirão', date:'02/10/2022', zi:6.5, winner:'home' },
+  { a:'FLA', b:'BOT', home:'Flamengo',  away:'Botafogo',     hs:4,as:1, league:'Brasileirão', date:'18/05/2022', zi:0,   winner:'home' },
+  { a:'FLA', b:'BOT', home:'Botafogo',  away:'Flamengo',     hs:0,as:2, league:'Brasileirão', date:'24/10/2021', zi:0,   winner:'away' },
+  // Real Madrid × Barcelona
+  { a:'RMA', b:'BAR', home:'Real Madrid',away:'Barcelona',    hs:3,as:2, league:'La Liga',     date:'21/04/2024', zi:0,   winner:'home' },
+  { a:'RMA', b:'BAR', home:'Barcelona', away:'Real Madrid',  hs:1,as:2, league:'La Liga',     date:'28/10/2023', zi:0,   winner:'away' },
+  { a:'RMA', b:'BAR', home:'Real Madrid',away:'Barcelona',    hs:2,as:1, league:'La Liga',     date:'02/04/2023', zi:0,   winner:'home' },
+  { a:'RMA', b:'BAR', home:'Barcelona', away:'Real Madrid',  hs:4,as:0, league:'La Liga',     date:'20/03/2022', zi:0,   winner:'home' },
+  { a:'RMA', b:'BAR', home:'Real Madrid',away:'Barcelona',    hs:2,as:1, league:'La Liga',     date:'12/04/2021', zi:0,   winner:'home' },
+  { a:'RMA', b:'BAR', home:'Barcelona', away:'Real Madrid',  hs:3,as:1, league:'La Liga',     date:'18/12/2019', zi:0,   winner:'home' },
+  // Bayern × Dortmund
+  { a:'BAY', b:'BVB', home:'Bayern',    away:'Dortmund',     hs:2,as:2, league:'Bundesliga',  date:'30/03/2024', zi:0,   winner:'draw' },
+  { a:'BAY', b:'BVB', home:'Dortmund',  away:'Bayern',       hs:4,as:2, league:'Bundesliga',  date:'04/11/2023', zi:5.5, winner:'home' },
+  { a:'BAY', b:'BVB', home:'Bayern',    away:'Dortmund',     hs:4,as:0, league:'Bundesliga',  date:'01/04/2023', zi:0,   winner:'home' },
+  { a:'BAY', b:'BVB', home:'Dortmund',  away:'Bayern',       hs:2,as:2, league:'Bundesliga',  date:'08/10/2022', zi:0,   winner:'draw' },
+  { a:'BAY', b:'BVB', home:'Bayern',    away:'Dortmund',     hs:3,as:1, league:'Bundesliga',  date:'23/04/2022', zi:0,   winner:'home' },
+  // Man City × Man United
+  { a:'MCI', b:'MUN', home:'Man City',  away:'Man United',   hs:3,as:1, league:'Premier Lge', date:'03/03/2024', zi:0,   winner:'home' },
+  { a:'MCI', b:'MUN', home:'Man United',away:'Man City',     hs:2,as:1, league:'Premier Lge', date:'29/10/2023', zi:5.8, winner:'home' },
+  { a:'MCI', b:'MUN', home:'Man City',  away:'Man United',   hs:6,as:3, league:'Premier Lge', date:'02/10/2022', zi:0,   winner:'home' },
+  { a:'MCI', b:'MUN', home:'Man United',away:'Man City',     hs:1,as:4, league:'Premier Lge', date:'06/03/2022', zi:0,   winner:'away' },
+  { a:'MCI', b:'MUN', home:'Man City',  away:'Man United',   hs:2,as:0, league:'Premier Lge', date:'07/11/2021', zi:0,   winner:'home' },
+  // PSG × Marseille
+  { a:'PSG', b:'MRS', home:'PSG',       away:'Marseille',    hs:2,as:3, league:'Ligue 1',     date:'24/03/2024', zi:7.5, winner:'away' },
+  { a:'PSG', b:'MRS', home:'Marseille', away:'PSG',          hs:0,as:2, league:'Ligue 1',     date:'29/10/2023', zi:0,   winner:'away' },
+  { a:'PSG', b:'MRS', home:'PSG',       away:'Marseille',    hs:4,as:0, league:'Ligue 1',     date:'16/04/2023', zi:0,   winner:'home' },
+  { a:'PSG', b:'MRS', home:'Marseille', away:'PSG',          hs:0,as:0, league:'Ligue 1',     date:'23/10/2022', zi:0,   winner:'draw' },
+  // Palmeiras × Flamengo
+  { a:'PAL', b:'FLA', home:'Palmeiras', away:'Flamengo',     hs:2,as:1, league:'Brasileirão', date:'07/04/2024', zi:0,   winner:'home' },
+  { a:'PAL', b:'FLA', home:'Flamengo',  away:'Palmeiras',    hs:3,as:2, league:'Brasileirão', date:'05/11/2023', zi:4.2, winner:'home' },
+  { a:'PAL', b:'FLA', home:'Palmeiras', away:'Flamengo',     hs:1,as:1, league:'Brasileirão', date:'19/06/2023', zi:0,   winner:'draw' },
+  { a:'PAL', b:'FLA', home:'Flamengo',  away:'Palmeiras',    hs:0,as:0, league:'Brasileirão', date:'18/09/2022', zi:0,   winner:'draw' },
+];
+
+function getH2H(idA, idB) {
+  return H2H_MATCHES.filter(m =>
+    (m.a === idA && m.b === idB) || (m.a === idB && m.b === idA)
+  );
+}
+
+// Gera confrontos dummy para pares sem dados históricos
+function generateDummyH2H(teamA, teamB) {
+  const matches = [];
+  const base = ['W','D','L'];
+  for (let i = 0; i < 6; i++) {
+    const r = Math.floor(Math.random() * 3);
+    const homeTeam = i % 2 === 0 ? teamA : teamB;
+    const awayTeam = i % 2 === 0 ? teamB : teamA;
+    const hs = r === 0 ? 1+Math.floor(Math.random()*2) : r === 2 ? 0 : Math.floor(Math.random()*2);
+    const as = r === 2 ? 1+Math.floor(Math.random()*2) : r === 0 ? 0 : Math.floor(Math.random()*2);
+    const winner = hs > as ? 'home' : as > hs ? 'away' : 'draw';
+    const yr = 2019 + Math.floor(i/2);
+    const zi = Math.random() > 0.7 ? (3 + Math.random()*5).toFixed(1)*1 : 0;
+    matches.push({
+      a: teamA.id, b: teamB.id,
+      home: homeTeam.name, away: awayTeam.name,
+      hs, as, league: teamA.league === teamB.league ? teamA.league : 'Amistoso',
+      date: `${10+i*5}/${3+i % 9}/${yr}`, zi, winner,
+    });
+  }
+  return matches;
+}
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let selectedA = null;
+let selectedB = null;
+
+// ── SEARCH ────────────────────────────────────────────────────────────────────
+function setupSearch(slot) {
+  const input    = document.getElementById(`input${slot}`);
+  const dropdown = document.getElementById(`dropdown${slot}`);
+
+  input.addEventListener('input', () => {
+    const q = input.value.trim().toLowerCase();
+    if (!q) { dropdown.innerHTML = ''; dropdown.style.display = 'none'; return; }
+    const results = ALL_TEAMS.filter(t => t.name.toLowerCase().includes(q) || t.league.toLowerCase().includes(q)).slice(0,6);
+    if (!results.length) {
+      dropdown.innerHTML = `<div class="slot-dd-empty">Nenhum time encontrado</div>`;
+      dropdown.style.display = 'block';
+      return;
+    }
+    dropdown.innerHTML = '';
+    results.forEach(t => {
+      const item = document.createElement('div');
+      item.className = 'slot-dd-item';
+      const logoUrl = LEAGUE_LOGOS[t.lid] || '';
+      const logoHtml = logoUrl
+        ? `<img src="${logoUrl}" style="width:13px;height:13px;object-fit:contain;flex-shrink:0;" onerror="this.style.display='none';">`
+        : flagImg(t.lid, 12);
+      item.innerHTML = `
+        <div class="slot-dd-crest" data-team="${t.id}">${t.name.substring(0,3).toUpperCase()}</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:0.8125rem;font-weight:600;">${t.name}</div>
+          <div style="font-size:0.6875rem;color:var(--gray);display:flex;align-items:center;gap:3px;">${logoHtml}${t.league}</div>
+        </div>`;
+      item.addEventListener('click', () => { selectTeam(slot, t); });
+      dropdown.appendChild(item);
+    });
+    dropdown.style.display = 'block';
+    // Async: try to load crests for results
+    results.forEach(t => {
+      const el = dropdown.querySelector(`[data-team="${t.id}"]`);
+      if (!el) return;
+      const cu = getCrest(t.name);
+      if (cu) el.innerHTML = `<img src="${cu}" style="width:24px;height:24px;object-fit:contain;" onerror="this.outerHTML='<span style=font-size:0.5rem;font-weight:700>${t.name.substring(0,3).toUpperCase()}</span>';">`;
+    });
+  });
+
+  // Close dropdown on outside click
+  document.addEventListener('click', e => {
+    if (!e.target.closest(`#slot${slot}`)) {
+      dropdown.style.display = 'none';
+    }
+  });
+}
+
+function selectTeam(slot, team) {
+  if (slot === 'A') selectedA = team;
+  else              selectedB = team;
+
+  const empty  = document.getElementById(`empty${slot}`);
+  const filled = document.getElementById(`filled${slot}`);
+  const crestEl= document.getElementById(`crest${slot}`);
+  const nameEl = document.getElementById(`name${slot}`);
+  const lgEl   = document.getElementById(`league${slot}`);
+
+  // Show filled state
+  empty.style.display  = 'none';
+  filled.style.display = 'flex';
+  nameEl.textContent   = team.name;
+  lgEl.textContent     = team.league;
+
+  // Crest
+  const cu = getCrest(team.name);
+  if (cu) {
+    crestEl.innerHTML = `<img src="${cu}" style="width:28px;height:28px;object-fit:contain;" loading="lazy" onerror="this.style.display='none';">`;
+  } else {
+    crestEl.textContent = team.name.substring(0,3).toUpperCase();
+  }
+
+  // Clear input
+  document.getElementById(`input${slot}`).value = '';
+  document.getElementById(`dropdown${slot}`).style.display = 'none';
+
+  document.getElementById('swapRow').style.display = 'flex';
+  if (selectedA && selectedB) renderComparison();
+  lucide.createIcons();
+}
+
+// ── CLEAR SLOT ────────────────────────────────────────────────────────────────
+['A','B'].forEach(slot => {
+  document.getElementById(`clear${slot}`).addEventListener('click', () => {
+    if (slot === 'A') selectedA = null; else selectedB = null;
+    document.getElementById(`empty${slot}`).style.display = 'block';
+    document.getElementById(`filled${slot}`).style.display = 'none';
+    document.getElementById('compResults').style.display = 'none';
+    document.getElementById('emptyState').style.display  = 'block';
+    lucide.createIcons();
+  });
+});
+
+// ── SWAP ──────────────────────────────────────────────────────────────────────
+document.getElementById('swapBtn').addEventListener('click', () => {
+  if (!selectedA || !selectedB) return;
+  [selectedA, selectedB] = [selectedB, selectedA];
+  selectTeam('A', selectedA);
+  selectTeam('B', selectedB);
+});
+
+// ── RENDER COMPARISON ─────────────────────────────────────────────────────────
+function renderComparison() {
+  document.getElementById('emptyState').style.display  = 'none';
+  document.getElementById('compResults').style.display = 'block';
+  window.scrollTo({ top: 300, behavior: 'smooth' });
+
+  const sA = getStats(selectedA.id);
+  const sB = getStats(selectedB.id);
+
+  let h2h = getH2H(selectedA.id, selectedB.id);
+  if (!h2h.length) h2h = generateDummyH2H(selectedA, selectedB);
+  h2h = h2h.sort((a,b) => new Date(b.date.split('/').reverse().join('-')) - new Date(a.date.split('/').reverse().join('-')));
+
+  renderH2HRecord(h2h, sA, sB);
+  renderStats(sA, sB);
+  renderH2HList(h2h);
+  renderForm(sA, sB);
+
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+// ── H2H RECORD ────────────────────────────────────────────────────────────────
+function renderH2HRecord(h2h, sA, sB) {
+  let wA = 0, wB = 0, d = 0;
+  h2h.forEach(m => {
+    const homeIsA = m.home === selectedA.name;
+    if (m.winner === 'draw') d++;
+    else if ((m.winner === 'home' && homeIsA) || (m.winner === 'away' && !homeIsA)) wA++;
+    else wB++;
+  });
+
+  const total = wA + wB + d;
+  document.getElementById('h2hTotal').textContent  = `${total} jogos`;
+  document.getElementById('h2hSubtitle').textContent = `${total} jogos registrados`;
+  document.getElementById('winsA').textContent     = wA;
+  document.getElementById('winsB').textContent     = wB;
+  document.getElementById('draws').textContent     = d;
+  document.getElementById('h2hNameA').textContent  = selectedA.name;
+  document.getElementById('h2hNameB').textContent  = selectedB.name;
+
+  const fA = total ? wA/total : 0;
+  const fD = total ? d/total : 0;
+  const fB = total ? wB/total : 0;
+  document.getElementById('domA').style.flex = fA;
+  document.getElementById('domD').style.flex = fD || 0.02;
+  document.getElementById('domB').style.flex = fB;
+  document.getElementById('pctA').textContent = total ? `${Math.round(fA*100)}%` : '–';
+  document.getElementById('pctB').textContent = total ? `${Math.round(fB*100)}%` : '–';
+
+  document.getElementById('statHeadA').textContent = selectedA.name;
+  document.getElementById('statHeadB').textContent = selectedB.name;
+  document.getElementById('formNameA').textContent = selectedA.name;
+  document.getElementById('formNameB').textContent = selectedB.name;
+}
+
+// ── STATS ROWS ────────────────────────────────────────────────────────────────
+const STAT_DEFS = [
+  { key:'ziAvg',       label:'ZI Médio',           fmt:v => v.toFixed(1), max:10,  iconA:'var(--green)', iconB:'var(--red)',  tooltip:'Índice Zebra médio nas últimas partidas' },
+  { key:'goalsFor',    label:'Gols / Jogo',         fmt:v => v.toFixed(1), max:4,   iconA:'var(--green)', iconB:'var(--green)' },
+  { key:'goalsAgainst',label:'Gols Sofridos / Jogo',fmt:v => v.toFixed(1), max:3.5, iconA:'var(--red)',   iconB:'var(--red)',   invert:true },
+  { key:'asUnderdog',  label:'Vitórias como Zebra', fmt:v => v+'%',        max:50,  iconA:'var(--gold)',  iconB:'var(--gold)' },
+  { key:'causingUpset',label:'Vítima de Zebra',     fmt:v => v+'%',        max:50,  iconA:'var(--gray)',  iconB:'var(--gray)',  invert:true },
+];
+
+function renderStats(sA, sB) {
+  const container = document.getElementById('statRows');
+  container.innerHTML = '';
+
+  STAT_DEFS.forEach(def => {
+    const vA = sA[def.key] || 0;
+    const vB = sB[def.key] || 0;
+    const pA = Math.min(100, Math.round((vA / def.max) * 100));
+    const pB = Math.min(100, Math.round((vB / def.max) * 100));
+    // Highlight winner (higher = better unless invert)
+    const aWins = def.invert ? vA < vB : vA > vB;
+    const bWins = def.invert ? vB < vA : vB > vA;
+
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;flex-direction:column;gap:4px;';
+    row.innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr 90px 1fr;align-items:center;gap:6px;">
+        <div style="text-align:right;">
+          <span style="font-size:0.875rem;font-weight:${aWins?'800':'600'};color:${aWins?'var(--white)':'var(--gray)'};">${def.fmt(vA)}</span>
+        </div>
+        <div style="text-align:center;font-size:0.625rem;font-weight:600;color:var(--gray);letter-spacing:0.3px;line-height:1.3;">${def.label}</div>
+        <div>
+          <span style="font-size:0.875rem;font-weight:${bWins?'800':'600'};color:${bWins?'var(--white)':'var(--gray)'};">${def.fmt(vB)}</span>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 90px 1fr;gap:6px;align-items:center;">
+        <div style="display:flex;justify-content:flex-end;">
+          <div style="height:6px;border-radius:3px;overflow:hidden;background:var(--border);width:100%;max-width:120px;">
+            <div style="height:100%;width:${pA}%;background:${aWins?'var(--green)':'var(--border)'};border-radius:3px;float:right;"></div>
+          </div>
+        </div>
+        <div></div>
+        <div>
+          <div style="height:6px;border-radius:3px;overflow:hidden;background:var(--border);width:100%;max-width:120px;">
+            <div style="height:100%;width:${pB}%;background:${bWins?'var(--green)':'var(--border)'};border-radius:3px;"></div>
+          </div>
+        </div>
+      </div>`;
+    container.appendChild(row);
+  });
+}
+
+// ── H2H LIST ──────────────────────────────────────────────────────────────────
+function renderH2HList(h2h) {
+  const container = document.getElementById('h2hList');
+  container.innerHTML = '';
+  h2h.slice(0,6).forEach(m => {
+    const homeIsA   = m.home === selectedA.name;
+    const aWon = (m.winner === 'home' && homeIsA) || (m.winner === 'away' && !homeIsA);
+    const bWon = (m.winner === 'home' && !homeIsA) || (m.winner === 'away' && homeIsA);
+    const isDraw    = m.winner === 'draw';
+    const resultColor = isDraw ? 'var(--gray)' : aWon ? 'var(--green)' : 'var(--red)';
+    const resultLabel = isDraw ? 'E' : aWon ? 'A' : 'B';
+
+    const card = document.createElement('div');
+    card.className = 'zebra-card';
+    card.style.cursor = 'pointer';
+
+    const ziHtml = m.zi > 0
+      ? `<span style="font-size:0.625rem;font-weight:700;padding:1px 5px;border-radius:4px;background:${m.zi>=7?'rgba(220,38,38,0.15)':'rgba(251,191,36,0.12)'};color:${m.zi>=7?'var(--red)':'var(--gold)'};margin-left:4px;">ZI ${m.zi}</span>`
+      : '';
+
+    card.innerHTML = `
+      <div style="display:flex;align-items:center;gap:10px;">
+        <!-- Result indicator -->
+        <div style="width:28px;height:28px;border-radius:8px;background:${resultColor}22;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid ${resultColor}44;">
+          <span style="font-size:0.625rem;font-weight:800;color:${resultColor};">${resultLabel}</span>
+        </div>
+
+        <!-- Match info -->
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
+            <span style="font-size:0.8125rem;font-weight:700;">${m.home}</span>
+            <span style="font-size:1rem;font-weight:800;color:var(--white);flex-shrink:0;">${m.hs}–${m.as}</span>
+            <span style="font-size:0.8125rem;font-weight:700;">${m.away}</span>
+          </div>
+          <div style="display:flex;align-items:center;font-size:0.6875rem;color:var(--gray);gap:4px;">
+            <span>${m.league}</span>
+            <span>·</span>
+            <span>${m.date}</span>
+            ${ziHtml}
+          </div>
+        </div>
+
+        <i data-lucide="chevron-right" style="width:14px;height:14px;color:var(--border);flex-shrink:0;"></i>
+      </div>`;
+    card.addEventListener('click', () => window.location.href = 'partida.html');
+    container.appendChild(card);
+  });
+}
+
+// ── FORMA RECENTE ─────────────────────────────────────────────────────────────
+function renderForm(sA, sB) {
+  renderFormRow('A', sA);
+  renderFormRow('B', sB);
+}
+
+function renderFormRow(slot, stats) {
+  const dots  = document.getElementById(`formDots${slot}`);
+  const spark = document.getElementById(`formSpark${slot}`);
+  const rec   = document.getElementById(`formRecord${slot}`);
+
+  const form = stats.form || [];
+  const ziH  = stats.ziH  || [];
+
+  // W/D/L count
+  const w = form.filter(r=>r==='W').length;
+  const d = form.filter(r=>r==='D').length;
+  const l = form.filter(r=>r==='L').length;
+  rec.textContent = `${w}V ${d}E ${l}D`;
+  rec.style.color = w > l ? 'var(--green)' : l > w ? 'var(--red)' : 'var(--gray)';
+
+  // Result dots
+  dots.innerHTML = '';
+  form.forEach((r, i) => {
+    const col = r==='W'?'var(--green)':r==='D'?'var(--gold)':'var(--red)';
+    const label = r==='W'?'V':r==='D'?'E':'D';
+    const dot = document.createElement('div');
+    dot.className = 'form-dot';
+    dot.style.cssText = `background:${col}22;border:1.5px solid ${col};color:${col};`;
+    dot.title = `Jogo ${form.length-i}: ${r==='W'?'Vitória':r==='D'?'Empate':'Derrota'}`;
+    dot.textContent = label;
+    dots.appendChild(dot);
+  });
+
+  // ZI sparkline (SVG)
+  const max = Math.max(...ziH, 1);
+  const W = 280, H = 48;
+  const pts = ziH.map((v, i) => {
+    const x = (i / (ziH.length-1)) * W;
+    const y = H - (v/max)*H;
+    return `${x},${y}`;
+  }).join(' ');
+
+  const bars = ziH.map((v, i) => {
+    if (!v) return '';
+    const x = (i / (ziH.length-1)) * W;
+    const bh = Math.max(3, (v/max)*H);
+    const col = v>=7?'var(--red)':v>=4?'var(--gold)':'rgba(46,230,92,0.5)';
+    return `<rect x="${x-4}" y="${H-bh}" width="8" height="${bh}" rx="2" fill="${col}" opacity="0.5"/>`;
+  }).join('');
+
+  spark.innerHTML = `
+    <svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:${H}px;overflow:visible;">
+      <!-- Grid lines -->
+      <line x1="0" y1="${H}" x2="${W}" y2="${H}" stroke="var(--border)" stroke-width="1"/>
+      <!-- ZI bars -->
+      ${bars}
+      <!-- Trend line -->
+      <polyline points="${pts}" fill="none" stroke="var(--green)" stroke-width="1.5" stroke-opacity="0.4" stroke-linejoin="round"/>
+      <!-- Dots on data points -->
+      ${ziH.map((v,i) => {
+        if (!v) return '';
+        const x = (i/(ziH.length-1))*W;
+        const y = H-(v/max)*H;
+        const col = v>=7?'var(--red)':v>=4?'var(--gold)':'var(--green)';
+        return `<circle cx="${x}" cy="${y}" r="3.5" fill="${col}"/>`;
+      }).join('')}
+    </svg>
+    <div style="display:flex;justify-content:space-between;font-size:0.5625rem;color:var(--gray);margin-top:3px;">
+      <span>10 jogos atrás</span><span style="font-size:0.5rem;color:var(--gray);">● ZI do jogo</span><span>Mais recente</span>
+    </div>`;
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+setupSearch('A');
+setupSearch('B');
+updatePlanBadge();
+
+// Pre-load league logos for dropdown display
+(async () => {
+  await Promise.all(['BRA','ENG','ESP','ITA','GER','FRA','POR','HOL'].map(lid => loadLeagueLogo(lid)));
+})();
+
+// Check URL params for pre-selection
+const params = new URLSearchParams(window.location.search);
+const ta = params.get('a'), tb = params.get('b');
+if (ta) { const t = ALL_TEAMS.find(t=>t.id===ta); if(t) selectTeam('A',t); }
+if (tb) { const t = ALL_TEAMS.find(t=>t.id===tb); if(t) selectTeam('B',t); }
+
+lucide.createIcons();
+</script>
+
+<style>
+  /* ── BOTTOM NAV & ICONS ─────────────────── */
+  .bottom-nav__icon i { width: 20px; height: 20px; display: block; }
+  .navbar__icon i { display: block; }
+  .sec-ic { width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 5px; flex-shrink: 0; }
+  .section-title { display: inline-flex; align-items: center; }
+
+  /* ── TEAM SLOT ──────────────────────────── */
+  .team-slot { position: relative; }
+
+  .slot-search-wrap {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 8px 10px;
+  }
+  .slot-search-ic { width: 14px; height: 14px; color: var(--gray); flex-shrink: 0; }
+  .slot-input {
+    background: none; border: none; outline: none; color: var(--white);
+    font-family: inherit; font-size: 0.875rem; width: 100%;
+  }
+  .slot-input::placeholder { color: var(--gray); }
+
+  .slot-dropdown {
+    position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+    background: var(--card2); border: 1px solid var(--border);
+    border-radius: var(--radius); z-index: 100; overflow: hidden;
+    box-shadow: 0 8px 24px rgba(0,0,0,.4); display: none;
+  }
+  .slot-dd-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 10px; cursor: pointer; transition: background var(--transition);
+    border-bottom: 1px solid var(--border);
+  }
+  .slot-dd-item:last-child { border-bottom: none; }
+  .slot-dd-item:hover { background: var(--card); }
+  .slot-dd-crest {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--border); display: flex; align-items: center;
+    justify-content: center; font-size: 0.5rem; font-weight: 700;
+    color: var(--gray); flex-shrink: 0; overflow: hidden;
+  }
+  .slot-dd-empty { padding: 12px; text-align: center; color: var(--gray); font-size: 0.8125rem; }
+
+  /* Selected (filled) state */
+  .slot-filled {
+    align-items: center; gap: 8px;
+    background: var(--green-dim); border: 1px solid rgba(46,230,92,0.3);
+    border-radius: var(--radius); padding: 8px 10px;
+  }
+  .slot-crest {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--card); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.5rem; font-weight: 700; color: var(--gray);
+    flex-shrink: 0; overflow: hidden;
+  }
+  .slot-name { font-size: 0.875rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .slot-league { font-size: 0.625rem; color: var(--gray); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .slot-clear {
+    background: none; border: none; color: var(--gray); cursor: pointer;
+    padding: 2px; display: flex; align-items: center; flex-shrink: 0;
+  }
+  .slot-clear:hover { color: var(--white); }
+
+  /* ── H2H RECORD ─────────────────────────── */
+  .h2h-big-num {
+    font-size: 2rem; font-weight: 900; line-height: 1;
+    color: var(--white); letter-spacing: -1px;
+  }
+
+  /* ── STATS ──────────────────────────────── */
+  .stat-team-head {
+    font-size: 0.75rem; font-weight: 700; color: var(--green);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+
+  /* ── FORM ───────────────────────────────── */
+  .form-team-label { font-size: 0.8125rem; font-weight: 700; }
+  .form-record { font-size: 0.75rem; font-weight: 600; }
+  .form-dots-row {
+    display: flex; gap: 4px; margin-bottom: 10px; flex-wrap: nowrap;
+  }
+  .form-dot {
+    width: 26px; height: 26px; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.625rem; font-weight: 800; flex-shrink: 0;
+    cursor: default;
+  }
+  .form-spark-wrap { width: 100%; }
+</style>
+</body>
+</html>
