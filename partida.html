@@ -114,10 +114,10 @@
 
   <!-- TAB BAR -->
   <div class="tab-bar">
-    <button class="tab-bar__item active" data-tab="resumo">Resumo</button>
-    <button class="tab-bar__item" data-tab="stats">Estatísticas</button>
-    <button class="tab-bar__item" data-tab="zebra">🦓 Zebra</button>
-    <button class="tab-bar__item" data-tab="h2h">H2H</button>
+    <button class="tab-bar__item active" data-tab="resumo"><i data-lucide="file-text" class="tab-ic"></i>Resumo</button>
+    <button class="tab-bar__item" data-tab="stats"><i data-lucide="bar-chart-2" class="tab-ic"></i>Estatísticas</button>
+    <button class="tab-bar__item" data-tab="zebra"><i data-lucide="zap" class="tab-ic"></i>Zebra</button>
+    <button class="tab-bar__item" data-tab="h2h"><i data-lucide="users" class="tab-ic"></i>H2H</button>
   </div>
 
   <!-- CONTEÚDO TABS -->
@@ -149,7 +149,7 @@
 
     <!-- TAB: ESTATÍSTICAS -->
     <div id="tab-stats" style="display:none;">
-      <div class="section-header"><span class="section-title">📊 Estatísticas da Partida</span></div>
+      <div class="section-header"><span class="section-title"><i data-lucide="bar-chart-2" class="sec-ic"></i>Estatísticas da Partida</span></div>
       <div class="card" id="matchStats"></div>
     </div>
 
@@ -531,6 +531,10 @@
 </script>
 <style>
   .bottom-nav__icon i { width: 20px; height: 20px; display: block; }
+  .tab-bar__item { display: inline-flex; align-items: center; gap: 5px; }
+  .tab-ic  { width: 13px; height: 13px; display: block; flex-shrink: 0; }
+  .sec-ic  { width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 5px; flex-shrink: 0; }
+  .section-title { display: inline-flex; align-items: center; }
   .navbar__icon i { display: block; }
 </style>
 </body>

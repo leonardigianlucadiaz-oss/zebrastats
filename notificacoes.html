@@ -54,9 +54,9 @@
   <section style="padding:10px 16px;border-bottom:1px solid var(--border);background:var(--card2);">
     <div class="scroll-x" style="gap:8px;">
       <button class="filter-chip active" data-nfilter="all">Todas</button>
-      <button class="filter-chip" data-nfilter="zebra">🦓 Zebras</button>
-      <button class="filter-chip" data-nfilter="jogo">⚽ Jogos</button>
-      <button class="filter-chip" data-nfilter="sistema">⚙️ Sistema</button>
+      <button class="filter-chip" data-nfilter="zebra"><i data-lucide="zap" class="chip-ic"></i>Zebras</button>
+      <button class="filter-chip" data-nfilter="jogo"><i data-lucide="circle-dot" class="chip-ic"></i>Jogos</button>
+      <button class="filter-chip" data-nfilter="sistema"><i data-lucide="settings" class="chip-ic"></i>Sistema</button>
     </div>
   </section>
 
@@ -179,6 +179,8 @@
 </script>
 <style>
   .bottom-nav__icon i { width: 20px; height: 20px; display: block; }
+  .chip-ic { width: 12px; height: 12px; display: block; flex-shrink: 0; }
+  .filter-chip { display: inline-flex; align-items: center; gap: 5px; }
   .navbar__icon i { display: block; }
 </style>
 </body>

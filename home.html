@@ -93,7 +93,7 @@
 
       <!-- EM BREVE -->
       <div class="section-header" style="margin-top:4px;">
-        <span class="section-title">⏰ Em Breve</span>
+        <span class="section-title"><i data-lucide="clock" class="sec-ic"></i>Em Breve</span>
         <a href="#" class="section-link">Ver agenda</a>
       </div>
 
@@ -101,7 +101,7 @@
 
       <!-- ZEBRAS DO DIA -->
       <div class="section-header" style="margin-top:4px;">
-        <span class="section-title">🦓 Zebras do Dia</span>
+        <span class="section-title"><i data-lucide="zap" class="sec-ic"></i>Zebras do Dia</span>
         <a href="assinatura.html" class="section-link text-gold"><i data-lucide="lock" style="width:12px;height:12px;vertical-align:middle;margin-right:3px;"></i>Pro</a>
       </div>
 
@@ -116,7 +116,7 @@
 
       <!-- RANKINGS RÁPIDOS -->
       <div class="section-header" style="margin-top:4px;">
-        <span class="section-title">📊 Top Zebras da Temporada</span>
+        <span class="section-title"><i data-lucide="bar-chart-2" class="sec-ic"></i>Top Zebras da Temporada</span>
       </div>
 
       <div id="zebraRanking" style="display:flex;flex-direction:column;gap:8px;"></div>
@@ -141,6 +141,8 @@
   <style>
     .bottom-nav__icon i { width: 20px; height: 20px; display: block; }
     .navbar__icon i { display: block; }
+    .sec-ic { width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 5px; flex-shrink: 0; }
+    .section-title { display: inline-flex; align-items: center; }
 
     @keyframes pulse {
       0%, 100% { opacity: 1; }

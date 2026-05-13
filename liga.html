@@ -102,10 +102,10 @@
 
   <!-- TAB BAR -->
   <div class="tab-bar" id="tabBar">
-    <button class="tab-bar__item active" data-tab="jogos">Jogos</button>
-    <button class="tab-bar__item" data-tab="tabela">Tabela</button>
-    <button class="tab-bar__item" data-tab="stats">Stats</button>
-    <button class="tab-bar__item" data-tab="zebras">🦓 Zebras</button>
+    <button class="tab-bar__item active" data-tab="jogos"><i data-lucide="calendar-days" class="tab-ic"></i>Jogos</button>
+    <button class="tab-bar__item" data-tab="tabela"><i data-lucide="layout-list" class="tab-ic"></i>Tabela</button>
+    <button class="tab-bar__item" data-tab="stats"><i data-lucide="bar-chart-2" class="tab-ic"></i>Stats</button>
+    <button class="tab-bar__item" data-tab="zebras"><i data-lucide="zap" class="tab-ic"></i>Zebras</button>
   </div>
 
   <!-- CONTEÚDO DAS TABS -->
@@ -114,9 +114,9 @@
     <!-- TAB: JOGOS -->
     <div id="tab-jogos">
       <div class="scroll-x" style="gap:8px;margin-bottom:4px;">
-        <button class="filter-chip active" data-jfilter="proximos">⏰ Próximos</button>
-        <button class="filter-chip" data-jfilter="aovivo">🔴 Ao Vivo</button>
-        <button class="filter-chip" data-jfilter="encerrados">✓ Encerrados</button>
+        <button class="filter-chip active" data-jfilter="proximos"><i data-lucide="clock" class="chip-ic"></i>Próximos</button>
+        <button class="filter-chip" data-jfilter="aovivo"><i data-lucide="radio" class="chip-ic"></i>Ao Vivo</button>
+        <button class="filter-chip" data-jfilter="encerrados"><i data-lucide="check-circle" class="chip-ic"></i>Encerrados</button>
       </div>
 
       <div id="jogosList" style="display:flex;flex-direction:column;gap:10px;margin-top:4px;"></div>
@@ -137,20 +137,20 @@
     <!-- TAB: STATS -->
     <div id="tab-stats" style="display:none;">
 
-      <div class="section-header"><span class="section-title">⚽ Artilheiros</span></div>
+      <div class="section-header"><span class="section-title"><i data-lucide="circle-dot" class="sec-ic"></i>Artilheiros</span></div>
       <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;margin-bottom:16px;" id="artilheiros"></div>
 
-      <div class="section-header"><span class="section-title">🅰️ Assistências</span></div>
+      <div class="section-header"><span class="section-title"><i data-lucide="corner-up-right" class="sec-ic"></i>Assistências</span></div>
       <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;margin-bottom:16px;" id="assistencias"></div>
 
-      <div class="section-header"><span class="section-title">📊 Clubes — Zebra Index</span></div>
+      <div class="section-header"><span class="section-title"><i data-lucide="bar-chart-2" class="sec-ic"></i>Clubes — Zebra Index</span></div>
       <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;" id="clubeStats"></div>
     </div>
 
     <!-- TAB: ZEBRAS -->
     <div id="tab-zebras" style="display:none;">
       <div class="section-header">
-        <span class="section-title">🦓 Maiores Zebras da Temporada</span>
+        <span class="section-title"><i data-lucide="zap" class="sec-ic"></i>Maiores Zebras da Temporada</span>
         <a href="zebras.html" class="section-link">Ver todas</a>
       </div>
       <div id="ligaZebras" style="display:flex;flex-direction:column;gap:10px;"></div>
@@ -653,6 +653,12 @@
 <style>
   .bottom-nav__icon i { width: 20px; height: 20px; display: block; }
   .navbar__icon i { display: block; }
+  /* icons inline em tabs, chips e section-titles */
+  .tab-bar__item { display: inline-flex; align-items: center; gap: 5px; }
+  .tab-ic  { width: 13px; height: 13px; display: block; flex-shrink: 0; }
+  .chip-ic { width: 12px; height: 12px; display: block; flex-shrink: 0; }
+  .sec-ic  { width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 5px; flex-shrink: 0; }
+  .section-title { display: inline-flex; align-items: center; }
   @keyframes pulse {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.3; }
