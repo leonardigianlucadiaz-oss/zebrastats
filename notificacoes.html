@@ -81,38 +81,86 @@
 <script src="js/api.js"></script>
 <script src="js/main.js"></script>
 <script>
+  // ── STORAGE KEYS ────────────────────────────────────────────
+  const NOTIFS_READ_KEY = 'zs_notifs_read';
+
+  // ── NOTIFICAÇÕES BASE (substituída por API futuramente) ──────
   const NOTIFS = [
-    // Hoje
-    { id:1,  group:'Hoje',    type:'zebra',   unread:true,  icon:'🦓', iconBg:'var(--green-dim)',  title:'ZEBRA ALERT — Botafogo 3×0 Flamengo', desc:'Zebra Index 8.2 — resultado altamente improvável confirmado. Odd do Botafogo era 4.50.',  time:'Há 2 horas',   link:'partida.html' },
-    { id:2,  group:'Hoje',    type:'jogo',    unread:true,  icon:'⚽', iconBg:'rgba(30,58,85,0.8)',title:'Lembrete: Flamengo × Botafogo começa em 1h', desc:'Brasileirão · Rodada 13 · Estádio Nilton Santos · 16h00', time:'Há 5 horas',   link:'partida.html' },
-    { id:3,  group:'Hoje',    type:'zebra',   unread:true,  icon:'🦓', iconBg:'var(--green-dim)',  title:'ZEBRA ALERT — Lecce 2×1 Juventus',    desc:'Zebra Index 7.9 — Lecce, 22º no Índice de Força, derrubou a Juventus em casa.',       time:'Há 6 horas',   link:'partida.html' },
-    { id:4,  group:'Hoje',    type:'sistema', unread:false, icon:'✨', iconBg:'var(--gold-dim)',   title:'Novo recurso: Tela da Liga disponível!', desc:'Acesse tabela de classificação, artilheiros e zebras por liga diretamente no app.', time:'Há 8 horas',   link:'liga.html'    },
-
-    // Ontem
-    { id:5,  group:'Ontem',   type:'jogo',    unread:false, icon:'🏆', iconBg:'var(--gold-dim)',   title:'Resultado: Champions League — Final',  desc:'Real Madrid 1×0 Borussia Dortmund. Fim de jogo.',                                    time:'Ontem · 23h05',link:'partida.html' },
-    { id:6,  group:'Ontem',   type:'zebra',   unread:false, icon:'🦓', iconBg:'var(--green-dim)',  title:'Top Zebra da Semana: Angers 2×0 PSG',  desc:'Zebra Index 9.4 — a maior zebra da temporada! PSG com odd 1.38 foi eliminado em casa.',time:'Ontem · 18h30',link:'zebras.html'  },
-    { id:7,  group:'Ontem',   type:'sistema', unread:false, icon:'👑', iconBg:'var(--gold-dim)',   title:'Oferta especial: Pro Anual com -17%',  desc:'Economize R$100 comparado ao mensal. Válido por mais 3 dias.',                       time:'Ontem · 10h00',link:'assinatura.html'},
-
-    // Esta semana
-    { id:8,  group:'Esta semana', type:'jogo', unread:false, icon:'⭐', iconBg:'rgba(30,58,85,0.8)', title:'Seu time favorito joga amanhã',       desc:'Flamengo × Internacional · Brasileirão · 18h30',                                    time:'08/05 · 09h00',link:'partida.html' },
-    { id:9,  group:'Esta semana', type:'zebra',unread:false, icon:'🦓', iconBg:'var(--green-dim)',   title:'ZEBRA ALERT — Augsburg 2×1 Bayern',   desc:'Zebra Index 8.7 — o Bayern Munich, favorito com odd 1.50, perdeu para o Augsburg.', time:'07/05 · 17h30',link:'partida.html' },
-    { id:10, group:'Esta semana', type:'sistema',unread:false,icon:'🔔',iconBg:'rgba(30,58,85,0.8)', title:'Lembrete de pagamento',               desc:'Sua assinatura Pro renova em 7 dias. Verifique seus dados de pagamento.',            time:'06/05 · 10h00',link:'perfil.html'  },
+    // — Hoje —
+    { id:'n1',  group:'Hoje',       type:'zebra',   unread:true,  icon:'zap',       iconBg:'var(--green-dim)',       title:'ZEBRA ALERT — Botafogo 3×0 Flamengo',        desc:'Zebra Index 8.2 · Odd do Botafogo era 4.50 · resultado altamente improvável confirmado.',   time:'Há 2 horas',    link:'partida.html' },
+    { id:'n2',  group:'Hoje',       type:'jogo',    unread:true,  icon:'circle-dot',iconBg:'rgba(30,58,85,0.9)',     title:'Lembrete: Flamengo × Botafogo começa em 1h', desc:'Brasileirão · Rodada 13 · Estádio Nilton Santos · 16h00',                                    time:'Há 5 horas',    link:'partida.html' },
+    { id:'n3',  group:'Hoje',       type:'zebra',   unread:true,  icon:'zap',       iconBg:'var(--green-dim)',       title:'ZEBRA ALERT — Lecce 2×1 Juventus',           desc:'Zebra Index 7.9 · Lecce, 22º no Índice de Força, derrubou a Juventus em casa.',             time:'Há 6 horas',    link:'partida.html' },
+    { id:'n4',  group:'Hoje',       type:'sistema', unread:false, icon:'sparkles',  iconBg:'var(--gold-dim)',        title:'Novo recurso: Tela da Liga disponível!',     desc:'Acesse tabela de classificação, artilheiros e zebras por liga diretamente no app.',        time:'Há 8 horas',    link:'liga.html'    },
+    // — Ontem —
+    { id:'n5',  group:'Ontem',      type:'jogo',    unread:false, icon:'trophy',    iconBg:'var(--gold-dim)',        title:'Resultado: Champions League — Final',        desc:'Real Madrid 1×0 Borussia Dortmund. Fim de jogo.',                                            time:'Ontem · 23h05', link:'partida.html' },
+    { id:'n6',  group:'Ontem',      type:'zebra',   unread:false, icon:'zap',       iconBg:'var(--green-dim)',       title:'Top Zebra da Semana: Angers 2×0 PSG',        desc:'Zebra Index 9.4 — a maior zebra da temporada! PSG com odd 1.38 foi eliminado em casa.',    time:'Ontem · 18h30', link:'zebras.html'  },
+    { id:'n7',  group:'Ontem',      type:'sistema', unread:false, icon:'crown',     iconBg:'var(--gold-dim)',        title:'Oferta especial: Pro Anual com -17%',        desc:'Economize R$100 comparado ao mensal. Válido por mais 3 dias.',                               time:'Ontem · 10h00', link:'assinatura.html'},
+    // — Esta semana —
+    { id:'n8',  group:'Esta semana',type:'jogo',    unread:false, icon:'calendar',  iconBg:'rgba(30,58,85,0.9)',     title:'Seu time favorito joga amanhã',              desc:'Flamengo × Internacional · Brasileirão · 18h30',                                             time:'08/05 · 09h00', link:'partida.html' },
+    { id:'n9',  group:'Esta semana',type:'zebra',   unread:false, icon:'zap',       iconBg:'var(--green-dim)',       title:'ZEBRA ALERT — Augsburg 2×1 Bayern',          desc:'Zebra Index 8.7 — o Bayern Munich, favorito com odd 1.50, perdeu para o Augsburg.',        time:'07/05 · 17h30', link:'partida.html' },
+    { id:'n10', group:'Esta semana',type:'sistema', unread:false, icon:'bell',      iconBg:'rgba(30,58,85,0.9)',     title:'Lembrete de pagamento',                      desc:'Sua assinatura Pro renova em 7 dias. Verifique seus dados de pagamento.',                   time:'06/05 · 10h00', link:'perfil.html'  },
   ];
 
+  // Injeta notificações de alertas disparados (localStorage)
+  function injectAlertNotifs() {
+    try {
+      const alertNotifs = JSON.parse(localStorage.getItem('zs_alert_notifs') || '[]');
+      alertNotifs.forEach(n => {
+        if (!NOTIFS.find(x => x.id === n.id)) NOTIFS.unshift(n);
+      });
+    } catch {}
+  }
+  injectAlertNotifs();
+
+  // ── ESTADO DE LEITURA (localStorage) ────────────────────────
+  function getReadSet() {
+    try { return new Set(JSON.parse(localStorage.getItem(NOTIFS_READ_KEY)) || []); }
+    catch { return new Set(); }
+  }
+  function saveReadSet(set) {
+    try { localStorage.setItem(NOTIFS_READ_KEY, JSON.stringify([...set])); }
+    catch {}
+    updateBellBadge();
+  }
+
+  let readIds = getReadSet();
+
+  function markRead(id) {
+    readIds.add(id);
+    saveReadSet(readIds);
+  }
+  function markAllRead() {
+    NOTIFS.forEach(n => readIds.add(n.id));
+    saveReadSet(readIds);
+  }
+  function getUnreadCount() {
+    return NOTIFS.filter(n => n.unread && !readIds.has(n.id)).length;
+  }
+
+  // ── RENDER ───────────────────────────────────────────────────
   let activeFilter = 'all';
-  let readIds = new Set();
 
   function renderNotifs() {
     const main = document.getElementById('notifMain');
     main.innerHTML = '';
 
+    // Update "Marcar lidas" label with count
+    const unread = getUnreadCount();
+    const markBtn = document.getElementById('markAllBtn');
+    markBtn.textContent = unread > 0 ? `Marcar lidas (${unread})` : 'Tudo lido';
+    markBtn.style.opacity = unread > 0 ? '1' : '0.4';
+    markBtn.style.pointerEvents = unread > 0 ? 'auto' : 'none';
+
     const filtered = activeFilter === 'all' ? NOTIFS : NOTIFS.filter(n => n.type === activeFilter);
     if (!filtered.length) {
       main.innerHTML = `<div style="text-align:center;padding:48px 16px;color:var(--gray);">
-        <div style="font-size:2.5rem;margin-bottom:12px;">🔔</div>
+        <div style="width:48px;height:48px;border-radius:14px;background:var(--card2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
+          <i data-lucide="bell-off" style="width:22px;height:22px;opacity:0.5;"></i>
+        </div>
         <div style="font-weight:600;margin-bottom:4px;">Nenhuma notificação</div>
         <div style="font-size:0.8125rem;">Você está em dia!</div>
       </div>`;
+      lucide.createIcons();
       return;
     }
 
@@ -123,37 +171,63 @@
     });
 
     Object.entries(groups).forEach(([group, items]) => {
-      // Group header
+      const groupUnread = items.filter(n => n.unread && !readIds.has(n.id)).length;
+
       const header = document.createElement('div');
-      header.style.cssText = 'padding:12px 16px 6px;font-size:0.6875rem;font-weight:600;color:var(--gray);text-transform:uppercase;letter-spacing:0.8px;';
-      header.textContent = group;
+      header.style.cssText = 'padding:12px 16px 6px;font-size:0.6875rem;font-weight:600;color:var(--gray);text-transform:uppercase;letter-spacing:0.8px;display:flex;align-items:center;gap:6px;';
+      header.innerHTML = group + (groupUnread > 0
+        ? ` <span style="background:var(--green);color:#000;font-size:0.5625rem;font-weight:800;padding:1px 5px;border-radius:10px;">${groupUnread}</span>`
+        : '');
       main.appendChild(header);
 
       const groupWrap = document.createElement('div');
       groupWrap.style.cssText = 'background:var(--card);border-top:1px solid var(--border);border-bottom:1px solid var(--border);';
 
-      items.forEach(n => {
+      items.forEach((n, idx) => {
         const isUnread = n.unread && !readIds.has(n.id);
         const item = document.createElement('div');
         item.className = `notif-item${isUnread ? ' notif-item--unread' : ''}`;
+        if (idx < items.length - 1) item.style.borderBottom = '1px solid var(--border)';
+
         item.innerHTML = `
-          <div class="notif-item__icon" style="background:${n.iconBg};">${n.icon}</div>
+          <div class="notif-item__icon" style="background:${n.iconBg};display:flex;align-items:center;justify-content:center;">
+            <i data-lucide="${n.icon}" style="width:16px;height:16px;"></i>
+          </div>
           <div class="notif-item__body">
             <div class="notif-item__title">${n.title}</div>
             <div class="notif-item__desc">${n.desc}</div>
             <div class="notif-item__time">${n.time}</div>
           </div>
-          ${isUnread ? '<div class="notif-item__dot"></div>' : ''}
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;">
+            ${isUnread ? '<div class="notif-item__dot"></div>' : '<div style="width:8px;"></div>'}
+            <button class="notif-read-btn" data-id="${n.id}" title="${isUnread ? 'Marcar como lida' : 'Lida'}" style="background:none;border:none;cursor:pointer;color:${isUnread ? 'var(--green)' : 'var(--border)'};padding:0;display:flex;">
+              <i data-lucide="${isUnread ? 'circle' : 'check-circle'}" style="width:13px;height:13px;"></i>
+            </button>
+          </div>
         `;
-        item.addEventListener('click', () => {
-          readIds.add(n.id);
-          window.location.href = n.link;
+
+        // Click item → mark read + navigate
+        item.addEventListener('click', e => {
+          if (e.target.closest('.notif-read-btn')) return;
+          markRead(n.id);
+          renderNotifs();
+          lucide.createIcons();
+          setTimeout(() => window.location.href = n.link, 150);
         });
+
+        // Click read button only → mark read in place
+        item.querySelector('.notif-read-btn').addEventListener('click', e => {
+          e.stopPropagation();
+          if (isUnread) { markRead(n.id); renderNotifs(); lucide.createIcons(); }
+        });
+
         groupWrap.appendChild(item);
       });
 
       main.appendChild(groupWrap);
     });
+
+    lucide.createIcons();
   }
 
   // ── FILTROS ──────────────────────────────────────────────────
@@ -168,13 +242,16 @@
 
   // ── MARCAR TODAS COMO LIDAS ───────────────────────────────────
   document.getElementById('markAllBtn').addEventListener('click', () => {
-    NOTIFS.forEach(n => readIds.add(n.id));
+    if (getUnreadCount() === 0) return;
+    markAllRead();
     renderNotifs();
+    lucide.createIcons();
     showToast('✓ Todas marcadas como lidas');
   });
 
   // ── INIT ─────────────────────────────────────────────────────
   renderNotifs();
+  initBellBadge();
   lucide.createIcons();
 </script>
 <style>
