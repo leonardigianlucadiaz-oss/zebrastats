@@ -425,6 +425,9 @@ p  { font-size: 0.875rem; line-height: 1.5; color: var(--gray); }
   font-size: 0.9375rem;
   font-weight: 600;
   color: var(--white);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .section-link {
@@ -943,7 +946,16 @@ p  { font-size: 0.875rem; line-height: 1.5; color: var(--gray); }
   border-left: none;
   border-right: none;
   font-family: inherit;
+  /* suporte a ícone inline */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
 }
+/* ícones dentro de tab-bar e filter-chip */
+.tab-ic  { width: 13px; height: 13px; display: block; flex-shrink: 0; }
+.chip-ic { width: 12px; height: 12px; display: block; flex-shrink: 0; }
+.sec-ic  { width: 14px; height: 14px; display: inline-block; vertical-align: middle; flex-shrink: 0; }
 
 .tab-bar__item.active {
   color: var(--green);
@@ -963,6 +975,10 @@ p  { font-size: 0.875rem; line-height: 1.5; color: var(--gray); }
   transition: all var(--transition);
   white-space: nowrap;
   font-family: inherit;
+  /* suporte a ícone inline */
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
 }
 .filter-chip.active {
   background: var(--green-dim);
