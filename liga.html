@@ -53,14 +53,14 @@
   <!-- SELETOR DE LIGA (acima do hero) -->
   <section style="background:var(--card2);padding:10px 16px;border-bottom:1px solid var(--border);">
     <div class="scroll-x" style="gap:8px;" id="leaguePicker">
-      <button class="filter-chip active" data-lid="BRA" data-flag="🇧🇷" data-name="Brasileirão Série A" data-sub="Brasil · Temporada 2025" data-lider="FLA" data-zebras="14" data-rodada="12ª"><span class="picker-logo" data-logo-lid="BRA">🇧🇷</span> Brasileirão</button>
-      <button class="filter-chip" data-lid="ENG" data-flag="🏴󠁧󠁢󠁥󠁮󠁧󠁿" data-name="Premier League" data-sub="Inglaterra · Temporada 2024/25" data-lider="LFC" data-zebras="21" data-rodada="37ª"><span class="picker-logo" data-logo-lid="ENG">🏴󠁧󠁢󠁥󠁮󠁧󠁿</span> Premier Lge</button>
-      <button class="filter-chip" data-lid="ESP" data-flag="🇪🇸" data-name="La Liga" data-sub="Espanha · Temporada 2024/25" data-lider="BAR" data-zebras="18" data-rodada="36ª"><span class="picker-logo" data-logo-lid="ESP">🇪🇸</span> La Liga</button>
-      <button class="filter-chip" data-lid="ITA" data-flag="🇮🇹" data-name="Serie A" data-sub="Itália · Temporada 2024/25" data-lider="INT" data-zebras="16" data-rodada="37ª"><span class="picker-logo" data-logo-lid="ITA">🇮🇹</span> Serie A</button>
-      <button class="filter-chip" data-lid="GER" data-flag="🇩🇪" data-name="Bundesliga" data-sub="Alemanha · Temporada 2024/25" data-lider="BAY" data-zebras="12" data-rodada="34ª"><span class="picker-logo" data-logo-lid="GER">🇩🇪</span> Bundesliga</button>
-      <button class="filter-chip" data-lid="FRA" data-flag="🇫🇷" data-name="Ligue 1" data-sub="França · Temporada 2024/25" data-lider="PSG" data-zebras="11" data-rodada="34ª"><span class="picker-logo" data-logo-lid="FRA">🇫🇷</span> Ligue 1</button>
-      <button class="filter-chip" data-lid="POR" data-flag="🇵🇹" data-name="Liga Portugal" data-sub="Portugal · Temporada 2024/25" data-lider="BEN" data-zebras="9" data-rodada="34ª"><span class="picker-logo" data-logo-lid="POR">🇵🇹</span> Liga PT</button>
-      <button class="filter-chip" data-lid="UCL" data-flag="🏆" data-name="Champions League" data-sub="Europa · Temporada 2024/25" data-lider="RMA" data-zebras="7" data-rodada="SF"><span class="picker-logo" data-logo-lid="UCL">🏆</span> Champions</button>
+      <button class="filter-chip active" data-lid="BRA" data-name="Brasileirão Série A" data-sub="Brasil · Temporada 2025" data-lider="FLA" data-zebras="14" data-rodada="12ª"><span class="picker-logo" id="pl-BRA"></span> Brasileirão</button>
+      <button class="filter-chip" data-lid="ENG" data-name="Premier League" data-sub="Inglaterra · Temporada 2024/25" data-lider="LFC" data-zebras="21" data-rodada="37ª"><span class="picker-logo" id="pl-ENG"></span> Premier Lge</button>
+      <button class="filter-chip" data-lid="ESP" data-name="La Liga" data-sub="Espanha · Temporada 2024/25" data-lider="BAR" data-zebras="18" data-rodada="36ª"><span class="picker-logo" id="pl-ESP"></span> La Liga</button>
+      <button class="filter-chip" data-lid="ITA" data-name="Serie A" data-sub="Itália · Temporada 2024/25" data-lider="INT" data-zebras="16" data-rodada="37ª"><span class="picker-logo" id="pl-ITA"></span> Serie A</button>
+      <button class="filter-chip" data-lid="GER" data-name="Bundesliga" data-sub="Alemanha · Temporada 2024/25" data-lider="BAY" data-zebras="12" data-rodada="34ª"><span class="picker-logo" id="pl-GER"></span> Bundesliga</button>
+      <button class="filter-chip" data-lid="FRA" data-name="Ligue 1" data-sub="França · Temporada 2024/25" data-lider="PSG" data-zebras="11" data-rodada="34ª"><span class="picker-logo" id="pl-FRA"></span> Ligue 1</button>
+      <button class="filter-chip" data-lid="POR" data-name="Liga Portugal" data-sub="Portugal · Temporada 2024/25" data-lider="BEN" data-zebras="9" data-rodada="34ª"><span class="picker-logo" id="pl-POR"></span> Liga PT</button>
+      <button class="filter-chip" data-lid="UCL" data-name="Champions League" data-sub="Europa · Temporada 2024/25" data-lider="RMA" data-zebras="7" data-rodada="SF"><span class="picker-logo" id="pl-UCL"></span> Champions</button>
     </div>
   </section>
 
@@ -290,7 +290,7 @@
       sdbStandingsLoaded = false;
       STANDINGS.length = 0;
       syncFavBtn();
-      loadLeagueLogo(activeLid);
+      loadHeroLogo(activeLid);
       loadLeagueCrests(activeLid);
       renderJogos();
       if (activeTab === 'tabela') renderTabela();
@@ -298,15 +298,19 @@
     });
   });
 
-  // ── LOGO DA LIGA (SDB) ──────────────────────────────────────────
-  async function loadLeagueLogo(lid) {
+  // ── LOGO DO HERO (64px) ─────────────────────────────────────────
+  // NOTA: usa loadLeagueLogo() global do main.js (retorna URL)
+  // NÃO redefine a função global — era o bug que causava logo errada
+  async function loadHeroLogo(lid) {
     const flagEl = document.getElementById('leagueFlag');
+    // Bandeira do país imediatamente (sem emoji regional)
+    const furl = { BRA:'br',ENG:'gb-eng',ESP:'es',ITA:'it',GER:'de',FRA:'fr',POR:'pt',UCL:'eu',UEL:'eu',HOL:'nl',ARG:'ar' }[lid];
+    if (furl) flagEl.innerHTML = `<img src="https://flagcdn.com/w40/${furl}.png" alt="${lid}" style="width:44px;height:auto;object-fit:contain;">`;
+    // Logo oficial SDB por cima quando carregar
     try {
-      const data = await ZebraAPI.sportsDb.getLeagueInfo(lid);
-      const league = data?.leagues?.[0];
-      const badge = league?.strBadge || league?.strLogo || '';
+      const badge = await loadLeagueLogo(lid);  // global main.js — retorna URL
       if (badge) {
-        flagEl.innerHTML = `<img src="${badge}" alt="${lid}" style="width:48px;height:48px;object-fit:contain;" onerror="this.parentElement.textContent='⚽';">`;
+        flagEl.innerHTML = `<img src="${badge}" alt="${lid}" style="width:52px;height:52px;object-fit:contain;" onerror="this.style.display='none'">`;
       }
     } catch {}
   }
@@ -548,7 +552,7 @@
   // ── INIT ──────────────────────────────────────────────────────────
   updatePlanBadge && updatePlanBadge();
   syncFavBtn();
-  loadLeagueLogo('BRA');
+  loadHeroLogo('BRA');
   renderJogos();
 
   // ── API REAL DATA ──────────────────────────────────────────────────
@@ -631,16 +635,20 @@
   lucide.createIcons();
 
   // ── LOGOS NOS CHIPS DO PICKER ─────────────────────────────────
-  async function initPickerLogos() {
-    const spans = document.querySelectorAll('#leaguePicker [data-logo-lid]');
-    spans.forEach(async span => {
-      const lid = span.dataset.logoLid;
-      const logo = await loadLeagueLogo(lid);
-      if (!logo) return;
-      span.innerHTML = `<img src="${logo}" onerror="this.style.display='none'">`;
+  // 1) Coloca bandeiras do país imediatamente (sem emoji)
+  // 2) Substitui pelo logo oficial da SDB quando carregar
+  (function initPickerLogos() {
+    document.querySelectorAll('#leaguePicker .filter-chip[data-lid]').forEach(async chip => {
+      const lid  = chip.dataset.lid;
+      const span = document.getElementById(`pl-${lid}`);
+      if (!span) return;
+      // Bandeira imediata via flagcdn
+      span.innerHTML = flagImg(lid, 14);
+      // Logo oficial SDB
+      const logo = await loadLeagueLogo(lid);  // global main.js
+      if (logo) span.innerHTML = `<img src="${logo}" style="width:16px;height:16px;object-fit:contain;" onerror="this.style.display='none'">`;
     });
-  }
-  initPickerLogos();
+  })();
 </script>
 <style>
   .bottom-nav__icon i { width: 20px; height: 20px; display: block; }
