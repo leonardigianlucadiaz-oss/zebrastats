@@ -672,6 +672,24 @@
     initGames();
     initZebrasDoDia();
     lucide.createIcons();
+
+    // Toast de boas-vindas após onboarding
+    const welcomeMsg = localStorage.getItem('zs_welcome_toast');
+    if (welcomeMsg) {
+      localStorage.removeItem('zs_welcome_toast');
+      setTimeout(() => showToast(welcomeMsg, 3500), 600);
+    }
+
+    // Preenche nome no navbar/sidebar com dados do cadastro
+    const savedName = localStorage.getItem('zs_user_name');
+    if (savedName) {
+      document.querySelectorAll('.sidebar__user-name').forEach(el => {
+        el.textContent = savedName.split(' ')[0];
+      });
+      document.querySelectorAll('.sidebar__user-avatar').forEach(el => {
+        el.textContent = savedName[0].toUpperCase();
+      });
+    }
   </script>
 </body>
 </html>
