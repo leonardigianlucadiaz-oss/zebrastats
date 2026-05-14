@@ -204,6 +204,30 @@
         </div>
       </div>
 
+      <!-- TIMELINE DE EVENTOS -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px;margin-bottom:12px;" id="timelineSection">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:14px;">
+          <i data-lucide="clock" style="width:14px;height:14px;color:var(--green);"></i>
+          <span style="font-size:0.875rem;font-weight:600;">Linha do Tempo</span>
+        </div>
+        <!-- 90-min bar -->
+        <div style="position:relative;height:4px;background:var(--border);border-radius:2px;margin:18px 0 24px;">
+          <div style="position:absolute;left:0;top:0;height:100%;width:62%;background:linear-gradient(90deg,var(--green),var(--gold));border-radius:2px;"></div>
+          <!-- Event dots injected by JS -->
+          <div id="timelineDots"></div>
+        </div>
+        <div id="timelineEvents" style="display:flex;flex-direction:column;gap:6px;"></div>
+      </div>
+
+      <!-- ODDS COMPARATIVO -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px;margin-bottom:12px;" id="oddsSection">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px;">
+          <i data-lucide="bar-chart-3" style="width:14px;height:14px;color:var(--gold);"></i>
+          <span style="font-size:0.875rem;font-weight:600;">Odds das Casas</span>
+        </div>
+        <div id="oddsComparator"></div>
+      </div>
+
       <!-- FATORES DA ZEBRA -->
       <div class="card card--gold-border">
         <div style="font-size:0.875rem;font-weight:600;margin-bottom:12px;display:flex;align-items:center;gap:6px;">
@@ -251,6 +275,12 @@
     <!-- TAB: H2H -->
     <div id="tab-h2h" style="display:none;">
       <div class="section-header"><span class="section-title"><i data-lucide="refresh-cw" class="sec-ic"></i>Últimos Confrontos</span></div>
+
+      <!-- H2H PREVIEW -->
+      <div id="h2hPreview" style="display:flex;gap:8px;margin-bottom:10px;">
+        <!-- filled by JS -->
+      </div>
+
       <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;margin-bottom:16px;" id="h2hList"></div>
 
       <div class="section-header"><span class="section-title"><i data-lucide="trending-up" class="sec-ic"></i>Histórico de Desempenho</span></div>
@@ -569,6 +599,104 @@
       el.appendChild(pill);
     });
   });
+
+  // ── TIMELINE DE EVENTOS ─────────────────────────────────────────
+  function initTimeline() {
+    const EVENTS = [
+      { min:14, type:'goal',   team:'home', player:'Arrascaeta', icon:'circle-dot', color:'var(--green)' },
+      { min:27, type:'yellow', team:'away', player:'Casemiro',   icon:'square',     color:'var(--gold)'  },
+      { min:41, type:'goal',   team:'away', player:'Salah',      icon:'circle-dot', color:'var(--green)' },
+      { min:57, type:'red',    team:'home', player:'Léo Ortiz',  icon:'square',     color:'var(--red)'   },
+      { min:73, type:'goal',   team:'home', player:'Pedro',      icon:'circle-dot', color:'var(--green)' },
+      { min:88, type:'goal',   team:'away', player:'Núñez',      icon:'circle-dot', color:'var(--green)' },
+    ];
+
+    const dotsContainer = document.getElementById('timelineDots');
+    const eventsContainer = document.getElementById('timelineEvents');
+    if (!dotsContainer || !eventsContainer) return;
+
+    dotsContainer.innerHTML = '';
+    eventsContainer.innerHTML = '';
+
+    EVENTS.forEach(ev => {
+      // Dot on bar
+      const dot = document.createElement('div');
+      dot.style.cssText = `position:absolute;top:50%;left:${ev.min/90*100}%;transform:translate(-50%,-50%);
+        width:12px;height:12px;border-radius:50%;background:${ev.color};border:2px solid var(--bg);
+        display:flex;align-items:center;justify-content:center;z-index:1;`;
+      const minLabel = document.createElement('span');
+      minLabel.style.cssText = `position:absolute;top:-18px;left:50%;transform:translateX(-50%);
+        font-size:0.5625rem;color:var(--gray);white-space:nowrap;`;
+      minLabel.textContent = `${ev.min}'`;
+      dot.appendChild(minLabel);
+      dotsContainer.appendChild(dot);
+
+      // Event row
+      const row = document.createElement('div');
+      row.style.cssText = `display:flex;align-items:center;gap:10px;padding:6px 0;
+        ${EVENTS.indexOf(ev) < EVENTS.length-1 ? 'border-bottom:1px solid var(--border);' : ''}`;
+      const isHome = ev.team === 'home';
+      row.innerHTML = `
+        <span style="font-size:0.75rem;font-weight:700;color:var(--gray);min-width:28px;text-align:right;">${ev.min}'</span>
+        <span style="width:8px;height:8px;border-radius:50%;background:${ev.color};flex-shrink:0;display:inline-block;"></span>
+        <span style="font-size:0.875rem;flex:1;${isHome ? '' : 'text-align:right;color:var(--gray);'}">${isHome ? ev.player : ''}</span>
+        <span style="font-size:0.75rem;color:var(--gray);text-align:center;">
+          ${ev.type === 'goal' ? '⚽' : ev.type === 'yellow' ? '🟨' : '🟥'}
+        </span>
+        <span style="font-size:0.875rem;flex:1;${isHome ? 'text-align:right;color:var(--gray);' : ''}">${isHome ? '' : ev.player}</span>`;
+      eventsContainer.appendChild(row);
+    });
+  }
+
+  // ── ODDS COMPARATIVO ────────────────────────────────────────────
+  function initOdds() {
+    const el = document.getElementById('oddsComparator');
+    if (!el) return;
+    const BOOKMAKERS = [
+      { name:'Bet365',    h:2.20, d:3.10, a:3.40 },
+      { name:'Betano',    h:2.15, d:3.20, a:3.50 },
+      { name:'Superbet',  h:2.25, d:3.05, a:3.35 },
+    ];
+    const best = { h: Math.max(...BOOKMAKERS.map(b=>b.h)), d: Math.max(...BOOKMAKERS.map(b=>b.d)), a: Math.max(...BOOKMAKERS.map(b=>b.a)) };
+    el.innerHTML = `
+      <div style="display:grid;grid-template-columns:80px 1fr 1fr 1fr;gap:4px;font-size:0.75rem;margin-bottom:6px;">
+        <div style="color:var(--gray);">Casa</div>
+        <div style="text-align:center;color:var(--gray);">Casa</div>
+        <div style="text-align:center;color:var(--gray);">Empate</div>
+        <div style="text-align:center;color:var(--gray);">Fora</div>
+      </div>
+      ${BOOKMAKERS.map(b => `
+      <div style="display:grid;grid-template-columns:80px 1fr 1fr 1fr;gap:4px;padding:6px 0;border-top:1px solid var(--border);">
+        <div style="font-weight:600;font-size:0.8125rem;">${b.name}</div>
+        <div style="text-align:center;"><span style="font-size:0.9375rem;font-weight:700;color:${b.h===best.h?'var(--green)':'var(--white)'};">${b.h.toFixed(2)}</span>${b.h===best.h?' <span style="font-size:0.5625rem;color:var(--green);">BEST</span>':''}</div>
+        <div style="text-align:center;"><span style="font-size:0.9375rem;font-weight:700;color:${b.d===best.d?'var(--green)':'var(--white)'};">${b.d.toFixed(2)}</span>${b.d===best.d?' <span style="font-size:0.5625rem;color:var(--green);">BEST</span>':''}</div>
+        <div style="text-align:center;"><span style="font-size:0.9375rem;font-weight:700;color:${b.a===best.a?'var(--green)':'var(--white)'};">${b.a.toFixed(2)}</span>${b.a===best.a?' <span style="font-size:0.5625rem;color:var(--green);">BEST</span>':''}</div>
+      </div>`).join('')}`;
+  }
+
+  // ── H2H PREVIEW MINI-CARDS ──────────────────────────────────────
+  function initH2hPreview() {
+    const el = document.getElementById('h2hPreview');
+    if (!el) return;
+    const matches = [
+      { date:'Mar 2025', hs:2, as:0, home:'Flamengo', away:'Liverpool' },
+      { date:'Nov 2024', hs:1, as:1, home:'Liverpool', away:'Flamengo' },
+      { date:'Jul 2024', hs:0, as:3, home:'Flamengo', away:'Liverpool' },
+    ];
+    el.innerHTML = matches.map(m => {
+      const diff = m.hs - m.as;
+      const color = diff > 0 ? 'var(--green)' : diff < 0 ? 'var(--red)' : 'var(--gold)';
+      return `<div style="flex:1;background:var(--card2);border:1px solid var(--border);border-radius:var(--radius-md);padding:8px;text-align:center;min-width:0;">
+        <div style="font-size:0.625rem;color:var(--gray);margin-bottom:4px;">${m.date}</div>
+        <div style="font-size:1rem;font-weight:800;color:${color};">${m.hs}–${m.as}</div>
+        <div style="font-size:0.5625rem;color:var(--gray);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${m.home}</div>
+      </div>`;
+    }).join('');
+  }
+
+  initTimeline();
+  initOdds();
+  initH2hPreview();
   lucide.createIcons();
 </script>
 <style>

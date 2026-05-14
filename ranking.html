@@ -84,6 +84,23 @@
     </div>
   </section>
 
+  <!-- FILTRO POR LIGA -->
+  <div class="scroll-x" style="gap:6px;padding:8px 16px;background:var(--card2);border-bottom:1px solid var(--border);" id="rankingLigaFilter">
+    <button class="filter-chip active" data-rlid="todas">Todas as ligas</button>
+    <button class="filter-chip" data-rlid="BRA">🇧🇷 Brasileirão</button>
+    <button class="filter-chip" data-rlid="ENG">Premier League</button>
+    <button class="filter-chip" data-rlid="ESP">La Liga</button>
+    <button class="filter-chip" data-rlid="ITA">Serie A</button>
+    <button class="filter-chip" data-rlid="GER">Bundesliga</button>
+  </div>
+
+  <!-- TABS DE PERÍODO -->
+  <div class="tab-bar" id="rankingPeriodTabs" style="margin-bottom:0;">
+    <button class="tab-bar__item active" data-period="semana"><i data-lucide="calendar-days" style="width:13px;height:13px;"></i>Esta Semana</button>
+    <button class="tab-bar__item" data-period="mes"><i data-lucide="calendar" style="width:13px;height:13px;"></i>Este Mês</button>
+    <button class="tab-bar__item" data-period="historico"><i data-lucide="history" style="width:13px;height:13px;"></i>Histórico</button>
+  </div>
+
   <!-- PODIUM TOP 3 -->
   <div id="podiumBlock" style="display:none;"></div>
 
@@ -157,6 +174,32 @@ const RANKING_DATA = [
 // ── STATE ─────────────────────────────────────────────────────────────────────
 let activePeriod  = 'all';
 let activeLeague  = 'all';
+
+// ── NEW PERIOD TABS STATE ────────────────────────────────────────────────────
+let activePeriodNew = 'semana';
+
+// Mock ZI multipliers per period so numbers feel different
+const PERIOD_MULT = { semana: 1.0, mes: 3.2, historico: 18.7 };
+
+document.querySelectorAll('#rankingPeriodTabs .tab-bar__item').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('#rankingPeriodTabs .tab-bar__item').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    activePeriodNew = this.dataset.period;
+    renderRanking();
+  });
+});
+
+// ── LIGA FILTER STATE ─────────────────────────────────────────────────────────
+let activeRankingLiga = 'todas';
+document.querySelectorAll('#rankingLigaFilter .filter-chip').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('#rankingLigaFilter .filter-chip').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    activeRankingLiga = this.dataset.rlid;
+    renderRanking();
+  });
+});
 
 const LEAGUE_META = [
   { id:'BRA', name:'Brasileirão' },
@@ -284,8 +327,28 @@ async function shareZebra(z, pos) {
   }
 }
 
+// ── SPARKLINE HELPER ─────────────────────────────────────────────────────────
+function sparkline(values, width = 48, height = 20, color = 'var(--green)') {
+  if (!values || values.length < 2) return '';
+  const min = Math.min(...values), max = Math.max(...values);
+  const range = max - min || 1;
+  const pts = values.map((v, i) => {
+    const x = (i / (values.length - 1)) * width;
+    const y = height - ((v - min) / range) * (height - 4) - 2;
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  }).join(' ');
+  const lastPt = pts.split(' ').pop();
+  const [lx, ly] = lastPt.split(',');
+  return `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" style="display:block;flex-shrink:0;">
+    <polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="${lx}" cy="${ly}" r="2.5" fill="${color}"/>
+  </svg>`;
+}
+
 // ── RENDER RANKING ────────────────────────────────────────────────────────────
 function renderRanking() {
+  const mult = (typeof PERIOD_MULT !== 'undefined' && typeof activePeriodNew !== 'undefined') ? PERIOD_MULT[activePeriodNew] : 1;
+
   const container  = document.getElementById('rankingList');
   const lockBanner = document.getElementById('rankLockBanner');
   container.innerHTML = '';
@@ -293,7 +356,14 @@ function renderRanking() {
   const isPro  = getUserPlan() !== 'free';
   const LIMIT  = isPro ? Infinity : 5;
 
-  let list = [...RANKING_DATA];
+  let data = [...RANKING_DATA];
+
+  // New liga filter
+  if (typeof activeRankingLiga !== 'undefined' && activeRankingLiga !== 'todas') {
+    data = data.filter(t => t.liga === activeRankingLiga || t.lid === activeRankingLiga);
+  }
+
+  let list = data;
 
   // Period filter
   if (activePeriod === 'week')  list = list.filter(z => z.period === 'week');
@@ -324,7 +394,7 @@ function renderRanking() {
   visible.forEach((z, idx) => {
     const pos  = idx + 1;
     const cls  = ziClass(z.zi);
-    const card = buildRankCard(z, pos, cls);
+    const card = buildRankCard(z, pos, cls, false, mult);
     container.appendChild(card);
   });
 
@@ -332,7 +402,7 @@ function renderRanking() {
   if (hasLocked) {
     const preview = list[LIMIT];
     const cls     = ziClass(preview.zi);
-    const ghost   = buildRankCard(preview, LIMIT + 1, cls, true);
+    const ghost   = buildRankCard(preview, LIMIT + 1, cls, true, mult);
     container.appendChild(ghost);
   }
 
@@ -341,11 +411,17 @@ function renderRanking() {
   if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
-function buildRankCard(z, pos, cls, locked = false) {
+function buildRankCard(z, pos, cls, locked = false, mult = 1) {
   const hcUrl  = getCrest(z.home);
   const acUrl  = getCrest(z.away);
   const color  = ziColors[cls];
   const label  = ziLabels[cls];
+
+  // Generate sparkline trend seeded by team name
+  const teamName = z.home;
+  const seed = teamName.split('').reduce((a,c) => a + c.charCodeAt(0), 0);
+  const trend = Array.from({length:6}, (_,i) => ((seed * (i+1) * 1664525) >>> 0) % 40 + 20);
+  const spark = sparkline(trend, 44, 18);
 
   const leagueLogo = LEAGUE_LOGOS[z.lid]
     ? `<img src="${LEAGUE_LOGOS[z.lid]}" style="width:11px;height:11px;object-fit:contain;vertical-align:middle;margin-right:2px;" onerror="this.remove();">`
@@ -371,6 +447,7 @@ function buildRankCard(z, pos, cls, locked = false) {
             <div style="display:flex;align-items:center;gap:5px;min-width:0;">
               ${hcUrl ? teamCrest(hcUrl, z.home) : ''}
               <span style="font-size:0.875rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${z.home}</span>
+              <span style="display:inline-flex;align-items:center;">${spark}</span>
             </div>
             <span style="font-size:1.25rem;font-weight:800;letter-spacing:-0.5px;color:var(--white);flex-shrink:0;text-align:center;padding:0 4px;">${z.hs}–${z.as}</span>
             <div style="display:flex;align-items:center;justify-content:flex-end;gap:5px;min-width:0;">
@@ -391,7 +468,7 @@ function buildRankCard(z, pos, cls, locked = false) {
             <!-- Odds chips -->
             <span style="font-size:0.625rem;background:rgba(46,230,92,0.1);color:var(--green);padding:2px 5px;border-radius:4px;font-weight:700;">${z.odds_h}</span>
             <!-- ZI badge -->
-            <span style="font-size:0.625rem;font-weight:800;padding:2px 6px;border-radius:4px;background:${color}22;color:${color};white-space:nowrap;">ZI ${z.zi} · ${label}</span>
+            <span style="font-size:0.625rem;font-weight:800;padding:2px 6px;border-radius:4px;background:${color}22;color:${color};white-space:nowrap;">ZI ${(Math.round(z.zi * mult * 10) / 10)} · ${label}</span>
           </div>
         </div>
       </div>

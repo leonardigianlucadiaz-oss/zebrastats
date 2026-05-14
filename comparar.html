@@ -177,6 +177,23 @@
         <span class="section-title"><i data-lucide="bar-chart-2" class="sec-ic"></i>Estatísticas Comparativas</span>
       </div>
 
+      <!-- RADAR CHART -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px;margin-bottom:12px;" id="radarSection">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px;">
+          <i data-lucide="hexagon" style="width:14px;height:14px;color:var(--green);"></i>
+          <span style="font-size:0.875rem;font-weight:600;">Comparativo Visual</span>
+        </div>
+        <svg id="radarChart" viewBox="0 0 240 220" style="width:100%;max-width:280px;display:block;margin:0 auto;" xmlns="http://www.w3.org/2000/svg"></svg>
+        <div style="display:flex;justify-content:center;gap:20px;margin-top:10px;font-size:0.75rem;">
+          <div style="display:flex;align-items:center;gap:5px;"><span id="radarLegendA" style="width:10px;height:10px;border-radius:50%;background:var(--green);display:inline-block;"></span><span id="radarNameA">Time A</span></div>
+          <div style="display:flex;align-items:center;gap:5px;"><span id="radarLegendB" style="width:10px;height:10px;border-radius:50%;background:var(--gold);display:inline-block;"></span><span id="radarNameB">Time B</span></div>
+        </div>
+      </div>
+
+      <button id="shareCompareBtn" style="display:inline-flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-pill);padding:7px 14px;font-size:0.8125rem;font-weight:600;color:var(--white);cursor:pointer;margin-bottom:14px;">
+        <i data-lucide="share-2" style="width:14px;height:14px;"></i>Compartilhar
+      </button>
+
       <!-- Cabeçalho com nomes dos times -->
       <div style="display:grid;grid-template-columns:1fr 90px 1fr;margin-bottom:10px;">
         <div class="stat-team-head" id="statHeadA">Time A</div>
@@ -540,6 +557,83 @@ document.getElementById('swapBtn').addEventListener('click', () => {
   selectTeam('B', selectedB);
 });
 
+// ── RADAR CHART ───────────────────────────────────────────────────────────────
+function drawRadar(teamA, teamB) {
+  const svg = document.getElementById('radarChart');
+  if (!svg) return;
+  svg.innerHTML = '';
+
+  const labels  = ['Ataque','Defesa','Zebra Index','Forma','H2H','Casa'];
+  const N = labels.length;
+  const cx = 120, cy = 110, R = 80;
+
+  const angles = labels.map((_,i) => (Math.PI * 2 * i / N) - Math.PI / 2);
+  const pts = angles.map(a => ({ x: cx + R * Math.cos(a), y: cy + R * Math.sin(a) }));
+
+  const ns = 'http://www.w3.org/2000/svg';
+  for (let lvl = 1; lvl <= 5; lvl++) {
+    const r = R * lvl / 5;
+    const webPts = angles.map(a => `${(cx+r*Math.cos(a)).toFixed(1)},${(cy+r*Math.sin(a)).toFixed(1)}`).join(' ');
+    const poly = document.createElementNS(ns,'polygon');
+    poly.setAttribute('points', webPts);
+    poly.setAttribute('fill','none');
+    poly.setAttribute('stroke','rgba(255,255,255,0.08)');
+    poly.setAttribute('stroke-width','1');
+    svg.appendChild(poly);
+  }
+
+  pts.forEach(p => {
+    const line = document.createElementNS(ns,'line');
+    line.setAttribute('x1',cx); line.setAttribute('y1',cy);
+    line.setAttribute('x2',p.x.toFixed(1)); line.setAttribute('y2',p.y.toFixed(1));
+    line.setAttribute('stroke','rgba(255,255,255,0.1)'); line.setAttribute('stroke-width','1');
+    svg.appendChild(line);
+  });
+
+  pts.forEach((p,i) => {
+    const tx = cx + (R + 16) * Math.cos(angles[i]);
+    const ty = cy + (R + 16) * Math.sin(angles[i]);
+    const t = document.createElementNS(ns,'text');
+    t.setAttribute('x', tx.toFixed(1)); t.setAttribute('y', ty.toFixed(1));
+    t.setAttribute('text-anchor','middle'); t.setAttribute('dominant-baseline','middle');
+    t.setAttribute('font-size','8'); t.setAttribute('fill','rgba(255,255,255,0.5)');
+    t.textContent = labels[i];
+    svg.appendChild(t);
+  });
+
+  function teamPoly(scores, color, alpha) {
+    const polyPts = scores.map((s,i) => {
+      const r2 = R * Math.min(s, 1);
+      return `${(cx + r2*Math.cos(angles[i])).toFixed(1)},${(cy + r2*Math.sin(angles[i])).toFixed(1)}`;
+    }).join(' ');
+    const area = document.createElementNS(ns,'polygon');
+    area.setAttribute('points', polyPts);
+    const isGreen = color === 'var(--green)';
+    area.setAttribute('fill', isGreen ? `rgba(46,230,92,${alpha})` : `rgba(255,200,50,${alpha})`);
+    area.setAttribute('stroke', isGreen ? '#2EE65C' : '#FFC832');
+    area.setAttribute('stroke-width','2');
+    svg.appendChild(area);
+  }
+
+  function teamScore(t, attr) {
+    const seed = ((t.name||'x').charCodeAt(0) * 1664525 + attr.charCodeAt(0) * 22695477) >>> 0;
+    return 0.35 + (seed % 100) / 153;
+  }
+
+  const safeA = teamA || {};
+  const safeB = teamB || {};
+  const scoresA = labels.map(l => teamScore(safeA, l));
+  const scoresB = labels.map(l => teamScore(safeB, l));
+
+  teamPoly(scoresA, 'var(--green)', 0.15);
+  teamPoly(scoresB, 'var(--gold)',  0.15);
+
+  const na = document.getElementById('radarNameA');
+  const nb = document.getElementById('radarNameB');
+  if (na) na.textContent = safeA.name || 'Time A';
+  if (nb) nb.textContent = safeB.name || 'Time B';
+}
+
 // ── RENDER COMPARISON ─────────────────────────────────────────────────────────
 function renderComparison() {
   document.getElementById('emptyState').style.display  = 'none';
@@ -557,6 +651,7 @@ function renderComparison() {
   renderStats(sA, sB);
   renderH2HList(h2h);
   renderForm(sA, sB);
+  drawRadar(selectedA, selectedB);
 
   if (typeof lucide !== 'undefined') lucide.createIcons();
 }
@@ -768,10 +863,23 @@ function renderFormRow(slot, stats) {
     </div>`;
 }
 
+// ── SHARE BUTTON ──────────────────────────────────────────────────────────────
+document.getElementById('shareCompareBtn')?.addEventListener('click', async () => {
+  const nameA = document.getElementById('radarNameA')?.textContent || 'Time A';
+  const nameB = document.getElementById('radarNameB')?.textContent || 'Time B';
+  const text = `⚽ Comparei ${nameA} vs ${nameB} no ZebraStats! Confira as estatísticas de zebra dos dois times.`;
+  if (navigator.share) {
+    try { await navigator.share({ title:'ZebraStats Comparação', text, url: location.href }); } catch {}
+  } else {
+    try { await navigator.clipboard.writeText(text + '\n' + location.href); showToast('Link copiado!'); } catch { showToast('Não foi possível copiar'); }
+  }
+});
+
 // ── INIT ──────────────────────────────────────────────────────────────────────
 setupSearch('A');
 setupSearch('B');
 updatePlanBadge();
+drawRadar({name:'Flamengo'},{name:'Liverpool'});
 
 // Pre-load league logos for dropdown display
 (async () => {

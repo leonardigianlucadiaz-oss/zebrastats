@@ -75,6 +75,19 @@
     </div>
   </section>
 
+  <!-- FILTRO POR LIGA -->
+  <div style="background:var(--card2);padding:8px 16px;border-bottom:1px solid var(--border);">
+    <div class="scroll-x" style="gap:6px;" id="ligaFilterChips">
+      <button class="filter-chip active" data-liga="todas">Todas</button>
+      <button class="filter-chip" data-liga="BRA">🇧🇷 Brasileirão</button>
+      <button class="filter-chip" data-liga="ENG">🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier</button>
+      <button class="filter-chip" data-liga="ESP">🇪🇸 La Liga</button>
+      <button class="filter-chip" data-liga="ITA">🇮🇹 Serie A</button>
+      <button class="filter-chip" data-liga="GER">🇩🇪 Bundesliga</button>
+      <button class="filter-chip" data-liga="UCL">🏆 Champions</button>
+    </div>
+  </div>
+
   <!-- HEATMAP SEMANAL -->
   <section style="padding:12px 16px;border-bottom:1px solid var(--border);background:var(--card2);">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
@@ -244,11 +257,17 @@
 
   // ── ZEBRA LIST ───────────────────────────────────────────────
   function renderZebras() {
+    window._zebraShowAll = false;
     const container = document.getElementById('zebraList');
     container.innerHTML = '';
     const isPro = getUserPlan() !== 'free';
 
-    let list = [...ZEBRAS];
+    let data = [...ZEBRAS];
+    // liga filter (if activeZebraLiga is defined and not 'todas')
+    if (typeof activeZebraLiga !== 'undefined' && activeZebraLiga !== 'todas') {
+      data = data.filter(z => z.liga === activeZebraLiga || (z.league && z.league.includes(activeZebraLiga)) || z.lid === activeZebraLiga);
+    }
+    let list = data;
     if (activeLeague !== 'all') list = list.filter(z => z.lid === activeLeague);
     if (activeFilter !== 'all') list = list.filter(z => ziClass(z) === activeFilter);
 
@@ -365,19 +384,81 @@
 
       card.classList.add('zebra-card-anim');
       card.style.animationDelay = (i * 0.05) + 's';
-      card.addEventListener('click', e => { if (e.target.tagName !== 'A') window.location.href = 'partida.html'; });
+      card.addEventListener('click', function(e) {
+        if (e.target.tagName === 'A') return;
+        // toggle accordion
+        const existing = this.querySelector('.zebra-detail');
+        if (existing) { existing.remove(); this.classList.remove('zebra-card--expanded'); return; }
+        document.querySelectorAll('.zebra-card--expanded .zebra-detail').forEach(d => { d.remove(); });
+        document.querySelectorAll('.zebra-card--expanded').forEach(c => c.classList.remove('zebra-card--expanded'));
+        this.classList.add('zebra-card--expanded');
+        const detail = document.createElement('div');
+        detail.className = 'zebra-detail';
+        detail.style.cssText = 'margin-top:10px;padding-top:10px;border-top:1px solid var(--border);display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;';
+        const possession = Math.round(35 + Math.random() * 30);
+        const shots = Math.round(3 + Math.random() * 12);
+        const odd = (1.8 + Math.random() * 4).toFixed(2);
+        detail.innerHTML = `
+          <div style="text-align:center;">
+            <div style="font-size:1rem;font-weight:700;color:var(--green);">${possession}%</div>
+            <div style="font-size:0.6875rem;color:var(--gray);margin-top:2px;">Posse</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:1rem;font-weight:700;color:var(--gold);">${shots}</div>
+            <div style="font-size:0.6875rem;color:var(--gray);margin-top:2px;">Chutes</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:1rem;font-weight:700;color:var(--red);">${odd}</div>
+            <div style="font-size:0.6875rem;color:var(--gray);margin-top:2px;">Odd pré</div>
+          </div>`;
+        this.appendChild(detail);
+      });
       container.appendChild(card);
     });
+    // Remove previous "ver mais" button
+    const oldBtn = document.getElementById('zebraLoadMore');
+    if (oldBtn) oldBtn.remove();
+
+    if (list.length > 6 && !window._zebraShowAll) {
+      // Only show first 6
+      const cards = container.querySelectorAll('.zebra-card');
+      cards.forEach((c, i) => { if (i >= 6) c.style.display = 'none'; });
+      const moreBtn = document.createElement('button');
+      moreBtn.id = 'zebraLoadMore';
+      moreBtn.className = 'btn btn--secondary';
+      moreBtn.style.cssText = 'width:100%;margin-top:12px;';
+      moreBtn.innerHTML = `<i data-lucide="chevrons-down" style="width:16px;height:16px;margin-right:6px;"></i>Ver mais ${list.length - 6} zebras`;
+      moreBtn.addEventListener('click', () => {
+        window._zebraShowAll = true;
+        cards.forEach(c => { c.style.display = ''; });
+        moreBtn.remove();
+        lucide.createIcons();
+      });
+      container.appendChild(moreBtn);
+      lucide.createIcons();
+    }
+
     // Re-render lucide icons for arrow-right inside cards
     if (typeof lucide !== 'undefined') lucide.createIcons();
   }
 
-  // ── FILTROS ──────────────────────────────────────────────────
-  document.querySelectorAll('.filter-chip').forEach(chip => {
+  // ── FILTROS DE MAGNITUDE ─────────────────────────────────────
+  document.querySelectorAll('#filterRow .filter-chip').forEach(chip => {
     chip.addEventListener('click', function() {
-      document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+      document.querySelectorAll('#filterRow .filter-chip').forEach(c => c.classList.remove('active'));
       this.classList.add('active');
       activeFilter = this.dataset.filter;
+      renderZebras();
+    });
+  });
+
+  // ── FILTRO POR LIGA ──────────────────────────────────────────
+  let activeZebraLiga = 'todas';
+  document.querySelectorAll('#ligaFilterChips .filter-chip').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('#ligaFilterChips .filter-chip').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      activeZebraLiga = this.dataset.liga;
       renderZebras();
     });
   });
@@ -586,6 +667,10 @@
     animation: fadeSlideIn 0.3s ease forwards;
     opacity: 0;
   }
+
+  /* ── ACCORDION EXPAND ── */
+  .zebra-card--expanded { border-color: var(--green) !important; }
+  .zebra-detail { animation: fadeSlideIn 0.2s ease both; }
 </style>
 </body>
 </html>

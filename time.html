@@ -78,6 +78,9 @@
           <div style="font-size:0.6875rem;color:rgba(255,255,255,0.6);">Zebras</div>
         </div>
       </div>
+      <a href="comparar.html" id="compararBtn" style="display:inline-flex;align-items:center;gap:5px;background:var(--card2);border:1px solid var(--border);border-radius:var(--radius-pill);padding:6px 12px;font-size:0.8125rem;font-weight:600;color:var(--white);text-decoration:none;margin-top:8px;">
+        <i data-lucide="git-compare" style="width:13px;height:13px;"></i>Comparar
+      </a>
     </div>
 
     <!-- SELETOR DE TIME (demo) -->
@@ -85,7 +88,19 @@
       <div class="scroll-x" id="teamSelector"></div>
     </div>
 
+    <!-- TAB BAR -->
+    <div class="tab-bar" id="timeTabBar">
+      <button class="tab-bar__item active" data-tab="overview"><i data-lucide="layout-dashboard" style="width:13px;height:13px;"></i>Visão Geral</button>
+      <button class="tab-bar__item" data-tab="jogos"><i data-lucide="clock" style="width:13px;height:13px;"></i>Últimos Jogos</button>
+      <button class="tab-bar__item" data-tab="zebras"><i data-lucide="zap" style="width:13px;height:13px;"></i>Maiores Zebras</button>
+      <button class="tab-bar__item" data-tab="escalacao"><i data-lucide="layout-grid" style="width:13px;height:13px;"></i>Escalação</button>
+      <button class="tab-bar__item" data-tab="transfers"><i data-lucide="arrow-left-right" style="width:13px;height:13px;"></i>Transfers</button>
+    </div>
+
     <main class="content">
+
+      <!-- TAB: VISÃO GERAL -->
+      <div id="tab-overview">
 
       <!-- ÍNDICE ZEBRA (VISUAL STAR BAR) -->
       <div class="card">
@@ -191,8 +206,8 @@
         </div>
       </div>
 
-      <!-- ÚLTIMAS PARTIDAS -->
-      <div>
+      <!-- TAB: ÚLTIMOS JOGOS -->
+      <div id="tab-jogos" style="display:none;">
         <div class="section-header">
           <span class="section-title"><i data-lucide="clock" class="sec-ic"></i>Últimas Partidas</span>
           <a href="zebras.html" class="section-link">Ver todas</a>
@@ -200,8 +215,8 @@
         <div id="lastMatchesList" style="display:flex;flex-direction:column;gap:8px;"></div>
       </div>
 
-      <!-- MAIORES ZEBRAS DO TIME -->
-      <div>
+      <!-- TAB: MAIORES ZEBRAS -->
+      <div id="tab-zebras" style="display:none;">
         <div class="section-header">
           <span class="section-title"><i data-lucide="zap" class="sec-ic"></i>Maiores Zebras do Time</span>
           <a href="zebras.html" class="section-link">Ver todas</a>
@@ -217,6 +232,47 @@
           <div style="font-size:0.75rem;font-weight:400;color:var(--gray);margin-top:2px;">Histórico de jogadores, relatórios e alertas em tempo real</div>
         </div>
         <span style="margin-left:auto;font-size:1rem;">→</span>
+      </div>
+
+      <!-- TAB: ESCALAÇÃO -->
+      <div id="tab-escalacao" style="display:none;">
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px;margin-bottom:12px;">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:14px;">
+            <i data-lucide="layout-grid" style="width:14px;height:14px;color:var(--green);"></i>
+            <span style="font-size:0.875rem;font-weight:600;">Formação Provável</span>
+            <span style="margin-left:auto;font-size:0.75rem;color:var(--gray);" id="formationLabel">4-3-3</span>
+          </div>
+          <!-- SVG PITCH -->
+          <div style="position:relative;width:100%;max-width:320px;margin:0 auto;" id="pitchContainer">
+            <svg id="pitchSvg" viewBox="0 0 220 320" style="width:100%;display:block;" xmlns="http://www.w3.org/2000/svg">
+              <!-- Grass -->
+              <rect x="0" y="0" width="220" height="320" rx="8" fill="#1a3a1a"/>
+              <!-- Lines -->
+              <rect x="10" y="10" width="200" height="300" rx="4" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+              <!-- Center line -->
+              <line x1="10" y1="160" x2="210" y2="160" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+              <!-- Center circle -->
+              <circle cx="110" cy="160" r="28" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+              <circle cx="110" cy="160" r="2" fill="rgba(255,255,255,0.3)"/>
+              <!-- Penalty areas -->
+              <rect x="50" y="10" width="120" height="55" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
+              <rect x="75" y="10" width="70" height="28" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
+              <rect x="50" y="255" width="120" height="55" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
+              <rect x="75" y="282" width="70" height="28" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
+              <!-- Players rendered by JS -->
+              <g id="pitchPlayers"></g>
+            </svg>
+          </div>
+          <div id="playersList" style="margin-top:12px;display:flex;flex-direction:column;gap:4px;"></div>
+        </div>
+      </div>
+
+      <!-- TAB: TRANSFERS -->
+      <div id="tab-transfers" style="display:none;">
+        <div class="section-header"><span class="section-title"><i data-lucide="arrow-right" style="width:14px;height:14px;display:inline-block;vertical-align:middle;margin-right:5px;"></i>Chegadas</span></div>
+        <div id="transfersIn" style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;margin-bottom:16px;"></div>
+        <div class="section-header"><span class="section-title"><i data-lucide="arrow-left" style="width:14px;height:14px;display:inline-block;vertical-align:middle;margin-right:5px;"></i>Saídas</span></div>
+        <div id="transfersOut" style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;"></div>
       </div>
 
       <!-- CONTEÚDO PRO (visível apenas para assinantes) -->
@@ -239,6 +295,8 @@
           </div>
         </div>
       </div>
+
+      </div><!-- /tab-overview -->
 
     </main>
 
@@ -852,6 +910,10 @@
       // Reset favorite
       currentSdbTeamId = null;
       syncTeamFavBtn();
+
+      // Wire comparar button
+      const cBtn = document.getElementById('compararBtn');
+      if (cBtn) cBtn.href = `comparar.html?a=${key}`;
     }
 
     // ── FAVORITE BUTTON ───────────────────────────────────
@@ -962,6 +1024,116 @@
 
     initRealData();
     initProContent();
+
+    // ── TAB BAR ───────────────────────────────────────────
+    const TIME_TABS = ['overview','jogos','zebras','escalacao','transfers'];
+    document.querySelectorAll('#timeTabBar .tab-bar__item').forEach(btn => {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('#timeTabBar .tab-bar__item').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        const activeTab = this.dataset.tab;
+        TIME_TABS.forEach(t => {
+          const el = document.getElementById(`tab-${t}`);
+          if (el) el.style.display = t === activeTab ? 'block' : 'none';
+        });
+        if (activeTab === 'escalacao') renderEscalacao();
+        if (activeTab === 'transfers') renderTransfers();
+      });
+    });
+
+    // ── WIRE COMPARAR BUTTON ──────────────────────────────
+    const comparBtn = document.getElementById('compararBtn');
+    if (comparBtn) {
+      comparBtn.href = `comparar.html?a=${currentTeam || 'torino'}`;
+    }
+
+    // ── RENDER ESCALAÇÃO ──────────────────────────────────
+    function renderEscalacao() {
+      const team = TEAMS[currentTeam] || Object.values(TEAMS)[0];
+      const color = team.color || '#2EE65C';
+      const formation = '4-3-3';
+      document.getElementById('formationLabel').textContent = formation;
+
+      const positions = [
+        { x:110, y:295, pos:'GK',  name:'Goleiro' },
+        { x:40,  y:250, pos:'LD',  name:'Lat. Dir.' },
+        { x:80,  y:240, pos:'ZD',  name:'Zagueiro' },
+        { x:140, y:240, pos:'ZE',  name:'Zagueiro' },
+        { x:180, y:250, pos:'LE',  name:'Lat. Esq.' },
+        { x:55,  y:185, pos:'VOL', name:'Volante' },
+        { x:110, y:175, pos:'MEI', name:'Meia' },
+        { x:165, y:185, pos:'ATA', name:'Meia-ata.' },
+        { x:55,  y:110, pos:'PD',  name:'Ponta Dir.' },
+        { x:110, y:95,  pos:'CA',  name:'Centroavante' },
+        { x:165, y:110, pos:'PE',  name:'Ponta Esq.' },
+      ];
+
+      const playerNames = ['Gabriel', 'Wesley', 'Fabrício Bruno', 'Léo Ortiz', 'Ayrton Lucas',
+        'Erick P.', 'De la Cruz', 'Gerson', 'Luiz Araújo', 'Pedro', 'Arrascaeta'];
+
+      const g = document.getElementById('pitchPlayers');
+      if (!g) return;
+      g.innerHTML = '';
+      positions.forEach((p, i) => {
+        const circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
+        circle.setAttribute('cx', p.x); circle.setAttribute('cy', p.y);
+        circle.setAttribute('r', '12'); circle.setAttribute('fill', color);
+        circle.setAttribute('stroke', '#fff'); circle.setAttribute('stroke-width', '1.5');
+        g.appendChild(circle);
+        const text = document.createElementNS('http://www.w3.org/2000/svg','text');
+        text.setAttribute('x', p.x); text.setAttribute('y', p.y + 4);
+        text.setAttribute('text-anchor','middle'); text.setAttribute('font-size','7');
+        text.setAttribute('font-weight','700'); text.setAttribute('fill','#fff');
+        text.textContent = p.pos;
+        g.appendChild(text);
+      });
+
+      const list = document.getElementById('playersList');
+      if (list) {
+        list.innerHTML = positions.map((p, i) => `
+          <div style="display:flex;align-items:center;gap:10px;padding:5px 0;${i<positions.length-1?'border-bottom:1px solid var(--border);':''}">
+            <span style="width:28px;height:20px;background:${color};border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:0.6875rem;font-weight:700;color:#fff;flex-shrink:0;">${p.pos}</span>
+            <span style="font-size:0.875rem;">${playerNames[i] || 'Jogador'}</span>
+          </div>`).join('');
+      }
+    }
+
+    // ── RENDER TRANSFERS ──────────────────────────────────
+    function renderTransfers() {
+      const inEl  = document.getElementById('transfersIn');
+      const outEl = document.getElementById('transfersOut');
+      if (!inEl || !outEl) return;
+
+      const arrivals = [
+        { name:'Michael', from:'Al-Hilal',   value:'R$ 35M', flag:'🇧🇷' },
+        { name:'Gonzalo Plata', from:'Sporting CP', value:'R$ 22M', flag:'🇪🇨' },
+        { name:'Allan',   from:'Atletico-MG', value:'R$ 18M', flag:'🇧🇷' },
+      ];
+      const departures = [
+        { name:'Éverton Ribeiro', to:'Bahia',   value:'Livre', flag:'🇧🇷' },
+        { name:'Filipe Luís',     to:'Aposentado', value:'—', flag:'🇧🇷' },
+      ];
+
+      function row(p, dir, isLast) {
+        const label = dir === 'in' ? p.from : p.to;
+        const arrowColor = dir === 'in' ? 'var(--green)' : 'var(--red)';
+        const arrow = dir === 'in' ? '↓' : '↑';
+        return `<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;${isLast?'':'border-bottom:1px solid var(--border);'}">
+          <span style="font-size:1.125rem;">${p.flag}</span>
+          <div style="flex:1;">
+            <div style="font-size:0.9375rem;font-weight:600;">${p.name}</div>
+            <div style="font-size:0.75rem;color:var(--gray);">${label}</div>
+          </div>
+          <div style="text-align:right;">
+            <span style="font-size:0.875rem;font-weight:700;color:${arrowColor};">${arrow} ${p.value}</span>
+          </div>
+        </div>`;
+      }
+
+      inEl.innerHTML  = arrivals.map((p,i)  => row(p,'in',  i===arrivals.length-1)).join('');
+      outEl.innerHTML = departures.map((p,i) => row(p,'out', i===departures.length-1)).join('');
+    }
+
     lucide.createIcons();
   </script>
   <style>
