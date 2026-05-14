@@ -69,21 +69,6 @@
     </div>
   </section>
 
-  <!-- ABAS DE PERÍODO -->
-  <div class="tab-bar" id="periodBar" style="background:var(--card2);border-bottom:1px solid var(--border);">
-    <button class="tab-bar__item active" data-period="all"><i data-lucide="infinity" class="tab-ic"></i>Todos os tempos</button>
-    <button class="tab-bar__item" data-period="week"><i data-lucide="calendar" class="tab-ic"></i>Esta semana</button>
-    <button class="tab-bar__item" data-period="month"><i data-lucide="calendar-days" class="tab-ic"></i>Este mês</button>
-  </div>
-
-  <!-- FILTRO DE LIGAS -->
-  <section style="background:var(--card2);padding:10px 16px;border-bottom:1px solid var(--border);">
-    <div class="scroll-x" id="leagueFilterRow" style="gap:8px;">
-      <button class="filter-chip active" data-rleague="all">Todas</button>
-      <!-- populated by JS -->
-    </div>
-  </section>
-
   <!-- FILTRO POR LIGA -->
   <div class="scroll-x" style="gap:6px;padding:8px 16px;background:var(--card2);border-bottom:1px solid var(--border);" id="rankingLigaFilter">
     <button class="filter-chip active" data-rlid="todas">Todas as ligas</button>
@@ -172,10 +157,6 @@ const RANKING_DATA = [
 ];
 
 // ── STATE ─────────────────────────────────────────────────────────────────────
-let activePeriod  = 'all';
-let activeLeague  = 'all';
-
-// ── NEW PERIOD TABS STATE ────────────────────────────────────────────────────
 let activePeriodNew = 'semana';
 
 // Mock ZI multipliers per period so numbers feel different
@@ -235,48 +216,6 @@ function positionBadge(pos) {
 function teamCrest(url, name) {
   if (!url) return '';
   return `<img src="${url}" alt="${name}" style="width:24px;height:24px;object-fit:contain;flex-shrink:0;" loading="lazy" onerror="this.style.display='none';">`;
-}
-
-// ── LEAGUE FILTER ROW ─────────────────────────────────────────────────────────
-function renderLeagueFilters() {
-  const row = document.getElementById('leagueFilterRow');
-  row.innerHTML = '';
-
-  // "Todas" pill
-  const allChip = document.createElement('button');
-  allChip.className = `filter-chip${activeLeague === 'all' ? ' active' : ''}`;
-  allChip.dataset.rleague = 'all';
-  allChip.textContent = 'Todas';
-  allChip.addEventListener('click', () => { activeLeague = 'all'; renderLeagueFilters(); renderRanking(); });
-  row.appendChild(allChip);
-
-  LEAGUE_META.forEach(l => {
-    const chip = document.createElement('button');
-    chip.className = `filter-chip${activeLeague === l.id ? ' active' : ''}`;
-    chip.dataset.rleague = l.id;
-    chip.style.gap = '5px';
-
-    const logoSlot = document.createElement('span');
-    logoSlot.id = `rfl-${l.id}`;
-    logoSlot.innerHTML = flagImg(l.id, 12);
-    chip.appendChild(logoSlot);
-    chip.appendChild(document.createTextNode(l.name.split(' ')[0]));
-
-    chip.addEventListener('click', () => { activeLeague = l.id; renderLeagueFilters(); renderRanking(); });
-    row.appendChild(chip);
-
-    // Async upgrade to official logo
-    const cached = LEAGUE_LOGOS[l.id];
-    if (cached) {
-      logoSlot.innerHTML = `<img src="${cached}" style="width:13px;height:13px;object-fit:contain;" onerror="this.style.display='none';">`;
-    } else {
-      loadLeagueLogo(l.id).then(badge => {
-        if (!badge) return;
-        const slot = document.getElementById(`rfl-${l.id}`);
-        if (slot) slot.innerHTML = `<img src="${badge}" style="width:13px;height:13px;object-fit:contain;" onerror="this.style.display='none';">`;
-      });
-    }
-  });
 }
 
 // ── PODIUM ────────────────────────────────────────────────────────────────────
@@ -366,11 +305,8 @@ function renderRanking() {
   let list = data;
 
   // Period filter
-  if (activePeriod === 'week')  list = list.filter(z => z.period === 'week');
-  if (activePeriod === 'month') list = list.filter(z => z.period === 'week' || z.period === 'month');
-
-  // League filter
-  if (activeLeague !== 'all') list = list.filter(z => z.lid === activeLeague);
+  if (activePeriodNew === 'semana') list = list.filter(z => z.period === 'week');
+  if (activePeriodNew === 'mes')    list = list.filter(z => z.period === 'week' || z.period === 'month');
 
   // Sort by ZI desc
   list.sort((a, b) => b.zi - a.zi);
@@ -507,16 +443,6 @@ function buildRankCard(z, pos, cls, locked = false, mult = 1) {
   return card;
 }
 
-// ── PERIOD TABS ───────────────────────────────────────────────────────────────
-document.querySelectorAll('#periodBar .tab-bar__item').forEach(btn => {
-  btn.addEventListener('click', function() {
-    document.querySelectorAll('#periodBar .tab-bar__item').forEach(b => b.classList.remove('active'));
-    this.classList.add('active');
-    activePeriod = this.dataset.period;
-    renderRanking();
-  });
-});
-
 // ── SKELETON HIDE ─────────────────────────────────────────────────────────────
 function showRanking() {
   document.getElementById('skeletonList').style.display = 'none';
@@ -528,18 +454,15 @@ function showRanking() {
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
 updatePlanBadge();
-renderLeagueFilters();
 
 // Brief skeleton delay to simulate loading feel
 setTimeout(() => {
   showRanking();
   renderRanking();
 
-  // Async: try to upgrade crests + league logos
+  // Async: try to upgrade crests
   (async () => {
     const lids = [...new Set(RANKING_DATA.map(z => z.lid))];
-    await Promise.all(lids.map(lid => loadLeagueLogo(lid)));
-    renderLeagueFilters();
     await Promise.all(lids.map(lid => loadLeagueCrests(lid)));
     renderRanking();
   })();
