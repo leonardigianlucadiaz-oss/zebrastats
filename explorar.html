@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ZebraStats — Explorar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/main.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config = { corePlugins: { preflight: false } }</script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+</head>
+<body>
+<div class="app-wrapper">
+
+  <!-- SIDEBAR (desktop) -->
+  <aside class="app-sidebar">
+    <a href="home.html" class="sidebar__brand">
+      <div class="sidebar__brand-icon">Z</div>
+      Zebra<span>Stats</span>
+    </a>
+    <nav class="sidebar__nav">
+      <a href="home.html"    class="sidebar__nav-item"><i data-lucide="home"></i><span>Home</span></a>
+      <a href="zebras.html"  class="sidebar__nav-item"><i data-lucide="activity"></i><span>Zebras</span></a>
+      <a href="ranking.html" class="sidebar__nav-item"><i data-lucide="medal"></i><span>Ranking</span></a>
+      <a href="comparar.html"class="sidebar__nav-item"><i data-lucide="git-compare"></i><span>Comparar</span></a>
+      <a href="alertas.html" class="sidebar__nav-item"><i data-lucide="bell-ring"></i><span>Alertas</span></a>
+      <a href="liga.html"    class="sidebar__nav-item"><i data-lucide="trophy"></i><span>Ligas</span></a>
+      <a href="time.html"    class="sidebar__nav-item"><i data-lucide="star"></i><span>Times</span></a>
+      <a href="perfil.html"  class="sidebar__nav-item"><i data-lucide="user"></i><span>Perfil</span></a>
+    </nav>
+    <div class="sidebar__footer">
+      <div class="sidebar__user">
+        <div class="sidebar__user-avatar">G</div>
+        <div class="sidebar__user-info">
+          <div class="sidebar__user-name">Gianluca</div>
+          <div class="sidebar__user-plan">Plano Free</div>
+        </div>
+      </div>
+      <a href="assinatura.html" class="badge badge--free" style="text-decoration:none;cursor:pointer;">FREE → PRO</a>
+    </div>
+  </aside>
+
+  <!-- MAIN AREA -->
+  <div class="app-main">
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <button onclick="goBack('home.html')" class="navbar__icon" style="background:none;border:none;cursor:pointer;color:var(--white);display:flex;align-items:center;justify-content:center;">
+      <i data-lucide="arrow-left" style="width:20px;height:20px;"></i>
+    </button>
+    <span style="font-size:1rem;font-weight:700;flex:1;text-align:center;">Explorar</span>
+    <div style="width:36px;"></div>
+  </nav>
+
+  <!-- CONTENT -->
+  <main class="content">
+
+    <!-- Search bar -->
+    <div style="position:relative; margin-bottom:12px;">
+      <i data-lucide="search" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--gray);pointer-events:none;"></i>
+      <input id="searchInput" type="text" placeholder="Buscar times, ligas..."
+        style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:10px 12px 10px 36px;color:var(--white);font-size:0.9375rem;outline:none;font-family:inherit;box-sizing:border-box;">
+    </div>
+
+    <!-- Filter chips -->
+    <div class="scroll-x" style="gap:8px;margin-bottom:16px;" id="filterChips">
+      <button class="filter-chip active" data-filter="todos">Todos</button>
+      <button class="filter-chip" data-filter="times">Times</button>
+      <button class="filter-chip" data-filter="ligas">Ligas</button>
+      <button class="filter-chip" data-filter="brasil">🇧🇷 Brasil</button>
+      <button class="filter-chip" data-filter="europa">🌍 Europa</button>
+    </div>
+
+    <!-- Results -->
+    <div id="explorarResults"></div>
+
+  </main>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <a href="home.html"    class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="home"></i></span>Home</a>
+    <a href="zebras.html"  class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="activity"></i></span>Zebras</a>
+    <a href="ranking.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="medal"></i></span>Ranking</a>
+    <a href="alertas.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="bell-ring"></i></span>Alertas</a>
+    <a href="perfil.html"  class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="user"></i></span>Perfil</a>
+  </nav>
+
+  </div><!-- /app-main -->
+</div><!-- /app-wrapper -->
+
+<div class="toast" id="toast"></div>
+
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/main.js"></script>
+<script>
+// ── TEAMS (copied verbatim from time.html) ────────────────────────────────────
+const TEAMS = {
+  torino: {
+    name: 'Torino FC', abbr: 'TOR', league: 'Serie A · Itália',
+    color: '#851414', w:8, d:5, l:11, zebras:7, zi: 6.4,
+    rating: 3.5,
+    ratingDesc: 'Alta frequência de resultados inesperados nas últimas 3 temporadas.',
+    losing:  [
+      { name:'Juventus',  abbr:'JUV', rec:'0V 1E 4D', period:'3 temp.', color:'#333' },
+      { name:'Inter',     abbr:'INT', rec:'1V 1E 3D', period:'2 temp.', color:'#003399' },
+      { name:'Atalanta',  abbr:'ATA', rec:'1V 0E 4D', period:'3 temp.', color:'#00008B' },
+    ],
+    winning: [
+      { name:'Empoli',    abbr:'EMP', rec:'4V 1E 0D', period:'3 temp.', color:'#005BAC' },
+      { name:'Lecce',     abbr:'LEC', rec:'3V 2E 0D', period:'2 temp.', color:'#FFC000' },
+      { name:'Frosinone', abbr:'FRO', rec:'3V 1E 1D', period:'2 temp.', color:'#003F8F' },
+    ],
+    seasonal: [
+      {m:'Ago',v:55},{m:'Set',v:50},{m:'Out',v:44},{m:'Nov',v:36},
+      {m:'Dez',v:33},{m:'Jan',v:42},{m:'Fev',v:54},{m:'Mar',v:67},
+      {m:'Abr',v:72},{m:'Mai',v:65},
+    ],
+    lastMatches: [
+      {home:'Torino',away:'Juventus', hs:0,as:2, date:'05/05',result:'D'},
+      {home:'Lecce', away:'Torino',   hs:1,as:2, date:'28/04',result:'W'},
+      {home:'Torino',away:'Inter',    hs:0,as:3, date:'21/04',result:'D'},
+      {home:'Empoli',away:'Torino',   hs:0,as:1, date:'14/04',result:'W'},
+      {home:'Torino',away:'Atalanta', hs:1,as:2, date:'07/04',result:'D'},
+    ],
+  },
+  flamengo: {
+    name: 'Flamengo', abbr: 'FLA', league: 'Brasileirão · Série A',
+    color: '#CC1A1A', w:14, d:4, l:6, zebras:5, zi: 5.3,
+    rating: 4.5,
+    ratingDesc: 'Frequentemente favorito e causa surpresas jogando como azarão fora de casa.',
+    losing:  [
+      { name:'Atletico MG', abbr:'ATM', rec:'1V 2E 4D', period:'3 temp.', color:'333' },
+      { name:'Fluminense',  abbr:'FLU', rec:'2V 1E 3D', period:'2 temp.', color:'#8B0000' },
+    ],
+    winning: [
+      { name:'Bahia',      abbr:'BAH', rec:'5V 1E 0D', period:'3 temp.', color:'#003399' },
+      { name:'Fortaleza',  abbr:'FOR', rec:'4V 2E 0D', period:'3 temp.', color:'#8B0000' },
+      { name:'Cruzeiro',   abbr:'CRU', rec:'4V 1E 1D', period:'2 temp.', color:'#003399' },
+    ],
+    seasonal: [
+      {m:'Abr',v:62},{m:'Mai',v:68},{m:'Jun',v:74},{m:'Jul',v:70},
+      {m:'Ago',v:65},{m:'Set',v:72},{m:'Out',v:60},{m:'Nov',v:55},
+      {m:'Dez',v:78},{m:'Jan',v:58},
+    ],
+    lastMatches: [
+      {home:'Flamengo',away:'Palmeiras',hs:1,as:2,date:'06/05',result:'D'},
+      {home:'Bahia',   away:'Flamengo', hs:0,as:3,date:'29/04',result:'W'},
+      {home:'Flamengo',away:'Flu',      hs:2,as:2,date:'22/04',result:'E'},
+      {home:'Flamengo',away:'Cruzeiro', hs:3,as:0,date:'15/04',result:'W'},
+    ],
+  },
+  'real-madrid': {
+    name: 'Real Madrid', abbr: 'RMA', league: 'La Liga · Espanha',
+    color: '#1a1a6e', w:22, d:5, l:5, zebras:4, zi: 4.1,
+    rating: 4.0,
+    ratingDesc: 'Raramente perde como favorito, mas causa surpresas importantes.',
+    losing:  [
+      { name:'Barcelona', abbr:'BAR', rec:'2V 3E 5D', period:'3 temp.', color:'#a50044' },
+      { name:'Atletico',  abbr:'ATM', rec:'2V 2E 4D', period:'3 temp.', color:'#cc0000' },
+    ],
+    winning: [
+      { name:'Getafe',    abbr:'GET', rec:'6V 1E 0D', period:'3 temp.', color:'#003399' },
+      { name:'Alavés',    abbr:'ALA', rec:'5V 2E 0D', period:'3 temp.', color:'#003399' },
+      { name:'Celta',     abbr:'CEL', rec:'5V 1E 1D', period:'3 temp.', color:'#6fc3df' },
+    ],
+    seasonal:  [{m:'Ago',v:70},{m:'Set',v:75},{m:'Out',v:68},{m:'Nov',v:72},{m:'Dez',v:80},{m:'Jan',v:65},{m:'Fev',v:74},{m:'Mar',v:82},{m:'Abr',v:78},{m:'Mai',v:85}],
+    lastMatches: [
+      {home:'Real Madrid',away:'Man City',  hs:3,as:3,date:'08/05',result:'E'},
+      {home:'Real Madrid',away:'Celta',     hs:4,as:0,date:'01/05',result:'W'},
+      {home:'Mallorca',   away:'Real Madrid',hs:1,as:0,date:'25/04',result:'D'},
+      {home:'Real Madrid',away:'Bayern',    hs:2,as:1,date:'17/04',result:'W'},
+      {home:'Atlético',   away:'Real Madrid',hs:2,as:1,date:'10/04',result:'D'},
+    ],
+  },
+  'man-city': {
+    name: 'Manchester City', abbr: 'MCI', league: 'Premier League · Inglaterra',
+    color: '#6cabdd', w:19, d:7, l:6, zebras:6, zi: 5.8,
+    rating: 3.8,
+    ratingDesc: 'Alta intensidade de pressão — zebras frequentes em jogos fora de casa.',
+    losing:  [
+      { name:'Arsenal',  abbr:'ARS', rec:'2V 2E 4D', period:'3 temp.', color:'#ef0107' },
+      { name:'Liverpool',abbr:'LIV', rec:'2V 3E 4D', period:'3 temp.', color:'#c8102e' },
+    ],
+    winning: [
+      { name:'Burnley',  abbr:'BUR', rec:'6V 0E 0D', period:'3 temp.', color:'#6c1d45' },
+      { name:'Everton',  abbr:'EVE', rec:'5V 1E 1D', period:'3 temp.', color:'#003399' },
+      { name:'Wolves',   abbr:'WOL', rec:'4V 2E 1D', period:'2 temp.', color:'#fdb913' },
+    ],
+    seasonal:  [{m:'Ago',v:60},{m:'Set',v:66},{m:'Out',v:71},{m:'Nov',v:68},{m:'Dez',v:74},{m:'Jan',v:70},{m:'Fev',v:76},{m:'Mar',v:80},{m:'Abr',v:72},{m:'Mai',v:69}],
+    lastMatches: [
+      {home:'Man City',away:'Tottenham',hs:2,as:0,date:'07/05',result:'W'},
+      {home:'Wolves', away:'Man City',  hs:0,as:5,date:'01/05',result:'W'},
+      {home:'Man City',away:'Arsenal',  hs:0,as:1,date:'24/04',result:'D'},
+      {home:'Chelsea',away:'Man City',  hs:0,as:2,date:'17/04',result:'W'},
+      {home:'Man City',away:'Luton',    hs:5,as:1,date:'13/04',result:'W'},
+    ],
+  },
+  'bayern': {
+    name: 'Bayern München', abbr: 'FCB', league: 'Bundesliga · Alemanha',
+    color: '#dc052d', w:20, d:4, l:8, zebras:9, zi: 7.2,
+    rating: 4.2,
+    ratingDesc: 'Gigante que surpreende negativamente com frequência incomum no século.',
+    losing:  [
+      { name:'Dortmund', abbr:'BVB', rec:'3V 2E 5D', period:'3 temp.', color:'#fde100' },
+      { name:'Augsburg', abbr:'AUG', rec:'1V 1E 3D', period:'3 temp.', color:'#ba3733' },
+    ],
+    winning: [
+      { name:'Mainz',     abbr:'MAI', rec:'5V 1E 0D', period:'3 temp.', color:'#e00000' },
+      { name:'Bochum',    abbr:'BOC', rec:'4V 2E 0D', period:'3 temp.', color:'#005ca9' },
+      { name:'Wolfsburg', abbr:'WOB', rec:'4V 1E 1D', period:'2 temp.', color:'#009a44' },
+    ],
+    seasonal:  [{m:'Ago',v:72},{m:'Set',v:78},{m:'Out',v:65},{m:'Nov',v:58},{m:'Dez',v:71},{m:'Jan',v:63},{m:'Fev',v:70},{m:'Mar',v:66},{m:'Abr',v:54},{m:'Mai',v:60}],
+    lastMatches: [
+      {home:'Bayern', away:'Real Madrid', hs:1,as:2,date:'08/05',result:'D'},
+      {home:'Augsburg',away:'Bayern',      hs:2,as:1,date:'01/05',result:'D'},
+      {home:'Bayern', away:'Wolfsburg',   hs:3,as:0,date:'25/04',result:'W'},
+      {home:'St.Pauli',away:'Bayern',     hs:3,as:1,date:'18/04',result:'D'},
+      {home:'Bayern', away:'Dortmund',    hs:0,as:2,date:'11/04',result:'D'},
+    ],
+  },
+  'psg': {
+    name: 'Paris Saint-Germain', abbr: 'PSG', league: 'Ligue 1 · França',
+    color: '#004170', w:21, d:5, l:6, zebras:8, zi: 6.9,
+    rating: 4.0,
+    ratingDesc: 'Dominante internamente mas zebras frequentes em competições europeias.',
+    losing:  [
+      { name:'Marseille',abbr:'OM',  rec:'2V 2E 4D', period:'3 temp.', color:'#009fc8' },
+      { name:'Monaco',   abbr:'ASM', rec:'2V 1E 3D', period:'3 temp.', color:'#e0000e' },
+    ],
+    winning: [
+      { name:'Angers',   abbr:'ANG', rec:'6V 0E 0D', period:'3 temp.', color:'#000000' },
+      { name:'Troyes',   abbr:'TRO', rec:'5V 1E 0D', period:'3 temp.', color:'#ffffff' },
+      { name:'Clermont', abbr:'CLF', rec:'5V 0E 1D', period:'2 temp.', color:'#e0000e' },
+    ],
+    seasonal:  [{m:'Ago',v:76},{m:'Set',v:80},{m:'Out',v:74},{m:'Nov',v:78},{m:'Dez',v:82},{m:'Jan',v:71},{m:'Fev',v:77},{m:'Mar',v:73},{m:'Abr',v:68},{m:'Mai',v:64}],
+    lastMatches: [
+      {home:'PSG',    away:'Dortmund',  hs:0,as:1,date:'07/05',result:'D'},
+      {home:'Reims',  away:'PSG',       hs:0,as:3,date:'30/04',result:'W'},
+      {home:'PSG',    away:'Monaco',    hs:2,as:0,date:'23/04',result:'W'},
+      {home:'Angers', away:'PSG',       hs:2,as:0,date:'07/04',result:'D'},
+      {home:'PSG',    away:'Barcelona', hs:3,as:2,date:'02/04',result:'W'},
+    ],
+  },
+  'palmeiras': {
+    name: 'Palmeiras', abbr: 'PAL', league: 'Brasileirão · Série A',
+    color: '#006437', w:16, d:6, l:4, zebras:4, zi: 4.5,
+    rating: 3.5,
+    ratingDesc: 'Sólido mas perde como favorito contra times médios com certa frequência.',
+    losing:  [
+      { name:'Flamengo',   abbr:'FLA', rec:'2V 2E 4D', period:'3 temp.', color:'#cc1a1a' },
+      { name:'Atletico MG',abbr:'ATM', rec:'2V 1E 3D', period:'3 temp.', color:'#333' },
+    ],
+    winning: [
+      { name:'Cuiabá',     abbr:'CUI', rec:'5V 1E 0D', period:'3 temp.', color:'#facc15' },
+      { name:'Fortaleza',  abbr:'FOR', rec:'4V 2E 0D', period:'3 temp.', color:'#8b0000' },
+      { name:'América MG', abbr:'AMG', rec:'4V 1E 1D', period:'2 temp.', color:'#006400' },
+    ],
+    seasonal:  [{m:'Abr',v:64},{m:'Mai',v:70},{m:'Jun',v:75},{m:'Jul',v:68},{m:'Ago',v:72},{m:'Set',v:78},{m:'Out',v:65},{m:'Nov',v:60},{m:'Dez',v:74},{m:'Jan',v:62}],
+    lastMatches: [
+      {home:'Palmeiras', away:'Flamengo',   hs:0,as:1,date:'06/05',result:'D'},
+      {home:'Bragantino',away:'Palmeiras',  hs:3,as:1,date:'29/04',result:'D'},
+      {home:'Palmeiras', away:'Cruzeiro',   hs:2,as:0,date:'22/04',result:'W'},
+      {home:'Cuiabá',    away:'Palmeiras',  hs:0,as:2,date:'15/04',result:'W'},
+      {home:'Palmeiras', away:'AtleticoMG', hs:1,as:1,date:'08/04',result:'E'},
+    ],
+  },
+  'barcelona': {
+    name: 'Barcelona', abbr: 'BAR', league: 'La Liga · Espanha',
+    color: '#a50044', w:20, d:4, l:8, zebras:7, zi: 6.2,
+    rating: 3.8,
+    ratingDesc: 'Fase de reconstrução — zebras mais frequentes que no histórico recente.',
+    losing:  [
+      { name:'Real Madrid',abbr:'RMA', rec:'2V 2E 5D', period:'3 temp.', color:'#1a1a6e' },
+      { name:'Girona',     abbr:'GIR', rec:'1V 1E 2D', period:'1 temp.', color:'#cc0000' },
+    ],
+    winning: [
+      { name:'Celta',    abbr:'CEL', rec:'5V 1E 1D', period:'3 temp.', color:'#6fc3df' },
+      { name:'Getafe',   abbr:'GET', rec:'5V 2E 0D', period:'3 temp.', color:'#003399' },
+      { name:'Villarreal',abbr:'VIL', rec:'4V 2E 1D', period:'3 temp.', color:'#ffd700' },
+    ],
+    seasonal:  [{m:'Ago',v:65},{m:'Set',v:70},{m:'Out',v:74},{m:'Nov',v:68},{m:'Dez',v:72},{m:'Jan',v:64},{m:'Fev',v:69},{m:'Mar',v:75},{m:'Abr',v:71},{m:'Mai',v:67}],
+    lastMatches: [
+      {home:'Barcelona', away:'PSG',       hs:2,as:3,date:'06/05',result:'D'},
+      {home:'Granada',   away:'Barcelona', hs:1,as:0,date:'29/04',result:'D'},
+      {home:'Barcelona', away:'Valencia',  hs:4,as:2,date:'22/04',result:'W'},
+      {home:'Real Madrid',away:'Barcelona',hs:3,as:2,date:'14/04',result:'D'},
+      {home:'Barcelona', away:'Napoli',    hs:3,as:1,date:'10/04',result:'W'},
+    ],
+  },
+  'arsenal': {
+    name: 'Arsenal', abbr: 'ARS', league: 'Premier League · Inglaterra',
+    color: '#ef0107', w:21, d:5, l:6, zebras:5, zi: 5.1,
+    rating: 3.6,
+    ratingDesc: 'Consistente mas title races amplificam pressão e criam zebras no final.',
+    losing:  [
+      { name:'Man City', abbr:'MCI', rec:'2V 2E 4D', period:'3 temp.', color:'#6cabdd' },
+      { name:'Aston Villa',abbr:'AVL',rec:'1V 2E 3D', period:'3 temp.', color:'#670e36' },
+    ],
+    winning: [
+      { name:'Everton',  abbr:'EVE', rec:'5V 1E 0D', period:'3 temp.', color:'#003399' },
+      { name:'Burnley',  abbr:'BUR', rec:'4V 2E 0D', period:'3 temp.', color:'#6c1d45' },
+      { name:'Brentford',abbr:'BRE', rec:'4V 1E 1D', period:'3 temp.', color:'#e30613' },
+    ],
+    seasonal:  [{m:'Ago',v:62},{m:'Set',v:68},{m:'Out',v:72},{m:'Nov',v:69},{m:'Dez',v:74},{m:'Jan',v:66},{m:'Fev',v:73},{m:'Mar',v:77},{m:'Abr',v:70},{m:'Mai',v:68}],
+    lastMatches: [
+      {home:'Arsenal',  away:'Man City',  hs:1,as:0,date:'06/05',result:'W'},
+      {home:'Tottenham',away:'Arsenal',   hs:0,as:3,date:'30/04',result:'W'},
+      {home:'Arsenal',  away:'Chelsea',   hs:5,as:0,date:'23/04',result:'W'},
+      {home:'Wolves',   away:'Arsenal',   hs:0,as:2,date:'16/04',result:'W'},
+      {home:'Arsenal',  away:'Aston Villa',hs:0,as:2,date:'09/04',result:'D'},
+    ],
+  },
+  'liverpool': {
+    name: 'Liverpool', abbr: 'LIV', league: 'Premier League · Inglaterra',
+    color: '#c8102e', w:19, d:5, l:8, zebras:6, zi: 5.6,
+    rating: 3.7,
+    ratingDesc: 'Transição pós-Klopp — fase de zebras mais frequentes enquanto se readapta.',
+    losing:  [
+      { name:'Man City', abbr:'MCI', rec:'2V 3E 5D', period:'3 temp.', color:'#6cabdd' },
+      { name:'Man Utd',  abbr:'MUN', rec:'2V 2E 4D', period:'3 temp.', color:'#da291c' },
+    ],
+    winning: [
+      { name:'Burnley',  abbr:'BUR', rec:'5V 1E 0D', period:'3 temp.', color:'#6c1d45' },
+      { name:'Wolves',   abbr:'WOL', rec:'4V 2E 1D', period:'3 temp.', color:'#fdb913' },
+      { name:'Brentford',abbr:'BRE', rec:'4V 1E 1D', period:'2 temp.', color:'#e30613' },
+    ],
+    seasonal:  [{m:'Ago',v:64},{m:'Set',v:70},{m:'Out',v:65},{m:'Nov',v:68},{m:'Dez',v:75},{m:'Jan',v:62},{m:'Fev',v:69},{m:'Mar',v:74},{m:'Abr',v:68},{m:'Mai',v:63}],
+    lastMatches: [
+      {home:'Liverpool', away:'Tottenham', hs:4,as:2,date:'05/05',result:'W'},
+      {home:'Everton',   away:'Liverpool', hs:0,as:2,date:'28/04',result:'W'},
+      {home:'Liverpool', away:'Fulham',    hs:3,as:1,date:'21/04',result:'W'},
+      {home:'Crystal P', away:'Liverpool', hs:2,as:1,date:'14/04',result:'D'},
+      {home:'Liverpool', away:'Man City',  hs:1,as:1,date:'10/03',result:'E'},
+    ],
+  },
+  'atletico-mg': {
+    name: 'Atlético Mineiro', abbr: 'CAM', league: 'Brasileirão · Série A',
+    color: '#000000', w:15, d:7, l:5, zebras:5, zi: 5.0,
+    rating: 3.4,
+    ratingDesc: 'Equipe equilibrada com histórico relevante de zebras no Brasileirão.',
+    losing:  [
+      { name:'Flamengo',abbr:'FLA', rec:'2V 1E 3D', period:'3 temp.', color:'#cc1a1a' },
+      { name:'Palmeiras',abbr:'PAL',rec:'2V 2E 3D', period:'3 temp.', color:'#006437' },
+    ],
+    winning: [
+      { name:'Cuiabá',    abbr:'CUI', rec:'4V 2E 0D', period:'3 temp.', color:'#facc15' },
+      { name:'Goiás',     abbr:'GOI', rec:'4V 1E 1D', period:'3 temp.', color:'#00a859' },
+      { name:'America MG',abbr:'AMG', rec:'3V 2E 1D', period:'2 temp.', color:'#006400' },
+    ],
+    seasonal:  [{m:'Abr',v:58},{m:'Mai',v:64},{m:'Jun',v:68},{m:'Jul',v:62},{m:'Ago',v:66},{m:'Set',v:72},{m:'Out',v:60},{m:'Nov',v:55},{m:'Dez',v:70},{m:'Jan',v:58}],
+    lastMatches: [
+      {home:'AtleticoMG',away:'Flamengo',  hs:1,as:1,date:'05/05',result:'E'},
+      {home:'AtleticoMG',away:'Palmeiras', hs:1,as:1,date:'28/04',result:'E'},
+      {home:'Cruzeiro',  away:'AtleticoMG',hs:0,as:2,date:'21/04',result:'W'},
+      {home:'AtleticoMG',away:'Bahia',     hs:3,as:0,date:'14/04',result:'W'},
+      {home:'Cuiabá',    away:'AtleticoMG',hs:0,as:1,date:'07/04',result:'W'},
+    ],
+  },
+  'juventus': {
+    name: 'Juventus', abbr: 'JUV', league: 'Serie A · Itália',
+    color: '#000000', w:17, d:6, l:9, zebras:8, zi: 6.6,
+    rating: 3.9,
+    ratingDesc: 'Passou por crise recente — zebras contra times menores marcam a era pós-Allegri.',
+    losing:  [
+      { name:'Inter',   abbr:'INT', rec:'1V 2E 5D', period:'3 temp.', color:'#003399' },
+      { name:'Napoli',  abbr:'NAP', rec:'2V 1E 4D', period:'3 temp.', color:'#099dd1' },
+    ],
+    winning: [
+      { name:'Frosinone',abbr:'FRO', rec:'4V 2E 0D', period:'3 temp.', color:'#003f8f' },
+      { name:'Lecce',    abbr:'LEC', rec:'3V 2E 1D', period:'3 temp.', color:'#ffc000' },
+      { name:'Empoli',   abbr:'EMP', rec:'4V 1E 1D', period:'3 temp.', color:'#005bac' },
+    ],
+    seasonal:  [{m:'Ago',v:60},{m:'Set',v:55},{m:'Out',v:48},{m:'Nov',v:52},{m:'Dez',v:58},{m:'Jan',v:64},{m:'Fev',v:62},{m:'Mar',v:68},{m:'Abr',v:65},{m:'Mai',v:58}],
+    lastMatches: [
+      {home:'Juventus',away:'Torino',    hs:2,as:0,date:'05/05',result:'W'},
+      {home:'Lecce',   away:'Juventus',  hs:2,as:1,date:'28/04',result:'D'},
+      {home:'Juventus',away:'Milan',     hs:0,as:0,date:'21/04',result:'E'},
+      {home:'Frosinone',away:'Juventus', hs:1,as:0,date:'14/04',result:'D'},
+      {home:'Juventus',away:'Lazio',     hs:3,as:1,date:'07/04',result:'W'},
+    ],
+  },
+};
+
+// ── LEAGUES ───────────────────────────────────────────────────────────────────
+const LEAGUES = [
+  { id:'BRA', name:'Brasileirão',       country:'Brasil',  flag:'br' },
+  { id:'ENG', name:'Premier League',    country:'Europa',  flag:'gb-eng' },
+  { id:'ESP', name:'La Liga',           country:'Europa',  flag:'es' },
+  { id:'ITA', name:'Serie A',           country:'Europa',  flag:'it' },
+  { id:'GER', name:'Bundesliga',        country:'Europa',  flag:'de' },
+  { id:'FRA', name:'Ligue 1',           country:'Europa',  flag:'fr' },
+  { id:'POR', name:'Liga Portugal',     country:'Europa',  flag:'pt' },
+  { id:'UCL', name:'Champions League',  country:'Europa',  flag:'eu' },
+];
+
+let activeFilter = 'todos';
+let searchQuery  = '';
+
+// ── EUROPEAN LEAGUE IDS for team filtering ─────────────────────────────────
+const EUROPEAN_LEAGUES = ['Premier League', 'La Liga', 'Serie A', 'Bundesliga', 'Ligue 1', 'Liga Portugal', 'Champions League', 'Inglaterra', 'Espanha', 'Itália', 'Alemanha', 'França', 'Portugal'];
+
+function isEuropeanTeam(league) {
+  if (!league) return false;
+  const l = league.toLowerCase();
+  return l.includes('premier') || l.includes('liga') || l.includes('bundesliga') ||
+         l.includes('ligue') || l.includes('serie a') || l.includes('champions') ||
+         l.includes('inglaterra') || l.includes('espanha') || l.includes('itália') ||
+         l.includes('alemanha') || l.includes('frança') || l.includes('portugal') ||
+         l.includes('italy') || l.includes('spain') || l.includes('germany') ||
+         l.includes('france') || l.includes('england');
+}
+
+function isBrasilTeam(league) {
+  if (!league) return false;
+  const l = league.toLowerCase();
+  return l.includes('brasil') || l.includes('brasileiro') || l.includes('série a') || l.includes('serie a · brasil');
+}
+
+// ── RENDER ────────────────────────────────────────────────────────────────────
+function renderExplorar() {
+  const container = document.getElementById('explorarResults');
+  const q = searchQuery.toLowerCase();
+
+  // Filter teams
+  let filteredTeams = Object.entries(TEAMS).filter(([id, t]) => {
+    const matchesSearch = !q || t.name.toLowerCase().includes(q);
+    if (!matchesSearch) return false;
+    if (activeFilter === 'times' || activeFilter === 'todos') return true;
+    if (activeFilter === 'brasil') return isBrasilTeam(t.league);
+    if (activeFilter === 'europa') return isEuropeanTeam(t.league);
+    if (activeFilter === 'ligas') return false;
+    return true;
+  });
+
+  // Filter leagues
+  let filteredLeagues = LEAGUES.filter(l => {
+    const matchesSearch = !q || l.name.toLowerCase().includes(q) || l.country.toLowerCase().includes(q);
+    if (!matchesSearch) return false;
+    if (activeFilter === 'ligas' || activeFilter === 'todos') return true;
+    if (activeFilter === 'brasil') return l.country === 'Brasil';
+    if (activeFilter === 'europa') return l.country === 'Europa';
+    if (activeFilter === 'times') return false;
+    return true;
+  });
+
+  // No results
+  if (filteredTeams.length === 0 && filteredLeagues.length === 0) {
+    const label = q ? `"${searchQuery}"` : activeFilter;
+    container.innerHTML = `
+      <div style="text-align:center;padding:48px 20px;color:var(--gray);">
+        <div style="font-size:2.5rem;margin-bottom:12px;">🔍</div>
+        <div style="font-weight:600;margin-bottom:6px;">Nenhum resultado encontrado para ${label}</div>
+        <div style="font-size:0.8125rem;line-height:1.5;">Tente outro termo ou filtro.</div>
+      </div>`;
+    lucide.createIcons();
+    return;
+  }
+
+  let html = '';
+
+  // Teams section
+  if (filteredTeams.length > 0) {
+    html += `
+      <div class="section-header">
+        <span class="section-title"><i data-lucide="shield" class="sec-ic"></i>Times</span>
+        <span style="font-size:0.6875rem;color:var(--gray);">${filteredTeams.length} encontrados</span>
+      </div>
+      <div class="teams-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;">`;
+
+    filteredTeams.forEach(([id, t]) => {
+      const faved = isFavorite ? isFavorite(id) : false;
+      const heartIcon = faved
+        ? `<i data-lucide="heart" style="width:14px;height:14px;fill:var(--red);color:var(--red);"></i>`
+        : `<i data-lucide="heart" style="width:14px;height:14px;color:var(--gray);"></i>`;
+      const ziCls = t.zi >= 7 ? 'grande' : t.zi >= 4 ? 'media' : 'leve';
+      const ziColor = t.zi >= 7 ? 'var(--red)' : t.zi >= 4 ? 'var(--gold)' : 'var(--gray)';
+      html += `
+        <div class="expl-team-card" data-id="${id}" style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:12px;cursor:pointer;position:relative;">
+          <button class="expl-fav-btn" data-id="${id}" data-name="${t.name}" style="position:absolute;top:8px;right:8px;background:none;border:none;cursor:pointer;padding:4px;display:flex;align-items:center;justify-content:center;border-radius:6px;transition:background 0.15s;">${heartIcon}</button>
+          <div style="display:flex;align-items:center;gap:7px;margin-bottom:6px;padding-right:28px;">
+            <div style="width:8px;height:8px;border-radius:50%;background:${t.color};flex-shrink:0;"></div>
+            <div style="font-weight:600;font-size:0.875rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${t.name}</div>
+          </div>
+          <div style="font-size:0.75rem;color:var(--gray);margin-bottom:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${t.league}</div>
+          <div style="font-size:0.6875rem;color:${ziColor};font-weight:700;">🦓 ZI ${t.zi.toFixed(1)}</div>
+        </div>`;
+    });
+
+    html += `</div>`;
+  }
+
+  // Leagues section
+  if (filteredLeagues.length > 0) {
+    html += `
+      <div class="section-header">
+        <span class="section-title"><i data-lucide="trophy" class="sec-ic"></i>Ligas</span>
+        <span style="font-size:0.6875rem;color:var(--gray);">${filteredLeagues.length} encontradas</span>
+      </div>`;
+
+    filteredLeagues.forEach(l => {
+      const faved = isFavLeague ? isFavLeague(l.id) : false;
+      const starIcon = faved
+        ? `<i data-lucide="star" style="width:16px;height:16px;fill:var(--gold);color:var(--gold);"></i>`
+        : `<i data-lucide="star" style="width:16px;height:16px;color:var(--gray);"></i>`;
+      const countryPill = `<span style="font-size:0.625rem;background:var(--card2);color:var(--gray);padding:2px 7px;border-radius:var(--radius-pill);border:1px solid var(--border);font-weight:500;">${l.country}</span>`;
+      html += `
+        <div class="expl-league-card" data-id="${l.id}" style="display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:12px 14px;margin-bottom:8px;cursor:pointer;">
+          <img src="https://flagcdn.com/w20/${l.flag}.png" style="width:20px;height:15px;object-fit:cover;border-radius:2px;flex-shrink:0;" alt="${l.country}" />
+          <div style="flex:1;min-width:0;">
+            <div style="font-weight:600;font-size:0.9375rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${l.name}</div>
+          </div>
+          ${countryPill}
+          <button class="expl-star-btn" data-id="${l.id}" data-name="${l.name}" style="background:none;border:none;cursor:pointer;padding:4px;display:flex;align-items:center;justify-content:center;border-radius:6px;transition:background 0.15s;flex-shrink:0;">${starIcon}</button>
+        </div>`;
+    });
+  }
+
+  container.innerHTML = html;
+
+  // Team card clicks
+  container.querySelectorAll('.expl-team-card').forEach(card => {
+    card.addEventListener('click', function(e) {
+      if (e.target.closest('.expl-fav-btn')) return;
+      window.location.href = 'time.html?team=' + this.dataset.id;
+    });
+  });
+
+  // Team fav buttons
+  container.querySelectorAll('.expl-fav-btn').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      toggleFavorite(this.dataset.id, this.dataset.name);
+      animFavBtn && animFavBtn(this);
+      renderExplorar();
+    });
+  });
+
+  // League card clicks
+  container.querySelectorAll('.expl-league-card').forEach(card => {
+    card.addEventListener('click', function(e) {
+      if (e.target.closest('.expl-star-btn')) return;
+      window.location.href = 'liga.html?id=' + this.dataset.id;
+    });
+  });
+
+  // League star buttons
+  container.querySelectorAll('.expl-star-btn').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      toggleFavLeague(this.dataset.id, this.dataset.name);
+      animFavBtn && animFavBtn(this);
+      renderExplorar();
+    });
+  });
+
+  lucide.createIcons();
+}
+
+// ── EVENT LISTENERS ───────────────────────────────────────────────────────────
+document.getElementById('searchInput').addEventListener('input', function() {
+  searchQuery = this.value.trim();
+  renderExplorar();
+});
+
+document.querySelectorAll('#filterChips .filter-chip').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('#filterChips .filter-chip').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    activeFilter = this.dataset.filter;
+    renderExplorar();
+  });
+});
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+updatePlanBadge && updatePlanBadge();
+renderExplorar();
+lucide.createIcons();
+</script>
+
+<style>
+  .sec-ic { width:14px; height:14px; display:inline-block; vertical-align:middle; margin-right:5px; flex-shrink:0; }
+  .section-title { display:inline-flex; align-items:center; }
+  .bottom-nav__icon i { width:20px; height:20px; display:block; }
+  .navbar__icon i { display:block; }
+
+  .filter-chip { display:inline-flex; align-items:center; gap:4px; }
+
+  .expl-team-card:hover { border-color:var(--green) !important; }
+  .expl-league-card:hover { border-color:var(--gold) !important; }
+
+  .expl-fav-btn:hover { background:rgba(238,68,68,0.1) !important; }
+  .expl-star-btn:hover { background:rgba(255,200,50,0.1) !important; }
+
+  #searchInput::placeholder { color:var(--gray); }
+  #searchInput:focus { border-color:var(--green); }
+</style>
+</body>
+</html>
