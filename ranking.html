@@ -498,7 +498,8 @@ function buildRankCard(z, pos, cls, locked = false, mult = 1) {
     });
     card.addEventListener('click', e => {
       if (e.target.tagName !== 'A' && !e.target.closest('.share-btn')) {
-        window.location.href = 'partida.html';
+        const teamId = (z.name || z.team || z.home || '').toLowerCase().replace(/[\s\.]+/g,'-').replace(/[^a-z0-9-]/g,'');
+        window.location.href = `time.html?team=${encodeURIComponent(teamId)}`;
       }
     });
   }

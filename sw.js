@@ -46,3 +46,45 @@ self.addEventListener('fetch', e => {
     })
   );
 });
+
+// ── PUSH NOTIFICATIONS ────────────────────────────────────────
+self.addEventListener('push', e => {
+  let data = { title: 'ZebraStats 🦓', body: 'Nova zebra detectada!', icon: 'icons/icon-192.svg', badge: 'icons/icon-192.svg', tag: 'zebra-alert' };
+  try {
+    if (e.data) {
+      const json = e.data.json();
+      data = { ...data, ...json };
+    }
+  } catch {
+    if (e.data) data.body = e.data.text();
+  }
+
+  e.waitUntil(
+    self.registration.showNotification(data.title, {
+      body:    data.body,
+      icon:    data.icon    || 'icons/icon-192.svg',
+      badge:   data.badge   || 'icons/icon-192.svg',
+      tag:     data.tag     || 'zebra-alert',
+      data:    { url: data.url || 'partida.html' },
+      actions: [
+        { action: 'open',    title: 'Ver partida' },
+        { action: 'dismiss', title: 'Fechar'      },
+      ],
+      vibrate:   [200, 100, 200],
+      renotify:  true,
+    })
+  );
+});
+
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  if (e.action === 'dismiss') return;
+  const url = (e.notification.data && e.notification.data.url) ? e.notification.data.url : 'home.html';
+  e.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clients => {
+      const existing = clients.find(c => c.url.includes(url));
+      if (existing) return existing.focus();
+      return self.clients.openWindow(url);
+    })
+  );
+});

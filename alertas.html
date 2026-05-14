@@ -57,6 +57,31 @@
     </a>
   </nav>
 
+  <!-- WEB PUSH CARD -->
+  <div style="padding:16px 16px 0;">
+    <div id="pushCard" style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px;margin-bottom:16px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:40px;height:40px;border-radius:var(--radius-md);background:rgba(46,230,92,0.1);border:1px solid rgba(46,230,92,0.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <i data-lucide="bell-ring" style="width:18px;height:18px;color:var(--green);"></i>
+          </div>
+          <div>
+            <div style="font-size:0.9375rem;font-weight:600;">Notificações Push</div>
+            <div style="font-size:0.75rem;color:var(--gray);margin-top:2px;" id="pushStatusText">Receba alertas em tempo real</div>
+          </div>
+        </div>
+        <button id="pushToggleBtn" style="background:var(--green);color:#0D1A2A;border:none;border-radius:var(--radius-pill);padding:8px 16px;font-size:0.8125rem;font-weight:700;cursor:pointer;flex-shrink:0;">
+          Ativar
+        </button>
+      </div>
+      <!-- Permission denied warning (hidden by default) -->
+      <div id="pushDeniedWarning" style="display:none;margin-top:10px;padding:8px 10px;background:rgba(238,68,68,0.1);border:1px solid rgba(238,68,68,0.3);border-radius:8px;font-size:0.75rem;color:var(--gray);">
+        <i data-lucide="alert-triangle" style="width:12px;height:12px;color:var(--red);margin-right:4px;"></i>
+        Permissão negada. Habilite nas configurações do navegador.
+      </div>
+    </div>
+  </div>
+
   <!-- RESUMO ──────────────────────────────────────────────── -->
   <section style="background:linear-gradient(135deg,var(--card2) 0%,rgba(46,230,92,0.05) 100%);padding:16px;border-bottom:1px solid var(--border);">
     <div style="display:flex;align-items:center;gap:16px;">
@@ -738,6 +763,126 @@ updatePlanBadge();
 renderLeagueChips();
 renderAll();
 initBellBadge();
+
+// ── WEB PUSH ──────────────────────────────────────────────────
+// VAPID public key — replace with real key from your push server
+const VAPID_PUBLIC_KEY = 'BEl62iUYgUivxIkv69yViEuiBIa-Ib9-SkvMeAtA3LFgDzkrxZJjSgSnfckjBJuBkr3qBUYIHBQFLXYp5Nksh8U';
+
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64  = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const rawData = atob(base64);
+  return Uint8Array.from([...rawData].map(c => c.charCodeAt(0)));
+}
+
+async function getPushSubscription() {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) return null;
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    return await reg.pushManager.getSubscription();
+  } catch { return null; }
+}
+
+async function subscribePush() {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+    showToast && showToast('Push não suportado neste navegador');
+    return;
+  }
+  try {
+    const permission = await Notification.requestPermission();
+    if (permission === 'denied') {
+      document.getElementById('pushDeniedWarning').style.display = 'block';
+      updatePushUI('denied');
+      return;
+    }
+    if (permission !== 'granted') return;
+
+    const reg = await navigator.serviceWorker.ready;
+    const sub = await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+    });
+
+    // Save subscription to localStorage (until real backend is ready)
+    try { localStorage.setItem('zs_push_subscription', JSON.stringify(sub.toJSON())); } catch {}
+
+    updatePushUI('subscribed');
+    showToast && showToast('🔔 Notificações ativadas!');
+
+    // Demo: show a test notification after 2s
+    setTimeout(async () => {
+      const r = await navigator.serviceWorker.ready;
+      r.showNotification('ZebraStats 🦓', {
+        body: 'Notificações ativadas! Você receberá alertas de zebras.',
+        icon: 'icons/icon-192.svg',
+        badge: 'icons/icon-192.svg',
+        tag: 'zebra-welcome',
+      });
+    }, 2000);
+  } catch(err) {
+    console.warn('Push subscribe error:', err);
+    showToast && showToast('Não foi possível ativar push');
+  }
+}
+
+async function unsubscribePush() {
+  try {
+    const sub = await getPushSubscription();
+    if (sub) await sub.unsubscribe();
+    try { localStorage.removeItem('zs_push_subscription'); } catch {}
+    updatePushUI('unsubscribed');
+    showToast && showToast('Notificações desativadas');
+  } catch(err) { console.warn('Unsubscribe error:', err); }
+}
+
+function updatePushUI(state) {
+  const btn      = document.getElementById('pushToggleBtn');
+  const statusEl = document.getElementById('pushStatusText');
+  const card     = document.getElementById('pushCard');
+  if (!btn) return;
+
+  if (state === 'subscribed') {
+    btn.textContent = 'Desativar';
+    btn.style.background = 'transparent';
+    btn.style.border = '1px solid var(--border)';
+    btn.style.color = 'var(--gray)';
+    if (statusEl) { statusEl.textContent = '✓ Ativado — você receberá alertas'; statusEl.style.color = 'var(--green)'; }
+    if (card) card.style.borderColor = 'rgba(46,230,92,0.3)';
+  } else if (state === 'denied') {
+    btn.textContent = 'Bloqueado';
+    btn.style.background = 'transparent';
+    btn.style.border = '1px solid var(--border)';
+    btn.style.color = 'var(--red)';
+    if (statusEl) { statusEl.textContent = 'Permissão negada pelo navegador'; statusEl.style.color = 'var(--red)'; }
+  } else {
+    btn.textContent = 'Ativar';
+    btn.style.background = 'var(--green)';
+    btn.style.border = 'none';
+    btn.style.color = '#0D1A2A';
+    if (statusEl) { statusEl.textContent = 'Receba alertas em tempo real'; statusEl.style.color = ''; }
+    if (card) card.style.borderColor = '';
+  }
+}
+
+// Init push UI state
+(async function initPushUI() {
+  if (!('PushManager' in window)) {
+    const card = document.getElementById('pushCard');
+    if (card) card.style.display = 'none'; // hide if not supported
+    return;
+  }
+  const permission = Notification.permission;
+  if (permission === 'denied') { updatePushUI('denied'); document.getElementById('pushDeniedWarning').style.display = 'block'; return; }
+  const sub = await getPushSubscription();
+  if (sub) updatePushUI('subscribed');
+})();
+
+document.getElementById('pushToggleBtn')?.addEventListener('click', async function() {
+  const sub = await getPushSubscription();
+  if (sub) { await unsubscribePush(); }
+  else { await subscribePush(); }
+});
+
 lucide.createIcons();
 </script>
 

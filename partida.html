@@ -115,6 +115,13 @@
     </div>
   </section>
 
+  <!-- SHARE CTA -->
+  <div style="padding:10px 16px 4px;display:flex;gap:8px;">
+    <button onclick="shareMatch()" style="flex:1;display:flex;align-items:center;justify-content:center;gap:7px;background:var(--green);color:#0D1A2A;border:none;border-radius:var(--radius-pill);padding:10px 16px;font-size:0.875rem;font-weight:700;cursor:pointer;">
+      <i data-lucide="share-2" style="width:16px;height:16px;"></i>Compartilhar zebra
+    </button>
+  </div>
+
   <!-- TAB BAR -->
   <div class="tab-bar">
     <button class="tab-bar__item active" data-tab="resumo"><i data-lucide="file-text" class="tab-ic"></i>Resumo</button>
@@ -315,16 +322,50 @@
 
 <script src="js/config.js"></script>
 <script src="js/api.js"></script>
+<script src="js/share.js"></script>
 <script src="js/main.js"></script>
 <script>
+  // ── URL PARAMS ────────────────────────────────────────────────
+  const _urlParams  = new URLSearchParams(location.search);
+  const _urlHome    = _urlParams.get('home')   || null;
+  const _urlAway    = _urlParams.get('away')   || null;
+  const _urlScore   = _urlParams.get('score')  || null;
+  const _urlZi      = _urlParams.get('zi')     || null;
+  const _urlLeague  = _urlParams.get('league') || null;
+  const _urlDate    = _urlParams.get('date')   || null;
+
+  // Apply URL params to visible DOM if present
+  if (_urlHome) {
+    document.querySelectorAll('[id*="HomeTeam"],[id*="homeTeam"],[class*="home-team"]').forEach(el => el.textContent = _urlHome);
+    const hn = document.getElementById('matchHomeName');
+    if (hn) hn.textContent = _urlHome;
+  }
+  if (_urlAway) {
+    document.querySelectorAll('[id*="AwayTeam"],[id*="awayTeam"],[class*="away-team"]').forEach(el => el.textContent = _urlAway);
+    const an = document.getElementById('matchAwayName');
+    if (an) an.textContent = _urlAway;
+  }
+
   // ── SHARE ───────────────────────────────────────────────────────
-  function shareMatch() {
-    const text = `🦓 ZebraStats — Botafogo vs Flamengo\nZI 7.8 · Odd 4.20\n${window.location.href}`;
-    if (navigator.share) {
-      navigator.share({ title: 'ZebraStats', text, url: window.location.href }).catch(() => {});
-    } else {
-      navigator.clipboard.writeText(text).then(() => showToast('Link copiado!')).catch(() => showToast('Erro ao copiar'));
-    }
+  async function shareMatch() {
+    // Build config from current page state
+    const homeEl   = document.getElementById('matchHomeName') || document.querySelector('[id*="homeTeam"],[id*="HomeTeam"],.home-team-name');
+    const awayEl   = document.getElementById('matchAwayName') || document.querySelector('[id*="awayTeam"],[id*="AwayTeam"],.away-team-name');
+    const scoreEl  = document.getElementById('matchScore')    || document.querySelector('[id*="score"],[id*="Score"],.game-card__score');
+    const ziEl     = document.getElementById('ziValue')       || document.querySelector('[id*="ziValue"],[id*="ZiValue"],.zi-value,.zebra-index');
+    const leagueEl = document.getElementById('matchCompetition') || document.querySelector('[id*="league"],[id*="League"],.league-name,.game-card__league');
+
+    const homeTeam = _urlHome   || homeEl?.textContent?.trim()                      || 'Casa';
+    const awayTeam = _urlAway   || awayEl?.textContent?.trim()                      || 'Fora';
+    const score    = _urlScore  || scoreEl?.textContent?.trim()                     || null;
+    const ziRaw    = _urlZi     || ziEl?.textContent?.replace(/[^\d.]/g, '')        || '5.0';
+    const league   = _urlLeague || leagueEl?.textContent?.trim()                    || 'Futebol';
+    const date     = _urlDate   || new Date().toLocaleDateString('pt-BR');
+
+    const zi = parseFloat(ziRaw) || 5.0;
+    const ziClass = zi >= 7 ? 'grande' : zi >= 4 ? 'media' : 'leve';
+
+    await shareMatchCard({ homeTeam, awayTeam, score, zi: ziRaw, ziClass, league, date });
   }
 
   // ── ZI METER ANIMATION ──────────────────────────────────────────

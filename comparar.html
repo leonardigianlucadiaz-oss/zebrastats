@@ -482,6 +482,7 @@ function setupSearch(slot) {
         <div style="flex:1;min-width:0;">
           <div style="font-size:0.8125rem;font-weight:600;">${t.name}</div>
           <div style="font-size:0.6875rem;color:var(--gray);display:flex;align-items:center;gap:3px;">${logoHtml}${t.league}</div>
+          <a href="time.html?team=${t.id}" onclick="event.stopPropagation()" style="font-size:0.6875rem;color:var(--green);text-decoration:none;display:block;margin-top:4px;opacity:0.8;">Ver perfil →</a>
         </div>`;
       item.addEventListener('click', () => { selectTeam(slot, t); });
       dropdown.appendChild(item);
@@ -891,6 +892,25 @@ const params = new URLSearchParams(window.location.search);
 const ta = params.get('a'), tb = params.get('b');
 if (ta) { const t = ALL_TEAMS.find(t=>t.id===ta); if(t) selectTeam('A',t); }
 if (tb) { const t = ALL_TEAMS.find(t=>t.id===tb); if(t) selectTeam('B',t); }
+
+// Auto-select teams from URL params
+(function applyComparParams() {
+  if (!ta && !tb) return;
+  const selA = document.getElementById('teamASelect') || document.querySelector('[data-team="a"] select') || document.querySelector('#selectA');
+  const selB = document.getElementById('teamBSelect') || document.querySelector('[data-team="b"] select') || document.querySelector('#selectB');
+  if (selA && ta) {
+    selA.value = ta;
+    selA.dispatchEvent(new Event('change'));
+  }
+  if (selB && tb) {
+    selB.value = tb;
+    selB.dispatchEvent(new Event('change'));
+  }
+  setTimeout(() => {
+    const compareBtn = document.getElementById('compareBtn') || document.querySelector('[onclick*="compare"]') || document.querySelector('.btn--primary');
+    if (compareBtn && ta && tb) compareBtn.click();
+  }, 100);
+})();
 
 initBellBadge();
 lucide.createIcons();

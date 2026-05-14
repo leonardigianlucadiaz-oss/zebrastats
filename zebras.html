@@ -378,7 +378,7 @@
               <div style="font-size:0.625rem;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px;">Odd favorito</div>
               <div style="font-size:0.9375rem;font-weight:700;color:var(--red);">${z.odds_a}</div>
             </div>
-            <a href="partida.html" style="margin-left:auto;font-size:0.75rem;color:var(--green);font-weight:600;text-decoration:none;display:flex;align-items:center;gap:3px;">Ver detalhes <i data-lucide="arrow-right" style="width:13px;height:13px;"></i></a>
+            <a href="#" onclick="event.stopPropagation();(function(z){const zi=parseFloat(z.zi||0);const p=new URLSearchParams({home:z.home||'',away:z.away||'',score:z.hs!==undefined?z.hs+' – '+z.as:'',zi:z.zi||'',league:z.league||'Futebol',date:z.date||'',ziClass:zi>=7?'grande':zi>=4?'media':'leve'});window.location.href='partida.html?'+p.toString();})(${JSON.stringify({home:z.home,away:z.away,hs:z.hs,as:z.as,zi:z.zi,league:z.league,date:z.date})})" style="margin-left:auto;font-size:0.75rem;color:var(--green);font-weight:600;text-decoration:none;display:flex;align-items:center;gap:3px;">Ver detalhes <i data-lucide="arrow-right" style="width:13px;height:13px;"></i></a>
           </div>`;
       }
 
@@ -386,32 +386,25 @@
       card.style.animationDelay = (i * 0.05) + 's';
       card.addEventListener('click', function(e) {
         if (e.target.tagName === 'A') return;
-        // toggle accordion
-        const existing = this.querySelector('.zebra-detail');
-        if (existing) { existing.remove(); this.classList.remove('zebra-card--expanded'); return; }
-        document.querySelectorAll('.zebra-card--expanded .zebra-detail').forEach(d => { d.remove(); });
-        document.querySelectorAll('.zebra-card--expanded').forEach(c => c.classList.remove('zebra-card--expanded'));
-        this.classList.add('zebra-card--expanded');
-        const detail = document.createElement('div');
-        detail.className = 'zebra-detail';
-        detail.style.cssText = 'margin-top:10px;padding-top:10px;border-top:1px solid var(--border);display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;';
-        const possession = Math.round(35 + Math.random() * 30);
-        const shots = Math.round(3 + Math.random() * 12);
-        const odd = (1.8 + Math.random() * 4).toFixed(2);
-        detail.innerHTML = `
-          <div style="text-align:center;">
-            <div style="font-size:1rem;font-weight:700;color:var(--green);">${possession}%</div>
-            <div style="font-size:0.6875rem;color:var(--gray);margin-top:2px;">Posse</div>
-          </div>
-          <div style="text-align:center;">
-            <div style="font-size:1rem;font-weight:700;color:var(--gold);">${shots}</div>
-            <div style="font-size:0.6875rem;color:var(--gray);margin-top:2px;">Chutes</div>
-          </div>
-          <div style="text-align:center;">
-            <div style="font-size:1rem;font-weight:700;color:var(--red);">${odd}</div>
-            <div style="font-size:0.6875rem;color:var(--gray);margin-top:2px;">Odd pré</div>
-          </div>`;
-        this.appendChild(detail);
+        // If clicking inside the expanded detail accordion, toggle it closed
+        if (e.target.closest('.zebra-detail')) {
+          const existing = this.querySelector('.zebra-detail');
+          if (existing) { existing.remove(); this.classList.remove('zebra-card--expanded'); }
+          return;
+        }
+        // Build params and navigate to partida.html
+        const zi = parseFloat(z.zi || z.index || 0);
+        const ziClass = zi >= 7 ? 'grande' : zi >= 4 ? 'media' : 'leve';
+        const navParams = new URLSearchParams({
+          home:   z.home   || z.homeTeam  || '',
+          away:   z.away   || z.awayTeam  || '',
+          score:  z.hs !== undefined ? `${z.hs} – ${z.as}` : '',
+          zi:     z.zi     || z.index     || '',
+          league: z.league || z.liga      || 'Futebol',
+          date:   z.date   || z.data      || '',
+          ziClass,
+        });
+        window.location.href = `partida.html?${navParams.toString()}`;
       });
       container.appendChild(card);
     });
