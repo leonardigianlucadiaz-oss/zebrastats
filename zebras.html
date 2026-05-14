@@ -75,11 +75,29 @@
     </div>
   </section>
 
+  <!-- HEATMAP SEMANAL -->
+  <section style="padding:12px 16px;border-bottom:1px solid var(--border);background:var(--card2);">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+      <span style="font-size:0.75rem;font-weight:600;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;">Intensidade da Semana</span>
+      <span style="font-size:0.625rem;color:var(--gray);">zebras por dia</span>
+    </div>
+    <div id="weekHeatmap" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;"></div>
+    <div style="display:flex;justify-content:space-between;margin-top:4px;">
+      <div id="heatmapLabels" style="display:contents;"></div>
+    </div>
+  </section>
+
   <!-- LISTA DE ZEBRAS -->
   <main class="content">
     <div class="section-header">
       <span class="section-title"><i data-lucide="zap" class="sec-ic"></i>Zebras Recentes</span>
-      <a href="ranking.html" class="section-link" style="display:inline-flex;align-items:center;gap:3px;"><i data-lucide="medal" style="width:12px;height:12px;"></i>Ranking</a>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <div style="display:flex;background:var(--card2);border:1px solid var(--border);border-radius:6px;overflow:hidden;">
+          <button id="viewCards" class="view-toggle-btn active" title="Cards" onclick="setView('cards')"><i data-lucide="layout-grid" style="width:13px;height:13px;"></i></button>
+          <button id="viewList"  class="view-toggle-btn"        title="Lista"  onclick="setView('list')"><i data-lucide="list" style="width:13px;height:13px;"></i></button>
+        </div>
+        <a href="ranking.html" class="section-link" style="display:inline-flex;align-items:center;gap:3px;"><i data-lucide="medal" style="width:12px;height:12px;"></i>Ranking</a>
+      </div>
     </div>
     <div style="margin-bottom:10px;">
       <span class="text-xs text-gray" id="zebraCount"></span>
@@ -345,6 +363,8 @@
           </div>`;
       }
 
+      card.classList.add('zebra-card-anim');
+      card.style.animationDelay = (i * 0.05) + 's';
       card.addEventListener('click', e => { if (e.target.tagName !== 'A') window.location.href = 'partida.html'; });
       container.appendChild(card);
     });
@@ -406,8 +426,65 @@
     });
   }
 
+  // ── HEATMAP SEMANAL ──────────────────────────────────────────────
+  function buildHeatmap() {
+    const days   = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+    const counts = [2, 5, 3, 7, 4, 8, 1];
+    const max    = Math.max(...counts);
+
+    const grid   = document.getElementById('weekHeatmap');
+    if (!grid) return;
+
+    grid.innerHTML = '';
+
+    counts.forEach((n, i) => {
+      const pct   = n / max;
+      const alpha = 0.08 + pct * 0.7;
+      const isHot = n === max;
+      const cell  = document.createElement('div');
+      cell.style.cssText = `
+        height: 40px;
+        border-radius: 6px;
+        background: rgba(46,230,92,${alpha.toFixed(2)});
+        border: 1px solid rgba(46,230,92,${(alpha * 0.6).toFixed(2)});
+        display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+        gap: 2px; cursor: pointer;
+        position: relative;
+        transition: transform 0.15s;
+      `;
+      if (isHot) cell.style.boxShadow = '0 0 8px rgba(46,230,92,0.3)';
+      cell.innerHTML = `
+        <span style="font-size:0.875rem;font-weight:800;color:${pct > 0.5 ? 'var(--white)' : 'var(--gray)'};">${n}</span>
+        <span style="font-size:0.5rem;color:${pct > 0.5 ? 'rgba(255,255,255,0.7)' : 'var(--gray)'};">${days[i]}</span>
+      `;
+      cell.addEventListener('mouseenter', () => cell.style.transform = 'scaleY(1.04)');
+      cell.addEventListener('mouseleave', () => cell.style.transform = '');
+      cell.title = `${n} zebra${n !== 1 ? 's' : ''} ${days[i] === days[new Date().getDay()] ? '(hoje)' : ''}`;
+      grid.appendChild(cell);
+    });
+  }
+
+  // ── VIEW TOGGLE ───────────────────────────────────────────────────
+  let currentView = 'cards';
+  function setView(mode) {
+    currentView = mode;
+    document.getElementById('viewCards').classList.toggle('active', mode === 'cards');
+    document.getElementById('viewList').classList.toggle('active', mode === 'list');
+    const list = document.getElementById('zebraList');
+    if (mode === 'list') {
+      list.style.gap = '4px';
+      list.querySelectorAll('.zebra-card,.card').forEach(c => c.classList.add('zebra-list-mode'));
+    } else {
+      list.style.gap = '12px';
+      list.querySelectorAll('.zebra-card,.card').forEach(c => c.classList.remove('zebra-list-mode'));
+    }
+    lucide.createIcons();
+  }
+
   // ── INIT ─────────────────────────────────────────────────────
   updatePlanBadge();
+  buildHeatmap();
   renderLeagueBar();
   renderZebras();
 
@@ -482,6 +559,33 @@
   .section-title { display: inline-flex; align-items: center; }
   .filter-chip { display: inline-flex; align-items: center; gap: 5px; }
   .navbar__icon i { display: block; }
+
+  /* ── VIEW TOGGLE ── */
+  .view-toggle-btn {
+    background: none; border: none; cursor: pointer;
+    padding: 5px 7px; color: var(--gray);
+    display: flex; align-items: center;
+    transition: background var(--transition), color var(--transition);
+  }
+  .view-toggle-btn.active { background: var(--green-dim); color: var(--green); }
+  .view-toggle-btn i { display: block; }
+
+  /* ── LIST MODE ── */
+  .zebra-list-mode {
+    padding: 8px 12px !important;
+  }
+  .zebra-list-mode .zebra-card__teams,
+  .zebra-list-mode .gc-team-block span:not(.gc-team-name) { display: none; }
+
+  /* ── STAGGER ANIMATION ── */
+  @keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .zebra-card-anim {
+    animation: fadeSlideIn 0.3s ease forwards;
+    opacity: 0;
+  }
 </style>
 </body>
 </html>

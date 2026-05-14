@@ -102,6 +102,13 @@
 
       <div id="upcomingGames" style="display:flex;flex-direction:column;gap:10px;"></div>
 
+      <!-- QUENTE AGORA -->
+      <div class="section-header" style="margin-top:4px;">
+        <span class="section-title"><i data-lucide="flame" class="sec-ic" style="color:#ff6b35;"></i>Quente Agora</span>
+        <a href="zebras.html" class="section-link">Ver zebras</a>
+      </div>
+      <div id="hotLeagues" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:4px;"></div>
+
       <!-- ZEBRAS DO DIA -->
       <div class="section-header" style="margin-top:4px;">
         <span class="section-title"><i data-lucide="zap" class="sec-ic"></i>Zebras do Dia</span>
@@ -245,6 +252,29 @@
     .ranking-row__bar-fill { height: 100%; border-radius: 2px; }
     .ranking-row__badge{ flex-shrink: 0; }
 
+    /* ── QUENTE AGORA ── */
+    .hot-league-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 10px 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      transition: border-color var(--transition), transform var(--transition);
+      text-align: center;
+    }
+    .hot-league-card:hover { border-color: var(--green); transform: translateY(-1px); }
+    .hot-league-card__logo { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; }
+    .hot-league-card__logo img { width: 28px; height: 28px; object-fit: contain; }
+    .hot-league-card__name { font-size: 0.625rem; font-weight: 600; color: var(--gray); line-height: 1.2; }
+    .hot-league-card__count { font-size: 1rem; font-weight: 800; color: var(--white); line-height: 1; }
+    .hot-league-card__label { font-size: 0.5625rem; color: var(--gray); }
+    .hot-league-card__bar { width: 100%; height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; margin-top: 2px; }
+    .hot-league-card__bar-fill { height: 100%; border-radius: 2px; background: var(--green); transition: width 0.8s ease; }
+
     /* ── ZEBRA DIA HERO ──────────────────────────────────────── */
     .zebra-dia-hero {
       background: linear-gradient(135deg, rgba(46,230,92,0.08) 0%, rgba(255,200,50,0.08) 100%);
@@ -341,6 +371,12 @@
         const leagueLogo = LEAGUE_LOGOS[g.league_id]
           ? `<img src="${LEAGUE_LOGOS[g.league_id]}" style="width:13px;height:13px;object-fit:contain;margin-right:4px;vertical-align:middle;" onerror="this.remove();">`
           : '';
+        // Probability strip from odds
+        const oddsH = parseFloat(g.odds_h) || 3;
+        const oddsA = parseFloat(g.odds_a) || 2;
+        const homeProb = Math.round(100 / oddsH);
+        const awayProb = Math.round(100 / oddsA);
+        const drawProb = Math.max(0, 100 - homeProb - awayProb);
         card.innerHTML = `
           <div class="game-card__league" style="display:flex;align-items:center;justify-content:space-between;">
             <span style="display:flex;align-items:center;">${leagueLogo}${g.league}</span>
@@ -359,6 +395,11 @@
               ${crestBlock(g.awayCrest, g.away)}
               <span class="gc-team-name">${g.away}</span>
             </div>
+          </div>
+          <div style="height:3px;background:var(--border);border-radius:0 0 var(--radius-md) var(--radius-md);overflow:hidden;margin-top:8px;display:flex;">
+            <div style="width:${homeProb}%;background:var(--green);transition:width 0.6s;"></div>
+            <div style="width:${drawProb}%;background:var(--gray);"></div>
+            <div style="width:${awayProb}%;background:var(--red);"></div>
           </div>`;
         card.addEventListener('click', () => window.location.href = 'partida.html');
         container.appendChild(card);
@@ -402,6 +443,41 @@
         card.addEventListener('click', () => window.location.href = 'partida.html');
         container.appendChild(card);
       });
+    }
+
+    // ── QUENTE AGORA ──────────────────────────────────────
+    function initHotLeagues() {
+      const HOT = [
+        { lid:'BRA', name:'Brasileirão', count:7, color:'var(--green)' },
+        { lid:'GER', name:'Bundesliga',  count:5, color:'var(--gold)' },
+        { lid:'ESP', name:'La Liga',     count:4, color:'var(--red)' },
+      ];
+      const max = HOT[0].count;
+      const container = document.getElementById('hotLeagues');
+      container.innerHTML = '';
+      HOT.forEach(l => {
+        const card = document.createElement('div');
+        card.className = 'hot-league-card';
+        card.onclick = () => window.location.href = 'liga.html';
+        card.innerHTML = `
+          <div class="hot-league-card__logo">${flagImg(l.lid, 24)}</div>
+          <div class="hot-league-card__name">${l.name}</div>
+          <div class="hot-league-card__count">${l.count}</div>
+          <div class="hot-league-card__label">zebras esta semana</div>
+          <div class="hot-league-card__bar"><div class="hot-league-card__bar-fill" style="width:0%;background:${l.color};" data-target="${Math.round((l.count/max)*100)}"></div></div>`;
+        container.appendChild(card);
+        // Async logo upgrade
+        loadLeagueLogo(l.lid).then(url => {
+          const logo = card.querySelector('.hot-league-card__logo');
+          if (url && logo) logo.innerHTML = `<img src="${url}" alt="${l.name}">`;
+        });
+      });
+      // Animate bars after paint
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        container.querySelectorAll('.hot-league-card__bar-fill').forEach(el => {
+          el.style.width = el.dataset.target + '%';
+        });
+      }));
     }
 
     // ── FAV TEAMS BAR ─────────────────────────────────────
@@ -466,6 +542,14 @@
             if (team?.strTeam) pill.querySelector('.team-pill__name').textContent = team.strTeam;
           }).catch(() => {});
         }
+      }
+
+      // Empty state hint when no real favorites
+      if (fromMeta.length === 0) {
+        const hint = document.createElement('div');
+        hint.style.cssText = 'width:100%;font-size:0.6875rem;color:var(--gray);text-align:center;padding:4px 0 2px;flex-shrink:0;order:-1;';
+        hint.textContent = 'Adicione seus times favoritos';
+        bar.appendChild(hint);
       }
 
       // Botão adicionar
@@ -689,6 +773,7 @@
     });
 
     // ── INIT ──────────────────────────────────────────────
+    initHotLeagues();
     initFavBar();
     initLeaguePills();
     initGames();
