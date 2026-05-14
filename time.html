@@ -48,7 +48,7 @@
 
     <!-- HEADER -->
     <nav class="navbar">
-      <button onclick="history.back()" class="navbar__icon" style="background:none;border:none;cursor:pointer;color:var(--white);display:flex;align-items:center;justify-content:center;"><i data-lucide="arrow-left" style="width:20px;height:20px;"></i></button>
+      <button onclick="goBack('home.html')" class="navbar__icon" style="background:none;border:none;cursor:pointer;color:var(--white);display:flex;align-items:center;justify-content:center;"><i data-lucide="arrow-left" style="width:20px;height:20px;"></i></button>
       <span style="font-size:1rem;font-weight:600;" id="navTitle">Perfil do Time</span>
       <button id="favBtn" class="navbar__icon" title="Favoritar"><i data-lucide="star" style="width:18px;height:18px;"></i></button>
     </nav>
@@ -139,7 +139,7 @@
       <!-- VINDO PERDENDO PARA -->
       <div class="card card--red-border">
         <div class="section-header">
-          <span class="section-title" style="color:var(--red);">📉 Vem perdendo para...</span>
+          <span class="section-title" style="color:var(--red);"><i data-lucide="trending-down" class="sec-ic" style="color:var(--red);"></i>Vem perdendo para...</span>
           <span class="text-xs text-gray">Últimas 3 temp.</span>
         </div>
         <div id="losingList"></div>
@@ -148,7 +148,7 @@
       <!-- VINDO GANHANDO DE -->
       <div class="card card--green-border">
         <div class="section-header">
-          <span class="section-title" style="color:var(--green);">📈 Vem ganhando de...</span>
+          <span class="section-title" style="color:var(--green);"><i data-lucide="trending-up" class="sec-ic" style="color:var(--green);"></i>Vem ganhando de...</span>
           <span class="text-xs text-gray">Últimas 3 temp.</span>
         </div>
         <div id="winningList"></div>
@@ -157,7 +157,7 @@
       <!-- DESEMPENHO SAZONAL -->
       <div class="card">
         <div class="section-header" style="margin-bottom:16px;">
-          <span class="section-title">📅 Desempenho Sazonal</span>
+          <span class="section-title"><i data-lucide="calendar" class="sec-ic"></i>Desempenho Sazonal</span>
           <select id="seasonSelect" style="background:var(--input-bg);border:1px solid var(--border);color:var(--gray);font-size:0.75rem;padding:4px 8px;border-radius:6px;font-family:inherit;outline:none;">
             <option value="24-25">2024–25</option>
             <option value="23-24">2023–24</option>
@@ -194,8 +194,8 @@
       <!-- ÚLTIMAS PARTIDAS -->
       <div>
         <div class="section-header">
-          <span class="section-title">🕐 Últimas Partidas</span>
-          <a href="#" class="section-link">Ver todas</a>
+          <span class="section-title"><i data-lucide="clock" class="sec-ic"></i>Últimas Partidas</span>
+          <a href="zebras.html" class="section-link">Ver todas</a>
         </div>
         <div id="lastMatchesList" style="display:flex;flex-direction:column;gap:8px;"></div>
       </div>
@@ -203,7 +203,7 @@
       <!-- MAIORES ZEBRAS DO TIME -->
       <div>
         <div class="section-header">
-          <span class="section-title">🏆 Maiores Zebras do Time</span>
+          <span class="section-title"><i data-lucide="zap" class="sec-ic"></i>Maiores Zebras do Time</span>
           <a href="zebras.html" class="section-link">Ver todas</a>
         </div>
         <div id="biggestZebrasList" style="display:flex;flex-direction:column;gap:8px;"></div>
@@ -244,11 +244,11 @@
 
     <!-- BOTTOM NAV (mobile only) -->
     <nav class="bottom-nav">
-      <a href="home.html"   class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="home"></i></span>Home</a>
-      <a href="zebras.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="activity"></i></span>Zebras</a>
-      <a href="liga.html"   class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="trophy"></i></span>Ligas</a>
-      <a href="time.html"   class="bottom-nav__item active"><span class="bottom-nav__icon"><i data-lucide="star"></i></span>Times</a>
-      <a href="perfil.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="user"></i></span>Perfil</a>
+      <a href="home.html"    class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="home"></i></span>Home</a>
+      <a href="zebras.html"  class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="activity"></i></span>Zebras</a>
+      <a href="ranking.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="medal"></i></span>Ranking</a>
+      <a href="alertas.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="bell-ring"></i></span>Alertas</a>
+      <a href="perfil.html"  class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="user"></i></span>Perfil</a>
     </nav>
 
   </div><!-- /app-main -->
@@ -560,7 +560,9 @@
     });
 
     // ── INIT ──────────────────────────────────────────────
-    loadTeam('torino');
+    // Suporte a ?team=flamengo (ou qualquer chave em TEAMS)
+    const _urlTeam = new URLSearchParams(location.search).get('team');
+    loadTeam(TEAMS[_urlTeam] ? _urlTeam : 'torino');
 
     // ── API REAL DATA ─────────────────────────────────────
     async function initRealData() {

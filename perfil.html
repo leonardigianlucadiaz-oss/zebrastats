@@ -220,7 +220,7 @@
           </div>
         </div>
         <label class="toggle-switch">
-          <input type="checkbox" checked />
+          <input type="checkbox" id="darkToggle" checked />
           <span class="toggle-slider"></span>
         </label>
       </div>
@@ -234,7 +234,7 @@
           </div>
         </div>
         <label class="toggle-switch">
-          <input type="checkbox" checked />
+          <input type="checkbox" id="notifToggle" checked />
           <span class="toggle-slider"></span>
         </label>
       </div>
@@ -321,11 +321,11 @@
 
   <!-- BOTTOM NAV (mobile only) -->
   <nav class="bottom-nav">
-    <a href="home.html"   class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="home"></i></span>Home</a>
-    <a href="zebras.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="activity"></i></span>Zebras</a>
-    <a href="liga.html"   class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="trophy"></i></span>Ligas</a>
-    <a href="time.html"   class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="star"></i></span>Times</a>
-    <a href="perfil.html" class="bottom-nav__item active"><span class="bottom-nav__icon"><i data-lucide="user"></i></span>Perfil</a>
+    <a href="home.html"    class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="home"></i></span>Home</a>
+    <a href="zebras.html"  class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="activity"></i></span>Zebras</a>
+    <a href="ranking.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="medal"></i></span>Ranking</a>
+    <a href="alertas.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="bell-ring"></i></span>Alertas</a>
+    <a href="perfil.html"  class="bottom-nav__item active"><span class="bottom-nav__icon"><i data-lucide="user"></i></span>Perfil</a>
   </nav>
 
   </div><!-- /app-main -->
@@ -433,9 +433,19 @@
   function saveProfile() {
     const name  = document.getElementById('editName').value.trim();
     const email = document.getElementById('editEmail').value.trim();
-    if (name)  document.getElementById('userName').textContent  = name;
-    if (email) document.getElementById('userEmail').textContent = email;
-    if (name)  document.getElementById('avatarEl').textContent  = name[0].toUpperCase();
+    if (name) {
+      document.getElementById('userName').textContent = name;
+      document.getElementById('avatarEl').textContent = name[0].toUpperCase();
+      localStorage.setItem('zs_user_name', name);
+      const sidebarAvatar = document.querySelector('.sidebar__user-avatar');
+      if (sidebarAvatar) sidebarAvatar.textContent = name[0].toUpperCase();
+      const sidebarName = document.querySelector('.sidebar__user-name');
+      if (sidebarName) sidebarName.textContent = name.split(' ')[0];
+    }
+    if (email) {
+      document.getElementById('userEmail').textContent = email;
+      localStorage.setItem('zs_user_email', email);
+    }
     closeModal('editDadosModal');
     showToast('✓ Dados atualizados!');
   }
@@ -453,6 +463,40 @@
     closeModal('feedbackModal');
     showToast('💬 Feedback enviado! Obrigado.');
   }
+
+  // ── TOGGLE PERSISTÊNCIA ──────────────────────────────────
+  (function initToggles() {
+    const darkToggle  = document.getElementById('darkToggle');
+    const notifToggle = document.getElementById('notifToggle');
+
+    // Restaura estado salvo
+    if (localStorage.getItem('zs_dark_mode') === 'false') darkToggle.checked = false;
+    if (localStorage.getItem('zs_push_notifs') === 'false') notifToggle.checked = false;
+
+    darkToggle.addEventListener('change', function() {
+      localStorage.setItem('zs_dark_mode', this.checked);
+      if (!this.checked) showToast('🌙 Modo claro em breve!');
+    });
+
+    notifToggle.addEventListener('change', function() {
+      localStorage.setItem('zs_push_notifs', this.checked);
+      showToast(this.checked ? '🔔 Alertas ativados' : '🔕 Alertas desativados');
+    });
+  })();
+
+  // ── AVATAR DINÂMICO ──────────────────────────────────────
+  (function initUserData() {
+    const savedName  = localStorage.getItem('zs_user_name');
+    const savedEmail = localStorage.getItem('zs_user_email');
+    if (savedName) {
+      document.getElementById('userName').textContent = savedName;
+      document.getElementById('avatarEl').textContent = savedName[0].toUpperCase();
+      // Sidebar avatar
+      const sidebarAvatar = document.querySelector('.sidebar__user-avatar');
+      if (sidebarAvatar) sidebarAvatar.textContent = savedName[0].toUpperCase();
+    }
+    if (savedEmail) document.getElementById('userEmail').textContent = savedEmail;
+  })();
 
   function confirmLogout() {
     if (confirm('Tem certeza que deseja sair?')) {

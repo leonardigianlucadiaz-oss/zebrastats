@@ -55,6 +55,20 @@ function initBellBadge() {
   updateBellBadge();
 }
 
+// ── NAVIGATION ────────────────────────────────────────────────
+/**
+ * Navega para trás no histórico com fallback para evitar
+ * ficar preso em pages sem histórico (ex: acesso direto via URL).
+ * @param {string} [fallback='home.html'] URL de destino se não houver histórico
+ */
+function goBack(fallback) {
+  if (history.length > 1) {
+    history.back();
+  } else {
+    window.location.href = fallback || 'home.html';
+  }
+}
+
 // ── TOAST ─────────────────────────────────────────────────────
 /**
  * Exibe uma mensagem toast temporária na parte inferior da tela.
