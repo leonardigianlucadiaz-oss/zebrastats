@@ -89,12 +89,14 @@
     </div>
 
     <!-- TAB BAR -->
-    <div class="tab-bar" id="timeTabBar">
-      <button class="tab-bar__item active" data-tab="overview"><i data-lucide="layout-dashboard" style="width:13px;height:13px;"></i>Visão Geral</button>
-      <button class="tab-bar__item" data-tab="jogos"><i data-lucide="clock" style="width:13px;height:13px;"></i>Últimos Jogos</button>
-      <button class="tab-bar__item" data-tab="zebras"><i data-lucide="zap" style="width:13px;height:13px;"></i>Maiores Zebras</button>
-      <button class="tab-bar__item" data-tab="escalacao"><i data-lucide="layout-grid" style="width:13px;height:13px;"></i>Escalação</button>
-      <button class="tab-bar__item" data-tab="transfers"><i data-lucide="arrow-left-right" style="width:13px;height:13px;"></i>Transfers</button>
+    <div class="time-tab-wrapper">
+      <div class="tab-bar" id="timeTabBar" style="overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;">
+        <button class="tab-bar__item active" data-tab="overview"><i data-lucide="layout-dashboard" style="width:13px;height:13px;"></i>Visão Geral</button>
+        <button class="tab-bar__item" data-tab="jogos"><i data-lucide="clock" style="width:13px;height:13px;"></i>Últimos Jogos</button>
+        <button class="tab-bar__item" data-tab="zebras"><i data-lucide="zap" style="width:13px;height:13px;"></i>Maiores Zebras</button>
+        <button class="tab-bar__item" data-tab="escalacao"><i data-lucide="layout-grid" style="width:13px;height:13px;"></i>Escalação</button>
+        <button class="tab-bar__item" data-tab="transfers"><i data-lucide="arrow-left-right" style="width:13px;height:13px;"></i>Transfers</button>
+      </div>
     </div>
 
     <main class="content">
@@ -1145,6 +1147,22 @@
   <style>
     .bottom-nav__icon i { width: 20px; height: 20px; display: block; }
     .navbar__icon i { display: block; }
+
+    /* Bug 7 — tab bar scroll + fade hint */
+    #timeTabBar::-webkit-scrollbar { display: none; }
+
+    .time-tab-wrapper {
+      position: relative;
+    }
+    .time-tab-wrapper::after {
+      content: '';
+      position: absolute;
+      right: 0; top: 0; bottom: 0;
+      width: 40px;
+      background: linear-gradient(to left, var(--card2, #0d1a2a), transparent);
+      pointer-events: none;
+      z-index: 1;
+    }
   </style>
 </body>
 </html>

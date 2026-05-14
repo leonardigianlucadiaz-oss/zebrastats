@@ -285,18 +285,18 @@
 
   // ── DADOS DAS LIGAS ───────────────────────────────────────────
   const LEAGUES = [
-    { id:'BRA', name:'Brasileirão',      flag:'🇧🇷', sdbId:'4351' },
-    { id:'ENG', name:'Premier League',   flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', sdbId:'4328' },
-    { id:'ESP', name:'La Liga',           flag:'🇪🇸', sdbId:'4335' },
-    { id:'ITA', name:'Serie A',           flag:'🇮🇹', sdbId:'4332' },
-    { id:'GER', name:'Bundesliga',        flag:'🇩🇪', sdbId:'4331' },
-    { id:'FRA', name:'Ligue 1',           flag:'🇫🇷', sdbId:'4334' },
-    { id:'UCL', name:'Champions League',  flag:'🌍', sdbId:'4480' },
-    { id:'PRT', name:'Primeira Liga',     flag:'🇵🇹', sdbId:'4344' },
-    { id:'ARG', name:'Liga Argentina',    flag:'🇦🇷', sdbId:'4406' },
-    { id:'MEX', name:'Liga MX',           flag:'🇲🇽', sdbId:'4350' },
-    { id:'NED', name:'Eredivisie',        flag:'🇳🇱', sdbId:'4337' },
-    { id:'USA', name:'MLS',               flag:'🇺🇸', sdbId:'4346' },
+    { id:'BRA', name:'Brasileirão',      flag:'🇧🇷', flagCdn:'br',     sdbId:'4351' },
+    { id:'ENG', name:'Premier League',   flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', flagCdn:'gb-eng', sdbId:'4328' },
+    { id:'ESP', name:'La Liga',           flag:'🇪🇸', flagCdn:'es',     sdbId:'4335' },
+    { id:'ITA', name:'Serie A',           flag:'🇮🇹', flagCdn:'it',     sdbId:'4332' },
+    { id:'GER', name:'Bundesliga',        flag:'🇩🇪', flagCdn:'de',     sdbId:'4331' },
+    { id:'FRA', name:'Ligue 1',           flag:'🇫🇷', flagCdn:'fr',     sdbId:'4334' },
+    { id:'UCL', name:'Champions League',  flag:'🌍',  flagCdn:'eu',     sdbId:'4480' },
+    { id:'PRT', name:'Primeira Liga',     flag:'🇵🇹', flagCdn:'pt',     sdbId:'4344' },
+    { id:'ARG', name:'Liga Argentina',    flag:'🇦🇷', flagCdn:'ar',     sdbId:'4406' },
+    { id:'MEX', name:'Liga MX',           flag:'🇲🇽', flagCdn:'mx',     sdbId:'4350' },
+    { id:'NED', name:'Eredivisie',        flag:'🇳🇱', flagCdn:'nl',     sdbId:'4337' },
+    { id:'USA', name:'MLS',               flag:'🇺🇸', flagCdn:'us',     sdbId:'4346' },
   ];
 
   // Times sugeridos (populares)
@@ -324,11 +324,14 @@
       const card = document.createElement('div');
       card.className = 'league-card' + (selectedLeagues.has(l.id) ? ' selected' : '');
       card.dataset.id = l.id;
+      const flagHtml = l.flagCdn
+        ? `<img src="https://flagcdn.com/w20/${l.flagCdn}.png" alt="${l.name}" style="width:20px;height:15px;object-fit:cover;border-radius:2px;" onerror="this.outerHTML='${l.flag}'">`
+        : l.flag;
       card.innerHTML = `
         <div style="display:flex;width:100%;justify-content:flex-end;">
           <div class="league-card__check">${selectedLeagues.has(l.id) ? '✓' : ''}</div>
         </div>
-        <div class="lc-flag" id="lf-${l.id}">${l.flag}</div>
+        <div class="lc-flag" id="lf-${l.id}">${flagHtml}</div>
         <div class="lc-name">${l.name}</div>`;
       card.addEventListener('click', () => toggleLeague(l.id, l.name, card));
       grid.appendChild(card);

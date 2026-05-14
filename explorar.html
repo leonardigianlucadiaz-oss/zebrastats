@@ -656,7 +656,27 @@ lucide.createIcons();
   .bottom-nav__icon i { width:20px; height:20px; display:block; }
   .navbar__icon i { display:block; }
 
-  .filter-chip { display:inline-flex; align-items:center; gap:4px; }
+  .filter-chip { display:inline-flex; align-items:center; gap:4px; white-space:nowrap; flex-shrink:0; }
+
+  /* Bug 5 fixes */
+  #destaquesBar {
+    overflow-x: auto !important;
+    scrollbar-width: none !important;
+    -webkit-overflow-scrolling: touch;
+  }
+  #destaquesBar::-webkit-scrollbar { display: none; }
+
+  #filterChips {
+    overflow-x: auto !important;
+    scrollbar-width: none !important;
+    -webkit-overflow-scrolling: touch;
+    flex-wrap: nowrap !important;
+  }
+  #filterChips::-webkit-scrollbar { display: none; }
+
+  .teams-grid > div {
+    min-width: 0;
+  }
 
   .expl-team-card:hover { border-color:var(--green) !important; }
   .expl-league-card:hover { border-color:var(--gold) !important; }

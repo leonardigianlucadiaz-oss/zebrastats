@@ -124,12 +124,25 @@
   </section>
 
   <!-- ESTADO VAZIO ──────────────────────────────────────── -->
-  <div id="emptyState" style="text-align:center;padding:56px 24px;color:var(--gray);">
-    <div style="width:56px;height:56px;border-radius:16px;background:var(--card2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
-      <i data-lucide="git-compare" style="width:26px;height:26px;color:var(--green);opacity:0.5;"></i>
+  <div id="emptyState" style="padding:32px 24px 56px;color:var(--gray);">
+    <div style="text-align:center;margin-bottom:28px;">
+      <div style="width:56px;height:56px;border-radius:16px;background:var(--card2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+        <i data-lucide="git-compare" style="width:26px;height:26px;color:var(--green);opacity:0.5;"></i>
+      </div>
+      <div style="font-weight:700;font-size:0.9375rem;margin-bottom:6px;color:var(--white);">Escolha dois times</div>
+      <div style="font-size:0.8125rem;line-height:1.5;max-width:260px;margin:0 auto;">Busque e selecione um time em cada campo para ver o comparativo completo</div>
     </div>
-    <div style="font-weight:700;font-size:0.9375rem;margin-bottom:6px;">Escolha dois times</div>
-    <div style="font-size:0.8125rem;line-height:1.5;max-width:260px;margin:0 auto;">Busque e selecione um time em cada campo para ver o comparativo completo</div>
+
+    <!-- Comparações populares -->
+    <div id="comparSuggestions">
+      <p style="font-size:0.75rem;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;text-align:center;">Comparações populares</p>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <button class="compar-suggest-btn" data-a="FLA" data-b="FLU">Flamengo vs Fluminense</button>
+        <button class="compar-suggest-btn" data-a="RMA" data-b="BAR">Real Madrid vs Barcelona</button>
+        <button class="compar-suggest-btn" data-a="MCI" data-b="ARS">Man City vs Arsenal</button>
+        <button class="compar-suggest-btn" data-a="JUV" data-b="ITR">Juventus vs Inter</button>
+      </div>
+    </div>
   </div>
 
   <!-- RESULTADOS ────────────────────────────────────────── -->
@@ -876,6 +889,18 @@ document.getElementById('shareCompareBtn')?.addEventListener('click', async () =
   }
 });
 
+// ── POPULAR SUGGESTIONS ───────────────────────────────────────────────────────
+document.querySelectorAll('.compar-suggest-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const idA = this.dataset.a;
+    const idB = this.dataset.b;
+    const teamA = ALL_TEAMS.find(t => t.id === idA);
+    const teamB = ALL_TEAMS.find(t => t.id === idB);
+    if (teamA) selectTeam('A', teamA);
+    if (teamB) selectTeam('B', teamB);
+  });
+});
+
 // ── INIT ──────────────────────────────────────────────────────────────────────
 setupSearch('A');
 setupSearch('B');
@@ -990,6 +1015,41 @@ lucide.createIcons();
   .stat-team-head {
     font-size: 0.75rem; font-weight: 700; color: var(--green);
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+
+  /* ── POPULAR SUGGESTIONS ───────────────── */
+  .compar-suggest-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    padding: 11px 16px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--white);
+    font-family: inherit;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    text-align: left;
+  }
+  .compar-suggest-btn::before {
+    content: '⚽';
+    margin-right: 8px;
+    font-size: 0.875rem;
+  }
+  .compar-suggest-btn::after {
+    content: '→';
+    font-size: 0.875rem;
+    color: var(--green);
+    margin-left: 8px;
+    flex-shrink: 0;
+  }
+  .compar-suggest-btn:hover {
+    border-color: var(--green);
+    background: var(--green-dim);
   }
 
   /* ── FORM ───────────────────────────────── */
