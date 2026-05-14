@@ -75,9 +75,11 @@
         </button>
       </div>
       <!-- Permission denied warning (hidden by default) -->
-      <div id="pushDeniedWarning" style="display:none;margin-top:10px;padding:8px 10px;background:rgba(238,68,68,0.1);border:1px solid rgba(238,68,68,0.3);border-radius:8px;font-size:0.75rem;color:var(--gray);">
-        <i data-lucide="alert-triangle" style="width:12px;height:12px;color:var(--red);margin-right:4px;"></i>
-        Permissão negada. Habilite nas configurações do navegador.
+      <div id="pushDeniedWarning" style="display:none;margin-top:10px;padding:8px 10px;background:rgba(238,68,68,0.1);border:1px solid rgba(238,68,68,0.3);border-radius:8px;">
+        <div style="display:flex;align-items:flex-start;gap:6px;max-width:100%;">
+          <i data-lucide="alert-triangle" style="width:12px;height:12px;color:var(--red);flex-shrink:0;margin-top:1px;"></i>
+          <span style="font-size:0.75rem;color:var(--gray);line-height:1.4;">Permissão negada pelo navegador. Habilite nas configurações do navegador para receber alertas.</span>
+        </div>
       </div>
     </div>
   </div>
@@ -110,7 +112,7 @@
   </section>
 
   <!-- MEUS ALERTAS ────────────────────────────────────────── -->
-  <section style="padding:16px;" id="myAlertsSection">
+  <section style="padding:16px;padding-bottom:80px;" id="myAlertsSection">
     <div class="section-header" style="margin-bottom:10px;">
       <span class="section-title"><i data-lucide="bell-ring" class="sec-ic"></i>Meus Alertas</span>
       <button id="clearAllBtn" style="background:none;border:none;color:var(--gray);font-size:0.75rem;font-weight:600;cursor:pointer;font-family:inherit;display:none;">Limpar todos</button>
