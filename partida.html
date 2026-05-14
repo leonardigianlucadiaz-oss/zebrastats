@@ -48,7 +48,7 @@
 
   <!-- NAVBAR -->
   <nav class="navbar">
-    <button onclick="history.back()" class="navbar__icon" style="background:none;border:none;cursor:pointer;color:var(--white);display:flex;align-items:center;justify-content:center;"><i data-lucide="arrow-left" style="width:20px;height:20px;"></i></button>
+    <button onclick="goBack('zebras.html')" class="navbar__icon" style="background:none;border:none;cursor:pointer;color:var(--white);display:flex;align-items:center;justify-content:center;"><i data-lucide="arrow-left" style="width:20px;height:20px;"></i></button>
     <span style="font-size:0.9375rem;font-weight:600;flex:1;text-align:center;">Detalhes da Partida</span>
     <button class="navbar__icon" onclick="shareMatch()" title="Compartilhar"><i data-lucide="share-2" style="width:18px;height:18px;"></i></button>
   </nav>
@@ -128,14 +128,14 @@
 
     <!-- TAB: RESUMO -->
     <div id="tab-resumo">
-      <div class="section-header"><span class="section-title">📋 Linha do Tempo</span></div>
+      <div class="section-header"><span class="section-title"><i data-lucide="list" class="sec-ic"></i>Linha do Tempo</span></div>
 
       <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;">
         <!-- Eventos -->
         <div id="timeline"></div>
       </div>
 
-      <div class="section-header" style="margin-top:16px;"><span class="section-title">👥 Escalações</span></div>
+      <div class="section-header" style="margin-top:16px;"><span class="section-title"><i data-lucide="users" class="sec-ic"></i>Escalações</span></div>
       <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px 16px;">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
           <div>
@@ -233,10 +233,10 @@
 
     <!-- TAB: H2H -->
     <div id="tab-h2h" style="display:none;">
-      <div class="section-header"><span class="section-title">🔁 Últimos Confrontos</span></div>
+      <div class="section-header"><span class="section-title"><i data-lucide="refresh-cw" class="sec-ic"></i>Últimos Confrontos</span></div>
       <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;margin-bottom:16px;" id="h2hList"></div>
 
-      <div class="section-header"><span class="section-title">📈 Histórico de Desempenho</span></div>
+      <div class="section-header"><span class="section-title"><i data-lucide="trending-up" class="sec-ic"></i>Histórico de Desempenho</span></div>
       <div class="card">
         <div style="font-size:0.8125rem;color:var(--gray);margin-bottom:12px;">Últimas 5 partidas (cada time)</div>
         <div style="margin-bottom:12px;">
@@ -254,11 +254,11 @@
 
   <!-- BOTTOM NAV (mobile only) -->
   <nav class="bottom-nav">
-    <a href="home.html"   class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="home"></i></span>Home</a>
-    <a href="zebras.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="activity"></i></span>Zebras</a>
-    <a href="liga.html"   class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="trophy"></i></span>Ligas</a>
-    <a href="time.html"   class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="star"></i></span>Times</a>
-    <a href="perfil.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="user"></i></span>Perfil</a>
+    <a href="home.html"    class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="home"></i></span>Home</a>
+    <a href="zebras.html"  class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="activity"></i></span>Zebras</a>
+    <a href="ranking.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="medal"></i></span>Ranking</a>
+    <a href="alertas.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="bell-ring"></i></span>Alertas</a>
+    <a href="perfil.html"  class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="user"></i></span>Perfil</a>
   </nav>
 
   </div><!-- /app-main -->
