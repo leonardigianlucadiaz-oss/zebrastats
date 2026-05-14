@@ -3,6 +3,67 @@
    Utilitários globais compartilhados entre todas as telas
    ============================================================ */
 
+// ── TEMA (dark / light) ───────────────────────────────────────
+// Aplica imediatamente ao carregar o script para evitar flash
+const THEME_KEY = 'zs_theme';
+(function _applyInitialTheme() {
+  try {
+    if (localStorage.getItem(THEME_KEY) === 'light')
+      document.documentElement.setAttribute('data-theme', 'light');
+  } catch {}
+})();
+
+function getTheme() {
+  try { return localStorage.getItem(THEME_KEY) || 'dark'; } catch { return 'dark'; }
+}
+
+function setTheme(theme) {
+  try { localStorage.setItem(THEME_KEY, theme); } catch {}
+  if (theme === 'light') {
+    document.documentElement.setAttribute('data-theme', 'light');
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+  }
+  _updateThemeButtons(theme);
+}
+
+function toggleTheme() { setTheme(getTheme() === 'dark' ? 'light' : 'dark'); }
+
+function _themeIcon(theme) {
+  return theme === 'light'
+    ? `<i data-lucide="moon"  style="width:16px;height:16px;display:block;"></i>`
+    : `<i data-lucide="sun"   style="width:16px;height:16px;display:block;"></i>`;
+}
+function _themeTitle(theme) {
+  return theme === 'light' ? 'Modo escuro' : 'Modo claro';
+}
+
+function _updateThemeButtons(theme) {
+  document.querySelectorAll('.zs-theme-toggle').forEach(btn => {
+    btn.innerHTML = _themeIcon(theme);
+    btn.title     = _themeTitle(theme);
+    if (typeof lucide !== 'undefined') lucide.createIcons({ nodes: [btn] });
+  });
+}
+
+function initThemeToggle() {
+  const theme = getTheme();
+  document.querySelectorAll('.navbar__actions').forEach(actions => {
+    if (actions.querySelector('.zs-theme-toggle')) return;
+    const btn = document.createElement('button');
+    btn.className = 'navbar__icon zs-theme-toggle';
+    btn.innerHTML = _themeIcon(theme);
+    btn.title     = _themeTitle(theme);
+    btn.setAttribute('aria-label', _themeTitle(theme));
+    btn.addEventListener('click', toggleTheme);
+    // Insere antes do primeiro ícone (busca)
+    const firstIcon = actions.querySelector('a.navbar__icon');
+    if (firstIcon) actions.insertBefore(btn, firstIcon);
+    else actions.appendChild(btn);
+    if (typeof lucide !== 'undefined') lucide.createIcons({ nodes: [btn] });
+  });
+}
+
 // ── BELL BADGE (contador de notificações não lidas) ───────────
 /**
  * Injeta/atualiza o badge de contagem no ícone de sino em qualquer página.
@@ -416,6 +477,7 @@ document.addEventListener('DOMContentLoaded', () => {
   updatePlanBadge();
   addRippleEffect();
   setActiveNavItem();
+  initThemeToggle();
 
   // ── PWA: inject manifest link ──────────────────────────────────
   if (!document.querySelector('link[rel="manifest"]')) {

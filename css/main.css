@@ -33,6 +33,36 @@
   --transition: 0.2s ease;
 }
 
+/* ── LIGHT THEME ─────────────────────────────────────────────── */
+[data-theme="light"] {
+  --bg:         #F0F4F8;
+  --card:       #FFFFFF;
+  --card2:      #E8EEF5;
+  --green:      #1AAF45;
+  --green-dim:  rgba(26, 175, 69, 0.12);
+  --green-glow: rgba(26, 175, 69, 0.22);
+  --gold:       #B87A00;
+  --gold-dim:   rgba(184, 122, 0, 0.14);
+  --red:        #C41E1E;
+  --red-dim:    rgba(196, 30, 30, 0.12);
+  --white:      #0D1A2A;
+  --gray:       #5A6E82;
+  --gray-dim:   rgba(90, 110, 130, 0.12);
+  --input-bg:   #EDF2F7;
+  --border:     #C5D5E5;
+  --dark-text:  #0D1A2A;
+  --shadow:     0 4px 24px rgba(0, 0, 0, 0.10);
+}
+
+/* Transição suave ao trocar tema */
+body, .app-wrapper, .app-sidebar, .app-main,
+.navbar, .bottom-nav, .card, .zebra-card,
+.sidebar__brand, .sidebar__nav-item, .sidebar__footer,
+.filter-chip, .tab-bar, .tab-bar__item,
+.modal, .modal-overlay, .lock-banner,
+.search-bar, input, textarea, select,
+.btn, .badge { transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease; }
+
 html { font-size: 16px; }
 
 body {
