@@ -84,6 +84,9 @@
     </div>
   </section>
 
+  <!-- PODIUM TOP 3 -->
+  <div id="podiumBlock" style="display:none;"></div>
+
   <!-- LISTA DE RANKING -->
   <main class="content" id="rankingMain" style="padding-bottom:80px;">
     <!-- skeleton -->
@@ -233,6 +236,42 @@ function renderLeagueFilters() {
   });
 }
 
+// ── PODIUM ────────────────────────────────────────────────────────────────────
+function renderPodium(data) {
+  const top3 = data.slice(0, 3);
+  if (top3.length < 1) { document.getElementById('podiumBlock').style.display = 'none'; return; }
+
+  // order: [1]=2nd, [0]=1st, [2]=3rd (podium arrangement)
+  const order = [top3[1], top3[0], top3[2]].filter(Boolean);
+  const posMap = [2, 1, 3];
+  const clsMap = ['podium-card--2', 'podium-card--1', 'podium-card--3'];
+
+  const wrap = document.createElement('div');
+  wrap.className = 'podium-wrap';
+
+  order.forEach((z, i) => {
+    if (!z) return;
+    const pos = posMap[i];
+    const medals = {1:'🥇', 2:'🥈', 3:'🥉'};
+    const card = document.createElement('div');
+    card.className = `podium-card ${clsMap[i]}`;
+    card.innerHTML = `
+      <div class="podium-medal">${medals[pos]}</div>
+      <div class="podium-teams">${z.home}<br><span style="color:var(--gray);font-weight:400;">vs</span><br>${z.away}</div>
+      <div class="podium-league">${z.league}</div>
+      <div class="podium-zi">ZI ${z.zi}</div>
+      <div class="podium-odd">odd ${z.odds_h}</div>`;
+    card.addEventListener('click', () => window.location.href = 'partida.html');
+    wrap.appendChild(card);
+  });
+
+  const block = document.getElementById('podiumBlock');
+  block.innerHTML = '';
+  block.appendChild(wrap);
+  block.appendChild(Object.assign(document.createElement('div'), { className: 'podium-base' }));
+  block.style.display = 'block';
+}
+
 // ── SHARE ─────────────────────────────────────────────────────────────────────
 async function shareZebra(z, pos) {
   const text = `#${pos} 🦓 ${z.home} ${z.hs}×${z.as} ${z.away} — Zebra Index ${z.zi} | ${z.league} · ${z.date}`;
@@ -265,6 +304,9 @@ function renderRanking() {
 
   // Sort by ZI desc
   list.sort((a, b) => b.zi - a.zi);
+
+  // Render podium for top 3
+  renderPodium(list);
 
   if (!list.length) {
     container.innerHTML = `<div style="text-align:center;padding:48px 16px;color:var(--gray);">
@@ -400,6 +442,7 @@ document.querySelectorAll('#periodBar .tab-bar__item').forEach(btn => {
 // ── SKELETON HIDE ─────────────────────────────────────────────────────────────
 function showRanking() {
   document.getElementById('skeletonList').style.display = 'none';
+  document.getElementById('podiumBlock').style.display = 'none'; // will be shown by renderPodium
   const list = document.getElementById('rankingList');
   list.style.display = 'flex';
   list.style.flexDirection = 'column';
@@ -451,6 +494,45 @@ lucide.createIcons();
 
   /* Share button hover */
   .share-btn:hover { color: var(--green) !important; }
+
+  /* ── PODIUM ───────────────────────────────────── */
+  .podium-wrap {
+    display: grid;
+    grid-template-columns: 1fr 1.15fr 1fr;
+    align-items: flex-end;
+    gap: 8px;
+    padding: 16px 16px 0;
+  }
+  .podium-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 8px 0;
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+    cursor: pointer;
+    transition: filter var(--transition);
+    text-align: center;
+    position: relative;
+  }
+  .podium-card:hover { filter: brightness(1.1); }
+  .podium-card--1 { background: linear-gradient(180deg, rgba(255,200,50,0.18) 0%, rgba(255,200,50,0.06) 100%); border: 1px solid rgba(255,200,50,0.4); border-bottom: none; min-height: 140px; }
+  .podium-card--2 { background: linear-gradient(180deg, rgba(192,192,192,0.14) 0%, rgba(192,192,192,0.04) 100%); border: 1px solid rgba(192,192,192,0.3); border-bottom: none; min-height: 115px; }
+  .podium-card--3 { background: linear-gradient(180deg, rgba(205,127,50,0.14) 0%, rgba(205,127,50,0.04) 100%); border: 1px solid rgba(205,127,50,0.25); border-bottom: none; min-height: 100px; }
+  .podium-medal { font-size: 1.5rem; line-height: 1; }
+  .podium-card--1 .podium-medal { font-size: 2rem; }
+  .podium-teams { font-size: 0.6875rem; font-weight: 600; color: var(--white); line-height: 1.3; }
+  .podium-league { font-size: 0.5625rem; color: var(--gray); margin-top: 1px; }
+  .podium-zi { font-size: 0.875rem; font-weight: 800; margin-top: 4px; }
+  .podium-card--1 .podium-zi { font-size: 1.125rem; color: var(--gold); }
+  .podium-card--2 .podium-zi { color: #c0c0c0; }
+  .podium-card--3 .podium-zi { color: #cd7f32; }
+  .podium-odd { font-size: 0.625rem; color: var(--gray); background: var(--card2); border-radius: var(--radius-pill); padding: 2px 7px; margin-top: 3px; margin-bottom: 8px; }
+  .podium-base {
+    height: 4px;
+    background: var(--border);
+    margin: 0 16px;
+  }
 </style>
 </body>
 </html>

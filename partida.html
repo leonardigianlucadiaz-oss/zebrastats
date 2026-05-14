@@ -168,8 +168,10 @@
           <div style="display:flex;justify-content:space-between;width:100%;font-size:0.625rem;color:var(--gray);margin-bottom:4px;">
             <span>Esperado</span><span>Improvável</span><span>Zebra</span>
           </div>
-          <div class="zebra-meter-bar">
-            <div id="ziMeter" class="zebra-meter-fill" style="width:82%;"></div>
+          <div class="zebra-meter-bar" style="position:relative;">
+            <div id="ziMeter" class="zebra-meter-fill" style="width:0%;position:relative;">
+              <div style="position:absolute;right:-5px;top:50%;transform:translateY(-50%);width:10px;height:10px;border-radius:50%;background:var(--white);box-shadow:0 0 6px rgba(255,255,255,0.8);"></div>
+            </div>
           </div>
           <div style="display:flex;justify-content:space-between;width:100%;font-size:0.625rem;color:var(--gray);margin-top:4px;">
             <span>0</span><span>5</span><span>10</span>
@@ -204,29 +206,44 @@
 
       <!-- FATORES DA ZEBRA -->
       <div class="card card--gold-border">
-        <div style="font-size:0.875rem;font-weight:600;margin-bottom:12px;color:var(--gold);">🔍 Fatores que contribuíram</div>
-        <div style="display:flex;flex-direction:column;gap:10px;">
-          <div style="display:flex;gap:10px;align-items:flex-start;">
-            <span style="font-size:1rem;flex-shrink:0;">📅</span>
+        <div style="font-size:0.875rem;font-weight:600;margin-bottom:12px;display:flex;align-items:center;gap:6px;">
+          <i data-lucide="search" style="width:16px;height:16px;color:var(--gold);"></i>
+          <span style="color:var(--gold);">Fatores que contribuíram</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div class="factor-card factor-card--gold">
+            <div class="factor-card__icon"><i data-lucide="calendar-clock" style="width:16px;height:16px;color:var(--gold);"></i></div>
             <div>
-              <div style="font-size:0.8125rem;font-weight:600;">Flamengo jogava pelo 3º jogo em 7 dias</div>
-              <div style="font-size:0.75rem;color:var(--gray);">Desgaste físico elevado identificado no histórico</div>
+              <div class="factor-card__title">Flamengo no 3º jogo em 7 dias</div>
+              <div class="factor-card__sub">Desgaste físico elevado identificado no histórico</div>
             </div>
           </div>
-          <div style="display:flex;gap:10px;align-items:flex-start;">
-            <span style="font-size:1rem;flex-shrink:0;">🏟️</span>
+          <div class="factor-card factor-card--green">
+            <div class="factor-card__icon"><i data-lucide="home" style="width:16px;height:16px;color:var(--green);"></i></div>
             <div>
-              <div style="font-size:0.8125rem;font-weight:600;">Botafogo em casa — fator mando forte</div>
-              <div style="font-size:0.75rem;color:var(--gray);">72% de aproveitamento em casa nesta temporada</div>
+              <div class="factor-card__title">Botafogo em casa — fator mando forte</div>
+              <div class="factor-card__sub">72% de aproveitamento em casa nesta temporada</div>
             </div>
           </div>
-          <div style="display:flex;gap:10px;align-items:flex-start;">
-            <span style="flex-shrink:0;display:flex;align-items:center;"><i data-lucide="bar-chart-2" style="width:16px;height:16px;color:var(--gold);"></i></span>
+          <div class="factor-card factor-card--blue">
+            <div class="factor-card__icon"><i data-lucide="bar-chart-2" style="width:16px;height:16px;color:#60a5fa;"></i></div>
             <div>
-              <div style="font-size:0.8125rem;font-weight:600;">xG favorável ao Botafogo nos últimos 3 jogos</div>
-              <div style="font-size:0.75rem;color:var(--gray);">Expected Goals indicavam oportunidades reais de gol</div>
+              <div class="factor-card__title">xG favorável ao Botafogo nos últimos 3 jogos</div>
+              <div class="factor-card__sub">Expected Goals indicavam oportunidades reais de gol</div>
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- HISTÓRICO PROBABILIDADE -->
+      <div class="card" style="margin-top:12px;display:flex;align-items:center;gap:12px;background:rgba(46,230,92,0.05);border-color:rgba(46,230,92,0.2);">
+        <div style="width:48px;height:48px;border-radius:var(--radius-md);background:var(--green-dim);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <i data-lucide="history" style="width:22px;height:22px;color:var(--green);"></i>
+        </div>
+        <div>
+          <div style="font-size:0.8125rem;color:var(--gray);margin-bottom:2px;">Histórico com ZI acima de 7</div>
+          <div style="font-size:1rem;font-weight:700;">Azarão venceu em <span style="color:var(--green);">61%</span> dos casos</div>
+          <div style="font-size:0.6875rem;color:var(--gray);margin-top:2px;">Em 23 jogos similares nos últimos 3 anos</div>
         </div>
       </div>
     </div>
@@ -280,6 +297,17 @@
     }
   }
 
+  // ── ZI METER ANIMATION ──────────────────────────────────────────
+  function animateMeter(pct) {
+    const el = document.getElementById('ziMeter');
+    if (!el) return;
+    el.style.width = '0%';
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      el.style.transition = 'width 1.1s cubic-bezier(0.4,0,0.2,1)';
+      el.style.width = pct + '%';
+    }));
+  }
+
   // ── TABS ────────────────────────────────────────────────────────
   document.querySelectorAll('.tab-bar__item').forEach(btn => {
     btn.addEventListener('click', function() {
@@ -289,6 +317,7 @@
       ['resumo','stats','zebra','h2h'].forEach(t => {
         document.getElementById(`tab-${t}`).style.display = t === tab ? 'block' : 'none';
       });
+      if (this.dataset.tab === 'zebra') animateMeter(82);
     });
   });
 
@@ -516,7 +545,7 @@
             const labelPT = { grande:'Grande', media:'Média', leve:'Leve' }[cls];
             document.getElementById('ziValue').textContent    = zi;
             document.getElementById('ziDesc').textContent     = `${labelPT} Zebra · ZI ${zi}`;
-            document.getElementById('ziMeter').style.width    = `${zi * 10}%`;
+            animateMeter(zi * 10);
             if (zi === 0) document.getElementById('zebraBadge').style.display = 'none';
           }
         }
@@ -549,6 +578,35 @@
   .sec-ic  { width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 5px; flex-shrink: 0; }
   .section-title { display: inline-flex; align-items: center; }
   .navbar__icon i { display: block; }
+
+  /* ── ZI METER ── */
+  .zebra-meter-fill {
+    background: linear-gradient(90deg, var(--gold) 0%, var(--green) 60%, var(--red) 100%);
+  }
+
+  /* ── FACTOR CARDS ── */
+  .factor-card {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    border-left: 3px solid transparent;
+  }
+  .factor-card__icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .factor-card__title { font-size: 0.8125rem; font-weight: 600; margin-bottom: 2px; }
+  .factor-card__sub   { font-size: 0.75rem; color: var(--gray); line-height: 1.4; }
+  .factor-card--gold  { background: rgba(255,200,50,0.07);  border-color: var(--gold); }
+  .factor-card--gold  .factor-card__icon { background: rgba(255,200,50,0.15); }
+  .factor-card--green { background: rgba(46,230,92,0.07);  border-color: var(--green); }
+  .factor-card--green .factor-card__icon { background: rgba(46,230,92,0.15); }
+  .factor-card--blue  { background: rgba(96,165,250,0.07); border-color: #60a5fa; }
+  .factor-card--blue  .factor-card__icon { background: rgba(96,165,250,0.15); }
 </style>
 </body>
 </html>
