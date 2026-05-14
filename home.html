@@ -338,6 +338,7 @@
   </style>
 
   <script src="js/config.js"></script>
+  <script src="js/zebra-engine.js"></script>
   <script src="js/api.js"></script>
   <script src="js/main.js"></script>
   <script>
@@ -722,6 +723,41 @@
     // ── ZEBRAS DO DIA — conteúdo PRO ─────────────────────
     function initZebrasDoDia() {
       const isPro = getUserPlan() === 'pro';
+
+      // Tenta carregar zebras reais
+      if (typeof ZebraAPI !== 'undefined' && ZebraAPI.isConfigured.footballData() && typeof ZebraEngine !== 'undefined') {
+        ZebraAPI.fetchRealZebras('ENG', 5).then(real => {
+          if (!real.length) return;
+          // Substitui o conteúdo do container com as zebras reais
+          const container = document.getElementById('zebrasDoDiaList');
+          if (!container) return;
+          container.innerHTML = '';
+          real.slice(0, isPro ? 5 : 2).forEach(z => {
+            const cls = z.ziClass || 'leve';
+            const clr = cls==='grande'?'var(--red)':cls==='media'?'var(--gold)':'var(--gray)';
+            const card = document.createElement('div');
+            card.className = 'zebra-card';
+            card.style.cursor = 'pointer';
+            card.innerHTML = `
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                <span style="font-size:0.6875rem;color:var(--gray);">${z.league} · ${z.date} ⚡</span>
+                <span style="font-size:0.75rem;font-weight:800;padding:3px 8px;border-radius:6px;background:${clr}22;color:${clr};">ZI ${z.zi}</span>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;">
+                <span style="font-size:0.875rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${z.home}</span>
+                <span style="font-size:1.25rem;font-weight:800;color:var(--white);">${z.hs}–${z.as}</span>
+                <span style="font-size:0.875rem;font-weight:700;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${z.away}</span>
+              </div>`;
+            card.addEventListener('click', () => {
+              const p = new URLSearchParams({ home:z.home, away:z.away, score:`${z.hs} – ${z.as}`, zi:z.zi, league:z.league, date:z.date, ziClass:z.ziClass||'leve' });
+              window.location.href = `partida.html?${p}`;
+            });
+            container.appendChild(card);
+          });
+          if (typeof lucide !== 'undefined') lucide.createIcons();
+        }).catch(() => {});
+      }
+
       const lockBanner = document.querySelector('.lock-banner');
       const sectionLink = document.querySelector('.section-link.text-gold');
 
