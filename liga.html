@@ -633,6 +633,23 @@
     loadFDMatches();
     loadFDScorers();
   }
+  // ── URL PARAM ?id= ─────────────────────────────────────────────
+  (function applyUrlParam() {
+    const urlLid = new URLSearchParams(location.search).get('id');
+    if (!urlLid) return;
+    const chip = document.querySelector(`#leaguePicker .filter-chip[data-lid="${urlLid}"]`);
+    if (!chip) return;
+    document.querySelectorAll('#leaguePicker .filter-chip').forEach(b => b.classList.remove('active'));
+    chip.classList.add('active');
+    activeLid = urlLid;
+    document.getElementById('leagueName').textContent = chip.dataset.name  || urlLid;
+    document.getElementById('leagueSub').textContent  = chip.dataset.sub   || '';
+    document.getElementById('statLider').textContent  = chip.dataset.lider || '—';
+    document.getElementById('statZebras').textContent = chip.dataset.zebras|| '—';
+    document.getElementById('statRodada').textContent = chip.dataset.rodada|| '—';
+    syncFavBtn();
+    loadHeroLogo(activeLid);
+  })();
   loadLeagueCrests(activeLid);
   initRealData();
   lucide.createIcons();

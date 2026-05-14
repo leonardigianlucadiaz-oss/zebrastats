@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ZebraStats — Meus Favoritos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/main.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config = { corePlugins: { preflight: false } }</script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+</head>
+<body>
+<div class="app-wrapper">
+
+  <!-- SIDEBAR (desktop) -->
+  <aside class="app-sidebar">
+    <a href="home.html" class="sidebar__brand">
+      <div class="sidebar__brand-icon">Z</div>
+      Zebra<span>Stats</span>
+    </a>
+    <nav class="sidebar__nav">
+      <a href="home.html"    class="sidebar__nav-item"><i data-lucide="home"></i><span>Home</span></a>
+      <a href="zebras.html"  class="sidebar__nav-item"><i data-lucide="activity"></i><span>Zebras</span></a>
+      <a href="ranking.html" class="sidebar__nav-item"><i data-lucide="medal"></i><span>Ranking</span></a>
+      <a href="comparar.html"class="sidebar__nav-item"><i data-lucide="git-compare"></i><span>Comparar</span></a>
+      <a href="alertas.html" class="sidebar__nav-item"><i data-lucide="bell-ring"></i><span>Alertas</span></a>
+      <a href="liga.html"    class="sidebar__nav-item"><i data-lucide="trophy"></i><span>Ligas</span></a>
+      <a href="time.html"    class="sidebar__nav-item"><i data-lucide="star"></i><span>Times</span></a>
+      <a href="perfil.html"  class="sidebar__nav-item"><i data-lucide="user"></i><span>Perfil</span></a>
+    </nav>
+    <div class="sidebar__footer">
+      <div class="sidebar__user">
+        <div class="sidebar__user-avatar">G</div>
+        <div class="sidebar__user-info">
+          <div class="sidebar__user-name">Gianluca</div>
+          <div class="sidebar__user-plan">Plano Free</div>
+        </div>
+      </div>
+      <a href="assinatura.html" class="badge badge--free" style="text-decoration:none;cursor:pointer;">FREE → PRO</a>
+    </div>
+  </aside>
+
+  <!-- MAIN AREA -->
+  <div class="app-main">
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <button onclick="goBack('home.html')" class="navbar__icon" style="background:none;border:none;cursor:pointer;color:var(--white);display:flex;align-items:center;justify-content:center;">
+      <i data-lucide="arrow-left" style="width:20px;height:20px;"></i>
+    </button>
+    <span style="font-size:1rem;font-weight:700;flex:1;text-align:center;">Meus Favoritos</span>
+    <a href="explorar.html" class="navbar__icon" title="Explorar">
+      <i data-lucide="pencil" style="width:18px;height:18px;"></i>
+    </a>
+  </nav>
+
+  <!-- CONTENT -->
+  <main class="content">
+
+    <div class="section-header">
+      <span class="section-title"><i data-lucide="star" class="sec-ic"></i>Meus Times</span>
+    </div>
+    <div id="teamsContainer"></div>
+
+    <div class="section-header" style="margin-top:8px;">
+      <span class="section-title"><i data-lucide="trophy" class="sec-ic"></i>Minhas Ligas</span>
+    </div>
+    <div id="leaguesContainer"></div>
+
+  </main>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <a href="home.html"    class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="home"></i></span>Home</a>
+    <a href="zebras.html"  class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="activity"></i></span>Zebras</a>
+    <a href="ranking.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="medal"></i></span>Ranking</a>
+    <a href="alertas.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="bell-ring"></i></span>Alertas</a>
+    <a href="perfil.html"  class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="user"></i></span>Perfil</a>
+  </nav>
+
+  </div><!-- /app-main -->
+</div><!-- /app-wrapper -->
+
+<div class="toast" id="toast"></div>
+
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/main.js"></script>
+<script>
+const LEAGUE_NAMES = {
+  BRA: 'Brasileirão',
+  ENG: 'Premier League',
+  ESP: 'La Liga',
+  ITA: 'Serie A',
+  GER: 'Bundesliga',
+  FRA: 'Ligue 1',
+  POR: 'Liga Portugal',
+  UCL: 'Champions League'
+};
+
+function renderTeams() {
+  const container = document.getElementById('teamsContainer');
+  const ids = getFavorites ? getFavorites() : [];
+  const meta = getFavTeamsData ? getFavTeamsData() : {};
+
+  if (!ids || ids.length === 0) {
+    container.innerHTML = `
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:32px 20px;text-align:center;margin-bottom:10px;">
+        <div style="font-size:2.5rem;margin-bottom:12px;">🦓</div>
+        <div style="font-weight:600;margin-bottom:6px;">Nenhum time favoritado ainda</div>
+        <div style="font-size:0.8125rem;color:var(--gray);margin-bottom:16px;line-height:1.5;">Adicione seus times favoritos para acompanhar suas zebras.</div>
+        <a href="explorar.html" class="btn btn--primary" style="display:inline-block;text-decoration:none;">Explorar Times</a>
+      </div>`;
+    lucide.createIcons();
+    return;
+  }
+
+  let html = '';
+  ids.forEach(id => {
+    const m = meta[id] || {};
+    const name = m.name || id;
+    const color = m.color || 'var(--green)';
+    const league = m.league || '—';
+    html += `
+      <div class="fav-team-card" data-id="${id}" style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px 16px;border-left:3px solid ${color};display:flex;align-items:center;gap:12px;margin-bottom:10px;cursor:pointer;">
+        <div style="width:8px;height:8px;border-radius:50%;background:${color};flex-shrink:0;"></div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-weight:600;font-size:0.9375rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${name}</div>
+          <div style="font-size:0.75rem;color:var(--gray);margin-top:2px;">${league}</div>
+        </div>
+        <button class="fav-remove-btn" data-id="${id}" data-name="${name}" title="Remover dos favoritos" style="background:none;border:none;cursor:pointer;padding:6px;display:flex;align-items:center;justify-content:center;color:var(--red);flex-shrink:0;border-radius:6px;transition:background 0.15s;">
+          <i data-lucide="heart-off" style="width:18px;height:18px;"></i>
+        </button>
+      </div>`;
+  });
+  container.innerHTML = html;
+
+  // Card click → team profile (except remove button)
+  container.querySelectorAll('.fav-team-card').forEach(card => {
+    card.addEventListener('click', function(e) {
+      if (e.target.closest('.fav-remove-btn')) return;
+      window.location.href = 'time.html?team=' + this.dataset.id;
+    });
+  });
+
+  // Remove buttons
+  container.querySelectorAll('.fav-remove-btn').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      toggleFavorite(this.dataset.id, this.dataset.name);
+      renderTeams();
+    });
+  });
+
+  lucide.createIcons();
+}
+
+function renderLeagues() {
+  const container = document.getElementById('leaguesContainer');
+  const ids = getFavLeagues ? getFavLeagues() : [];
+
+  if (!ids || ids.length === 0) {
+    container.innerHTML = `
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:32px 20px;text-align:center;margin-bottom:10px;">
+        <div style="font-size:2.5rem;margin-bottom:12px;">⭐</div>
+        <div style="font-weight:600;margin-bottom:6px;">Nenhuma liga favoritada ainda</div>
+        <div style="font-size:0.8125rem;color:var(--gray);margin-bottom:16px;line-height:1.5;">Adicione ligas para ver zebras e estatísticas das suas competições favoritas.</div>
+        <a href="liga.html" class="btn btn--primary" style="display:inline-block;text-decoration:none;">Explorar Ligas</a>
+      </div>`;
+    lucide.createIcons();
+    return;
+  }
+
+  let html = '';
+  ids.forEach(lid => {
+    const name = LEAGUE_NAMES[lid] || lid;
+    const flagHtml = flagImg ? flagImg(lid, 20) : '';
+    html += `
+      <div class="fav-league-card" data-id="${lid}" style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px 16px;border-left:3px solid var(--gold);display:flex;align-items:center;gap:12px;margin-bottom:10px;cursor:pointer;">
+        <div style="flex-shrink:0;">${flagHtml}</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-weight:600;font-size:0.9375rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${name}</div>
+        </div>
+        <button class="fav-league-remove-btn" data-id="${lid}" data-name="${name}" title="Remover dos favoritos" style="background:none;border:none;cursor:pointer;padding:6px;display:flex;align-items:center;justify-content:center;color:var(--gold);flex-shrink:0;border-radius:6px;transition:background 0.15s;">
+          <i data-lucide="star-off" style="width:18px;height:18px;"></i>
+        </button>
+      </div>`;
+  });
+  container.innerHTML = html;
+
+  // Card click → league page
+  container.querySelectorAll('.fav-league-card').forEach(card => {
+    card.addEventListener('click', function(e) {
+      if (e.target.closest('.fav-league-remove-btn')) return;
+      window.location.href = 'liga.html?id=' + this.dataset.id;
+    });
+  });
+
+  // Remove buttons
+  container.querySelectorAll('.fav-league-remove-btn').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      toggleFavLeague(this.dataset.id, this.dataset.name);
+      renderLeagues();
+    });
+  });
+
+  lucide.createIcons();
+}
+
+// Init
+updatePlanBadge && updatePlanBadge();
+renderTeams();
+renderLeagues();
+lucide.createIcons();
+</script>
+
+<style>
+  .sec-ic { width:14px; height:14px; display:inline-block; vertical-align:middle; margin-right:5px; flex-shrink:0; }
+  .section-title { display:inline-flex; align-items:center; }
+  .bottom-nav__icon i { width:20px; height:20px; display:block; }
+  .navbar__icon i { display:block; }
+
+  .fav-team-card:hover,
+  .fav-league-card:hover { opacity:0.9; }
+
+  .fav-remove-btn:hover { background:rgba(238,68,68,0.1) !important; }
+  .fav-league-remove-btn:hover { background:rgba(255,200,50,0.1) !important; }
+
+  .btn--primary {
+    background:var(--green); color:#000; border:none; cursor:pointer;
+    font-family:inherit; font-weight:700; font-size:0.875rem;
+    padding:10px 20px; border-radius:var(--radius-pill);
+    transition:opacity .15s;
+  }
+  .btn--primary:hover { opacity:.9; }
+</style>
+</body>
+</html>

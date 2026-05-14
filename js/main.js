@@ -417,6 +417,21 @@ document.addEventListener('DOMContentLoaded', () => {
   addRippleEffect();
   setActiveNavItem();
 
+  // ── PWA: inject manifest link ──────────────────────────────────
+  if (!document.querySelector('link[rel="manifest"]')) {
+    const _mlink = document.createElement('link');
+    _mlink.rel   = 'manifest';
+    _mlink.href  = 'manifest.json';
+    document.head.appendChild(_mlink);
+  }
+
+  // ── PWA: register service worker ──────────────────────────────
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    });
+  }
+
   // Adiciona animação de ripple e spinner via CSS
   const style = document.createElement('style');
   style.textContent = `

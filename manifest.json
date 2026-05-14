@@ -1,0 +1,27 @@
+{
+  "name": "ZebraStats",
+  "short_name": "ZebraStats",
+  "description": "Estatísticas e alertas de zebras no futebol mundial",
+  "start_url": "home.html",
+  "scope": ".",
+  "display": "standalone",
+  "background_color": "#0D1A2A",
+  "theme_color": "#0D1A2A",
+  "orientation": "portrait",
+  "lang": "pt-BR",
+  "icons": [
+    {
+      "src": "icons/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["sports", "news"]
+}
