@@ -75,19 +75,6 @@
     </div>
   </section>
 
-  <!-- FILTRO POR LIGA -->
-  <div style="background:var(--card2);padding:8px 16px;border-bottom:1px solid var(--border);">
-    <div class="scroll-x" style="gap:6px;" id="ligaFilterChips">
-      <button class="filter-chip active" data-liga="todas">Todas</button>
-      <button class="filter-chip" data-liga="BRA">🇧🇷 Brasileirão</button>
-      <button class="filter-chip" data-liga="ENG">🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier</button>
-      <button class="filter-chip" data-liga="ESP">🇪🇸 La Liga</button>
-      <button class="filter-chip" data-liga="ITA">🇮🇹 Serie A</button>
-      <button class="filter-chip" data-liga="GER">🇩🇪 Bundesliga</button>
-      <button class="filter-chip" data-liga="UCL">🏆 Champions</button>
-    </div>
-  </div>
-
   <!-- HEATMAP SEMANAL -->
   <section style="padding:12px 16px;border-bottom:1px solid var(--border);background:var(--card2);">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
@@ -441,17 +428,6 @@
       document.querySelectorAll('#filterRow .filter-chip').forEach(c => c.classList.remove('active'));
       this.classList.add('active');
       activeFilter = this.dataset.filter;
-      renderZebras();
-    });
-  });
-
-  // ── FILTRO POR LIGA ──────────────────────────────────────────
-  let activeZebraLiga = 'todas';
-  document.querySelectorAll('#ligaFilterChips .filter-chip').forEach(btn => {
-    btn.addEventListener('click', function() {
-      document.querySelectorAll('#ligaFilterChips .filter-chip').forEach(b => b.classList.remove('active'));
-      this.classList.add('active');
-      activeZebraLiga = this.dataset.liga;
       renderZebras();
     });
   });

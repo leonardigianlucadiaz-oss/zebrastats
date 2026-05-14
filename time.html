@@ -323,7 +323,8 @@
     const TEAMS = {
       torino: {
         name: 'Torino FC', abbr: 'TOR', league: 'Serie A · Itália',
-        color: '#851414', w:8, d:5, l:11, zebras:7, zi: 6.4,
+        color: '#851414', stadium: 'Olimpico Grande Torino',
+        w:8, d:5, l:11, zebras:7, zi: 6.4,
         rating: 3.5,
         ratingDesc: 'Alta frequência de resultados inesperados nas últimas 3 temporadas.',
         losing:  [
@@ -864,7 +865,7 @@
       document.getElementById('navTitle').textContent  = t.name;
       document.getElementById('heroShield').textContent = t.abbr;
       document.getElementById('heroName').textContent   = t.name;
-      document.getElementById('heroLeague').textContent = t.league;
+      document.getElementById('heroLeague').textContent = t.stadium ? `${t.league} · ${t.stadium}` : t.league;
       document.getElementById('teamHero').style.background = `linear-gradient(160deg,${t.color} 0%,${t.color}55 100%)`;
       document.getElementById('statW').textContent = t.w;
       document.getElementById('statD').textContent = t.d;
@@ -966,6 +967,11 @@
         const results = await ZebraAPI.sportsDb.searchTeam(teamName);
         if (!results?.teams?.length) return;
         const raw  = results.teams[0];
+        // Defensive: verify the API result is actually the team we searched for
+        const searchWords = teamName.toLowerCase().replace(/\b(fc|sc|ac|cf|sd|ud)\b/g,'').trim().split(/\s+/).filter(w => w.length > 2);
+        const resultName  = (raw.strTeam || '').toLowerCase();
+        const isMatch = searchWords.some(w => resultName.includes(w));
+        if (!isMatch) { console.warn('[Time] SDB mismatch:', raw.strTeam, '≠', teamName); return; }
         const team = ZebraAPI.transform.sdbTeam(raw);
         currentSdbTeamId = raw.idTeam || null;
 
