@@ -156,6 +156,52 @@ const ZebraAPI = (() => {
     async getMatchOdds(matchId)  { return this._fetch(`/football-get-match-odds?matchid=${matchId}`); },
   };
 
+  /* ── THE ODDS API (opcional — 500 req/mês grátis) ──────────── */
+  // https://the-odds-api.com  → cadastro grátis, chave em Perfil → Configurar APIs
+  const ODDS = {
+    BASE   : 'https://api.the-odds-api.com/v4',
+    SPORTS : {
+      ENG:'soccer_epl', ESP:'soccer_spain_la_liga', ITA:'soccer_italy_serie_a',
+      GER:'soccer_germany_bundesliga', FRA:'soccer_france_ligue_one',
+      BRA:'soccer_brazil_campeonato', POR:'soccer_portugal_primeira_liga',
+    },
+
+    key() { return (typeof ZEBRA_CONFIG !== 'undefined' ? ZEBRA_CONFIG.ODDS_API_KEY : '') || ''; },
+
+    async getRecentScores(lid, daysFrom = 3) {
+      const k = this.key(); if (!k) return [];
+      const sport = this.SPORTS[lid]; if (!sport) return [];
+      const ck = `odds_${lid}_${daysFrom}`;
+      const hit = _cache.get(ck); if (hit) return hit;
+      try {
+        const url = `${this.BASE}/sports/${sport}/scores/?apiKey=${k}&daysFrom=${daysFrom}`;
+        const r = await fetch(url);
+        if (!r.ok) { console.warn(`[OddsAPI] ${r.status}`); return []; }
+        const data = await r.json();
+        _cache.set(ck, data || []);
+        return data || [];
+      } catch(e) { console.warn('[OddsAPI] erro:', e.message); return []; }
+    },
+
+    // Retorna mapa: "HomeTeam vs AwayTeam" → { homeOdd, awayOdd }
+    async getOddsMap(lid, daysFrom = 3) {
+      const games = await this.getRecentScores(lid, daysFrom);
+      const map = {};
+      games.forEach(g => {
+        if (!g.bookmakers?.length) return;
+        const bk = g.bookmakers[0];
+        const h2h = bk.markets?.find(m => m.key === 'h2h');
+        if (!h2h?.outcomes?.length) return;
+        const homeOut = h2h.outcomes.find(o => o.name === g.home_team);
+        const awayOut = h2h.outcomes.find(o => o.name === g.away_team);
+        if (homeOut && awayOut) {
+          map[`${g.home_team}|${g.away_team}`] = { homeOdd: homeOut.price, awayOdd: awayOut.price };
+        }
+      });
+      return map;
+    },
+  };
+
   /* ── TRANSFORMERS ───────────────────────────────────────────── */
   const transform = {
 
@@ -282,26 +328,131 @@ const ZebraAPI = (() => {
 
   /* ── ZEBRA INDEX ────────────────────────────────────────────── */
   const zebra = {
-    /* A partir de odds: odd alta do vencedor = ele era azarão */
     fromOdds(winnerOdd) {
+      if (typeof ZebraEngine !== 'undefined') {
+        const r = ZebraEngine.calc({ homeScore:1, awayScore:0, homeOdd:winnerOdd, awayOdd:1.3 });
+        return r.zi;
+      }
       const o = parseFloat(winnerOdd);
       if (!o || o <= 1) return 0;
       return parseFloat(Math.min(10, Math.log(o) * 3.8).toFixed(1));
     },
-
-    /* A partir de posições na tabela: vencedor estava mais abaixo */
     fromPositions(winnerPos, loserPos, totalTeams = 20) {
-      const diff = loserPos - winnerPos;   // + = vencedor era pior colocado
-      if (diff <= 0) return 0;             // resultado esperado
+      if (typeof ZebraEngine !== 'undefined') {
+        const r = ZebraEngine.calc({ homeScore:1, awayScore:0, homePosn:winnerPos, awayPosn:loserPos, lid: totalTeams === 18 ? 'GER' : 'ENG' });
+        return r.zi;
+      }
+      const diff = loserPos - winnerPos;
+      if (diff <= 0) return 0;
       return parseFloat(Math.min(10, (diff / totalTeams) * 12).toFixed(1));
     },
-
     classify(zi) {
       if (zi >= 7) return { cls:'grande', label:'🔴 Grande' };
       if (zi >= 4) return { cls:'media',  label:'🟠 Média'  };
       return           { cls:'leve',   label:'🟡 Leve'   };
     },
   };
+
+  /* ── LEAGUE LABELS ──────────────────────────────────────────── */
+  const _LEAGUE_LABEL = {
+    ENG:'Premier League', ESP:'La Liga', ITA:'Serie A', GER:'Bundesliga',
+    FRA:'Ligue 1', BRA:'Brasileirão', POR:'Liga Portugal', UCL:'Champions League',
+  };
+
+  /* ── FETCH REAL ZEBRAS ──────────────────────────────────────── */
+  /**
+   * Busca partidas recentes + tabela, calcula ZI real com ZebraEngine.
+   * Requer Football-Data.org configurado; usa OddsAPI se disponível.
+   * @param {string} lid  — código de liga (ENG, BRA, ESP…)
+   * @param {number} [limit=20]
+   * @returns {Promise<Array>}  Array de zebras ordenadas por ZI desc
+   */
+  async function fetchRealZebras(lid, limit = 20) {
+    if (!FD.key()) return [];
+    if (typeof ZebraEngine === 'undefined') return [];
+
+    try {
+      // 1. Busca partidas finalizadas + tabela em paralelo
+      const [matchData, standData] = await Promise.all([
+        FD.getMatches(lid, 'FINISHED', limit),
+        FD.getStandings(lid),
+      ]);
+      if (!matchData?.matches?.length) return [];
+
+      // 2. Monta mapa posição + forma por nome de time
+      const posMap  = {};
+      const formMap = {};
+      if (standData) {
+        transform.fdStandings(standData).forEach(t => {
+          [t.name, t.abbr].filter(Boolean).forEach(k => {
+            posMap[k]  = t.pos;
+            formMap[k] = t.form || '';
+          });
+        });
+      }
+
+      // 3. Odds reais (OddsAPI) — opcionais
+      let oddsMap = {};
+      try { oddsMap = await ODDS.getOddsMap(lid, 4); } catch {}
+
+      // 4. Calcula ZI para cada partida
+      const zebras = [];
+      for (const m of matchData.matches) {
+        const t = transform.fdMatch(m);
+        if (!t?.isFinished || !t.hs == null || !t.as == null) continue;
+        if (t.winner === 'DRAW' || !t.winner) continue;
+
+        const homePos  = posMap[t.homeFull]  || posMap[t.home];
+        const awayPos  = posMap[t.awayFull]  || posMap[t.away];
+        const homeForm = formMap[t.homeFull] || formMap[t.home] || '';
+        const awayForm = formMap[t.awayFull] || formMap[t.away] || '';
+
+        // Tenta pegar odds reais, senão estima
+        const oddsKey = `${t.homeFull}|${t.awayFull}`;
+        const realOdds = oddsMap[oddsKey];
+        const homeOdd = realOdds?.homeOdd || null;
+        const awayOdd = realOdds?.awayOdd || null;
+
+        const result = ZebraEngine.calc({
+          homeScore: t.hs, awayScore: t.as,
+          homeOdd, awayOdd,
+          homePosn: homePos, awayPosn: awayPos,
+          homeForm, awayForm, lid,
+        });
+
+        if (!result.isZebra) continue;
+
+        // Odds para exibição (reais ou estimadas)
+        let dispHomeOdd = homeOdd, dispAwayOdd = awayOdd;
+        if (!dispHomeOdd && homePos && awayPos) {
+          const est = ZebraEngine.estimateOdds(homePos, awayPos, homeForm, awayForm);
+          dispHomeOdd = est.homeOdd;
+          dispAwayOdd = est.awayOdd;
+        }
+
+        zebras.push({
+          home: t.home, away: t.away,
+          hs: t.hs, as: t.as,
+          league: _LEAGUE_LABEL[lid] || lid, lid,
+          date: t.date,
+          zi: result.zi,
+          ziClass: result.class,
+          azarao: result.azarao,
+          odds_h: dispHomeOdd ? parseFloat(dispHomeOdd).toFixed(2) : '–',
+          odds_a: dispAwayOdd ? parseFloat(dispAwayOdd).toFixed(2) : '–',
+          homeCrest: t.homeCrest || '',
+          awayCrest: t.awayCrest || '',
+          realOdds: !!realOdds,
+          period: 'week',
+        });
+      }
+
+      return zebras.sort((a, b) => b.zi - a.zi);
+    } catch(e) {
+      console.warn('[fetchRealZebras] erro:', e.message);
+      return [];
+    }
+  }
 
   /* ── STATUS ─────────────────────────────────────────────────── */
   const isConfigured = {
@@ -311,6 +462,6 @@ const ZebraAPI = (() => {
   };
 
   /* ── PUBLIC ─────────────────────────────────────────────────── */
-  return { footballData: FD, sportsDb: SDB, rapidApi: RAPID, transform, zebra, isConfigured };
+  return { footballData: FD, sportsDb: SDB, rapidApi: RAPID, oddsApi: ODDS, transform, zebra, fetchRealZebras, isConfigured };
 
 })();

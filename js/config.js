@@ -13,4 +13,5 @@ const ZEBRA_CONFIG = {
   get FOOTBALL_DATA_KEY() { return localStorage.getItem('zs_fd_key')    || ''; },
   get THESPORTSDB_KEY()   { return localStorage.getItem('zs_sdb_key')   || '123'; },
   get RAPIDAPI_KEY()      { return localStorage.getItem('zs_rapid_key') || ''; },
+  get ODDS_API_KEY()      { return localStorage.getItem('zs_odds_key')  || ''; },
 };

@@ -127,6 +127,7 @@
 <div class="toast" id="toast"></div>
 
 <script src="js/config.js"></script>
+<script src="js/zebra-engine.js"></script>
 <script src="js/api.js"></script>
 <script src="js/main.js"></script>
 <script>
@@ -469,6 +470,32 @@ setTimeout(() => {
 }, 500);
 
 initBellBadge();
+
+// ── DADOS REAIS (Football-Data.org + ZebraEngine) ────────────
+async function initRealRanking() {
+  if (typeof ZebraAPI === 'undefined' || !ZebraAPI.isConfigured.footballData()) return;
+  if (typeof ZebraEngine === 'undefined') return;
+
+  const LIDS = ['ENG','ESP','ITA','GER','FRA','BRA'];
+  try {
+    // Busca zebras de até 3 ligas em paralelo (respeita rate limit)
+    const [l1, l2, l3] = await Promise.all([
+      ZebraAPI.fetchRealZebras('ENG', 10),
+      ZebraAPI.fetchRealZebras('ESP', 10),
+      ZebraAPI.fetchRealZebras('ITA', 10),
+    ]);
+    const real = [...l1, ...l2, ...l3].sort((a, b) => b.zi - a.zi);
+    if (!real.length) return;
+
+    // Substitui o dataset mock pelos dados reais
+    RANKING_DATA.length = 0;
+    real.forEach((z, i) => RANKING_DATA.push({ ...z, id: i+1, period: z.period || 'week' }));
+    renderRanking();
+    showToast('⚡ Ranking atualizado com dados reais');
+  } catch(e) { console.warn('[Ranking] initRealRanking:', e.message); }
+}
+
+initRealRanking();
 lucide.createIcons();
 </script>
 <style>
