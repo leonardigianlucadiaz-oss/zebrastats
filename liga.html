@@ -122,6 +122,13 @@
         <button class="filter-chip" data-jfilter="encerrados"><i data-lucide="check-circle" class="chip-ic"></i>Encerrados</button>
       </div>
 
+      <div class="scroll-x" style="gap:6px;margin-top:8px;" id="rodadaFilter">
+        <button class="filter-chip active" data-rodada="todas">Todas as rodadas</button>
+        <button class="filter-chip" data-rodada="13">Rodada 13</button>
+        <button class="filter-chip" data-rodada="12">Rodada 12</button>
+        <button class="filter-chip" data-rodada="11">Rodada 11</button>
+      </div>
+
       <div id="jogosList" style="display:flex;flex-direction:column;gap:10px;margin-top:4px;"></div>
     </div>
 
@@ -343,17 +350,31 @@
     });
   });
 
+  let activeRodada = 'todas';
+  document.querySelectorAll('#rodadaFilter .filter-chip').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('#rodadaFilter .filter-chip').forEach(b=>b.classList.remove('active'));
+      this.classList.add('active');
+      activeRodada = this.dataset.rodada;
+      renderJogos();
+    });
+  });
+
   function renderJogos() {
     const container = document.getElementById('jogosList');
     container.innerHTML = '';
     const list = JOGOS[activeJfilt] || [];
+    let filteredList = list;
+    if (typeof activeRodada !== 'undefined' && activeRodada !== 'todas') {
+      filteredList = list.filter(g => (g.league || g.rodada || '').includes(activeRodada));
+    }
 
-    if (!list.length) {
+    if (!filteredList.length) {
       container.innerHTML = `<p class="text-gray text-sm" style="text-align:center;padding:24px;">Nenhum jogo</p>`;
       return;
     }
 
-    list.forEach(g => {
+    filteredList.forEach(g => {
       const card = document.createElement('div');
       card.className = `game-card${g.zebra ? ' game-card--zebra' : ''}`;
 
@@ -406,11 +427,21 @@
     });
   }
 
+  // ── SPARKLINE ─────────────────────────────────────────────────────
+  function sparkline(values, width, height, color) {
+    width = width || 44; height = height || 16; color = color || 'var(--gray)';
+    if (!values || values.length < 2) return '';
+    const min = Math.min(...values), max = Math.max(...values), range = max - min || 1;
+    const pts = values.map((v,i) => `${((i/(values.length-1))*width).toFixed(1)},${(height-((v-min)/range)*(height-4)-2).toFixed(1)}`).join(' ');
+    const lastPt = pts.split(' ').pop().split(',');
+    return `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}"><polyline points="${pts}" fill="none" stroke="${color}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="${lastPt[0]}" cy="${lastPt[1]}" r="2" fill="${color}"/></svg>`;
+  }
+
   // ── TABELA ────────────────────────────────────────────────────────
   function renderTabela() {
     const table = document.getElementById('standingsTable');
     const thead = `<thead><tr>
-        <th>Pos</th><th style="width:28px;"></th><th>Time</th><th>P</th><th>J</th>
+        <th>Pos</th><th style="width:28px;"></th><th>Time</th><th style="width:44px;"></th><th>P</th><th>J</th>
         <th>V</th><th>E</th><th>D</th><th>SG</th><th>🦓</th>
       </tr></thead>`;
 
@@ -439,16 +470,28 @@
       if (isZebraRow) {
         tr.style.cssText = 'border-left:2px solid var(--gold);background:rgba(255,200,50,0.04);';
       }
+      // Highlight favorited team
+      const favTeams = typeof getFavorites === 'function' ? getFavorites() : [];
+      const teamKey = (t.name || '').toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'');
+      const isFav = favTeams.some(fid => t.name.toLowerCase().includes(fid) || fid.includes(teamKey));
+      if (isFav) {
+        tr.style.background = 'rgba(46,230,92,0.07)';
+        tr.style.borderLeft = '3px solid var(--green)';
+      }
       const badgeClass = { cl:'pos-badge--cl', eur:'pos-badge--eur', rel:'pos-badge--rel' }[t.posClass] || '';
       const crestHtml = t.crest
         ? `<img src="${t.crest}" alt="${t.name}" style="width:22px;height:22px;object-fit:contain;display:block;margin:0 auto;" loading="lazy" onerror="this.style.opacity=0;">`
         : `<span style="font-size:0.5rem;font-weight:700;color:var(--gray);display:block;text-align:center;">${(t.abbr||t.name.substring(0,3)).toUpperCase()}</span>`;
       const ziColor = ziNum >= 6 ? 'var(--gold)' : ziNum >= 4 ? 'var(--gold)' : 'var(--gray)';
       const ziDisplay = isZebraRow ? `🦓 ${t.zi}` : t.zi;
+      const sSeed = (t.name||'').split('').reduce((a,c)=>a+c.charCodeAt(0),0);
+      const sTrend2 = Array.from({length:6},(_,i)=>((sSeed*(i+3)*1664525+1013904223)>>>0)%40+10);
+      const spark = sparkline(sTrend2, 40, 16);
       tr.innerHTML = `
         <td><span class="pos-badge ${badgeClass}">${t.pos}</span></td>
         <td>${crestHtml}</td>
         <td style="font-weight:${isZebraRow ? '600' : '400'};">${t.name}</td>
+        <td style="padding:0 2px;">${spark}</td>
         <td style="font-weight:700;">${t.p}</td>
         <td>${t.j}</td>
         <td style="color:var(--green);">${t.v}</td>

@@ -101,9 +101,16 @@ const LEAGUE_NAMES = {
   UCL: 'Champions League'
 };
 
+function getFavoritesArr() {
+  return getFavorites ? getFavorites() : [];
+}
+function saveFavoritesArr(arr) {
+  try { localStorage.setItem('zebrastats_favorites', JSON.stringify(arr)); } catch {}
+}
+
 function renderTeams() {
   const container = document.getElementById('teamsContainer');
-  const ids = getFavorites ? getFavorites() : [];
+  const ids = getFavoritesArr();
   const meta = getFavTeamsData ? getFavTeamsData() : {};
 
   if (!ids || ids.length === 0) {
@@ -118,41 +125,77 @@ function renderTeams() {
     return;
   }
 
-  let html = '';
+  container.innerHTML = '';
+
   ids.forEach(id => {
     const m = meta[id] || {};
     const name = m.name || id;
     const color = m.color || 'var(--green)';
     const league = m.league || '—';
-    html += `
-      <div class="fav-team-card" data-id="${id}" style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px 16px;border-left:3px solid ${color};display:flex;align-items:center;gap:12px;margin-bottom:10px;cursor:pointer;">
-        <div style="width:8px;height:8px;border-radius:50%;background:${color};flex-shrink:0;"></div>
-        <div style="flex:1;min-width:0;">
-          <div style="font-weight:600;font-size:0.9375rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${name}</div>
-          <div style="font-size:0.75rem;color:var(--gray);margin-top:2px;">${league}</div>
-        </div>
-        <button class="fav-remove-btn" data-id="${id}" data-name="${name}" title="Remover dos favoritos" style="background:none;border:none;cursor:pointer;padding:6px;display:flex;align-items:center;justify-content:center;color:var(--red);flex-shrink:0;border-radius:6px;transition:background 0.15s;">
-          <i data-lucide="heart-off" style="width:18px;height:18px;"></i>
-        </button>
-      </div>`;
-  });
-  container.innerHTML = html;
 
-  // Card click → team profile (except remove button)
-  container.querySelectorAll('.fav-team-card').forEach(card => {
+    // ZI badge
+    const zi = m.zi !== undefined ? m.zi : '—';
+    const ziColor = zi !== '—' ? (parseFloat(zi) >= 7 ? 'var(--red)' : parseFloat(zi) >= 4 ? 'var(--gold)' : 'var(--gray)') : 'var(--gray)';
+    const ziBadge = `<span style="font-size:0.6875rem;font-weight:700;color:${ziColor};background:rgba(255,255,255,0.06);border-radius:4px;padding:2px 6px;margin-top:4px;display:inline-block;">🦓 ${zi}</span>`;
+
+    const card = document.createElement('div');
+    card.className = 'fav-team-card';
+    card.dataset.id = id;
+    card.style.cssText = `background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px 16px;border-left:3px solid ${color};display:flex;align-items:center;gap:12px;margin-bottom:10px;cursor:pointer;`;
+    card.innerHTML = `
+      <div style="width:8px;height:8px;border-radius:50%;background:${color};flex-shrink:0;"></div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-weight:600;font-size:0.9375rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${name}</div>
+        <div style="font-size:0.75rem;color:var(--gray);margin-top:2px;">${league}</div>
+        ${ziBadge}
+      </div>
+      <button class="fav-remove-btn" data-id="${id}" data-name="${name}" title="Remover dos favoritos" style="background:none;border:none;cursor:pointer;padding:6px;display:flex;align-items:center;justify-content:center;color:var(--red);flex-shrink:0;border-radius:6px;transition:background 0.15s;">
+        <i data-lucide="heart-off" style="width:18px;height:18px;"></i>
+      </button>`;
+
+    // Card click
     card.addEventListener('click', function(e) {
       if (e.target.closest('.fav-remove-btn')) return;
       window.location.href = 'time.html?team=' + this.dataset.id;
     });
-  });
 
-  // Remove buttons
-  container.querySelectorAll('.fav-remove-btn').forEach(btn => {
-    btn.addEventListener('click', function(e) {
+    // Remove button
+    card.querySelector('.fav-remove-btn').addEventListener('click', function(e) {
       e.stopPropagation();
       toggleFavorite(this.dataset.id, this.dataset.name);
       renderTeams();
     });
+
+    // Drag-and-drop
+    card.setAttribute('draggable', 'true');
+    card.dataset.teamId = id;
+
+    card.addEventListener('dragstart', e => {
+      e.dataTransfer.setData('text/plain', id);
+      card.style.opacity = '0.5';
+    });
+    card.addEventListener('dragend', () => { card.style.opacity = '1'; });
+    card.addEventListener('dragover', e => {
+      e.preventDefault();
+      card.style.borderColor = 'var(--green)';
+    });
+    card.addEventListener('dragleave', () => { card.style.borderColor = ''; });
+    card.addEventListener('drop', e => {
+      e.preventDefault();
+      card.style.borderColor = '';
+      const draggedId = e.dataTransfer.getData('text/plain');
+      if (draggedId === id) return;
+      const favs = getFavoritesArr();
+      const fromIdx = favs.indexOf(draggedId);
+      const toIdx   = favs.indexOf(id);
+      if (fromIdx < 0 || toIdx < 0) return;
+      favs.splice(fromIdx, 1);
+      favs.splice(toIdx, 0, draggedId);
+      saveFavoritesArr(favs);
+      renderTeams();
+    });
+
+    container.appendChild(card);
   });
 
   lucide.createIcons();
@@ -226,6 +269,9 @@ lucide.createIcons();
 
   .fav-team-card:hover,
   .fav-league-card:hover { opacity:0.9; }
+
+  [draggable=true] { touch-action: none; user-select: none; }
+  [draggable=true]:active { cursor: grabbing; }
 
   .fav-remove-btn:hover { background:rgba(238,68,68,0.1) !important; }
   .fav-league-remove-btn:hover { background:rgba(255,200,50,0.1) !important; }

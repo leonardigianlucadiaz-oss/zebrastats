@@ -392,6 +392,23 @@ function addFromTemplate(tpl) {
   showToast(`✓ Alerta criado: ${tpl.label}`);
 }
 
+// ── MATCH PREVIEW HELPER ──────────────────────────────────────────────────────
+const MATCH_TEAMS_MAP = {
+  'Brasileirão':['Flamengo','Palmeiras'], 'Premier League':['Liverpool','Arsenal'],
+  'La Liga':['Real Madrid','Barcelona'], 'Serie A':['Inter','Milan'],
+  'Bundesliga':['Bayern','Dortmund'], 'Champions':['PSG','Man City']
+};
+function buildMatchPreview(alert) {
+  const ligaKey = Object.keys(MATCH_TEAMS_MAP).find(k => (alert.liga||alert.league||alert.label||'').includes(k)) || 'Brasileirão';
+  const [homeTeam, awayTeam] = MATCH_TEAMS_MAP[ligaKey];
+  const matchTime = '18:00';
+  return `<div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;padding:6px 8px;background:var(--bg);border-radius:8px;font-size:0.75rem;">
+    <span style="font-weight:600;flex:1;">${homeTeam}</span>
+    <span style="color:var(--gray);font-size:0.6875rem;padding:0 8px;">${matchTime}</span>
+    <span style="font-weight:600;flex:1;text-align:right;">${awayTeam}</span>
+  </div>`;
+}
+
 // ── MY ALERTS LIST ────────────────────────────────────────────────────────────
 function renderAlertsList() {
   const container = document.getElementById('alertsList');
@@ -414,43 +431,69 @@ function renderAlertsList() {
 
   clearBtn.style.display = 'inline';
 
-  alerts.forEach((a, idx) => {
-    const card = document.createElement('div');
-    card.className = 'alert-card';
-    card.dataset.id = a.id;
+  // Group alerts by liga
+  const grouped = {};
+  alerts.forEach(a => {
+    let key = 'Geral';
+    if (a.type === 'zi_league' && a.lid && a.lid !== 'all') {
+      const found = LEAGUES_META.find(l => l.id === a.lid);
+      key = found ? found.name : a.lid;
+    } else if (a.type === 'zi_league' && a.lid === 'all') {
+      key = 'Todas as Ligas';
+    } else if (a.type === 'zi_team' && a.team) {
+      key = 'Times';
+    } else if (a.type === 'match') {
+      key = 'Jogos Ao Vivo';
+    }
+    if (!grouped[key]) grouped[key] = [];
+    grouped[key].push(a);
+  });
 
-    const timeLabel = { any:'Qualquer hora', morning:'Manhã (6–12h)', afternoon:'Tarde (12–18h)', evening:'Noite (18–23h)' }[a.tw] || 'Qualquer hora';
-    const lastTrig  = a.lastTriggered
-      ? `Último disparo: ${new Date(a.lastTriggered).toLocaleDateString('pt-BR')}`
-      : `Disparado ${a.triggeredCount}x`;
+  Object.entries(grouped).forEach(([liga, items]) => {
+    const header = document.createElement('div');
+    header.style.cssText = 'font-size:0.75rem;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:0.08em;padding:8px 0 4px;margin-top:4px;';
+    header.textContent = liga;
+    container.appendChild(header);
 
-    card.innerHTML = `
-      <div style="display:flex;align-items:flex-start;gap:10px;">
-        <div class="alert-card__icon" style="background:${a.iconBg}22;color:${a.iconBg};">
-          <i data-lucide="${a.icon||'bell'}" style="width:14px;height:14px;"></i>
-        </div>
-        <div style="flex:1;min-width:0;">
-          <div style="font-size:0.875rem;font-weight:700;margin-bottom:2px;">${a.label}</div>
-          <div style="font-size:0.6875rem;color:var(--gray);margin-bottom:6px;">${a.sub||''}</div>
-          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-            <span class="alert-meta-chip"><i data-lucide="clock" style="width:10px;height:10px;"></i>${timeLabel}</span>
-            <span class="alert-meta-chip"><i data-lucide="zap" style="width:10px;height:10px;"></i>${lastTrig}</span>
+    items.forEach((a, idx) => {
+      const card = document.createElement('div');
+      card.className = 'alert-card';
+      card.dataset.id = a.id;
+
+      const timeLabel = { any:'Qualquer hora', morning:'Manhã (6–12h)', afternoon:'Tarde (12–18h)', evening:'Noite (18–23h)' }[a.tw] || 'Qualquer hora';
+      const lastTrig  = a.lastTriggered
+        ? `Último disparo: ${new Date(a.lastTriggered).toLocaleDateString('pt-BR')}`
+        : `Disparado ${a.triggeredCount}x`;
+
+      card.innerHTML = `
+        <div style="display:flex;align-items:flex-start;gap:10px;">
+          <div class="alert-card__icon" style="background:${a.iconBg}22;color:${a.iconBg};">
+            <i data-lucide="${a.icon||'bell'}" style="width:14px;height:14px;"></i>
+          </div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:0.875rem;font-weight:700;margin-bottom:2px;">${a.label}</div>
+            <div style="font-size:0.6875rem;color:var(--gray);margin-bottom:6px;">${a.sub||''}</div>
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              <span class="alert-meta-chip"><i data-lucide="clock" style="width:10px;height:10px;"></i>${timeLabel}</span>
+              <span class="alert-meta-chip"><i data-lucide="zap" style="width:10px;height:10px;"></i>${lastTrig}</span>
+            </div>
+            ${buildMatchPreview(a)}
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0;">
+            <!-- Toggle -->
+            <label class="alert-toggle">
+              <input type="checkbox" ${a.active?'checked':''} data-toggle="${a.id}" />
+              <span class="alert-toggle__track"></span>
+            </label>
+            <!-- Delete -->
+            <button class="alert-delete-btn" data-delete="${a.id}" title="Excluir">
+              <i data-lucide="trash-2" style="width:13px;height:13px;"></i>
+            </button>
           </div>
         </div>
-        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0;">
-          <!-- Toggle -->
-          <label class="alert-toggle">
-            <input type="checkbox" ${a.active?'checked':''} data-toggle="${a.id}" />
-            <span class="alert-toggle__track"></span>
-          </label>
-          <!-- Delete -->
-          <button class="alert-delete-btn" data-delete="${a.id}" title="Excluir">
-            <i data-lucide="trash-2" style="width:13px;height:13px;"></i>
-          </button>
-        </div>
-      </div>
-      ${idx < alerts.length - 1 ? '<div style="height:1px;background:var(--border);margin-top:12px;"></div>' : ''}`;
-    container.appendChild(card);
+        ${idx < items.length - 1 ? '<div style="height:1px;background:var(--border);margin-top:12px;"></div>' : ''}`;
+      container.appendChild(card);
+    });
   });
 
   // Events
