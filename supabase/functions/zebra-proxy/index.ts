@@ -92,10 +92,22 @@ Deno.serve(async (req: Request) => {
       return ok(data);
     }
 
-    // ── The Odds API: odds recentes ──────────────────────────
+    // ── The Odds API: odds pré-jogo (bookmakers reais) ──────
     if (action === "odds") {
       const key = Deno.env.get("ODDS_API_KEY");
       if (!key) return err("ODDS_API_KEY não configurada — odds serão estimadas", 503);
+      const sport = ODDS_SPORTS[lid];
+      if (!sport) return err(`Liga sem odds disponível: ${lid}`, 400);
+      const data = await fetchCached(
+        `https://api.the-odds-api.com/v4/sports/${sport}/odds/?apiKey=${key}&regions=eu&markets=h2h&oddsFormat=decimal`
+      );
+      return ok(data);
+    }
+
+    // ── The Odds API: scores recentes (resultados) ───────────
+    if (action === "odds-scores") {
+      const key = Deno.env.get("ODDS_API_KEY");
+      if (!key) return err("ODDS_API_KEY não configurada", 503);
       const sport = ODDS_SPORTS[lid];
       if (!sport) return err(`Liga sem odds disponível: ${lid}`, 400);
       const days = url.searchParams.get("days") ?? "3";
@@ -150,7 +162,7 @@ Deno.serve(async (req: Request) => {
       return ok(data);
     }
 
-    return err(`Ação desconhecida: '${action}'. Use: matches, standings, odds, sdb-team, sdb-table, sdb-events-last, sdb-teams`, 400);
+    return err(`Ação desconhecida: '${action}'. Use: matches, standings, odds, odds-scores, sdb-team, sdb-table, sdb-events-last, sdb-teams`, 400);
 
   } catch (e: unknown) {
     const msg = e instanceof Error ? e.message : String(e);

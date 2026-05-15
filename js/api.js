@@ -237,9 +237,20 @@ const ZebraAPI = (() => {
       } catch(e) { console.warn('[OddsAPI] erro:', e.message); return []; }
     },
 
-    // Retorna mapa: "HomeTeam vs AwayTeam" → { homeOdd, awayOdd }
-    async getOddsMap(lid, daysFrom = 3) {
-      const games = await this.getRecentScores(lid, daysFrom);
+    // Retorna mapa: "HomeTeam|AwayTeam" → { homeOdd, awayOdd }
+    // Usa proxy (odds pré-jogo com bookmakers reais da Europa)
+    async getOddsMap(lid) {
+      // Tenta via proxy primeiro (chave no servidor)
+      let games = await _proxy.fetch('odds', { lid });
+      // Fallback: direct com chave local
+      if (!games && this.key()) {
+        const sport = this.SPORTS[lid]; if (!sport) return {};
+        try {
+          const r = await fetch(`${this.BASE}/sports/${sport}/odds/?apiKey=${this.key()}&regions=eu&markets=h2h&oddsFormat=decimal`);
+          if (r.ok) games = await r.json();
+        } catch {}
+      }
+      if (!Array.isArray(games)) return {};
       const map = {};
       games.forEach(g => {
         if (!g.bookmakers?.length) return;
@@ -422,7 +433,7 @@ const ZebraAPI = (() => {
    * @returns {Promise<Array>}  Array de zebras ordenadas por ZI desc
    */
   async function fetchRealZebras(lid, limit = 20) {
-    if (!FD.key()) return [];
+    if (!_proxy.base() && !FD.key()) return [];
     if (typeof ZebraEngine === 'undefined') return [];
 
     try {
