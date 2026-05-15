@@ -47,7 +47,13 @@ const ZebraAPI = (() => {
       const hit = _cache.get(ck);
       if (hit) return hit;
       try {
-        const r = await fetch(`${base}?${qs}`);
+        const anon = (typeof ZEBRA_CONFIG !== 'undefined') ? ZEBRA_CONFIG.SUPABASE_ANON : '';
+        const r = await fetch(`${base}?${qs}`, {
+          headers: {
+            'apikey': anon,
+            'Authorization': `Bearer ${anon}`,
+          }
+        });
         if (!r.ok) { console.warn(`[Proxy] ${r.status} — ${action}`, params); return null; }
         const data = await r.json();
         if (data?.error) { console.warn(`[Proxy] erro da função: ${data.error}`); return null; }
