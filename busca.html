@@ -519,7 +519,7 @@ function renderPopularLeagues() {
       <div class="pop-league-card__name">${l.name}</div>`;
     card.addEventListener('click', () => {
       localStorage.setItem('zs_search_league', l.id);
-      window.location.href = 'liga.html';
+      window.location.href = 'liga.html?id=' + l.id;
     });
     container.appendChild(card);
     // Logo oficial SDB substitui a bandeira
@@ -682,7 +682,7 @@ function buildTeamItem(t, query) {
     if (e.target.closest('.fav-star-btn')) return;
     addToHistory(t.name);
     localStorage.setItem('zs_search_team', t.name);
-    window.location.href = 'time.html';
+    window.location.href = 'time.html?team=' + encodeURIComponent(t.id);
   });
 
   // Click no botão de favorito
@@ -721,7 +721,7 @@ function buildLeagueItem(l, query) {
     if (e.target.closest('.fav-star-btn')) return;
     addToHistory(l.name);
     localStorage.setItem('zs_search_league', l.id);
-    window.location.href = 'liga.html';
+    window.location.href = 'liga.html?id=' + l.id;
   });
 
   // Click no botão de favorito

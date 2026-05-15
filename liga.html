@@ -299,6 +299,8 @@
       // reset standings state for new league
       sdbStandingsLoaded = false;
       STANDINGS.length = 0;
+      JOGOS.proximos = []; JOGOS.aovivo = []; JOGOS.encerrados = [];
+      ARTILHEIROS.length = 0; ASSISTENCIAS.length = 0; ZEBRAS_LIGA.length = 0;
       syncFavBtn();
       loadHeroLogo(activeLid);
       loadLeagueCrests(activeLid);
@@ -423,7 +425,7 @@
       }
 
       card.addEventListener('click', () => {
-        const zi = (Math.random() * 5 + 2).toFixed(1);
+        const zi = g.zi !== undefined ? g.zi : ((g.home || '').charCodeAt(0) % 50 / 10 + 2).toFixed(1);
         const navParams = new URLSearchParams({
           home:   g.home || '',
           away:   g.away || '',
@@ -669,10 +671,10 @@
           ...(finished?.matches  || []),
         ].map(ZebraAPI.transform.fdMatch).filter(Boolean);
         if (all.length) {
-          ['proximos','ao_vivo','resultados'].forEach(k => { JOGOS[k] = []; });
+          ['proximos','aovivo','encerrados'].forEach(k => { JOGOS[k] = []; });
           all.forEach(m => {
-            if (m.isLive) JOGOS['ao_vivo'].push({ home:m.home, away:m.away, hs:m.hs, as:m.as, time:m.time, status:'live' });
-            else if (m.isFinished) JOGOS['resultados'].push({ home:m.home, away:m.away, hs:m.hs, as:m.as, date:m.date });
+            if (m.isLive) JOGOS['aovivo'].push({ home:m.home, away:m.away, hs:m.hs, as:m.as, time:m.time, status:'live' });
+            else if (m.isFinished) JOGOS['encerrados'].push({ home:m.home, away:m.away, hs:m.hs, as:m.as, date:m.date });
             else JOGOS['proximos'].push({ home:m.home, away:m.away, time:m.time, date:m.date });
           });
           if (activeTab === 'jogos') renderJogos();

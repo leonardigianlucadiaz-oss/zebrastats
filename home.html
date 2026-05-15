@@ -145,6 +145,8 @@
         <i data-lucide="arrow-right" style="margin-left:auto;color:var(--green);width:16px;height:16px;flex-shrink:0;"></i>
       </div>
 
+      <div id="zebrasDoDiaList" style="display:flex;flex-direction:column;gap:8px;"></div>
+
       <!-- RANKINGS RÁPIDOS -->
       <div class="section-header" style="margin-top:4px;">
         <span class="section-title"><i data-lucide="medal" class="sec-ic"></i>Top Zebras da Temporada</span>
@@ -529,17 +531,7 @@
           return acc;
         }, []);
 
-      // Times padrão de ligas variadas se não tiver favoritos suficientes
-      const DEFAULTS = [
-        { name:'Flamengo' },
-        { name:'Real Madrid' },
-        { name:'Manchester City' },
-        { name:'Bayern Munich' },
-        { name:'Juventus' },
-      ];
-      const shownNames = new Set(fromMeta.map(m => m.name));
-      const extras = DEFAULTS.filter(d => !shownNames.has(d.name));
-      const toShow = [...fromMeta, ...extras].slice(0, 5);
+      const toShow = fromMeta.slice(0, 5);
 
       for (const item of toShow) {
         const name = item.name;

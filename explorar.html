@@ -48,11 +48,11 @@
 
   <!-- NAVBAR -->
   <nav class="navbar">
-    <button onclick="goBack('home.html')" class="navbar__icon" style="background:none;border:none;cursor:pointer;color:var(--white);display:flex;align-items:center;justify-content:center;">
-      <i data-lucide="arrow-left" style="width:20px;height:20px;"></i>
-    </button>
-    <span style="font-size:1rem;font-weight:700;flex:1;text-align:center;">Explorar</span>
-    <div style="width:36px;"></div>
+    <a href="home.html" class="navbar__brand">Zebra<span>Stats</span></a>
+    <div class="navbar__actions">
+      <a href="busca.html" class="navbar__icon" title="Buscar"><i data-lucide="search" style="width:18px;height:18px;"></i></a>
+      <a href="notificacoes.html" class="navbar__icon" title="Notificações"><i data-lucide="bell" style="width:18px;height:18px;"></i></a>
+    </div>
   </nav>
 
   <!-- CONTENT -->
@@ -122,6 +122,7 @@
 <div class="toast" id="toast"></div>
 
 <script src="js/config.js"></script>
+<script src="js/zebra-engine.js"></script>
 <script src="js/api.js"></script>
 <script src="js/main.js"></script>
 <script>

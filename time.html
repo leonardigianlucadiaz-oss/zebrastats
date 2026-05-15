@@ -318,6 +318,7 @@
   <div class="toast" id="toast"></div>
 
   <script src="js/config.js"></script>
+  <script src="js/zebra-engine.js"></script>
   <script src="js/api.js"></script>
   <script src="js/main.js"></script>
   <script>
@@ -1076,8 +1077,7 @@
         { x:165, y:110, pos:'PE',  name:'Ponta Esq.' },
       ];
 
-      const playerNames = ['Gabriel', 'Wesley', 'Fabrício Bruno', 'Léo Ortiz', 'Ayrton Lucas',
-        'Erick P.', 'De la Cruz', 'Gerson', 'Luiz Araújo', 'Pedro', 'Arrascaeta'];
+      const playerNames = positions.map((p, i) => p.name || ('Jogador ' + (i + 1)));
 
       const g = document.getElementById('pitchPlayers');
       if (!g) return;
