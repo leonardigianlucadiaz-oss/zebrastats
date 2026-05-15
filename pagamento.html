@@ -22,11 +22,14 @@
       Zebra<span>Stats</span>
     </a>
     <nav class="sidebar__nav">
-      <a href="home.html"   class="sidebar__nav-item"><i data-lucide="home"></i><span>Home</span></a>
-      <a href="zebras.html" class="sidebar__nav-item"><i data-lucide="activity"></i><span>Zebras</span></a>
-      <a href="liga.html"   class="sidebar__nav-item"><i data-lucide="trophy"></i><span>Ligas</span></a>
-      <a href="time.html"   class="sidebar__nav-item"><i data-lucide="star"></i><span>Times</span></a>
-      <a href="perfil.html" class="sidebar__nav-item"><i data-lucide="user"></i><span>Perfil</span></a>
+      <a href="home.html"     class="sidebar__nav-item"><i data-lucide="home"></i><span>Home</span></a>
+      <a href="zebras.html"   class="sidebar__nav-item"><i data-lucide="activity"></i><span>Zebras</span></a>
+      <a href="ranking.html"  class="sidebar__nav-item"><i data-lucide="medal"></i><span>Ranking</span></a>
+      <a href="comparar.html" class="sidebar__nav-item"><i data-lucide="bar-chart-2"></i><span>Comparar</span></a>
+      <a href="alertas.html"  class="sidebar__nav-item"><i data-lucide="bell"></i><span>Alertas</span></a>
+      <a href="liga.html"     class="sidebar__nav-item"><i data-lucide="trophy"></i><span>Ligas</span></a>
+      <a href="time.html"     class="sidebar__nav-item"><i data-lucide="star"></i><span>Times</span></a>
+      <a href="perfil.html"   class="sidebar__nav-item"><i data-lucide="user"></i><span>Perfil</span></a>
     </nav>
     <div class="sidebar__footer">
       <div class="sidebar__user">
@@ -300,6 +303,7 @@
     this.disabled = true;
     this.style.opacity = '0.7';
 
+    showToast('🎭 Modo demo — pagamento simulado');
     setTimeout(() => {
       setUserPlan('pro');
       showSuccessScreen();
@@ -341,5 +345,14 @@
   .navbar__icon i { display: block; }
   .payment-method-tab i { vertical-align: middle; }
 </style>
+
+    <!-- BOTTOM NAV (mobile only) -->
+    <nav class="bottom-nav">
+      <a href="home.html"    class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="home"></i></span>Home</a>
+      <a href="zebras.html"  class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="activity"></i></span>Zebras</a>
+      <a href="ranking.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="medal"></i></span>Ranking</a>
+      <a href="alertas.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="bell"></i></span>Alertas</a>
+      <a href="perfil.html"  class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="user"></i></span>Perfil</a>
+    </nav>
 </body>
 </html>

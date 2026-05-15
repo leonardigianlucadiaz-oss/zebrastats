@@ -107,9 +107,18 @@
   // Injeta notificações de alertas disparados (localStorage)
   function injectAlertNotifs() {
     try {
-      const alertNotifs = JSON.parse(localStorage.getItem('zs_alert_notifs') || '[]');
-      alertNotifs.forEach(n => {
-        if (!NOTIFS.find(x => x.id === n.id)) NOTIFS.unshift(n);
+      const alerts = JSON.parse(localStorage.getItem('zs_alerts') || '[]');
+      alerts.forEach((a, i) => {
+        const id = `alert-${i}`;
+        if (!NOTIFS.find(x => x.id === id)) {
+          NOTIFS.unshift({
+            id, group:'Hoje', type:'sistema', unread:true,
+            icon:'bell-ring', iconBg:'var(--green-dim)',
+            title:`Alerta configurado: ${a.team || a.league || 'Time'} - ${a.type || 'zebra'}`,
+            desc:`Alerta de zebra ativo para ${a.team || a.league}`,
+            time:'Agora', link:'alertas.html'
+          });
+        }
       });
     } catch {}
   }

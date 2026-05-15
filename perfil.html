@@ -501,7 +501,13 @@
 
     darkToggle.addEventListener('change', function() {
       localStorage.setItem('zs_dark_mode', this.checked);
-      if (!this.checked) showToast('🌙 Modo claro em breve!');
+      if (typeof toggleTheme === 'function') {
+        toggleTheme();
+      } else {
+        const current = document.documentElement.getAttribute('data-theme');
+        document.documentElement.setAttribute('data-theme', current === 'light' ? 'dark' : 'light');
+        localStorage.setItem('zs_theme', current === 'light' ? 'dark' : 'light');
+      }
     });
 
     notifToggle.addEventListener('change', function() {
