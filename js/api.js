@@ -31,51 +31,92 @@ const ZebraAPI = (() => {
     },
   };
 
+  /* ── PROXY HELPER (Supabase Edge Function) ──────────────────── */
+  // Todas as chamadas passam pelo proxy quando disponível.
+  // As chaves das APIs externas ficam nos Secrets do Supabase — nunca no frontend.
+  const _proxy = {
+    base() {
+      return (typeof ZEBRA_CONFIG !== 'undefined' && ZEBRA_CONFIG.proxyEnabled)
+        ? ZEBRA_CONFIG.PROXY_BASE : null;
+    },
+    async fetch(action, params = {}) {
+      const base = this.base();
+      if (!base) return null;
+      const qs = new URLSearchParams({ action, ...params }).toString();
+      const ck = `proxy_${action}_${qs}`;
+      const hit = _cache.get(ck);
+      if (hit) return hit;
+      try {
+        const r = await fetch(`${base}?${qs}`);
+        if (!r.ok) { console.warn(`[Proxy] ${r.status} — ${action}`, params); return null; }
+        const data = await r.json();
+        if (data?.error) { console.warn(`[Proxy] erro da função: ${data.error}`); return null; }
+        _cache.set(ck, data);
+        return data;
+      } catch(e) { console.warn('[Proxy] rede:', e.message); return null; }
+    },
+  };
+
   /* ── FOOTBALL-DATA.ORG ──────────────────────────────────────── */
   const FD = {
     BASE : 'https://api.football-data.org/v4',
-    // código → competition code (v4)
     COMPS: { BRA:'BSA', ENG:'PL', ESP:'PD', ITA:'SA', GER:'BL1', FRA:'FL1', UCL:'CL', POR:'PPL' },
-    // código → season start year
     SEASON(lid) { return lid === 'BRA' ? '2025' : '2024'; },
 
     key() {
       return (typeof ZEBRA_CONFIG !== 'undefined' ? ZEBRA_CONFIG.FOOTBALL_DATA_KEY : '') || '';
     },
 
-    async _fetch(path) {
-      const k = this.key();
-      if (!k) return null;
+    // Tenta proxy primeiro; fallback para chamada direta com chave local
+    async _fetch(path, lid) {
       const ck = `fd_${path}`;
-      const hit = _cache.get(ck);
-      if (hit) return hit;
+      const hit = _cache.get(ck); if (hit) return hit;
+
+      // 1. Proxy Supabase (chave no servidor)
+      if (_proxy.base() && lid) {
+        const action = path.includes('/standings') ? 'standings'
+                     : path.includes('/matches')   ? 'matches'
+                     : null;
+        if (action) {
+          const params = { lid };
+          if (action === 'matches') {
+            const status = path.match(/status=([^&]+)/)?.[1];
+            const limit  = path.match(/limit=(\d+)/)?.[1];
+            if (status) params.status = status;
+            if (limit)  params.limit  = limit;
+          }
+          const data = await _proxy.fetch(action, params);
+          if (data) { _cache.set(ck, data); return data; }
+        }
+      }
+
+      // 2. Fallback: chamada direta com chave local
+      const k = this.key(); if (!k) return null;
       try {
-        // Usa query param em vez de header customizado para evitar CORS preflight
         const sep = path.includes('?') ? '&' : '?';
-        const url = `${this.BASE}${path}${sep}X-Auth-Token=${k}`;
-        const r = await fetch(url);
+        const r = await fetch(`${this.BASE}${path}${sep}X-Auth-Token=${k}`);
         if (!r.ok) { console.warn(`[FD] ${r.status} — ${path}`); return null; }
         const data = await r.json();
         _cache.set(ck, data);
         return data;
-      } catch (e) { console.warn('[FD] Erro de rede:', e.message); return null; }
+      } catch(e) { console.warn('[FD] Erro de rede:', e.message); return null; }
     },
 
     async getStandings(lid) {
       const c = this.COMPS[lid]; if (!c) return null;
-      return this._fetch(`/competitions/${c}/standings?season=${this.SEASON(lid)}`);
+      return this._fetch(`/competitions/${c}/standings?season=${this.SEASON(lid)}`, lid);
     },
     async getMatches(lid, status, limit = 8) {
       const c = this.COMPS[lid]; if (!c) return null;
       const qs = [`season=${this.SEASON(lid)}`, `limit=${limit}`];
       if (status) qs.push(`status=${status}`);
-      return this._fetch(`/competitions/${c}/matches?${qs.join('&')}`);
+      return this._fetch(`/competitions/${c}/matches?${qs.join('&')}`, lid);
     },
     async getScorers(lid, limit = 10) {
       const c = this.COMPS[lid]; if (!c) return null;
-      return this._fetch(`/competitions/${c}/scorers?season=${this.SEASON(lid)}&limit=${limit}`);
+      return this._fetch(`/competitions/${c}/scorers?season=${this.SEASON(lid)}&limit=${limit}`, lid);
     },
-    async getMatch(id) { return this._fetch(`/matches/${id}`); },
+    async getMatch(id) { return this._fetch(`/matches/${id}`, null); },
   };
 
   /* ── THESPORTSDB ────────────────────────────────────────────── */
@@ -88,17 +129,24 @@ const ZebraAPI = (() => {
       return (typeof ZEBRA_CONFIG !== 'undefined' ? ZEBRA_CONFIG.THESPORTSDB_KEY : '') || '123';
     },
 
-    async _fetch(ep) {
-      const url = `${this.BASE}/${this.key()}/${ep}`;
-      const hit = _cache.get(`sdb_${ep}`);
-      if (hit) return hit;
+    async _fetch(ep, proxyAction, proxyParams) {
+      const ck = `sdb_${ep}`;
+      const hit = _cache.get(ck); if (hit) return hit;
+
+      // 1. Proxy Supabase
+      if (proxyAction && _proxy.base()) {
+        const data = await _proxy.fetch(proxyAction, proxyParams || {});
+        if (data) { _cache.set(ck, data); return data; }
+      }
+
+      // 2. Direto (chave pública "123" — sem segredo)
       try {
-        const r = await fetch(url);
+        const r = await fetch(`${this.BASE}/${this.key()}/${ep}`);
         if (!r.ok) { console.warn(`[SDB] ${r.status} — ${ep}`); return null; }
         const data = await r.json();
-        _cache.set(`sdb_${ep}`, data);
+        _cache.set(ck, data);
         return data;
-      } catch (e) { console.warn('[SDB] Erro de rede:', e.message); return null; }
+      } catch(e) { console.warn('[SDB] Erro de rede:', e.message); return null; }
     },
 
     async getLeagueInfo(lid) {
@@ -107,21 +155,21 @@ const ZebraAPI = (() => {
     },
     async getLeagueTable(lid) {
       const id = this.LEAGUES[lid]; if (!id) return null;
-      const s = this.SEASONS[lid] || '2024-2025';
-      return this._fetch(`lookuptable.php?l=${id}&s=${s}`);
+      const s  = this.SEASONS[lid] || '2024-2025';
+      return this._fetch(`lookuptable.php?l=${id}&s=${s}`, 'sdb-table', { lid, season: s });
     },
     async getAllTeams(lid) {
       const id = this.LEAGUES[lid]; if (!id) return null;
-      return this._fetch(`lookup_all_teams.php?id=${id}`);
+      return this._fetch(`lookup_all_teams.php?id=${id}`, 'sdb-teams', { lid });
     },
     async searchTeam(name) {
-      return this._fetch(`searchteams.php?t=${encodeURIComponent(name)}`);
+      return this._fetch(`searchteams.php?t=${encodeURIComponent(name)}`, 'sdb-team', { name });
     },
     async lookupTeam(id) {
       return this._fetch(`lookupteam.php?id=${id}`);
     },
     async getTeamLastEvents(teamId) {
-      return this._fetch(`eventslast.php?id=${teamId}`);
+      return this._fetch(`eventslast.php?id=${teamId}`, 'sdb-events-last', { teamId });
     },
     async getTeamNextEvents(teamId) {
       return this._fetch(`eventsnext.php?id=${teamId}`);
@@ -456,9 +504,11 @@ const ZebraAPI = (() => {
 
   /* ── STATUS ─────────────────────────────────────────────────── */
   const isConfigured = {
-    footballData : () => !!FD.key(),
+    // Ativo se proxy Supabase disponível OU chave local configurada
+    footballData : () => !!_proxy.base() || !!FD.key(),
     rapidApi     : () => !!RAPID.key(),
-    sportsDb     : () => true,   // chave pública "123" sempre disponível
+    sportsDb     : () => true,
+    oddsApi      : () => !!_proxy.base(), // odds via proxy (chave no servidor)
   };
 
   /* ── PUBLIC ─────────────────────────────────────────────────── */
