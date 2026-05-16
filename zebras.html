@@ -478,17 +478,17 @@
   }
 
   // ── HEATMAP SEMANAL ──────────────────────────────────────────────
-  function buildHeatmap() {
-    const days   = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
-    const counts = [2, 5, 3, 7, 4, 8, 1];
-    const max    = Math.max(...counts);
+  function buildHeatmap(counts) {
+    const days      = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+    const dayCounts = counts || [0,0,0,0,0,0,0]; // Sun=0 … Sat=6
+    const max       = Math.max(...dayCounts) || 1;
 
     const grid   = document.getElementById('weekHeatmap');
     if (!grid) return;
 
     grid.innerHTML = '';
 
-    counts.forEach((n, i) => {
+    dayCounts.forEach((n, i) => {
       const pct   = n / max;
       const alpha = 0.08 + pct * 0.7;
       const isHot = n === max;
@@ -563,6 +563,19 @@
       renderZebras();
       const countEl = document.getElementById('zebraCount');
       if (countEl) countEl.textContent = `${realZebras.length} zebras reais ⚡`;
+
+      // Calculate day-of-week distribution for heatmap
+      const dayCounts = [0,0,0,0,0,0,0];
+      realZebras.forEach(z => {
+        if (z.date) {
+          // z.date is "DD/MM" format
+          const [d,m] = z.date.split('/').map(Number);
+          const dt = new Date(new Date().getFullYear(), m-1, d);
+          const dow = dt.getDay(); // 0=Sun … 6=Sat
+          dayCounts[dow]++;
+        }
+      });
+      buildHeatmap(dayCounts);
     } catch(e) { console.warn('[Zebras] initRealData:', e.message); }
   }
 

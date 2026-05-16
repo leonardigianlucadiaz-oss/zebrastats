@@ -180,6 +180,17 @@ const ZebraAPI = (() => {
     async getTeamNextEvents(teamId) {
       return this._fetch(`eventsnext.php?id=${teamId}`);
     },
+    async getSquad(teamId) {
+      // Try proxy first
+      const proxyData = await _proxy.fetch('sdb-players', { teamId });
+      if (proxyData?.player) return proxyData.player;
+      // Fallback direct (key 123 is public)
+      try {
+        const r = await fetch(`${this.BASE}/123/lookup_all_players.php?id=${teamId}`);
+        if (r.ok) { const d = await r.json(); return d?.player || []; }
+      } catch {}
+      return [];
+    },
   };
 
   /* ── RAPIDAPI ───────────────────────────────────────────────── */

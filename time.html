@@ -991,6 +991,19 @@
         }
         syncTeamFavBtn();
 
+        // Try to load real players from TheSportsDB
+        if (currentSdbTeamId) {
+          try {
+            const squad = await ZebraAPI.sportsDb.getSquad(currentSdbTeamId);
+            if (squad && squad.length) {
+              window._realPlayers = squad;
+              // Re-render escalacao tab if active
+              const activeTabEl = document.querySelector('#timeTabBar .tab-bar__item.active');
+              if (activeTabEl && activeTabEl.dataset.tab === 'escalacao') renderEscalacao();
+            }
+          } catch(e) { console.warn('[time] players load error:', e); }
+        }
+
         // Últimas partidas via SDB
         if (currentSdbTeamId) {
           const evts = await ZebraAPI.sportsDb.getTeamLastEvents(currentSdbTeamId);
@@ -1077,7 +1090,26 @@
         { x:165, y:110, pos:'PE',  name:'Ponta Esq.' },
       ];
 
-      const playerNames = positions.map((p, i) => p.name || ('Jogador ' + (i + 1)));
+      // Use real players if available
+      let playerNames = positions.map((p, i) => p.name || ('Jogador ' + (i + 1)));
+      if (window._realPlayers && window._realPlayers.length) {
+        const byPos = { Goalkeeper:[], Defender:[], Midfielder:[], Forward:[] };
+        window._realPlayers.forEach(pl => {
+          const pos = pl.strPosition || '';
+          if (pos.includes('Goalkeeper') || pos.includes('GK')) byPos.Goalkeeper.push(pl.strPlayer);
+          else if (pos.includes('Defender') || pos.includes('Back')) byPos.Defender.push(pl.strPlayer);
+          else if (pos.includes('Midfielder') || pos.includes('Mid')) byPos.Midfielder.push(pl.strPlayer);
+          else if (pos.includes('Forward') || pos.includes('Striker') || pos.includes('Winger') || pos.includes('Attack')) byPos.Forward.push(pl.strPlayer);
+          else byPos.Midfielder.push(pl.strPlayer); // default
+        });
+        const realNames = [
+          byPos.Goalkeeper[0],
+          byPos.Defender[0], byPos.Defender[1], byPos.Defender[2], byPos.Defender[3],
+          byPos.Midfielder[0], byPos.Midfielder[1], byPos.Midfielder[2],
+          byPos.Forward[0], byPos.Forward[1], byPos.Forward[2],
+        ];
+        playerNames = positions.map((p, i) => realNames[i] || p.name || ('Jogador ' + (i + 1)));
+      }
 
       const g = document.getElementById('pitchPlayers');
       if (!g) return;

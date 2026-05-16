@@ -476,23 +476,35 @@ async function initRealRanking() {
   if (typeof ZebraAPI === 'undefined' || !ZebraAPI.isConfigured.footballData()) return;
   if (typeof ZebraEngine === 'undefined') return;
 
-  const LIDS = ['ENG','ESP','ITA','GER','FRA','BRA'];
   try {
-    // Busca zebras de até 3 ligas em paralelo (respeita rate limit)
-    const [l1, l2, l3] = await Promise.all([
-      ZebraAPI.fetchRealZebras('ENG', 10),
-      ZebraAPI.fetchRealZebras('ESP', 10),
-      ZebraAPI.fetchRealZebras('ITA', 10),
-    ]);
-    const real = [...l1, ...l2, ...l3].sort((a, b) => b.zi - a.zi);
-    if (!real.length) return;
-
-    // Substitui o dataset mock pelos dados reais
-    RANKING_DATA.length = 0;
-    real.forEach((z, i) => RANKING_DATA.push({ ...z, id: i+1, period: z.period || 'week' }));
-    renderRanking();
-    showToast('⚡ Ranking atualizado com dados reais');
-  } catch(e) { console.warn('[Ranking] initRealRanking:', e.message); }
+    const lids = ['ENG','ESP','ITA','BRA','GER','FRA'];
+    const results = await Promise.allSettled(
+      lids.map(lid => ZebraAPI.fetchRealZebras(lid, 15))
+    );
+    const allZebras = results
+      .filter(r => r.status === 'fulfilled' && Array.isArray(r.value))
+      .flatMap(r => r.value);
+    if (allZebras.length > 0) {
+      RANKING_DATA.length = 0;
+      allZebras.sort((a,b) => b.zi - a.zi).forEach((z, i) => {
+        RANKING_DATA.push({
+          pos: i+1,
+          home: z.home, away: z.away,
+          hs: z.hs, as: z.as,
+          league: z.league, lid: z.lid,
+          zi: z.zi, ziClass: z.ziClass,
+          odd: parseFloat(z.odds_h) || parseFloat(z.odds_a) || 0,
+          date: z.date, azarao: z.azarao,
+          homeCrest: z.homeCrest || '', awayCrest: z.awayCrest || '',
+          realOdds: z.realOdds || false,
+          trend: [], period: 'week',
+          odds_h: z.odds_h, odds_a: z.odds_a,
+        });
+      });
+      renderRanking();
+      showToast('⚡ Ranking atualizado com dados reais');
+    }
+  } catch(e) { console.warn('[ranking] real data error:', e); }
 }
 
 initRealRanking();
