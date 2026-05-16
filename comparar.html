@@ -630,8 +630,21 @@ function drawRadar(teamA, teamB) {
     svg.appendChild(area);
   }
 
-  function teamScore(t, attr) {
-    const seed = ((t.name||'x').charCodeAt(0) * 1664525 + attr.charCodeAt(0) * 22695477) >>> 0;
+  function teamScore(t, label) {
+    const st = TEAM_STATS[t.id];
+    if (st) {
+      // Map radar labels to TEAM_STATS fields (normalize 0-1)
+      const atk  = Math.min(1, (st.goalsFor   || 1.5) / 3.5);
+      const def  = Math.min(1, 1 - (st.goalsAgainst || 1.5) / 3.5);
+      const zi   = Math.min(1, (st.ziAvg || 4) / 10);
+      const form = (() => { const f = st.form || []; const w = f.filter(x=>x==='W').length; return f.length ? w/f.length : 0.5; })();
+      const h2h  = 0.5; // neutral without full dataset
+      const home = Math.min(1, atk * 0.6 + def * 0.4);
+      const map  = { Ataque:atk, Defesa:def, 'Zebra Index':zi, Forma:form, H2H:h2h, Casa:home };
+      return map[label] !== undefined ? map[label] : 0.5;
+    }
+    // Fallback: seeded deterministic value
+    const seed = ((t.name||'x').charCodeAt(0) * 1664525 + label.charCodeAt(0) * 22695477) >>> 0;
     return 0.35 + (seed % 100) / 153;
   }
 

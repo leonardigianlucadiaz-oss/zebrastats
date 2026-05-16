@@ -472,12 +472,93 @@ function scrollToTop(smooth = true) {
   window.scrollTo({ top: 0, behavior: smooth ? 'smooth' : 'auto' });
 }
 
+// ── NORMALIZE TEAM SLUG ────────────────────────────────────────
+// Maps SDB numeric IDs (e.g. "sdb-133604") to slug keys used in
+// the TEAMS object on time.html. Falls back to slug-ifying the
+// raw string when no mapping is found.
+const _SDB_TO_SLUG = {
+  '133604': 'flamengo',
+  '133600': 'palmeiras',
+  '133606': 'botafogo',
+  '133602': 'fluminense',
+  '133601': 'corinthians',
+  '133603': 'sao-paulo',
+  '133609': 'gremio',
+  '133610': 'internacional',
+  '133607': 'atletico-mg',
+  '133608': 'bragantino',
+  '133612': 'vasco',
+  // European clubs
+  '133739': 'man-city',
+  '133616': 'liverpool',
+  '133604': 'arsenal',
+  '133615': 'chelsea',
+  '133619': 'man-united',
+  '133621': 'tottenham',
+  '133614': 'newcastle',
+  '135260': 'real-madrid',
+  '133725': 'barcelona',
+  '133729': 'atletico',
+  '133738': 'juventus',
+  '133741': 'inter',
+  '133733': 'ac-milan',
+  '133745': 'napoli',
+  '133735': 'roma',
+  '133718': 'psg',
+  '133719': 'marseille',
+  '133721': 'monaco',
+  '133693': 'bayern',
+  '133706': 'dortmund',
+  '133705': 'leverkusen',
+  '133604': 'benfica',
+  '133765': 'porto',
+  '133769': 'sporting-cp',
+  '133632': 'ajax',
+  '133761': 'torino',
+};
+
+function normalizeTeamSlug(input) {
+  if (!input) return '';
+  const s = String(input);
+  // Handle "sdb-<number>" format
+  const sdbMatch = s.match(/^sdb-(\d+)$/i);
+  if (sdbMatch) {
+    return _SDB_TO_SLUG[sdbMatch[1]] || sdbMatch[1];
+  }
+  // Handle plain numeric IDs
+  if (/^\d+$/.test(s)) {
+    return _SDB_TO_SLUG[s] || s;
+  }
+  // Already a slug or short code — slug-ify just in case
+  return s.toLowerCase().replace(/[\s\.]+/g, '-').replace(/[^a-z0-9-]/g, '');
+}
+window.normalizeTeamSlug = normalizeTeamSlug;
+
+// ── UPDATE SIDEBAR USER ────────────────────────────────────────
+function updateSidebarUser() {
+  try {
+    const name = localStorage.getItem('zs_user_name') || 'Usuário';
+    const plan = getUserPlan();
+    document.querySelectorAll('.sidebar__user-name').forEach(el => {
+      el.textContent = name;
+    });
+    document.querySelectorAll('.sidebar__user-avatar').forEach(el => {
+      el.textContent = (name[0] || 'U').toUpperCase();
+    });
+    document.querySelectorAll('.sidebar__user-plan').forEach(el => {
+      el.textContent = plan === 'pro' ? 'Plano Pro' : 'Plano Free';
+    });
+  } catch {}
+}
+window.updateSidebarUser = updateSidebarUser;
+
 // ── INIT GLOBAL ───────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   updatePlanBadge();
   addRippleEffect();
   setActiveNavItem();
   initThemeToggle();
+  updateSidebarUser();
 
   // ── PWA: inject manifest link ──────────────────────────────────
   if (!document.querySelector('link[rel="manifest"]')) {

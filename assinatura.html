@@ -387,6 +387,35 @@
 
     // ── LUCIDE — inicializa todos os ícones da página ─────
     lucide.createIcons();
+
+    // ── PRO DETECTION — show "already subscribed" banner ──────
+    (function checkProUser() {
+      try {
+        const plan = localStorage.getItem('zebrastats_plan') || 'free';
+        if (plan !== 'pro') return;
+        // User is already Pro — show a banner and hide subscribe button
+        const proBanner = document.createElement('div');
+        proBanner.style.cssText = 'background:var(--green-dim);border:1px solid rgba(46,230,92,0.4);border-radius:var(--radius-md);padding:14px 16px;display:flex;align-items:center;gap:12px;margin-bottom:16px;';
+        proBanner.innerHTML = `
+          <i data-lucide="check-circle-2" style="width:20px;height:20px;color:var(--green);flex-shrink:0;"></i>
+          <div style="flex:1;">
+            <div style="font-size:0.9375rem;font-weight:700;color:var(--green);">Você já é Pro!</div>
+            <div style="font-size:0.8125rem;color:var(--gray);margin-top:2px;">Aproveite todos os recursos do ZebraStats Pro.</div>
+          </div>
+          <a href="home.html" style="font-size:0.8125rem;color:var(--green);font-weight:600;text-decoration:none;flex-shrink:0;">Ir para o app →</a>
+        `;
+        const main = document.querySelector('main');
+        if (main) main.insertBefore(proBanner, main.firstChild);
+        const subscribeBtn = document.getElementById('subscribeBtnPro');
+        if (subscribeBtn) {
+          subscribeBtn.textContent = '✓ Pro Ativo';
+          subscribeBtn.disabled = true;
+          subscribeBtn.style.opacity = '0.6';
+          subscribeBtn.style.pointerEvents = 'none';
+        }
+        lucide.createIcons({ nodes: [proBanner] });
+      } catch {}
+    })();
   </script>
 </body>
 </html>

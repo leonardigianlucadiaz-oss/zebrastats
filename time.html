@@ -208,6 +208,8 @@
         </div>
       </div>
 
+      </div><!-- /tab-overview -->
+
       <!-- TAB: ÚLTIMOS JOGOS -->
       <div id="tab-jogos" style="display:none;">
         <div class="section-header">
@@ -224,16 +226,6 @@
           <a href="zebras.html" class="section-link">Ver todas</a>
         </div>
         <div id="biggestZebrasList" style="display:flex;flex-direction:column;gap:8px;"></div>
-      </div>
-
-      <!-- BANNER PREMIUM (escondido para PRO via updatePlanBadge) -->
-      <div class="lock-banner" id="timeLockBanner" onclick="window.location.href='assinatura.html'">
-        <span style="font-size:1.2rem;">🔒</span>
-        <div>
-          <div style="font-size:0.875rem;font-weight:600;">Análise completa de zebras</div>
-          <div style="font-size:0.75rem;font-weight:400;color:var(--gray);margin-top:2px;">Histórico de jogadores, relatórios e alertas em tempo real</div>
-        </div>
-        <span style="margin-left:auto;font-size:1rem;">→</span>
       </div>
 
       <!-- TAB: ESCALAÇÃO -->
@@ -297,8 +289,6 @@
           </div>
         </div>
       </div>
-
-      </div><!-- /tab-overview -->
 
     </main>
 
@@ -1144,34 +1134,9 @@
       const outEl = document.getElementById('transfersOut');
       if (!inEl || !outEl) return;
 
-      const arrivals = [
-        { name:'Michael', from:'Al-Hilal',   value:'R$ 35M', flag:'🇧🇷' },
-        { name:'Gonzalo Plata', from:'Sporting CP', value:'R$ 22M', flag:'🇪🇨' },
-        { name:'Allan',   from:'Atletico-MG', value:'R$ 18M', flag:'🇧🇷' },
-      ];
-      const departures = [
-        { name:'Éverton Ribeiro', to:'Bahia',   value:'Livre', flag:'🇧🇷' },
-        { name:'Filipe Luís',     to:'Aposentado', value:'—', flag:'🇧🇷' },
-      ];
-
-      function row(p, dir, isLast) {
-        const label = dir === 'in' ? p.from : p.to;
-        const arrowColor = dir === 'in' ? 'var(--green)' : 'var(--red)';
-        const arrow = dir === 'in' ? '↓' : '↑';
-        return `<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;${isLast?'':'border-bottom:1px solid var(--border);'}">
-          <span style="font-size:1.125rem;">${p.flag}</span>
-          <div style="flex:1;">
-            <div style="font-size:0.9375rem;font-weight:600;">${p.name}</div>
-            <div style="font-size:0.75rem;color:var(--gray);">${label}</div>
-          </div>
-          <div style="text-align:right;">
-            <span style="font-size:0.875rem;font-weight:700;color:${arrowColor};">${arrow} ${p.value}</span>
-          </div>
-        </div>`;
-      }
-
-      inEl.innerHTML  = arrivals.map((p,i)  => row(p,'in',  i===arrivals.length-1)).join('');
-      outEl.innerHTML = departures.map((p,i) => row(p,'out', i===departures.length-1)).join('');
+      const emptyHtml = `<div style="padding:20px;text-align:center;color:var(--gray);font-size:0.8125rem;">Nenhuma transferência registrada</div>`;
+      inEl.innerHTML  = emptyHtml;
+      outEl.innerHTML = emptyHtml;
     }
 
     lucide.createIcons();

@@ -751,17 +751,25 @@ function renderAll() {
   renderAlertsList();
 }
 
-// ── PLAN BADGE ────────────────────────────────────────────────────────────────
-function updatePlanBadge() {
+// ── PLAN BADGE (local override to also update alert count) ────────────────────
+// NOTE: The global updatePlanBadge from main.js runs first via DOMContentLoaded.
+// This local version runs after and augments the badge with alert count for FREE users.
+function _alertasUpdateBadge() {
   const badge = document.getElementById('planBadge');
-  if (!badge) return; // safe no-op if element absent
+  if (!badge) return;
+  const isPro  = (typeof getUserPlan === 'function') ? getUserPlan() === 'pro' : false;
   const alerts = loadAlerts();
-  const isPro  = false; // TODO: link to auth state
-  badge.textContent = isPro ? 'PRO' : `FREE ${alerts.length}/${FREE_LIMIT}`;
+  if (!isPro) {
+    badge.textContent = `FREE ${alerts.length}/${FREE_LIMIT}`;
+    badge.className = badge.className.replace('badge--pro', 'badge--free');
+  } else {
+    badge.textContent = 'PRO';
+    badge.className = badge.className.replace('badge--free', 'badge--pro');
+  }
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
-updatePlanBadge();
+_alertasUpdateBadge();
 renderLeagueChips();
 renderAll();
 initBellBadge();

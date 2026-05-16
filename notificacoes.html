@@ -108,17 +108,26 @@
   function injectAlertNotifs() {
     try {
       const alerts = JSON.parse(localStorage.getItem('zs_alerts') || '[]');
-      alerts.forEach((a, i) => {
-        const id = `alert-${i}`;
-        if (!NOTIFS.find(x => x.id === id)) {
-          NOTIFS.unshift({
-            id, group:'Hoje', type:'sistema', unread:true,
-            icon:'bell-ring', iconBg:'var(--green-dim)',
-            title:`Alerta configurado: ${a.team || a.league || 'Time'} - ${a.type || 'zebra'}`,
-            desc:`Alerta de zebra ativo para ${a.team || a.league}`,
-            time:'Agora', link:'alertas.html'
-          });
-        }
+      const active  = alerts.filter(a => a.active !== false);
+      if (!active.length) return;
+      active.forEach((a, i) => {
+        const id = `alert-injected-${a.id || i}`;
+        if (NOTIFS.find(x => x.id === id)) return; // skip duplicates
+        const label    = a.label || a.team || a.league || 'Alerta';
+        const sublabel = a.sub   || (a.team ? `Time: ${a.team}` : a.league ? `Liga: ${a.league}` : '');
+        const threshold = a.threshold ? ` (ZI ≥ ${a.threshold})` : '';
+        NOTIFS.unshift({
+          id,
+          group:   'Hoje',
+          type:    'alerta',
+          unread:  true,
+          icon:    a.icon || 'bell-ring',
+          iconBg:  a.iconBg || 'var(--green-dim)',
+          title:   `🦓 ${label}${threshold}`,
+          desc:    sublabel || `Alerta ativo — toque para gerenciar`,
+          time:    'Agora',
+          link:    'alertas.html',
+        });
       });
     } catch {}
   }
