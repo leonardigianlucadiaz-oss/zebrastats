@@ -334,6 +334,13 @@
   const _urlLeague  = _urlParams.get('league') || null;
   const _urlDate    = _urlParams.get('date')   || null;
 
+  // Additional URL params
+  const _urlHomeCrest = _urlParams.get('homeCrest') || null;
+  const _urlAwayCrest = _urlParams.get('awayCrest') || null;
+  const _urlAzarao    = _urlParams.get('azarao')    || null;
+  const _urlOddsH     = _urlParams.get('odds_h')    || null;
+  const _urlOddsA     = _urlParams.get('odds_a')    || null;
+
   // Apply URL params to visible DOM if present
   if (_urlHome) {
     document.querySelectorAll('[id*="HomeTeam"],[id*="homeTeam"],[class*="home-team"]').forEach(el => el.textContent = _urlHome);
@@ -344,6 +351,95 @@
     document.querySelectorAll('[id*="AwayTeam"],[id*="awayTeam"],[class*="away-team"]').forEach(el => el.textContent = _urlAway);
     const an = document.getElementById('matchAwayName');
     if (an) an.textContent = _urlAway;
+  }
+
+  // 1. Score
+  if (_urlScore) {
+    const parts = _urlScore.split(/[-–]/).map(s => s.trim());
+    if (parts.length === 2) {
+      const homeGoals = parts[0];
+      const awayGoals = parts[1];
+      const scoreEl = document.getElementById('matchScore');
+      if (scoreEl) scoreEl.innerHTML = `${homeGoals}<span style="color:var(--gray);font-size:2rem;margin:0 4px;">–</span>${awayGoals}`;
+    }
+  }
+
+  // 2. ZI
+  if (_urlZi) {
+    const ziNum = parseFloat(_urlZi);
+    const ziPct = (ziNum / 10) * 100;
+    const ziValEl = document.getElementById('ziValue');
+    const ziScoreEl = document.getElementById('ziScore');
+    if (ziValEl) ziValEl.textContent = _urlZi;
+    if (ziScoreEl) ziScoreEl.textContent = _urlZi;
+    // Animate meter on page load
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      animateMeter(ziPct);
+    }));
+  }
+
+  // 3. Competition/League
+  if (_urlLeague) {
+    const compEl = document.getElementById('matchCompetition');
+    if (compEl) {
+      const datePart = _urlDate ? ` · ${_urlDate}` : '';
+      compEl.textContent = `${_urlLeague}${datePart}`;
+    }
+  }
+
+  // 4. Crests
+  if (_urlHomeCrest) {
+    const homeShieldEl = document.getElementById('matchHomeShield');
+    if (homeShieldEl) {
+      homeShieldEl.innerHTML = `<img src="${_urlHomeCrest}" style="width:44px;height:44px;object-fit:contain;" onerror="this.style.display='none'">`;
+    }
+  }
+  if (_urlAwayCrest) {
+    const awayShieldEl = document.getElementById('matchAwayShield');
+    if (awayShieldEl) {
+      awayShieldEl.innerHTML = `<img src="${_urlAwayCrest}" style="width:44px;height:44px;object-fit:contain;" onerror="this.style.display='none'">`;
+    }
+  }
+
+  // 5. Roles (azarão/favorito)
+  if (_urlAzarao) {
+    const homeRoleEl = document.getElementById('matchHomeRole');
+    const awayRoleEl = document.getElementById('matchAwayRole');
+    if (_urlAzarao === 'home') {
+      if (homeRoleEl) { homeRoleEl.textContent = 'Azarão'; homeRoleEl.style.color = 'var(--green)'; homeRoleEl.style.background = 'rgba(46,230,92,0.12)'; }
+      if (awayRoleEl) { awayRoleEl.textContent = 'Favorito'; awayRoleEl.style.color = 'var(--gray)'; awayRoleEl.style.background = 'var(--card2)'; }
+    } else if (_urlAzarao === 'away') {
+      if (homeRoleEl) { homeRoleEl.textContent = 'Favorito'; homeRoleEl.style.color = 'var(--gray)'; homeRoleEl.style.background = 'var(--card2)'; }
+      if (awayRoleEl) { awayRoleEl.textContent = 'Azarão'; awayRoleEl.style.color = 'var(--green)'; awayRoleEl.style.background = 'rgba(46,230,92,0.12)'; }
+    }
+  }
+
+  // 6. Odds
+  if (_urlOddsH || _urlOddsA) {
+    // Find home/away odd display elements (first and last in odds bar)
+    const oddEls = document.querySelectorAll('[id="homeOdd"],[id="awayOdd"]');
+    if (oddEls.length === 0) {
+      // Target by position: the odds bar has 3 divs (home, draw, away)
+      const oddDivs = document.querySelectorAll('#matchScore').length
+        ? document.querySelectorAll('div[style*="font-size:1.125rem;font-weight:700"]')
+        : [];
+      // Fallback: update via innerText search in odds section
+    }
+    // Update the static odd values displayed in the odds row
+    const allOddVals = document.querySelectorAll('[style*="font-size:1.125rem;font-weight:700;color:var(--green)"]');
+    if (_urlOddsH && allOddVals.length > 0) allOddVals[0].textContent = _urlOddsH;
+    const allOddRed = document.querySelectorAll('[style*="font-size:1.125rem;font-weight:700;color:var(--red)"]');
+    if (_urlOddsA && allOddRed.length > 0) allOddRed[0].textContent = _urlOddsA;
+    // Also update home/away labels that reference team names in odds row
+    const oddLabels = document.querySelectorAll('[style*="font-size:0.625rem;color:var(--gray);text-transform:uppercase"]');
+    if (_urlHome && oddLabels.length > 0) {
+      const homeLabel = oddLabels[0];
+      if (homeLabel && homeLabel.textContent.toLowerCase().includes('odd')) homeLabel.textContent = `Odd ${_urlHome}`;
+    }
+    if (_urlAway && oddLabels.length > 2) {
+      const awayLabel = oddLabels[2];
+      if (awayLabel && awayLabel.textContent.toLowerCase().includes('odd')) awayLabel.textContent = `Odd ${_urlAway}`;
+    }
   }
 
   // ── SHARE ───────────────────────────────────────────────────────
@@ -388,7 +484,10 @@
       ['resumo','stats','zebra','h2h'].forEach(t => {
         document.getElementById(`tab-${t}`).style.display = t === tab ? 'block' : 'none';
       });
-      if (this.dataset.tab === 'zebra') animateMeter(82);
+      if (this.dataset.tab === 'zebra') {
+        const pct = _urlZi ? (parseFloat(_urlZi) / 10) * 100 : 82;
+        animateMeter(pct);
+      }
     });
   });
 

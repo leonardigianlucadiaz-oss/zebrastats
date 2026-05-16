@@ -842,15 +842,33 @@
     initBellBadge();
     lucide.createIcons();
 
-    // Stats bar counters
-    (function initStatsBar() {
-      const today = new Date();
-      const seed  = today.getFullYear() * 10000 + (today.getMonth()+1) * 100 + today.getDate();
-      const rng   = (n) => ((seed * 1664525 + n * 1013904223) >>> 0) % n;
-      document.getElementById('sdLive')   && (document.getElementById('sdLive').textContent   = `${rng(4)+1} ao vivo`);
-      document.getElementById('sdHighZi') && (document.getElementById('sdHighZi').textContent = `${rng(6)+3} jogos com ZI alto`);
-      document.getElementById('sdTotal')  && (document.getElementById('sdTotal').textContent  = `${rng(10)+8} jogos hoje`);
-    })();
+    // Stats bar counters — real data from API
+    async function initStatsBar() {
+      try {
+        // Fetch real matches for today from proxy
+        const data = await ZebraAPI.footballData.getMatches('ENG', 'SCHEDULED', 20).catch(() => null);
+        const liveData = await ZebraAPI.footballData.getMatches('ENG', 'IN_PLAY', 10).catch(() => null);
+        const liveCount = liveData?.matches?.length || 0;
+        const todayCount = (data?.matches?.length || 0) + liveCount;
+
+        // Get real zebras for ZI high count
+        const zebras = await ZebraAPI.fetchRealZebras('ENG', 20).catch(() => []);
+        const highZiCount = zebras.filter(z => z.zi >= 7).length;
+
+        if (document.getElementById('sdLive'))
+          document.getElementById('sdLive').textContent = liveCount > 0 ? `${liveCount} ao vivo` : 'Ao vivo';
+        if (document.getElementById('sdHighZi'))
+          document.getElementById('sdHighZi').textContent = highZiCount > 0 ? `${highZiCount} zebras ZI alto` : 'ZI alto';
+        if (document.getElementById('sdTotal'))
+          document.getElementById('sdTotal').textContent = todayCount > 0 ? `${todayCount} jogos hoje` : 'Ver agenda';
+      } catch(e) {
+        // fallback to reasonable static values
+        document.getElementById('sdLive')   && (document.getElementById('sdLive').textContent   = 'Ao vivo');
+        document.getElementById('sdHighZi') && (document.getElementById('sdHighZi').textContent = 'ZI alto');
+        document.getElementById('sdTotal')  && (document.getElementById('sdTotal').textContent  = 'Ver agenda');
+      }
+    }
+    initStatsBar();
 
     // Toast de boas-vindas após onboarding
     const welcomeMsg = localStorage.getItem('zs_welcome_toast');

@@ -162,7 +162,18 @@ Deno.serve(async (req: Request) => {
       return ok(data);
     }
 
-    return err(`Ação desconhecida: '${action}'. Use: matches, standings, odds, odds-scores, sdb-team, sdb-table, sdb-events-last, sdb-teams`, 400);
+    // ── TheSportsDB: jogadores do time ───────────────────────
+    if (action === "sdb-players") {
+      const key    = Deno.env.get("THESPORTSDB_KEY") ?? "123";
+      const teamId = url.searchParams.get("teamId") ?? "";
+      if (!teamId) return err("Parâmetro 'teamId' obrigatório", 400);
+      const data = await fetchCached(
+        `https://www.thesportsdb.com/api/v1/json/${key}/lookup_all_players.php?id=${teamId}`
+      );
+      return ok(data);
+    }
+
+    return err(`Ação desconhecida: '${action}'. Use: matches, standings, odds, odds-scores, sdb-team, sdb-table, sdb-events-last, sdb-teams, sdb-players`, 400);
 
   } catch (e: unknown) {
     const msg = e instanceof Error ? e.message : String(e);
