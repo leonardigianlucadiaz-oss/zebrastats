@@ -350,7 +350,7 @@ const POPULAR_LEAGUES = [
   { id:'ITA', name:'Serie A',        flag:'🇮🇹' },
   { id:'GER', name:'Bundesliga',     flag:'🇩🇪' },
   { id:'FRA', name:'Ligue 1',        flag:'🇫🇷' },
-  { id:'PRT', name:'Liga Portugal',  flag:'🇵🇹' },
+  { id:'POR', name:'Liga Portugal',  flag:'🇵🇹' },
   { id:'ARG', name:'Liga Argentina', flag:'🇦🇷' },
   { id:'UCL', name:'Champions',      flag:'🌍' },
 ];
@@ -364,7 +364,7 @@ const LOCAL_LEAGUES = [
   { id:'FRA', name:'Ligue 1',              country:'França',    flag:'🇫🇷' },
   { id:'UCL', name:'Champions League',     country:'Europa',    flag:'🌍' },
   { id:'UEL', name:'Europa League',        country:'Europa',    flag:'🟠' },
-  { id:'PRT', name:'Primeira Liga',        country:'Portugal',  flag:'🇵🇹' },
+  { id:'POR', name:'Primeira Liga',        country:'Portugal',  flag:'🇵🇹' },
   { id:'ARG', name:'Liga Profesional',     country:'Argentina', flag:'🇦🇷' },
   { id:'MEX', name:'Liga MX',              country:'México',    flag:'🇲🇽' },
   { id:'NED', name:'Eredivisie',           country:'Holanda',   flag:'🇳🇱' },
@@ -682,7 +682,8 @@ function buildTeamItem(t, query) {
     if (e.target.closest('.fav-star-btn')) return;
     addToHistory(t.name);
     localStorage.setItem('zs_search_team', t.name);
-    window.location.href = 'time.html?team=' + encodeURIComponent(t.id);
+    const teamSlug = typeof normalizeTeamSlug === 'function' ? normalizeTeamSlug(t.id) : t.id;
+    window.location.href = 'time.html?team=' + encodeURIComponent(teamSlug);
   });
 
   // Click no botão de favorito

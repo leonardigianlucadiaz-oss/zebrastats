@@ -63,15 +63,15 @@
     <div style="display:flex;align-items:center;gap:16px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;flex:1;min-width:0;">
       <div style="display:flex;align-items:center;gap:5px;flex-shrink:0;">
         <span style="width:6px;height:6px;border-radius:50%;background:var(--red);animation:pulse 1.5s infinite;display:inline-block;"></span>
-        <span style="font-size:0.75rem;color:var(--white);font-weight:600;" id="sdLive">3 ao vivo</span>
+        <span style="font-size:0.75rem;color:var(--white);font-weight:600;" id="sdLive">–</span>
       </div>
       <div style="display:flex;align-items:center;gap:5px;flex-shrink:0;">
         <i data-lucide="zap" style="width:13px;height:13px;color:var(--gold);flex-shrink:0;"></i>
-        <span style="font-size:0.75rem;color:var(--gray);" id="sdHighZi">5 jogos com ZI alto</span>
+        <span style="font-size:0.75rem;color:var(--gray);" id="sdHighZi">–</span>
       </div>
       <div style="display:flex;align-items:center;gap:5px;flex-shrink:0;">
         <i data-lucide="calendar" style="width:13px;height:13px;color:var(--green);flex-shrink:0;"></i>
-        <span style="font-size:0.75rem;color:var(--gray);" id="sdTotal">12 jogos hoje</span>
+        <span style="font-size:0.75rem;color:var(--gray);" id="sdTotal">–</span>
       </div>
     </div>
     <a href="zebras.html" style="font-size:0.6875rem;color:var(--green);font-weight:600;text-decoration:none;flex-shrink:0;margin-left:12px;">Ver zebras →</a>
@@ -104,15 +104,19 @@
       <div id="liveGames" style="display:flex;flex-direction:column;gap:10px;"></div>
 
       <!-- FILTRO DE LIGAS -->
-      <div class="scroll-x" id="leagueFilter" style="margin-top:4px;gap:8px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:4px;margin-bottom:2px;">
+        <span style="font-size:0.6875rem;color:var(--gray);">Filtrar por liga</span>
+        <a href="liga.html" style="font-size:0.6875rem;color:var(--green);font-weight:600;text-decoration:none;">Explorar ligas →</a>
+      </div>
+      <div class="scroll-x" id="leagueFilter" style="gap:8px;">
         <button class="league-pill active" data-league="all">Todos</button>
-        <button class="league-pill" data-league="BRA"><span class="pill-logo" id="hpl-BRA"></span> Brasileirão</button>
-        <button class="league-pill" data-league="ENG"><span class="pill-logo" id="hpl-ENG"></span> Premier Lge</button>
-        <button class="league-pill" data-league="ESP"><span class="pill-logo" id="hpl-ESP"></span> La Liga</button>
-        <button class="league-pill" data-league="ITA"><span class="pill-logo" id="hpl-ITA"></span> Serie A</button>
-        <button class="league-pill" data-league="GER"><span class="pill-logo" id="hpl-GER"></span> Bundesliga</button>
-        <button class="league-pill" data-league="FRA"><span class="pill-logo" id="hpl-FRA"></span> Ligue 1</button>
-        <button class="league-pill" data-league="UCL"><span class="pill-logo" id="hpl-UCL"></span> Champions</button>
+        <button class="league-pill" data-league="BRA" data-lid="BRA"><span class="pill-logo" id="hpl-BRA"></span> Brasileirão</button>
+        <button class="league-pill" data-league="ENG" data-lid="ENG"><span class="pill-logo" id="hpl-ENG"></span> Premier Lge</button>
+        <button class="league-pill" data-league="ESP" data-lid="ESP"><span class="pill-logo" id="hpl-ESP"></span> La Liga</button>
+        <button class="league-pill" data-league="ITA" data-lid="ITA"><span class="pill-logo" id="hpl-ITA"></span> Serie A</button>
+        <button class="league-pill" data-league="GER" data-lid="GER"><span class="pill-logo" id="hpl-GER"></span> Bundesliga</button>
+        <button class="league-pill" data-league="FRA" data-lid="FRA"><span class="pill-logo" id="hpl-FRA"></span> Ligue 1</button>
+        <button class="league-pill" data-league="UCL" data-lid="UCL"><span class="pill-logo" id="hpl-UCL"></span> Champions</button>
       </div>
 
       <!-- EM BREVE -->
@@ -434,7 +438,16 @@
             <div style="width:${drawProb}%;background:var(--gray);"></div>
             <div style="width:${awayProb}%;background:var(--red);"></div>
           </div>`;
-        card.addEventListener('click', () => window.location.href = 'partida.html');
+        card.addEventListener('click', () => {
+          const navParams = new URLSearchParams({
+            home:   g.home || '',
+            away:   g.away || '',
+            score:  (g.hs !== undefined && g.as !== undefined) ? `${g.hs} – ${g.as}` : '',
+            league: g.league || '',
+            zi:     g.zi !== undefined ? g.zi : '',
+          });
+          window.location.href = `partida.html?${navParams.toString()}`;
+        });
         container.appendChild(card);
       });
     }
@@ -473,7 +486,16 @@
               <span class="gc-team-name">${g.away}</span>
             </div>
           </div>`;
-        card.addEventListener('click', () => window.location.href = 'partida.html');
+        card.addEventListener('click', () => {
+          const navParams = new URLSearchParams({
+            home:   g.home || '',
+            away:   g.away || '',
+            score:  '',
+            league: g.league || '',
+            time:   g.time || '',
+          });
+          window.location.href = `partida.html?${navParams.toString()}`;
+        });
         container.appendChild(card);
       });
     }
@@ -602,6 +624,12 @@
     // ── LEAGUE FILTER ─────────────────────────────────────
     document.querySelectorAll('.league-pill').forEach(pill => {
       pill.addEventListener('click', function() {
+        const lid = this.dataset.lid;
+        // If already active and has a liga, navigate to liga.html
+        if (this.classList.contains('active') && lid) {
+          window.location.href = `liga.html?id=${lid}`;
+          return;
+        }
         document.querySelectorAll('.league-pill').forEach(p => p.classList.remove('active'));
         this.classList.add('active');
         activeLeagueFilter = this.dataset.league;

@@ -161,7 +161,7 @@ const RANKING_DATA = [
 let activePeriodNew = 'semana';
 
 // Mock ZI multipliers per period so numbers feel different
-const PERIOD_MULT = { semana: 1.0, mes: 3.2, historico: 1.0 };
+const PERIOD_MULT = { semana: 1.0, mes: 1.0, historico: 1.0 };
 
 document.querySelectorAll('#rankingPeriodTabs .tab-bar__item').forEach(btn => {
   btn.addEventListener('click', function() {
@@ -244,7 +244,17 @@ function renderPodium(data) {
       <div class="podium-league">${z.league}</div>
       <div class="podium-zi">ZI ${z.zi}</div>
       <div class="podium-odd">odd ${z.odds_h}</div>`;
-    card.addEventListener('click', () => window.location.href = 'partida.html');
+    card.addEventListener('click', () => {
+      const navParams = new URLSearchParams({
+        home:   z.home   || '',
+        away:   z.away   || '',
+        score:  (z.hs !== undefined && z.as !== undefined) ? `${z.hs} – ${z.as}` : '',
+        league: z.league || '',
+        zi:     z.zi     || '',
+        odds:   z.odds_h || '',
+      });
+      window.location.href = `partida.html?${navParams.toString()}`;
+    });
     wrap.appendChild(card);
   });
 
@@ -283,6 +293,20 @@ function sparkline(values, width = 48, height = 20, color = 'var(--green)') {
     <polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
     <circle cx="${lx}" cy="${ly}" r="2.5" fill="${color}"/>
   </svg>`;
+}
+
+// ── MAKE TREND FROM ZI ────────────────────────────────────────────────────────
+// Returns a sparkline SVG whose shape reflects the team's ZI value.
+// High ZI → upward trend; low ZI → flatter/downward; uses deterministic values.
+function makeTrend(zi) {
+  const base = Math.min(10, Math.max(0, parseFloat(zi) || 0));
+  // 6 points centered around the ZI value with slight variation
+  const steps = [0, 0.6, 1.0, 0.4, 0.8, 1.2];
+  const values = steps.map((s, i) => {
+    const v = base * (0.5 + s * 0.4) + (i % 2 === 0 ? 0 : base * 0.1);
+    return Math.max(0, v);
+  });
+  return sparkline(values, 44, 18);
 }
 
 // ── RENDER RANKING ────────────────────────────────────────────────────────────
@@ -354,11 +378,8 @@ function buildRankCard(z, pos, cls, locked = false, mult = 1) {
   const color  = ziColors[cls];
   const label  = ziLabels[cls];
 
-  // Generate sparkline trend seeded by team name
-  const teamName = z.home;
-  const seed = teamName.split('').reduce((a,c) => a + c.charCodeAt(0), 0);
-  const trend = Array.from({length:6}, (_,i) => ((seed * (i+1) * 1664525) >>> 0) % 40 + 20);
-  const spark = sparkline(trend, 44, 18);
+  // Generate sparkline trend derived from team's ZI value
+  const spark = makeTrend(z.zi);
 
   const leagueLogo = LEAGUE_LOGOS[z.lid]
     ? `<img src="${LEAGUE_LOGOS[z.lid]}" style="width:11px;height:11px;object-fit:contain;vertical-align:middle;margin-right:2px;" onerror="this.remove();">`
@@ -435,7 +456,10 @@ function buildRankCard(z, pos, cls, locked = false, mult = 1) {
     });
     card.addEventListener('click', e => {
       if (e.target.tagName !== 'A' && !e.target.closest('.share-btn')) {
-        const teamId = (z.name || z.team || z.home || '').toLowerCase().replace(/[\s\.]+/g,'-').replace(/[^a-z0-9-]/g,'');
+        const rawId = z.id || z.team || z.name || z.home || '';
+        const teamId = typeof normalizeTeamSlug === 'function'
+          ? normalizeTeamSlug(rawId)
+          : rawId.toLowerCase().replace(/[\s\.]+/g,'-').replace(/[^a-z0-9-]/g,'');
         window.location.href = `time.html?team=${encodeURIComponent(teamId)}`;
       }
     });

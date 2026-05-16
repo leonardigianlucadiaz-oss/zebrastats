@@ -623,10 +623,34 @@
     });
   }
 
+  // ── JOGOS LOADING SKELETON ──────────────────────────────────────
+  function showJogosLoading() {
+    const container = document.getElementById('jogosList');
+    if (!container) return;
+    container.innerHTML = '';
+    for (let i = 0; i < 4; i++) {
+      const skel = document.createElement('div');
+      skel.className = 'game-card';
+      skel.style.cssText = 'pointer-events:none;';
+      skel.innerHTML = `
+        <div class="game-card__league" style="display:flex;justify-content:space-between;">
+          <div class="skel" style="height:11px;width:80px;border-radius:6px;"></div>
+          <div class="skel" style="height:11px;width:50px;border-radius:6px;"></div>
+        </div>
+        <div class="game-card__match" style="margin-top:10px;">
+          <div class="skel" style="height:14px;width:90px;border-radius:6px;flex:1;"></div>
+          <div class="skel" style="height:14px;width:36px;border-radius:6px;margin:0 12px;"></div>
+          <div class="skel" style="height:14px;width:90px;border-radius:6px;flex:1;"></div>
+        </div>`;
+      container.appendChild(skel);
+    }
+  }
+
   // ── INIT ──────────────────────────────────────────────────────────
   updatePlanBadge && updatePlanBadge();
   syncFavBtn();
   loadHeroLogo('BRA');
+  showJogosLoading();
   renderJogos();
 
   // ── API REAL DATA ──────────────────────────────────────────────────

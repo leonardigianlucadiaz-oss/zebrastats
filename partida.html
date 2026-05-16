@@ -818,10 +818,12 @@
   function initH2hPreview() {
     const el = document.getElementById('h2hPreview');
     if (!el) return;
+    const homeTeam = _urlHome || 'Time A';
+    const awayTeam = _urlAway || 'Time B';
     const matches = [
-      { date:'Mar 2025', hs:2, as:0, home:'Flamengo', away:'Liverpool' },
-      { date:'Nov 2024', hs:1, as:1, home:'Liverpool', away:'Flamengo' },
-      { date:'Jul 2024', hs:0, as:3, home:'Flamengo', away:'Liverpool' },
+      { date:'Mar 2025', hs:2, as:0, home:homeTeam, away:awayTeam },
+      { date:'Nov 2024', hs:1, as:1, home:awayTeam, away:homeTeam },
+      { date:'Jul 2024', hs:0, as:3, home:homeTeam, away:awayTeam },
     ];
     el.innerHTML = matches.map(m => {
       const diff = m.hs - m.as;

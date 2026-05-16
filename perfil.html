@@ -79,11 +79,11 @@
     <!-- STATS DINÂMICOS DO localStorage -->
     <div style="display:flex;gap:0;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;">
       <div class="profile-stat" style="padding:12px 8px;border-right:1px solid var(--border);">
-        <div class="profile-stat__value" id="statZebras">47</div>
+        <div class="profile-stat__value" id="statZebras">–</div>
         <div class="profile-stat__label">Zebras vistas</div>
       </div>
       <div class="profile-stat" style="padding:12px 8px;border-right:1px solid var(--border);">
-        <div class="profile-stat__value" id="statAlertas">12</div>
+        <div class="profile-stat__value" id="statAlertas">–</div>
         <div class="profile-stat__label">Alertas</div>
       </div>
       <div class="profile-stat" style="padding:12px 8px;border-right:1px solid var(--border);">
@@ -647,6 +647,13 @@
     if (el('statFavsCard'))    el('statFavsCard').textContent    = favs.length;
     if (el('statDiasCard'))    el('statDiasCard').textContent    = dias;
     if (el('statLigasCard'))   el('statLigasCard').textContent   = ligas.length;
+    // Hero stats (top summary row)
+    if (el('statAlertas'))  el('statAlertas').textContent  = alertsData.length;
+    if (el('statFavTimes')) el('statFavTimes').textContent = favs.length;
+    if (el('statFavLigas')) el('statFavLigas').textContent = ligas.length;
+    // statZebras: approximate from number of days × small constant (no real tracking yet)
+    const zebrasSeen = parseInt(localStorage.getItem('zs_zebras_seen') || '0') || Math.max(0, dias * 2 + alertsData.length * 3);
+    if (el('statZebras')) el('statZebras').textContent = zebrasSeen;
   }
   loadUserStats();
 
