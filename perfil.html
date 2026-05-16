@@ -159,7 +159,7 @@
       <a href="zebras.html" class="profile-menu-item">
         <div class="profile-menu-item__icon"><i data-lucide="activity" style="width:18px;height:18px;"></i></div>
         <div class="profile-menu-item__text">
-          <div class="profile-menu-item__label">Zebras Salvas</div>
+          <div class="profile-menu-item__label">Ver Zebras</div>
           <div class="profile-menu-item__sub">Partidas marcadas para revisitar</div>
         </div>
         <span class="profile-menu-item__arrow">›</span>
@@ -495,18 +495,21 @@
     const darkToggle  = document.getElementById('darkToggle');
     const notifToggle = document.getElementById('notifToggle');
 
-    // Restaura estado salvo
-    if (localStorage.getItem('zs_dark_mode') === 'false') darkToggle.checked = false;
+    // FIX 23 — sync checkbox with actual zs_theme value
+    const currentTheme = localStorage.getItem('zs_theme') || 'dark';
+    darkToggle.checked = (currentTheme === 'dark');
     if (localStorage.getItem('zs_push_notifs') === 'false') notifToggle.checked = false;
 
     darkToggle.addEventListener('change', function() {
-      localStorage.setItem('zs_dark_mode', this.checked);
+      // FIX 23 — always call toggleTheme() to keep zs_theme in sync
       if (typeof toggleTheme === 'function') {
         toggleTheme();
       } else {
-        const current = document.documentElement.getAttribute('data-theme');
-        document.documentElement.setAttribute('data-theme', current === 'light' ? 'dark' : 'light');
-        localStorage.setItem('zs_theme', current === 'light' ? 'dark' : 'light');
+        const current = localStorage.getItem('zs_theme') || 'dark';
+        const next = current === 'dark' ? 'light' : 'dark';
+        localStorage.setItem('zs_theme', next);
+        if (next === 'light') document.documentElement.setAttribute('data-theme', 'light');
+        else document.documentElement.removeAttribute('data-theme');
       }
     });
 

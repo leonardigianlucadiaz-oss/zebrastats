@@ -563,10 +563,32 @@
     goToStep(currentStep - 1, 'back');
   });
 
-  document.getElementById('skipAllBtn').addEventListener('click', () => {
-    if (confirm('Pular configuração? Você poderá configurar depois no perfil.')) {
-      finish();
+  // FIX 25 — replace browser confirm() with custom styled overlay
+  function confirmSkip() {
+    let overlay = document.getElementById('skipConfirmOverlay');
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.id = 'skipConfirmOverlay';
+      overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:1000;display:flex;align-items:center;justify-content:center;padding:24px;';
+      overlay.innerHTML = `
+        <div style="background:var(--card,#111);border:1px solid var(--border,#222);border-radius:16px;padding:24px;max-width:320px;width:100%;text-align:center;">
+          <div style="font-size:1.5rem;margin-bottom:12px;">⏭️</div>
+          <div style="font-size:1rem;font-weight:700;margin-bottom:8px;">Pular configuração?</div>
+          <div style="font-size:0.8125rem;color:#888;margin-bottom:20px;line-height:1.5;">Você poderá configurar depois no perfil.</div>
+          <div style="display:flex;gap:10px;">
+            <button id="skipCancelBtn" style="flex:1;padding:10px;border-radius:8px;border:1px solid var(--border,#333);background:none;color:#fff;font-family:inherit;font-size:0.875rem;font-weight:600;cursor:pointer;">Voltar</button>
+            <button id="skipConfirmBtn" style="flex:1;padding:10px;border-radius:8px;border:none;background:var(--green,#2EE65C);color:#000;font-family:inherit;font-size:0.875rem;font-weight:700;cursor:pointer;">Pular</button>
+          </div>
+        </div>`;
+      document.body.appendChild(overlay);
     }
+    overlay.style.display = 'flex';
+    document.getElementById('skipCancelBtn').onclick = () => { overlay.style.display = 'none'; };
+    document.getElementById('skipConfirmBtn').onclick = () => { overlay.style.display = 'none'; finish(); };
+  }
+
+  document.getElementById('skipAllBtn').addEventListener('click', () => {
+    confirmSkip();
   });
 
   // ── STEP 3: NOTIFICAÇÕES ─────────────────────────────────────

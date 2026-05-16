@@ -521,6 +521,12 @@
 
   // ── STATS ─────────────────────────────────────────────────────────
   function renderStats() {
+    // FIX 17 — guard against empty CLUBE_STATS
+    if (!CLUBE_STATS || !CLUBE_STATS.length) {
+      const csEl = document.getElementById('clubeStats');
+      if (csEl) csEl.innerHTML = '<div style="padding:20px;text-align:center;color:var(--gray);font-size:0.8125rem;">Dados indisponíveis</div>';
+      return;
+    }
     // Artilheiros com avatar
     function playerAvatar(name, flag) {
       const initials = name.split(' ').map(w => w[0]).join('').substring(0,2).toUpperCase();
@@ -659,8 +665,17 @@
 
     // TheSportsDB — sempre disponível
     async function loadSDBStandings() {
+      // FIX 3: timeout fallback — show error after 8s if API doesn't respond
+      const timeoutId = setTimeout(() => {
+        if (!sdbStandingsLoaded) {
+          sdbStandingsLoaded = true;
+          const tb = document.getElementById('standingsTbody') || document.querySelector('#standingsTable tbody');
+          if (tb) tb.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:24px;color:var(--gray);">Dados indisponíveis. Tente novamente.</td></tr>`;
+        }
+      }, 8000);
       try {
         const data = await ZebraAPI.sportsDb.getLeagueTable(lid);
+        clearTimeout(timeoutId);
         const rows = ZebraAPI.transform.sdbTable(data);
         if (rows && rows.length) {
           STANDINGS.length = 0;
@@ -677,7 +692,7 @@
           const lider = STANDINGS[0];
           if (lider) document.getElementById('statLider').textContent = lider.abbr || lider.name.substring(0,3).toUpperCase();
         }
-      } catch(e) { console.warn('SDB standings error:', e); sdbStandingsLoaded = true; if (activeTab === 'tabela') renderTabela(); }
+      } catch(e) { clearTimeout(timeoutId); console.warn('SDB standings error:', e); sdbStandingsLoaded = true; if (activeTab === 'tabela') renderTabela(); }
     }
 
     // Football-Data.org — requer chave

@@ -674,7 +674,7 @@ function buildTeamItem(t, query) {
     </div>
     <span class="result-item__badge badge--type-time">Time</span>
     <button class="fav-star-btn ${isFav ? 'is-fav' : ''}" data-type="time" data-id="${t.id}" data-name="${t.name.replace(/"/g,'&quot;')}" data-crest="${t.crest}" title="${isFav ? 'Remover dos favoritos' : 'Favoritar'}">
-      <i data-lucide="${isFav ? 'star' : 'star'}" style="width:15px;height:15px;${isFav ? 'fill:var(--gold);' : ''}"></i>
+      <i data-lucide="star" style="width:15px;height:15px;${isFav ? 'fill:var(--gold);color:var(--gold);' : ''}"></i><!-- FIX 33 -->
     </button>`;
 
   // Click no item → navega

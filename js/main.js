@@ -46,9 +46,10 @@ function _updateThemeButtons(theme) {
   });
 }
 
-function initThemeToggle() {
+function initThemeToggle() { // FIX 22 — try multiple selectors for navbar actions
   const theme = getTheme();
-  document.querySelectorAll('.navbar__actions').forEach(actions => {
+  const containers = document.querySelectorAll('.navbar__actions, .navbar-actions, [data-theme-toggle-host]');
+  containers.forEach(actions => {
     if (actions.querySelector('.zs-theme-toggle')) return;
     const btn = document.createElement('button');
     btn.className = 'navbar__icon zs-theme-toggle';
@@ -476,8 +477,9 @@ function scrollToTop(smooth = true) {
 // Maps SDB numeric IDs (e.g. "sdb-133604") to slug keys used in
 // the TEAMS object on time.html. Falls back to slug-ifying the
 // raw string when no mapping is found.
+// FIX 5 — removed duplicate '133604' keys; corrected IDs for flamengo, arsenal, benfica
 const _SDB_TO_SLUG = {
-  '133604': 'flamengo',
+  '134316': 'flamengo',
   '133600': 'palmeiras',
   '133606': 'botafogo',
   '133602': 'fluminense',
@@ -510,7 +512,7 @@ const _SDB_TO_SLUG = {
   '133693': 'bayern',
   '133706': 'dortmund',
   '133705': 'leverkusen',
-  '133604': 'benfica',
+  '133772': 'benfica',
   '133765': 'porto',
   '133769': 'sporting-cp',
   '133632': 'ajax',

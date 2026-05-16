@@ -137,20 +137,17 @@
     <div id="tab-resumo">
       <div class="section-header"><span class="section-title"><i data-lucide="list" class="sec-ic"></i>Linha do Tempo</span></div>
 
-      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;">
-        <!-- Eventos -->
-        <div id="timeline"></div>
-      </div>
+      <!-- Timeline rendered by initTimeline() into #timelineEvents (FIX 1: static duplicate removed) -->
 
       <div class="section-header" style="margin-top:16px;"><span class="section-title"><i data-lucide="users" class="sec-ic"></i>Escalações</span></div>
       <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px 16px;">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
           <div>
-            <div style="font-size:0.75rem;font-weight:700;color:var(--gray);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px;">Botafogo</div>
+            <div data-team="home" style="font-size:0.75rem;font-weight:700;color:var(--gray);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px;">Botafogo</div>
             <div style="display:flex;flex-direction:column;gap:5px;font-size:0.8125rem;" id="squad-bot"></div>
           </div>
           <div>
-            <div style="font-size:0.75rem;font-weight:700;color:var(--gray);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px;">Flamengo</div>
+            <div data-team="away" style="font-size:0.75rem;font-weight:700;color:var(--gray);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px;">Flamengo</div>
             <div style="display:flex;flex-direction:column;gap:5px;font-size:0.8125rem;" id="squad-fla"></div>
           </div>
         </div>
@@ -294,11 +291,11 @@
       <div class="card">
         <div style="font-size:0.8125rem;color:var(--gray);margin-bottom:12px;">Últimas 5 partidas (cada time)</div>
         <div style="margin-bottom:12px;">
-          <div style="font-size:0.75rem;font-weight:600;margin-bottom:6px;">Botafogo</div>
+          <div data-team="home" style="font-size:0.75rem;font-weight:600;margin-bottom:6px;">Botafogo</div>
           <div style="display:flex;gap:4px;" id="botForm"></div>
         </div>
         <div>
-          <div style="font-size:0.75rem;font-weight:600;margin-bottom:6px;">Flamengo</div>
+          <div data-team="away" style="font-size:0.75rem;font-weight:600;margin-bottom:6px;">Flamengo</div>
           <div style="display:flex;gap:4px;" id="flaForm"></div>
         </div>
       </div>
@@ -342,13 +339,14 @@
   const _urlOddsA     = _urlParams.get('odds_a')    || null;
 
   // Apply URL params to visible DOM if present
+  // FIX 15 — update all [data-team="home"/"away"] elements from URL params
   if (_urlHome) {
-    document.querySelectorAll('[id*="HomeTeam"],[id*="homeTeam"],[class*="home-team"]').forEach(el => el.textContent = _urlHome);
+    document.querySelectorAll('[id*="HomeTeam"],[id*="homeTeam"],[class*="home-team"],[data-team="home"]').forEach(el => el.textContent = _urlHome);
     const hn = document.getElementById('matchHomeName');
     if (hn) hn.textContent = _urlHome;
   }
   if (_urlAway) {
-    document.querySelectorAll('[id*="AwayTeam"],[id*="awayTeam"],[class*="away-team"]').forEach(el => el.textContent = _urlAway);
+    document.querySelectorAll('[id*="AwayTeam"],[id*="awayTeam"],[class*="away-team"],[data-team="away"]').forEach(el => el.textContent = _urlAway);
     const an = document.getElementById('matchAwayName');
     if (an) an.textContent = _urlAway;
   }
@@ -502,26 +500,7 @@
     { min:90, team:'BOT', type:'fim',     lucide:'flag',           color:'var(--gray)',   player:'Fim de Jogo',       desc:'Botafogo 3×0 Flamengo' },
   ];
 
-  const timeline = document.getElementById('timeline');
-  EVENTS.forEach((e, i) => {
-    const isBot = e.team === 'BOT';
-    const isLast = i === EVENTS.length - 1;
-    const row = document.createElement('div');
-    row.style.cssText = `display:flex;align-items:center;gap:12px;padding:10px 14px;${isLast ? '' : 'border-bottom:1px solid var(--border);'}`;
-    row.innerHTML = `
-      <span style="font-size:0.75rem;font-weight:700;color:var(--gray);min-width:28px;text-align:right;">${e.min}'</span>
-      <div style="width:28px;height:28px;border-radius:50%;background:${e.color}22;border:1px solid ${e.color}44;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-        <i data-lucide="${e.lucide}" style="width:14px;height:14px;color:${e.color};"></i>
-      </div>
-      <div style="flex:1;">
-        <div style="font-size:0.875rem;font-weight:600;">${e.player}</div>
-        <div style="font-size:0.75rem;color:var(--gray);margin-top:1px;">${e.desc}</div>
-      </div>
-      <span style="font-size:0.625rem;font-weight:700;padding:3px 8px;border-radius:var(--radius-pill);background:${isBot ? 'rgba(46,230,92,0.12)' : 'var(--red-dim)'};color:${isBot ? 'var(--green)' : 'var(--red)'};">${e.team}</span>
-    `;
-    timeline.appendChild(row);
-  });
-  lucide.createIcons();
+  // Static timeline removed — dynamic initTimeline() is the only timeline (FIX 1)
 
   // ── ESCALAÇÕES ─────────────────────────────────────────────────
   const BOT_SQUAD = ['John (GK)','Damián Suárez','Adryelson','Barboza','Marçal','Tchê Tchê','Gregore','Marlon Freitas','Tiquinho','Júnior Santos','Luiz Henrique'];
@@ -551,10 +530,13 @@
   ];
 
   const statsEl = document.getElementById('matchStats');
+  // FIX 15 — use URL params for team names in stats header
+  const _statsHome = _urlHome || 'Botafogo';
+  const _statsAway = _urlAway || 'Flamengo';
   statsEl.innerHTML = `
     <div id="matchStatsHeader" style="display:flex;justify-content:space-between;margin-bottom:14px;">
-      <span style="font-size:0.875rem;font-weight:700;color:var(--green);">Botafogo</span>
-      <span style="font-size:0.875rem;font-weight:700;color:var(--red);">Flamengo</span>
+      <span data-team="home" style="font-size:0.875rem;font-weight:700;color:var(--green);">${_statsHome}</span>
+      <span data-team="away" style="font-size:0.875rem;font-weight:700;color:var(--red);">${_statsAway}</span>
     </div>`;
 
   STATS.forEach(s => {

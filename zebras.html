@@ -180,6 +180,7 @@
 
   let activeLeague = 'all';
   let activeFilter = 'all';
+  let activeZebraLiga = 'all'; // FIX 4
 
   function ziClass(z) {
     if (z.zi >= 7) return 'grande';
@@ -251,9 +252,9 @@
     const isPro = getUserPlan() !== 'free';
 
     let data = [...ZEBRAS];
-    // liga filter (if activeZebraLiga is defined and not 'todas')
-    if (typeof activeZebraLiga !== 'undefined' && activeZebraLiga !== 'todas') {
-      data = data.filter(z => z.liga === activeZebraLiga || (z.league && z.league.includes(activeZebraLiga)) || z.lid === activeZebraLiga);
+    // FIX 4 — liga filter using correctly declared activeZebraLiga
+    if (activeZebraLiga !== 'all') {
+      data = data.filter(z => z.lid === activeZebraLiga || z.league === activeZebraLiga);
     }
     let list = data;
     if (activeLeague !== 'all') list = list.filter(z => z.lid === activeLeague);
@@ -518,17 +519,23 @@
 
   // ── VIEW TOGGLE ───────────────────────────────────────────────────
   let currentView = 'cards';
-  function setView(mode) {
+  function setView(mode) { // FIX 21 — direct style manipulation instead of CSS class
     currentView = mode;
     document.getElementById('viewCards').classList.toggle('active', mode === 'cards');
     document.getElementById('viewList').classList.toggle('active', mode === 'list');
     const list = document.getElementById('zebraList');
     if (mode === 'list') {
       list.style.gap = '4px';
-      list.querySelectorAll('.zebra-card,.card').forEach(c => c.classList.add('zebra-list-mode'));
+      list.querySelectorAll('.zebra-card,.card').forEach(c => {
+        c.style.padding = '8px 12px';
+        c.querySelectorAll('[data-hide-list]').forEach(el => { el.style.display = 'none'; });
+      });
     } else {
       list.style.gap = '12px';
-      list.querySelectorAll('.zebra-card,.card').forEach(c => c.classList.remove('zebra-list-mode'));
+      list.querySelectorAll('.zebra-card,.card').forEach(c => {
+        c.style.padding = '';
+        c.querySelectorAll('[data-hide-list]').forEach(el => { el.style.display = ''; });
+      });
     }
     lucide.createIcons();
   }
@@ -554,7 +561,7 @@
     if (typeof ZebraAPI === 'undefined' || !ZebraAPI.isConfigured.footballData()) return;
     if (typeof ZebraEngine === 'undefined') return;
 
-    const lid = activeLeague === 'all' ? 'ENG' : activeLeague;
+    const lid = (activeLeague && activeLeague !== 'all') ? activeLeague.toUpperCase() : 'ENG'; // FIX 6
     try {
       const realZebras = await ZebraAPI.fetchRealZebras(lid, 15);
       if (!realZebras.length) return;
