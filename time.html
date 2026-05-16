@@ -311,6 +311,7 @@
   <script src="js/zebra-engine.js"></script>
   <script src="js/api.js"></script>
   <script src="js/main.js"></script>
+  <script src="js/teams-data.js"></script><!-- FIX 28 -->
   <script>
     // ── DATA ──────────────────────────────────────────────
     const TEAMS = {
@@ -600,6 +601,9 @@
         ],
       },
     };
+
+    // FIX 28 — expose TEAMS as window.TEAMS_DATA for cross-page access
+    window.TEAMS_DATA = Object.assign(window.TEAMS_DATA || {}, TEAMS);
 
     let currentTeam = 'torino';
     let isFavorited = false;
@@ -1005,7 +1009,7 @@
               const hs = parseInt(e.intHomeScore) || 0;
               const as = parseInt(e.intAwayScore) || 0;
               let result = 'E';
-              if (hs !== as) result = (isHome ? hs > as : as > hs) ? 'W' : 'D';
+              if (hs !== as) result = (isHome ? hs > as : as > hs) ? 'W' : 'L'; // FIX 10 — was 'D', should be 'L'
               return { home: e.strHomeTeam, away: e.strAwayTeam, hs, as, date: m.date, result };
             });
             renderLastMatches(mapped);
@@ -1129,14 +1133,27 @@
     }
 
     // ── RENDER TRANSFERS ──────────────────────────────────
+    // FIX 11 — show Transfermarkt link instead of empty state
     function renderTransfers() {
       const inEl  = document.getElementById('transfersIn');
       const outEl = document.getElementById('transfersOut');
       if (!inEl || !outEl) return;
 
-      const emptyHtml = `<div style="padding:20px;text-align:center;color:var(--gray);font-size:0.8125rem;">Nenhuma transferência registrada</div>`;
-      inEl.innerHTML  = emptyHtml;
-      outEl.innerHTML = emptyHtml;
+      const team = TEAMS[currentTeam] || Object.values(TEAMS)[0];
+      const tmQuery = encodeURIComponent(team.name || currentTeam || '');
+      const tmLink = `https://www.transfermarkt.com.br/schnellsuche/ergebnis/schnellsuche?query=${tmQuery}`;
+      const linkHtml = `
+        <div style="padding:20px;text-align:center;color:var(--gray);font-size:0.8125rem;">
+          <div style="margin-bottom:10px;">Dados de transferências disponíveis no Transfermarkt.</div>
+          <a href="${tmLink}" target="_blank" rel="noopener noreferrer"
+             style="display:inline-flex;align-items:center;gap:5px;font-size:0.8125rem;color:var(--green);font-weight:600;text-decoration:none;">
+            <i data-lucide="external-link" style="width:13px;height:13px;"></i>
+            Ver no Transfermarkt
+          </a>
+        </div>`;
+      inEl.innerHTML  = linkHtml;
+      outEl.innerHTML = linkHtml;
+      if (typeof lucide !== 'undefined') lucide.createIcons();
     }
 
     lucide.createIcons();

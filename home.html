@@ -709,14 +709,22 @@
     }
 
     // ── ZEBRA RANKING (ZI máx 10.0) ──────────────────────
+    // FIX 19 — sort by zi desc and reassign positions
     const MEDALS = { 1:'🥇', 2:'🥈', 3:'🥉' };
-    const ZEBRA_RANKING = [
-      { pos:1, name:'Luton Town',  league:'Premier League', badge:'9.1', zi:9.1, color:'var(--green)' },
-      { pos:2, name:'Augsburg',    league:'Bundesliga',     badge:'8.7', zi:8.7, color:'var(--green)' },
-      { pos:3, name:'Botafogo',    league:'Brasileirão',    badge:'8.2', zi:8.2, color:'var(--gold)'  },
-      { pos:4, name:'Lecce',       league:'Serie A',        badge:'7.9', zi:7.9, color:'var(--gold)'  },
-      { pos:5, name:'Angers',      league:'Ligue 1',        badge:'9.4', zi:9.4, color:'var(--gold)'  },
+    const ZEBRA_RANKING_RAW = [
+      { name:'Luton Town',  league:'Premier League', zi:9.1 },
+      { name:'Augsburg',    league:'Bundesliga',     zi:8.7 },
+      { name:'Botafogo',    league:'Brasileirão',    zi:8.2 },
+      { name:'Lecce',       league:'Serie A',        zi:7.9 },
+      { name:'Angers',      league:'Ligue 1',        zi:9.4 },
     ];
+    ZEBRA_RANKING_RAW.sort((a, b) => b.zi - a.zi);
+    const ZEBRA_RANKING = ZEBRA_RANKING_RAW.map((r, i) => ({
+      ...r,
+      pos: i + 1,
+      badge: String(r.zi),
+      color: r.zi >= 8 ? 'var(--green)' : 'var(--gold)',
+    }));
     const rankContainer = document.getElementById('zebraRanking');
     ZEBRA_RANKING.forEach((r, idx) => {
       const row = document.createElement('div');
@@ -872,15 +880,17 @@
 
     // Stats bar counters — real data from API
     async function initStatsBar() {
+      // FIX 20 — use user's last-viewed league instead of hardcoded 'ENG'
+      const userLid = localStorage.getItem('zs_last_league') || 'ENG';
       try {
         // Fetch real matches for today from proxy
-        const data = await ZebraAPI.footballData.getMatches('ENG', 'SCHEDULED', 20).catch(() => null);
-        const liveData = await ZebraAPI.footballData.getMatches('ENG', 'IN_PLAY', 10).catch(() => null);
+        const data = await ZebraAPI.footballData.getMatches(userLid, 'SCHEDULED', 20).catch(() => null);
+        const liveData = await ZebraAPI.footballData.getMatches(userLid, 'IN_PLAY', 10).catch(() => null);
         const liveCount = liveData?.matches?.length || 0;
         const todayCount = (data?.matches?.length || 0) + liveCount;
 
         // Get real zebras for ZI high count
-        const zebras = await ZebraAPI.fetchRealZebras('ENG', 20).catch(() => []);
+        const zebras = await ZebraAPI.fetchRealZebras(userLid, 20).catch(() => []);
         const highZiCount = zebras.filter(z => z.zi >= 7).length;
 
         if (document.getElementById('sdLive'))

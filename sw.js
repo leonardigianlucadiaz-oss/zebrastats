@@ -6,7 +6,7 @@ const STATIC_ASSETS = [
   'time.html', 'liga.html', 'alertas.html', 'perfil.html',
   'comparar.html', 'notificacoes.html', 'busca.html',
   'assinatura.html', 'pagamento.html', 'favoritos.html', 'explorar.html',
-  'css/main.css', 'js/main.js', 'js/config.js', 'js/api.js',
+  'css/main.css', 'js/main.js', 'js/config.js', 'js/api.js', 'js/zebra-engine.js', // FIX 30
   'manifest.json', 'icons/icon-192.svg', 'icons/icon-512.svg',
 ];
 

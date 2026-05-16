@@ -125,6 +125,7 @@
 <script src="js/zebra-engine.js"></script>
 <script src="js/api.js"></script>
 <script src="js/main.js"></script>
+<script src="js/teams-data.js"></script><!-- FIX 28 -->
 <script>
 // ── TEAMS (copied verbatim from time.html) ────────────────────────────────────
 const TEAMS = {
@@ -443,10 +444,10 @@ function isEuropeanTeam(league) {
          l.includes('france') || l.includes('england');
 }
 
-function isBrasilTeam(league) {
+function isBrasilTeam(league) { // FIX 27 — added 'brasilei' to catch all Brasileirão variants
   if (!league) return false;
   const l = league.toLowerCase();
-  return l.includes('brasil') || l.includes('brasileiro') || l.includes('série a') || l.includes('serie a · brasil');
+  return l.includes('brasil') || l.includes('brasilei') || l.includes('brasileiro') || l.includes('série a') || l.includes('serie a · brasil');
 }
 
 // ── RENDER ────────────────────────────────────────────────────────────────────
