@@ -278,6 +278,130 @@ const ZebraAPI = (() => {
     },
   };
 
+  /* ── API-FOOTBALL (via proxy Supabase) ─────────────────────── */
+  const APIF = {
+    LEAGUES: { ENG:39, ESP:140, ITA:135, GER:78, FRA:61, BRA:71, POR:94, UCL:2, HOL:88 },
+    SEASONS: { BRA:'2025', ENG:'2024', ESP:'2024', ITA:'2024', GER:'2024', FRA:'2024', POR:'2024', UCL:'2024', HOL:'2024' },
+
+    async _p(action, params = {}) {
+      const raw = await _proxy.fetch(action, params);
+      return raw?.response ?? null;
+    },
+
+    async getFixtures(lid, { last, next } = {}) {
+      const season = this.SEASONS[lid] || '2024';
+      const params = { lid, season };
+      if (last) params.last = String(last);
+      if (next) params.next = String(next);
+      return this._p('apif-fixtures', params);
+    },
+
+    async getFixtureStats(fixtureId) {
+      return this._p('apif-fixture-stats', { fixtureId: String(fixtureId) });
+    },
+
+    async getFixtureEvents(fixtureId) {
+      return this._p('apif-fixture-events', { fixtureId: String(fixtureId) });
+    },
+
+    async getFixtureLineups(fixtureId) {
+      return this._p('apif-fixture-lineups', { fixtureId: String(fixtureId) });
+    },
+
+    async getH2H(teamId1, teamId2, last = 10) {
+      return this._p('apif-h2h', { h2h: `${teamId1}-${teamId2}`, last: String(last) });
+    },
+
+    async searchTeam(name) {
+      return this._p('apif-team-search', { name });
+    },
+
+    async getTeamStats(teamId, lid) {
+      const season = this.SEASONS[lid] || '2024';
+      return this._p('apif-team-stats', { teamId: String(teamId), lid, season });
+    },
+
+    async getPredictions(fixtureId) {
+      return this._p('apif-predictions', { fixtureId: String(fixtureId) });
+    },
+
+    // Transforma resposta de fixture para formato ZebraStats
+    transformFixture(f) {
+      if (!f?.fixture) return null;
+      const d = new Date(f.fixture.date);
+      const home = f.teams?.home;
+      const away = f.teams?.away;
+      const goals = f.goals;
+      const s = f.fixture.status;
+      const isFinished = s?.short === 'FT' || s?.short === 'AET' || s?.short === 'PEN';
+      const isLive     = ['1H','HT','2H','ET','BT','P','INT'].includes(s?.short);
+      return {
+        fixtureId  : f.fixture.id,
+        home       : home?.name || '',
+        away       : away?.name || '',
+        homeLogo   : home?.logo || '',
+        awayLogo   : away?.logo || '',
+        hs         : goals?.home ?? null,
+        as         : goals?.away ?? null,
+        isFinished,
+        isLive,
+        isScheduled: !isFinished && !isLive,
+        elapsed    : f.fixture.status?.elapsed || null,
+        date       : d.toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', timeZone:'America/Sao_Paulo' }),
+        time       : d.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit', timeZone:'America/Sao_Paulo' }),
+        round      : f.league?.round || '',
+        venue      : f.fixture.venue?.name || '',
+        referee    : f.fixture.referee || '',
+        homeId     : home?.id,
+        awayId     : away?.id,
+        homeWinner : home?.winner,
+        awayWinner : away?.winner,
+      };
+    },
+
+    // Transforma estatísticas de fixture → objeto simples
+    transformStats(response) {
+      if (!Array.isArray(response) || response.length < 2) return null;
+      const parse = (arr, key) => {
+        const item = arr?.find(s => s.type === key);
+        const v = item?.value;
+        if (v === null || v === undefined) return null;
+        if (typeof v === 'string' && v.endsWith('%')) return parseFloat(v);
+        return typeof v === 'number' ? v : parseFloat(v) || null;
+      };
+      const h = response[0]?.statistics;
+      const a = response[1]?.statistics;
+      return {
+        home: {
+          shots      : parse(h, 'Total Shots'),
+          shotsOn    : parse(h, 'Shots on Goal'),
+          possession : parse(h, 'Ball Possession'),
+          corners    : parse(h, 'Corner Kicks'),
+          fouls      : parse(h, 'Fouls'),
+          yellowCards: parse(h, 'Yellow Cards'),
+          redCards   : parse(h, 'Red Cards'),
+          offsides   : parse(h, 'Offsides'),
+          passes     : parse(h, 'Total passes'),
+          passAcc    : parse(h, 'Passes accurate'),
+          xg         : parse(h, 'Expected Goals'),
+        },
+        away: {
+          shots      : parse(a, 'Total Shots'),
+          shotsOn    : parse(a, 'Shots on Goal'),
+          possession : parse(a, 'Ball Possession'),
+          corners    : parse(a, 'Corner Kicks'),
+          fouls      : parse(a, 'Fouls'),
+          yellowCards: parse(a, 'Yellow Cards'),
+          redCards   : parse(a, 'Red Cards'),
+          offsides   : parse(a, 'Offsides'),
+          passes     : parse(a, 'Total passes'),
+          passAcc    : parse(a, 'Passes accurate'),
+          xg         : parse(a, 'Expected Goals'),
+        },
+      };
+    },
+  };
+
   /* ── TRANSFORMERS ───────────────────────────────────────────── */
   const transform = {
 
@@ -532,14 +656,14 @@ const ZebraAPI = (() => {
 
   /* ── STATUS ─────────────────────────────────────────────────── */
   const isConfigured = {
-    // Ativo se proxy Supabase disponível OU chave local configurada
     footballData : () => !!_proxy.base() || !!FD.key(),
     rapidApi     : () => !!RAPID.key(),
     sportsDb     : () => true,
-    oddsApi      : () => !!_proxy.base(), // odds via proxy (chave no servidor)
+    oddsApi      : () => !!_proxy.base(),
+    apiFootball  : () => !!_proxy.base(), // chave APIF_KEY no Supabase Secret
   };
 
   /* ── PUBLIC ─────────────────────────────────────────────────── */
-  return { footballData: FD, sportsDb: SDB, rapidApi: RAPID, oddsApi: ODDS, transform, zebra, fetchRealZebras, isConfigured };
+  return { footballData: FD, sportsDb: SDB, rapidApi: RAPID, oddsApi: ODDS, apiFootball: APIF, transform, zebra, fetchRealZebras, isConfigured };
 
 })();

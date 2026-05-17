@@ -682,7 +682,6 @@ function renderComparison() {
 
   let h2h = getH2H(selectedA.id, selectedB.id);
   if (!h2h.length) h2h = generateDummyH2H(selectedA, selectedB);
-  // FIX 13 — robust H2H date sort: parse DD/MM/YYYY (zero-pad single-digit parts)
   function parseH2HDate(str) {
     const [d, m, y] = str.split('/');
     return new Date(`${(y||'2000').padStart(4,'0')}-${(m||'01').padStart(2,'0')}-${(d||'01').padStart(2,'0')}`);
@@ -696,6 +695,71 @@ function renderComparison() {
   drawRadar(selectedA, selectedB);
 
   if (typeof lucide !== 'undefined') lucide.createIcons();
+
+  // Enriquece com H2H real da API-Football (assíncrono, sobrepõe se encontrar)
+  fetchRealH2H(selectedA, selectedB);
+}
+
+async function fetchRealH2H(teamA, teamB) {
+  if (typeof ZebraAPI === 'undefined' || !ZebraAPI.isConfigured.apiFootball()) return;
+  try {
+    // Busca IDs dos dois times em paralelo
+    const [resA, resB] = await Promise.all([
+      ZebraAPI.apiFootball.searchTeam(teamA.name),
+      ZebraAPI.apiFootball.searchTeam(teamB.name),
+    ]);
+    const idA = resA?.[0]?.team?.id;
+    const idB = resB?.[0]?.team?.id;
+    if (!idA || !idB) return;
+
+    const fixtures = await ZebraAPI.apiFootball.getH2H(idA, idB, 10);
+    if (!Array.isArray(fixtures) || !fixtures.length) return;
+
+    // Converte fixtures para formato local e re-renderiza H2H
+    const h2hReal = fixtures.map(f => {
+      const m = ZebraAPI.apiFootball.transformFixture(f);
+      if (!m) return null;
+      const diff = (m.hs || 0) - (m.as || 0);
+      return {
+        home: m.home, away: m.away,
+        hs: m.hs ?? 0, as: m.as ?? 0,
+        league: f.league?.name || 'Liga',
+        date: m.date,
+        zi: 0,
+        winner: diff > 0 ? 'home' : diff < 0 ? 'away' : 'draw',
+      };
+    }).filter(Boolean);
+
+    if (!h2hReal.length) return;
+
+    // Recalcula contagem H2H com dados reais
+    let wA = 0, wB = 0, d = 0;
+    h2hReal.forEach(m => {
+      const homeIsA = m.home === teamA.name || m.home.toLowerCase().includes(teamA.name.toLowerCase().split(' ')[0]);
+      if (m.winner === 'draw') d++;
+      else if ((m.winner === 'home' && homeIsA) || (m.winner === 'away' && !homeIsA)) wA++;
+      else wB++;
+    });
+    const total = wA + wB + d;
+    if (total) {
+      document.getElementById('h2hTotal').textContent    = `${total} jogos`;
+      document.getElementById('h2hSubtitle').textContent = `${total} confrontos reais (API-Football)`;
+      document.getElementById('winsA').textContent       = wA;
+      document.getElementById('winsB').textContent       = wB;
+      document.getElementById('draws').textContent       = d;
+      const fA = total ? wA/total : 0, fD = total ? d/total : 0, fB = total ? wB/total : 0;
+      document.getElementById('domA').style.flex = fA;
+      document.getElementById('domD').style.flex = fD || 0.02;
+      document.getElementById('domB').style.flex = fB;
+      document.getElementById('pctA').textContent = `${Math.round(fA*100)}%`;
+      document.getElementById('pctB').textContent = `${Math.round(fB*100)}%`;
+    }
+
+    // Atualiza lista de confrontos com dados reais
+    renderH2HList(h2hReal);
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+
+  } catch(e) { console.warn('[comparar] fetchRealH2H error:', e); }
 }
 
 // ── H2H RECORD ────────────────────────────────────────────────────────────────
