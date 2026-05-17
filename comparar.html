@@ -214,7 +214,10 @@
         <div class="stat-team-head" id="statHeadB" style="text-align:right;">Time B</div>
       </div>
 
-      <div id="statRows" style="display:flex;flex-direction:column;gap:14px;"></div>
+      <!-- FIX 6 — mobile scroll wrapper -->
+      <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
+        <div id="statRows" style="display:flex;flex-direction:column;gap:14px;min-width:280px;"></div>
+      </div>
     </section>
 
     <!-- ÚLTIMOS CONFRONTOS ─────────────────────── -->

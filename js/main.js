@@ -477,41 +477,48 @@ function scrollToTop(smooth = true) {
 // Maps SDB numeric IDs (e.g. "sdb-133604") to slug keys used in
 // the TEAMS object on time.html. Falls back to slug-ifying the
 // raw string when no mapping is found.
-// FIX 5 — removed duplicate '133604' keys; corrected IDs for flamengo, arsenal, benfica
+// FIX 2 — corrected verified SDB IDs for all clubs
 const _SDB_TO_SLUG = {
+  // Brazilian clubs
   '134316': 'flamengo',
-  '133600': 'palmeiras',
-  '133606': 'botafogo',
-  '133602': 'fluminense',
+  '146363': 'palmeiras',
+  '146366': 'botafogo',
+  '146367': 'fluminense',
   '133601': 'corinthians',
-  '133603': 'sao-paulo',
+  '146368': 'sao-paulo',
   '133609': 'gremio',
-  '133610': 'internacional',
+  '133611': 'internacional',
   '133607': 'atletico-mg',
   '133608': 'bragantino',
-  '133612': 'vasco',
-  // European clubs
-  '133739': 'man-city',
-  '133616': 'liverpool',
+  '133617': 'vasco',
+  // Premier League
   '133604': 'arsenal',
-  '133615': 'chelsea',
-  '133619': 'man-united',
-  '133621': 'tottenham',
+  '133610': 'chelsea',
+  '133612': 'liverpool',
+  '133613': 'man-city',
+  '133616': 'man-united',
+  '133619': 'tottenham',
   '133614': 'newcastle',
-  '135260': 'real-madrid',
-  '133725': 'barcelona',
-  '133729': 'atletico',
-  '133738': 'juventus',
-  '133741': 'inter',
-  '133733': 'ac-milan',
-  '133745': 'napoli',
+  // La Liga
+  '133728': 'real-madrid',
+  '133739': 'barcelona',
+  '133732': 'atletico',
+  // Serie A Italy
+  '133706': 'juventus',
+  '133704': 'inter',
+  '133703': 'ac-milan',
+  '133701': 'napoli',
   '133735': 'roma',
-  '133718': 'psg',
-  '133719': 'marseille',
+  // Ligue 1
+  '133731': 'psg',
+  '133724': 'lyon',
+  '133720': 'marseille',
   '133721': 'monaco',
-  '133693': 'bayern',
-  '133706': 'dortmund',
+  // Bundesliga
+  '133719': 'bayern',
+  '133718': 'dortmund',
   '133705': 'leverkusen',
+  // Other
   '133772': 'benfica',
   '133765': 'porto',
   '133769': 'sporting-cp',

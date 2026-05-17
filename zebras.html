@@ -85,6 +85,14 @@
     <div style="display:flex;justify-content:space-between;margin-top:4px;">
       <div id="heatmapLabels" style="display:contents;"></div>
     </div>
+    <!-- FIX 1 — heatmap legend -->
+    <div style="display:flex;align-items:center;gap:6px;margin-top:6px;justify-content:flex-end;">
+      <span style="font-size:0.6rem;color:var(--gray);">menos</span>
+      <span style="width:10px;height:10px;border-radius:2px;background:var(--green-dim);display:inline-block;"></span>
+      <span style="width:10px;height:10px;border-radius:2px;background:#22c55e99;display:inline-block;"></span>
+      <span style="width:10px;height:10px;border-radius:2px;background:var(--green);display:inline-block;"></span>
+      <span style="font-size:0.6rem;color:var(--gray);">mais</span>
+    </div>
   </section>
 
   <!-- LISTA DE ZEBRAS -->
@@ -200,7 +208,7 @@
     const allPill = document.createElement('div');
     allPill.className = `league-fav-pill${activeLeague === 'all' ? ' active-league' : ''}`;
     allPill.innerHTML = `<span class="league-fav-pill__label" style="padding:6px 14px;display:flex;align-items:center;gap:5px;"><i data-lucide="globe" style="width:13px;height:13px;"></i> Todas</span>`;
-    allPill.addEventListener('click', () => { activeLeague = 'all'; renderLeagueBar(); renderZebras(); lucide.createIcons(); });
+    allPill.addEventListener('click', () => { activeLeague = 'all'; activeZebraLiga = 'all'; renderLeagueBar(); renderZebras(); lucide.createIcons(); });
     bar.appendChild(allPill);
 
     LEAGUES.forEach(l => {
@@ -219,6 +227,7 @@
       `;
       pill.querySelector('[data-lid]').addEventListener('click', () => {
         activeLeague = l.id;
+        activeZebraLiga = l.id; // FIX 1 — sync zebra filter with league bar
         renderLeagueBar();
         renderZebras();
         loadLeagueCrests(l.id);

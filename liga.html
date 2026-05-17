@@ -301,6 +301,7 @@
       STANDINGS.length = 0;
       JOGOS.proximos = []; JOGOS.aovivo = []; JOGOS.encerrados = [];
       ARTILHEIROS.length = 0; ASSISTENCIAS.length = 0; ZEBRAS_LIGA.length = 0;
+      CLUBE_STATS.length = 0; // FIX 7 — reset club stats on league switch
       syncFavBtn();
       loadHeroLogo(activeLid);
       loadLeagueCrests(activeLid);
@@ -734,6 +735,17 @@
             if (s.assists > 0) ASSISTENCIAS.push({ name:s.name, team:s.team, ast:s.assists, flag:s.flag || '🌍' });
           });
           ASSISTENCIAS.sort((a,b) => b.ast - a.ast);
+          // FIX 7 — repopulate CLUBE_STATS from scorers data
+          const clubMap = {};
+          scorers.forEach(s => {
+            if (!s.team) return;
+            if (!clubMap[s.team]) clubMap[s.team] = { team: s.team, gols: 0, assists: 0, players: 0 };
+            clubMap[s.team].gols    += (s.goals   || 0);
+            clubMap[s.team].assists += (s.assists  || 0);
+            clubMap[s.team].players += 1;
+          });
+          CLUBE_STATS.length = 0;
+          Object.values(clubMap).sort((a,b) => b.gols - a.gols).forEach(c => CLUBE_STATS.push(c));
           if (activeTab === 'stats') renderStats();
         }
       } catch(e) { console.warn('FD scorers error:', e); }

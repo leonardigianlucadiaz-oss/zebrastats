@@ -262,13 +262,19 @@ function renderPodium(data) {
       <div class="podium-zi">ZI ${z.zi}</div>
       <div class="podium-odd">odd ${z.odds_h}</div>`;
     card.addEventListener('click', () => {
+      // FIX 4 — include all required URL params for partida.html
       const navParams = new URLSearchParams({
-        home:   z.home   || '',
-        away:   z.away   || '',
-        score:  (z.hs !== undefined && z.as !== undefined) ? `${z.hs} – ${z.as}` : '',
-        league: z.league || '',
-        zi:     z.zi     || '',
-        odds:   z.odds_h || '',
+        home:      z.home        || '',
+        away:      z.away        || '',
+        score:     (z.hs !== undefined && z.as !== undefined) ? `${z.hs}-${z.as}` : '',
+        league:    z.league      || '',
+        date:      z.date        || '',
+        zi:        z.zi          || '',
+        azarao:    z.azarao      || '',
+        odds_h:    z.odds_h      || '',
+        odds_a:    z.odds_a      || '',
+        homeCrest: z.homeCrest   || '',
+        awayCrest: z.awayCrest   || '',
       });
       window.location.href = `partida.html?${navParams.toString()}`;
     });
@@ -460,7 +466,7 @@ function buildRankCard(z, pos, cls, locked = false, mult = 1) {
       <button class="share-btn" data-id="${z.id}" style="background:none;border:none;cursor:pointer;color:var(--gray);font-size:0.75rem;font-weight:500;font-family:inherit;display:inline-flex;align-items:center;gap:4px;padding:0;">
         <i data-lucide="share-2" style="width:13px;height:13px;"></i>Compartilhar
       </button>
-      <a href="${`partida.html?home=${encodeURIComponent(z.home)}&away=${encodeURIComponent(z.away)}&score=${z.hs}-${z.as}&zi=${z.zi}&league=${encodeURIComponent(z.league)}&date=${encodeURIComponent(z.date)}&azarao=${encodeURIComponent(z.azarao||'')}&odds_h=${z.odd||''}&homeCrest=${encodeURIComponent(z.homeCrest||'')}&awayCrest=${encodeURIComponent(z.awayCrest||'')}`}" style="font-size:0.75rem;color:var(--green);font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:3px;">
+      <a href="${`partida.html?home=${encodeURIComponent(z.home)}&away=${encodeURIComponent(z.away)}&score=${z.hs}-${z.as}&zi=${z.zi}&league=${encodeURIComponent(z.league)}&date=${encodeURIComponent(z.date)}&azarao=${encodeURIComponent(z.azarao||'')}&odds_h=${encodeURIComponent(z.odds_h||z.odd||'')}&odds_a=${encodeURIComponent(z.odds_a||'')}&homeCrest=${encodeURIComponent(z.homeCrest||'')}&awayCrest=${encodeURIComponent(z.awayCrest||'')}`}" style="font-size:0.75rem;color:var(--green);font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:3px;">
         Ver partida <i data-lucide="arrow-right" style="width:13px;height:13px;"></i>
       </a>
     </div>`}

@@ -489,18 +489,7 @@
     });
   });
 
-  // ── TIMELINE ────────────────────────────────────────────────────
-  const EVENTS = [
-    { min:12, team:'BOT', type:'gol',     lucide:'circle-dot',    color:'var(--green)',  player:'Tiquinho Soares',   desc:'Gol de cabeça após escanteio' },
-    { min:38, team:'FLA', type:'amarelo', lucide:'square',         color:'var(--gold)',   player:'Léo Pereira',       desc:'Falta dura no meio-campo' },
-    { min:55, team:'BOT', type:'gol',     lucide:'circle-dot',    color:'var(--green)',  player:'Júnior Santos',     desc:'Finalização de fora da área' },
-    { min:63, team:'FLA', type:'sub',     lucide:'arrow-left-right',color:'var(--gray)', player:'Gabigol → Éverton', desc:'Substituição Flamengo' },
-    { min:78, team:'BOT', type:'gol',     lucide:'circle-dot',    color:'var(--green)',  player:'Luiz Henrique',     desc:'Contra-ataque decisivo' },
-    { min:82, team:'FLA', type:'vermelho',lucide:'square',         color:'var(--red)',    player:'Fabrício Bruno',    desc:'Segundo cartão amarelo' },
-    { min:90, team:'BOT', type:'fim',     lucide:'flag',           color:'var(--gray)',   player:'Fim de Jogo',       desc:'Botafogo 3×0 Flamengo' },
-  ];
-
-  // Static timeline removed — dynamic initTimeline() is the only timeline (FIX 1)
+  // FIX 3 — dead static EVENTS array removed; dynamic initTimeline() is the only timeline
 
   // ── ESCALAÇÕES ─────────────────────────────────────────────────
   const BOT_SQUAD = ['John (GK)','Damián Suárez','Adryelson','Barboza','Marçal','Tchê Tchê','Gregore','Marlon Freitas','Tiquinho','Júnior Santos','Luiz Henrique'];
