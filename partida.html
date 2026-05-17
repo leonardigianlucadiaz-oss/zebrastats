@@ -332,11 +332,14 @@
   const _urlDate    = _urlParams.get('date')   || null;
 
   // Additional URL params
-  const _urlHomeCrest = _urlParams.get('homeCrest') || null;
-  const _urlAwayCrest = _urlParams.get('awayCrest') || null;
-  const _urlAzarao    = _urlParams.get('azarao')    || null;
-  const _urlOddsH     = _urlParams.get('odds_h')    || null;
-  const _urlOddsA     = _urlParams.get('odds_a')    || null;
+  const _urlHomeCrest  = _urlParams.get('homeCrest')  || null;
+  const _urlAwayCrest  = _urlParams.get('awayCrest')  || null;
+  const _urlAzarao     = _urlParams.get('azarao')     || null;
+  const _urlOddsH      = _urlParams.get('odds_h')     || null;
+  const _urlOddsA      = _urlParams.get('odds_a')     || null;
+  const _urlFixtureId  = _urlParams.get('fixtureId')  || null;
+  const _urlHomeId     = _urlParams.get('homeId')     || null;
+  const _urlAwayId     = _urlParams.get('awayId')     || null;
 
   // Apply URL params to visible DOM if present
   // FIX 15 — update all [data-team="home"/"away"] elements from URL params
@@ -810,6 +813,205 @@
   initTimeline();
   initOdds();
   initH2hPreview();
+
+  // ── API-FOOTBALL: dados reais (stats, escalação, timeline, H2H) ─
+  async function initApifData() {
+    if (typeof ZebraAPI === 'undefined' || !ZebraAPI.isConfigured.apiFootball()) return;
+
+    const fixtureId = _urlFixtureId || localStorage.getItem('zs_current_apif_fixture');
+    if (!fixtureId) return;
+
+    try {
+      // Busca stats, eventos e escalações em paralelo
+      const [statsRes, eventsRes, lineupsRes] = await Promise.all([
+        ZebraAPI.apiFootball.getFixtureStats(fixtureId),
+        ZebraAPI.apiFootball.getFixtureEvents(fixtureId),
+        ZebraAPI.apiFootball.getFixtureLineups(fixtureId),
+      ]);
+
+      // ── Estatísticas reais ───────────────────────────────────
+      if (statsRes) {
+        const s = ZebraAPI.apiFootball.transformStats(statsRes);
+        if (s) renderRealStats(s);
+      }
+
+      // ── Eventos reais (gols, cartões) ────────────────────────
+      if (Array.isArray(eventsRes) && eventsRes.length) {
+        renderRealTimeline(eventsRes);
+      }
+
+      // ── Escalações reais ─────────────────────────────────────
+      if (Array.isArray(lineupsRes) && lineupsRes.length) {
+        renderRealLineups(lineupsRes);
+      }
+
+      // ── H2H real (se temos IDs dos times) ───────────────────
+      const homeId = _urlHomeId || localStorage.getItem('zs_current_apif_home_id');
+      const awayId = _urlAwayId || localStorage.getItem('zs_current_apif_away_id');
+      if (homeId && awayId) {
+        const h2hRes = await ZebraAPI.apiFootball.getH2H(homeId, awayId, 8);
+        if (Array.isArray(h2hRes) && h2hRes.length) renderRealH2H(h2hRes);
+      }
+
+    } catch(e) { console.warn('[partida] initApifData error:', e); }
+  }
+
+  function renderRealStats(s) {
+    const statsEl = document.getElementById('matchStats');
+    if (!statsEl) return;
+    const home = _urlHome || 'Casa';
+    const away = _urlAway || 'Fora';
+    const rows = [
+      { label:'Posse de bola', h: s.home.possession,  a: s.away.possession,  unit:'%' },
+      { label:'Chutes',        h: s.home.shots,        a: s.away.shots,        unit:'' },
+      { label:'No gol',        h: s.home.shotsOn,      a: s.away.shotsOn,      unit:'' },
+      { label:'Escanteios',    h: s.home.corners,      a: s.away.corners,      unit:'' },
+      { label:'Faltas',        h: s.home.fouls,        a: s.away.fouls,        unit:'' },
+      { label:'Amarelos',      h: s.home.yellowCards,  a: s.away.yellowCards,  unit:'' },
+      { label:'Vermelhos',     h: s.home.redCards,     a: s.away.redCards,     unit:'' },
+      { label:'xG',            h: s.home.xg,           a: s.away.xg,           unit:'' },
+    ].filter(r => r.h !== null && r.a !== null);
+    if (!rows.length) return;
+
+    statsEl.innerHTML = `<div style="display:flex;justify-content:space-between;margin-bottom:14px;">
+      <span style="font-size:0.875rem;font-weight:700;color:var(--green);">${home}</span>
+      <span style="font-size:0.625rem;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;align-self:center;">Estatísticas Reais</span>
+      <span style="font-size:0.875rem;font-weight:700;color:var(--red);">${away}</span>
+    </div>`;
+    rows.forEach(r => {
+      const total = (r.h + r.a) || 1;
+      const hp = Math.round((r.h / total) * 100);
+      const div = document.createElement('div');
+      div.style.marginBottom = '12px';
+      div.innerHTML = `
+        <div style="display:flex;justify-content:space-between;font-size:0.8125rem;margin-bottom:5px;">
+          <span style="font-weight:600;color:var(--green);">${r.h}${r.unit}</span>
+          <span style="font-size:0.75rem;color:var(--gray);">${r.label}</span>
+          <span style="font-weight:600;color:var(--red);">${r.a}${r.unit}</span>
+        </div>
+        <div style="display:flex;gap:3px;height:5px;">
+          <div style="flex:${hp};background:var(--green);border-radius:3px 0 0 3px;"></div>
+          <div style="flex:${100-hp};background:var(--red);border-radius:0 3px 3px 0;"></div>
+        </div>`;
+      statsEl.appendChild(div);
+    });
+  }
+
+  function renderRealTimeline(events) {
+    const dotsEl   = document.getElementById('timelineDots');
+    const eventsEl = document.getElementById('timelineEvents');
+    if (!dotsEl || !eventsEl) return;
+    dotsEl.innerHTML   = '';
+    eventsEl.innerHTML = '';
+
+    const filtered = events.filter(e =>
+      ['Goal','Card','subst'].includes(e.type) && e.time?.elapsed != null
+    );
+    if (!filtered.length) return;
+
+    filtered.forEach((ev, i) => {
+      const min   = ev.time.elapsed + (ev.time.extra || 0);
+      const isHome= ev.team?.name === (_urlHome || '');
+      const type  = ev.type;
+      const detail= ev.detail || '';
+      let icon = '⚽', color = 'var(--green)';
+      if (type === 'Card') {
+        icon  = detail.includes('Yellow') ? '🟨' : '🟥';
+        color = detail.includes('Yellow') ? 'var(--gold)' : 'var(--red)';
+      } else if (type === 'subst') { icon = '🔄'; color = 'var(--gray)'; }
+      else if (detail === 'Own Goal') { icon = '⚽'; color = 'var(--red)'; }
+
+      // Dot
+      const dot = document.createElement('div');
+      dot.style.cssText = `position:absolute;top:50%;left:${Math.min(min,90)/90*100}%;transform:translate(-50%,-50%);
+        width:12px;height:12px;border-radius:50%;background:${color};border:2px solid var(--bg);z-index:1;`;
+      const minLbl = document.createElement('span');
+      minLbl.style.cssText = 'position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-size:0.5625rem;color:var(--gray);white-space:nowrap;';
+      minLbl.textContent = `${min}'`;
+      dot.appendChild(minLbl);
+      dotsEl.appendChild(dot);
+
+      // Row
+      const row = document.createElement('div');
+      row.style.cssText = `display:flex;align-items:center;gap:10px;padding:6px 0;${i < filtered.length-1 ? 'border-bottom:1px solid var(--border);' : ''}`;
+      const player = ev.player?.name || ev.assist?.name || '';
+      row.innerHTML = `
+        <span style="font-size:0.75rem;font-weight:700;color:var(--gray);min-width:28px;text-align:right;">${min}'</span>
+        <span style="width:8px;height:8px;border-radius:50%;background:${color};flex-shrink:0;display:inline-block;"></span>
+        <span style="font-size:0.875rem;flex:1;${isHome ? '' : 'text-align:right;color:var(--gray);'}">${isHome ? player : ''}</span>
+        <span style="font-size:0.75rem;color:var(--gray);text-align:center;">${icon}</span>
+        <span style="font-size:0.875rem;flex:1;${isHome ? 'text-align:right;color:var(--gray);' : ''}">${isHome ? '' : player}</span>`;
+      eventsEl.appendChild(row);
+    });
+  }
+
+  function renderRealLineups(lineups) {
+    if (lineups.length < 2) return;
+    const home = lineups[0], away = lineups[1];
+    const homeEl = document.getElementById('squad-bot');
+    const awayEl = document.getElementById('squad-fla');
+    const homeLbl = document.querySelector('[data-team="home"]');
+    const awayLbl = document.querySelector('[data-team="away"]');
+    if (homeLbl) homeLbl.textContent = home.team?.name || _urlHome || 'Casa';
+    if (awayLbl) awayLbl.textContent = away.team?.name || _urlAway || 'Fora';
+    const render = (el, lineup) => {
+      if (!el) return;
+      el.innerHTML = '';
+      const all = [...(lineup.startXI || []), ...(lineup.substitutes || [])];
+      all.forEach((p, i) => {
+        const name   = p.player?.name || '';
+        const pos    = p.player?.pos  || '';
+        const isSub  = i >= (lineup.startXI?.length || 11);
+        const div = document.createElement('div');
+        div.style.cssText = 'display:flex;align-items:center;gap:6px;' + (isSub ? 'opacity:0.55;' : '');
+        div.innerHTML = `<span style="font-size:0.625rem;color:var(--gray);min-width:14px;">${isSub ? '↔' : i+1}</span>
+          <span style="font-size:0.625rem;color:var(--green);min-width:18px;font-weight:600;">${pos}</span>
+          <span style="font-size:0.8125rem;">${name}</span>`;
+        el.appendChild(div);
+      });
+    };
+    render(homeEl, home);
+    render(awayEl, away);
+  }
+
+  function renderRealH2H(fixtures) {
+    const el = document.getElementById('h2hList');
+    if (!el) return;
+    el.innerHTML = '';
+    fixtures.slice(0, 8).forEach((f, i) => {
+      const m  = ZebraAPI.apiFootball.transformFixture(f);
+      if (!m) return;
+      const diff = (m.hs || 0) - (m.as || 0);
+      const color = diff > 0 ? 'var(--green)' : diff < 0 ? 'var(--red)' : 'var(--gray)';
+      const row = document.createElement('div');
+      row.style.cssText = `display:flex;align-items:center;gap:10px;padding:10px 14px;${i < fixtures.length-1 ? 'border-bottom:1px solid var(--border);' : ''}`;
+      row.innerHTML = `
+        <span style="font-size:0.6875rem;color:var(--gray);min-width:60px;">${m.date}</span>
+        <span style="font-size:0.8125rem;flex:1;font-weight:500;">${m.home}</span>
+        <span style="font-size:1rem;font-weight:700;min-width:48px;text-align:center;color:${color};">${m.hs ?? '–'}–${m.as ?? '–'}</span>
+        <span style="font-size:0.8125rem;flex:1;text-align:right;font-weight:500;">${m.away}</span>
+        <span style="width:28px;"></span>`;
+      el.appendChild(row);
+    });
+
+    // Também atualiza preview de H2H
+    const previewEl = document.getElementById('h2hPreview');
+    if (previewEl) {
+      previewEl.innerHTML = fixtures.slice(0, 3).map(f => {
+        const m = ZebraAPI.apiFootball.transformFixture(f);
+        if (!m) return '';
+        const diff  = (m.hs || 0) - (m.as || 0);
+        const color = diff > 0 ? 'var(--green)' : diff < 0 ? 'var(--red)' : 'var(--gold)';
+        return `<div style="flex:1;background:var(--card2);border:1px solid var(--border);border-radius:var(--radius-md);padding:8px;text-align:center;min-width:0;">
+          <div style="font-size:0.625rem;color:var(--gray);margin-bottom:4px;">${m.date}</div>
+          <div style="font-size:1rem;font-weight:800;color:${color};">${m.hs ?? '–'}–${m.as ?? '–'}</div>
+          <div style="font-size:0.5625rem;color:var(--gray);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${m.home}</div>
+        </div>`;
+      }).join('');
+    }
+  }
+
+  initApifData();
   lucide.createIcons();
 </script>
 <style>

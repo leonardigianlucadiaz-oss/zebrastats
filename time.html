@@ -153,6 +153,15 @@
         </div>
       </div>
 
+      <!-- ESTATÍSTICAS REAIS (API-Football) — injetado por JS quando disponível -->
+      <div id="apifStatsCard" style="display:none;" class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+          <span class="section-title" style="font-size:0.875rem;"><i data-lucide="bar-chart-2" class="sec-ic"></i>Estatísticas da Temporada</span>
+          <span style="font-size:0.625rem;color:var(--gray);background:var(--card2);padding:2px 7px;border-radius:var(--radius-pill);">API-Football</span>
+        </div>
+        <div id="apifStatsBody" style="display:flex;flex-direction:column;gap:10px;"></div>
+      </div>
+
       <!-- VINDO PERDENDO PARA -->
       <div class="card card--red-border">
         <div class="section-header">
@@ -1039,7 +1048,76 @@
     }
 
     initRealData();
+    initApifTeamStats();
     initProContent();
+
+    // ── API-FOOTBALL: estatísticas reais da temporada ─────────
+    async function initApifTeamStats() {
+      if (typeof ZebraAPI === 'undefined' || !ZebraAPI.isConfigured.apiFootball()) return;
+      const teamName = TEAMS[currentTeam]?.name || currentTeam;
+      if (!teamName) return;
+
+      try {
+        const results = await ZebraAPI.apiFootball.searchTeam(teamName);
+        if (!results?.length) return;
+        const apifTeam = results[0]?.team;
+        if (!apifTeam?.id) return;
+
+        // Determina liga a partir do time atual
+        const team = TEAMS[currentTeam];
+        const lid  = team?.lid || 'ENG';
+        const statsRes = await ZebraAPI.apiFootball.getTeamStats(apifTeam.id, lid);
+        if (!statsRes) return;
+
+        const s  = statsRes.response || statsRes;
+        const fx = s.fixtures;
+        if (!fx) return;
+
+        // Atualiza W/D/L no hero com dados reais
+        const wins   = fx.wins?.total   || fx.wins?.home   + fx.wins?.away   || 0;
+        const draws  = fx.draws?.total  || fx.draws?.home  + fx.draws?.away  || 0;
+        const losses = fx.loses?.total  || fx.loses?.home  + fx.loses?.away  || 0;
+        if (wins || draws || losses) {
+          const wEl = document.getElementById('statW');
+          const dEl = document.getElementById('statD');
+          const lEl = document.getElementById('statL');
+          if (wEl) wEl.textContent = wins;
+          if (dEl) dEl.textContent = draws;
+          if (lEl) lEl.textContent = losses;
+        }
+
+        // Monta cartão de estatísticas
+        const goalsFor  = s.goals?.for?.average?.total  || '–';
+        const goalsAgst = s.goals?.against?.average?.total || '–';
+        const cleanSh   = s.clean_sheet?.total ?? '–';
+        const failScore = s.failed_to_score?.total ?? '–';
+        const formation = s.lineups?.[0]?.formation || null;
+        if (formation) {
+          const fl = document.getElementById('formationLabel');
+          if (fl) fl.textContent = formation;
+        }
+
+        const rows = [
+          { label:'Gols marcados / jogo', value: goalsFor,  color:'var(--green)' },
+          { label:'Gols sofridos / jogo',  value: goalsAgst, color:'var(--red)'   },
+          { label:'Clean sheets',          value: cleanSh,   color:'var(--gray)'  },
+          { label:'Jogos sem marcar',      value: failScore, color:'var(--gray)'  },
+        ];
+        if (formation) rows.unshift({ label:'Formação mais usada', value: formation, color:'var(--gold)' });
+
+        const body = document.getElementById('apifStatsBody');
+        const card = document.getElementById('apifStatsCard');
+        if (!body || !card) return;
+        body.innerHTML = rows.map(r => `
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);">
+            <span style="font-size:0.8125rem;color:var(--gray);">${r.label}</span>
+            <span style="font-size:0.9375rem;font-weight:700;color:${r.color};">${r.value}</span>
+          </div>`).join('');
+        card.style.display = 'block';
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+
+      } catch(e) { console.warn('[time] initApifTeamStats error:', e); }
+    }
 
     // ── TAB BAR ───────────────────────────────────────────
     const TIME_TABS = ['overview','jogos','zebras','escalacao','transfers'];
