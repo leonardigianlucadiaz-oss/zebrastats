@@ -239,34 +239,53 @@
 
       <!-- TAB: ESCALAÇÃO -->
       <div id="tab-escalacao" style="display:none;">
-        <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px;margin-bottom:12px;">
-          <div style="display:flex;align-items:center;gap:6px;margin-bottom:14px;">
+        <!-- Campo + Onze Titular -->
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px;margin-bottom:10px;">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px;">
             <i data-lucide="layout-grid" style="width:14px;height:14px;color:var(--green);"></i>
             <span style="font-size:0.875rem;font-weight:600;">Formação Provável</span>
-            <span style="margin-left:auto;font-size:0.75rem;color:var(--gray);" id="formationLabel">4-3-3</span>
+            <span style="margin-left:auto;font-size:0.75rem;color:var(--gray);font-weight:700;" id="formationLabel">4-3-3</span>
           </div>
           <!-- SVG PITCH -->
-          <div style="position:relative;width:100%;max-width:320px;margin:0 auto;" id="pitchContainer">
-            <svg id="pitchSvg" viewBox="0 0 220 320" style="width:100%;display:block;" xmlns="http://www.w3.org/2000/svg">
-              <!-- Grass -->
-              <rect x="0" y="0" width="220" height="320" rx="8" fill="#1a3a1a"/>
-              <!-- Lines -->
-              <rect x="10" y="10" width="200" height="300" rx="4" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
-              <!-- Center line -->
-              <line x1="10" y1="160" x2="210" y2="160" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
-              <!-- Center circle -->
-              <circle cx="110" cy="160" r="28" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
-              <circle cx="110" cy="160" r="2" fill="rgba(255,255,255,0.3)"/>
-              <!-- Penalty areas -->
-              <rect x="50" y="10" width="120" height="55" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
-              <rect x="75" y="10" width="70" height="28" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
-              <rect x="50" y="255" width="120" height="55" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
-              <rect x="75" y="282" width="70" height="28" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
+          <div style="position:relative;width:100%;max-width:300px;margin:0 auto;" id="pitchContainer">
+            <svg id="pitchSvg" viewBox="0 0 220 310" style="width:100%;display:block;" xmlns="http://www.w3.org/2000/svg">
+              <!-- Grass gradient -->
+              <defs>
+                <linearGradient id="grassGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#1a3a1a"/>
+                  <stop offset="100%" stop-color="#163216"/>
+                </linearGradient>
+              </defs>
+              <rect x="0" y="0" width="220" height="310" rx="8" fill="url(#grassGrad)"/>
+              <!-- Stripes -->
+              <rect x="10" y="10"  width="200" height="36" fill="rgba(255,255,255,0.025)" rx="0"/>
+              <rect x="10" y="82"  width="200" height="36" fill="rgba(255,255,255,0.025)" rx="0"/>
+              <rect x="10" y="154" width="200" height="36" fill="rgba(255,255,255,0.025)" rx="0"/>
+              <rect x="10" y="226" width="200" height="36" fill="rgba(255,255,255,0.025)" rx="0"/>
+              <!-- Field lines -->
+              <rect x="10" y="10" width="200" height="290" rx="4" fill="none" stroke="rgba(255,255,255,0.22)" stroke-width="1.5"/>
+              <line x1="10" y1="155" x2="210" y2="155" stroke="rgba(255,255,255,0.22)" stroke-width="1.5"/>
+              <circle cx="110" cy="155" r="26" fill="none" stroke="rgba(255,255,255,0.22)" stroke-width="1.5"/>
+              <circle cx="110" cy="155" r="2" fill="rgba(255,255,255,0.35)"/>
+              <!-- Attack penalty area (top) -->
+              <rect x="52" y="10" width="116" height="48" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1.2"/>
+              <rect x="78" y="10" width="64" height="24" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1.2"/>
+              <!-- Defense penalty area (bottom) -->
+              <rect x="52" y="252" width="116" height="48" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1.2"/>
+              <rect x="78" y="276" width="64" height="24" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1.2"/>
               <!-- Players rendered by JS -->
               <g id="pitchPlayers"></g>
             </svg>
           </div>
-          <div id="playersList" style="margin-top:12px;display:flex;flex-direction:column;gap:4px;"></div>
+          <div id="playersList" style="margin-top:10px;display:flex;flex-direction:column;"></div>
+        </div>
+        <!-- Banco de Reservas -->
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px 16px;">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;">
+            <i data-lucide="users" style="width:14px;height:14px;color:var(--gray);"></i>
+            <span style="font-size:0.8125rem;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;">Banco de Reservas</span>
+          </div>
+          <div id="benchList" style="display:flex;flex-direction:column;"></div>
         </div>
       </div>
 
@@ -1145,72 +1164,235 @@
       comparBtn.href = `comparar.html?a=${currentTeam || 'torino'}`;
     }
 
+    // ── LAYOUTS DE FORMAÇÃO (coordenadas no SVG 220×310) ─────────
+    const FORMATIONS = {
+      '4-3-3': [
+        {pos:'GK', x:110,y:278}, {pos:'RB',x:35, y:234}, {pos:'ZD',x:80, y:224},
+        {pos:'ZE', x:140,y:224}, {pos:'LB',x:185,y:234}, {pos:'MC',x:52, y:170},
+        {pos:'MC', x:110,y:160}, {pos:'MC',x:168,y:170}, {pos:'PD',x:42, y:95},
+        {pos:'CA', x:110,y:78},  {pos:'PE',x:178,y:95},
+      ],
+      '4-2-3-1': [
+        {pos:'GK', x:110,y:278}, {pos:'RB',x:35, y:234}, {pos:'ZD',x:80, y:224},
+        {pos:'ZE', x:140,y:224}, {pos:'LB',x:185,y:234}, {pos:'VOL',x:80,y:182},
+        {pos:'VOL',x:140,y:182}, {pos:'MD',x:38, y:128}, {pos:'MEI',x:110,y:118},
+        {pos:'ME', x:182,y:128}, {pos:'CA',x:110,y:68},
+      ],
+      '4-4-2': [
+        {pos:'GK', x:110,y:278}, {pos:'RB',x:35, y:234}, {pos:'ZD',x:80, y:224},
+        {pos:'ZE', x:140,y:224}, {pos:'LB',x:185,y:234}, {pos:'PD',x:32, y:168},
+        {pos:'MC', x:80, y:163}, {pos:'MC',x:140,y:163}, {pos:'PE',x:188,y:168},
+        {pos:'CA', x:78, y:90},  {pos:'CA',x:142,y:90},
+      ],
+      '3-4-3': [
+        {pos:'GK', x:110,y:278}, {pos:'ZD',x:55, y:234}, {pos:'ZC',x:110,y:222},
+        {pos:'ZE', x:165,y:234}, {pos:'LD',x:26, y:170}, {pos:'MC',x:76, y:160},
+        {pos:'MC', x:144,y:160}, {pos:'LE',x:194,y:170}, {pos:'PD',x:42, y:95},
+        {pos:'CA', x:110,y:78},  {pos:'PE',x:178,y:95},
+      ],
+      '3-5-2': [
+        {pos:'GK', x:110,y:278}, {pos:'ZD',x:55, y:234}, {pos:'ZC',x:110,y:222},
+        {pos:'ZE', x:165,y:234}, {pos:'LD',x:24, y:172}, {pos:'MC',x:68, y:160},
+        {pos:'MC', x:110,y:152},{pos:'MC',x:152,y:160}, {pos:'LE',x:196,y:172},
+        {pos:'CA', x:78, y:90},  {pos:'CA',x:142,y:90},
+      ],
+      '4-3-2-1': [
+        {pos:'GK', x:110,y:278}, {pos:'RB',x:35, y:234}, {pos:'ZD',x:80, y:224},
+        {pos:'ZE', x:140,y:224}, {pos:'LB',x:185,y:234}, {pos:'MC',x:52, y:175},
+        {pos:'MC', x:110,y:165},{pos:'MC',x:168,y:175}, {pos:'MD',x:76, y:115},
+        {pos:'ME', x:144,y:115}, {pos:'CA',x:110,y:68},
+      ],
+    };
+
+    // ── ESCALAÇÕES POR TIME ────────────────────────────────────────
+    const TEAM_LINEUPS = {
+      torino: {
+        formation:'4-3-3',
+        starters:['Milinkovic-Savic','Bellanova','Djidji','Buongiorno','Rodriguez','Tameze','Ricci','Ilic','Seck','Sanabria','Karamoh'],
+        bench:[{pos:'GK',name:'Berisha'},{pos:'ZD',name:'Zima'},{pos:'LB',name:'Vojvoda'},{pos:'MC',name:'Linetty'},{pos:'MC',name:'Lazaro'},{pos:'PD',name:'Vlasic'},{pos:'CA',name:'Pellegri'}],
+      },
+      flamengo: {
+        formation:'4-2-3-1',
+        starters:['Rossi','Varela','Fabrício Bruno','David Luiz','Ayrton Lucas','Thiago Maia','Erick Pulgar','Everton Cebolinha','Arrascaeta','Gerson','Pedro'],
+        bench:[{pos:'GK',name:'Santos'},{pos:'ZD',name:'Léo Pereira'},{pos:'LB',name:'Viña'},{pos:'MC',name:'Matheus França'},{pos:'MEI',name:'Victor Hugo'},{pos:'PE',name:'Gabigol'},{pos:'CA',name:'Lineker'}],
+      },
+      'real-madrid': {
+        formation:'4-3-3',
+        starters:['Lunin','Carvajal','Militão','Nacho','Mendy','Tchouaméni','Kroos','Camavinga','Valverde','Bellingham','Vinicius Jr'],
+        bench:[{pos:'GK',name:'Kepa'},{pos:'ZD',name:'Alaba'},{pos:'LB',name:'García'},{pos:'MC',name:'Modric'},{pos:'MC',name:'Ceballos'},{pos:'PD',name:'Rodrygo'},{pos:'CA',name:'Joselu'}],
+      },
+      'man-city': {
+        formation:'4-2-3-1',
+        starters:['Ederson','Walker','Dias','Akanji','Gvardiol','Rodri','Kovacic','Silva','De Bruyne','Doku','Haaland'],
+        bench:[{pos:'GK',name:'Ortega'},{pos:'RB',name:'Lewis'},{pos:'ZD',name:'Stones'},{pos:'MC',name:'Foden'},{pos:'MC',name:'B. Silva'},{pos:'PD',name:'Oscar Bobb'},{pos:'CA',name:'J. Álvarez'}],
+      },
+      'bayern': {
+        formation:'4-2-3-1',
+        starters:['Neuer','Kimmich','Upamecano','Dier','Davies','Goretzka','Pavlovic','Müller','Musiala','Sané','Kane'],
+        bench:[{pos:'GK',name:'Peretz'},{pos:'RB',name:'Mazraoui'},{pos:'ZD',name:'De Ligt'},{pos:'MC',name:'Laimer'},{pos:'ME',name:'Gnabry'},{pos:'PD',name:'Tel'},{pos:'CA',name:'Zirkzee'}],
+      },
+      'psg': {
+        formation:'4-3-3',
+        starters:['Donnarumma','Hakimi','Marquinhos','L. Beraldo','Nuno Mendes','Fabian Ruiz','Vitinha','Zaïre-Emery','Dembélé','Kolo Muani','Lee Kang-in'],
+        bench:[{pos:'GK',name:'Safonov'},{pos:'RB',name:'Mukiele'},{pos:'ZD',name:'Ramos'},{pos:'MC',name:'Ugarte'},{pos:'MC',name:'Neves'},{pos:'PD',name:'Asensio'},{pos:'CA',name:'Doué'}],
+      },
+      'palmeiras': {
+        formation:'4-2-3-1',
+        starters:['Weverton','Marcos Rocha','Gustavo Gómez','Murilo','Piquerez','Zé Rafael','Aníbal Moreno','Dudu','Raphael Veiga','Lázaro','Flaco López'],
+        bench:[{pos:'GK',name:'M. Lomba'},{pos:'ZD',name:'Vitor Reis'},{pos:'LB',name:'Mayke'},{pos:'MC',name:'Gab. Menino'},{pos:'MC',name:'R. Ríos'},{pos:'PE',name:'Rony'},{pos:'CA',name:'Endrick'}],
+      },
+      'barcelona': {
+        formation:'4-3-3',
+        starters:['Ter Stegen','Koundé','Christensen','Iñigo Martínez','Balde','Pedri','De Jong','Gündoğan','Yamal','Lewandowski','Raphinha'],
+        bench:[{pos:'GK',name:'Peña'},{pos:'ZD',name:'Marcos Alonso'},{pos:'LB',name:'Cancelo'},{pos:'MC',name:'Fermín López'},{pos:'MC',name:'Romeu'},{pos:'PD',name:'João Félix'},{pos:'CA',name:'Vitor Roque'}],
+      },
+      'arsenal': {
+        formation:'4-3-3',
+        starters:['Raya','Ben White','Saliba','Gabriel','Zinchenko','Odegaard','Rice','Havertz','Saka','Jesus','Martinelli'],
+        bench:[{pos:'GK',name:'Ramsdale'},{pos:'ZD',name:'Timber'},{pos:'LB',name:'Tomiyasu'},{pos:'MC',name:'Jorginho'},{pos:'MC',name:'Smith Rowe'},{pos:'PD',name:'Trossard'},{pos:'CA',name:'Nketiah'}],
+      },
+      'liverpool': {
+        formation:'4-3-3',
+        starters:['Alisson','Alexander-Arnold','Matip','Van Dijk','Robertson','Szoboszlai','Mac Allister','Jones','Salah','Darwin Núñez','Diaz'],
+        bench:[{pos:'GK',name:'Kelleher'},{pos:'ZD',name:'Quansah'},{pos:'LB',name:'Bradley'},{pos:'MC',name:'Endo'},{pos:'MC',name:'Elliott'},{pos:'PD',name:'Gakpo'},{pos:'CA',name:'Jota'}],
+      },
+      'atletico-mg': {
+        formation:'4-2-3-1',
+        starters:['Everson','Mariano','Júnior Alonso','M. Lemos','Guilherme Arana','Otávio','Alan Franco','Vargas','Paulinho','Rubens','Hulk'],
+        bench:[{pos:'GK',name:'Rafael'},{pos:'ZD',name:'Réver'},{pos:'RB',name:'Dodô'},{pos:'MC',name:'Jair'},{pos:'MC',name:'Igor Gomes'},{pos:'PE',name:'Savarino'},{pos:'CA',name:'Deyverson'}],
+      },
+      'juventus': {
+        formation:'4-3-3',
+        starters:['Szczesny','Danilo','Bremer','Gatti','Alex Sandro','Locatelli','Cambiaso','Fagioli','Chiesa','Vlahovic','Yildiz'],
+        bench:[{pos:'GK',name:'Perin'},{pos:'ZD',name:'Rugani'},{pos:'LB',name:'De Sciglio'},{pos:'MC',name:'Miretti'},{pos:'MC',name:'Nonge'},{pos:'PD',name:'Iling-Junior'},{pos:'CA',name:'Milik'}],
+      },
+    };
+
     // ── RENDER ESCALAÇÃO ──────────────────────────────────
     function renderEscalacao() {
       const team = TEAMS[currentTeam] || Object.values(TEAMS)[0];
       const color = team.color || '#2EE65C';
-      const formation = '4-3-3';
-      document.getElementById('formationLabel').textContent = formation;
 
-      const positions = [
-        { x:110, y:295, pos:'GK',  name:'Goleiro' },
-        { x:40,  y:250, pos:'LD',  name:'Lat. Dir.' },
-        { x:80,  y:240, pos:'ZD',  name:'Zagueiro' },
-        { x:140, y:240, pos:'ZE',  name:'Zagueiro' },
-        { x:180, y:250, pos:'LE',  name:'Lat. Esq.' },
-        { x:55,  y:185, pos:'VOL', name:'Volante' },
-        { x:110, y:175, pos:'MEI', name:'Meia' },
-        { x:165, y:185, pos:'ATA', name:'Meia-ata.' },
-        { x:55,  y:110, pos:'PD',  name:'Ponta Dir.' },
-        { x:110, y:95,  pos:'CA',  name:'Centroavante' },
-        { x:165, y:110, pos:'PE',  name:'Ponta Esq.' },
-      ];
+      // Dados da escalação do time
+      const lineupData = TEAM_LINEUPS[currentTeam] || TEAM_LINEUPS.torino;
+      let formation   = lineupData.formation;
+      let starterNames = [...lineupData.starters];
+      let benchData    = [...lineupData.bench];
 
-      // Use real players if available
-      let playerNames = positions.map((p, i) => p.name || ('Jogador ' + (i + 1)));
-      if (window._realPlayers && window._realPlayers.length) {
-        const byPos = { Goalkeeper:[], Defender:[], Midfielder:[], Forward:[] };
+      // Override com jogadores reais da API se disponíveis
+      if (window._realPlayers && window._realPlayers.length >= 11) {
+        const byPos = { GK:[], RB:[], LB:[], CB:[], DM:[], CM:[], RM:[], LM:[], FW:[] };
         window._realPlayers.forEach(pl => {
-          const pos = pl.strPosition || '';
-          if (pos.includes('Goalkeeper') || pos.includes('GK')) byPos.Goalkeeper.push(pl.strPlayer);
-          else if (pos.includes('Defender') || pos.includes('Back')) byPos.Defender.push(pl.strPlayer);
-          else if (pos.includes('Midfielder') || pos.includes('Mid')) byPos.Midfielder.push(pl.strPlayer);
-          else if (pos.includes('Forward') || pos.includes('Striker') || pos.includes('Winger') || pos.includes('Attack')) byPos.Forward.push(pl.strPlayer);
-          else byPos.Midfielder.push(pl.strPlayer); // default
+          const p = (pl.strPosition || '').toLowerCase();
+          if (/goalkeeper/i.test(p))                    byPos.GK.push(pl.strPlayer);
+          else if (/right.back|right back/i.test(p))   byPos.RB.push(pl.strPlayer);
+          else if (/left.back|left back/i.test(p))     byPos.LB.push(pl.strPlayer);
+          else if (/centre.back|center.back|defender/i.test(p)) byPos.CB.push(pl.strPlayer);
+          else if (/defensive.mid|holding/i.test(p))   byPos.DM.push(pl.strPlayer);
+          else if (/right.mid|right wing/i.test(p))    byPos.RM.push(pl.strPlayer);
+          else if (/left.mid|left wing/i.test(p))      byPos.LM.push(pl.strPlayer);
+          else if (/forward|striker|attack/i.test(p))  byPos.FW.push(pl.strPlayer);
+          else                                          byPos.CM.push(pl.strPlayer);
         });
-        const realNames = [
-          byPos.Goalkeeper[0],
-          byPos.Defender[0], byPos.Defender[1], byPos.Defender[2], byPos.Defender[3],
-          byPos.Midfielder[0], byPos.Midfielder[1], byPos.Midfielder[2],
-          byPos.Forward[0], byPos.Forward[1], byPos.Forward[2],
-        ];
-        playerNames = positions.map((p, i) => realNames[i] || p.name || ('Jogador ' + (i + 1)));
+        const layout = FORMATIONS[formation] || FORMATIONS['4-3-3'];
+        const cbCount = {n:0}, dmCount = {n:0}, cmCount = {n:0}, fwCount = {n:0};
+        const mapped = layout.map((p,i) => {
+          if (p.pos==='GK')  return byPos.GK[0];
+          if (p.pos==='RB')  return byPos.RB[0]  || byPos.CB[cbCount.n++];
+          if (p.pos==='LB')  return byPos.LB[0]  || byPos.CB[cbCount.n++];
+          if (['ZD','ZE','ZC'].includes(p.pos)) return byPos.CB[cbCount.n++];
+          if (p.pos==='VOL') return byPos.DM[dmCount.n++] || byPos.CM[cmCount.n++];
+          if (['MC','MEI'].includes(p.pos)) return byPos.CM[cmCount.n++];
+          if (['MD','PD'].includes(p.pos)) return byPos.RM[0] || byPos.CM[cmCount.n++];
+          if (['ME','PE'].includes(p.pos)) return byPos.LM[0] || byPos.CM[cmCount.n++];
+          if (p.pos==='CA')  return byPos.FW[fwCount.n++];
+          return null;
+        });
+        if (mapped.filter(Boolean).length >= 8) {
+          starterNames = mapped.map((n,i) => n || lineupData.starters[i] || 'Jogador');
+        }
+        // Banco dos jogadores não escalados
+        const usedSet = new Set(starterNames);
+        const remaining = window._realPlayers.map(p=>p.strPlayer).filter(n=>n&&!usedSet.has(n)).slice(0,7);
+        if (remaining.length >= 5) {
+          benchData = remaining.map(name => ({pos:'RES', name}));
+        }
       }
 
+      document.getElementById('formationLabel').textContent = formation;
+      const formLayout = FORMATIONS[formation] || FORMATIONS['4-3-3'];
+
+      // Sobrenome curto para exibir no círculo
+      function shortName(full) {
+        if (!full) return '?';
+        const parts = full.replace(/-/g,' ').trim().split(' ');
+        const last  = parts[parts.length - 1];
+        return last.length > 8 ? last.substring(0,7) : last;
+      }
+
+      // ── SVG: renderiza jogadores no campo
       const g = document.getElementById('pitchPlayers');
       if (!g) return;
       g.innerHTML = '';
-      positions.forEach((p, i) => {
+
+      formLayout.forEach((p, i) => {
+        const sn = shortName(starterNames[i]);
+
+        // Sombra
+        const sh = document.createElementNS('http://www.w3.org/2000/svg','ellipse');
+        sh.setAttribute('cx',p.x); sh.setAttribute('cy',p.y+14.5);
+        sh.setAttribute('rx','11'); sh.setAttribute('ry','4');
+        sh.setAttribute('fill','rgba(0,0,0,0.25)');
+        g.appendChild(sh);
+
+        // Círculo
         const circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
-        circle.setAttribute('cx', p.x); circle.setAttribute('cy', p.y);
-        circle.setAttribute('r', '12'); circle.setAttribute('fill', color);
-        circle.setAttribute('stroke', '#fff'); circle.setAttribute('stroke-width', '1.5');
+        circle.setAttribute('cx',p.x); circle.setAttribute('cy',p.y);
+        circle.setAttribute('r','13'); circle.setAttribute('fill',color);
+        circle.setAttribute('stroke','rgba(255,255,255,0.9)'); circle.setAttribute('stroke-width','1.5');
         g.appendChild(circle);
-        const text = document.createElementNS('http://www.w3.org/2000/svg','text');
-        text.setAttribute('x', p.x); text.setAttribute('y', p.y + 4);
-        text.setAttribute('text-anchor','middle'); text.setAttribute('font-size','7');
-        text.setAttribute('font-weight','700'); text.setAttribute('fill','#fff');
-        text.textContent = p.pos;
-        g.appendChild(text);
+
+        // Posição (acima, menor)
+        const posT = document.createElementNS('http://www.w3.org/2000/svg','text');
+        posT.setAttribute('x',p.x); posT.setAttribute('y',p.y-2);
+        posT.setAttribute('text-anchor','middle'); posT.setAttribute('font-size','5');
+        posT.setAttribute('font-weight','800'); posT.setAttribute('fill','rgba(255,255,255,0.7)');
+        posT.setAttribute('font-family','Inter,sans-serif');
+        posT.textContent = p.pos;
+        g.appendChild(posT);
+
+        // Sobrenome (abaixo, maior e negrito)
+        const nameT = document.createElementNS('http://www.w3.org/2000/svg','text');
+        nameT.setAttribute('x',p.x); nameT.setAttribute('y',p.y+7);
+        nameT.setAttribute('text-anchor','middle'); nameT.setAttribute('font-size','6.5');
+        nameT.setAttribute('font-weight','700'); nameT.setAttribute('fill','#fff');
+        nameT.setAttribute('font-family','Inter,sans-serif');
+        nameT.textContent = sn;
+        g.appendChild(nameT);
       });
 
+      // ── Lista de titulares
       const list = document.getElementById('playersList');
       if (list) {
-        list.innerHTML = positions.map((p, i) => `
-          <div style="display:flex;align-items:center;gap:10px;padding:5px 0;${i<positions.length-1?'border-bottom:1px solid var(--border);':''}">
-            <span style="width:28px;height:20px;background:${color};border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:0.6875rem;font-weight:700;color:#fff;flex-shrink:0;">${p.pos}</span>
-            <span style="font-size:0.875rem;">${playerNames[i] || 'Jogador'}</span>
+        list.innerHTML = formLayout.map((p,i) => `
+          <div style="display:flex;align-items:center;gap:10px;padding:7px 2px;${i<formLayout.length-1?'border-bottom:1px solid var(--border);':''}">
+            <span style="min-width:34px;height:22px;background:${color};border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:0.625rem;font-weight:800;color:#fff;flex-shrink:0;letter-spacing:0.2px;">${p.pos}</span>
+            <span style="font-size:0.875rem;font-weight:500;">${starterNames[i] || 'Jogador'}</span>
           </div>`).join('');
+      }
+
+      // ── Banco de reservas
+      const bench = document.getElementById('benchList');
+      if (bench) {
+        if (!benchData || !benchData.length) {
+          bench.innerHTML = '<div style="font-size:0.8125rem;color:var(--gray);padding:8px 0;">Banco não disponível</div>';
+        } else {
+          bench.innerHTML = benchData.map((p,i) => `
+            <div style="display:flex;align-items:center;gap:10px;padding:7px 2px;${i<benchData.length-1?'border-bottom:1px solid var(--border);':''}">
+              <span style="min-width:34px;height:22px;background:var(--card2);border:1px solid var(--border);border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:0.625rem;font-weight:700;color:var(--gray);flex-shrink:0;">${p.pos}</span>
+              <span style="font-size:0.875rem;color:var(--gray);">${p.name}</span>
+            </div>`).join('');
+        }
       }
     }
 
