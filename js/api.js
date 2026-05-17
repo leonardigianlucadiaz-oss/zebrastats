@@ -458,11 +458,13 @@ const ZebraAPI = (() => {
     fdScorers(data) {
       if (!data?.scorers) return [];
       return data.scorers.map(s => ({
-        name    : s.player.name,
-        team    : s.team?.name || s.team?.shortName || '',
-        goals   : s.goals || 0,
-        assists : s.assists || 0,
-        flag    : '🌐',
+        name          : s.player.name,
+        team          : s.team?.name || s.team?.shortName || '',
+        goals         : s.goals         || 0,
+        assists       : s.assists        || 0,
+        penalties     : s.penalties      || 0,
+        playedMatches : s.playedMatches  || 0,
+        flag          : '🌐',
       }));
     },
 
