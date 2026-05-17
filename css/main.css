@@ -88,19 +88,42 @@ body {
   border: 1px solid var(--border);
 }
 
-/* ── SIDEBAR (desktop only) ── */
+/* ── SIDEBAR — drawer hambúrguer ── */
 .app-sidebar {
   display: none;
+  flex-direction: column;
   width: 260px;
   flex-shrink: 0;
   background: var(--card);
   border-right: 1px solid var(--border);
-  flex-direction: column;
   height: 100vh;
-  position: sticky;
-  top: 0;
   overflow-y: auto;
+  /* drawer: oculto fora da tela por padrão */
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  z-index: 600;
+  transform: translateX(-280px);
+  transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
 }
+.app-sidebar.sidebar--open {
+  display: flex;
+  transform: translateX(0);
+}
+
+/* Backdrop do hambúrguer */
+.sidebar-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(3px);
+  z-index: 599;
+  cursor: pointer;
+}
+.sidebar-backdrop.active { display: block; }
+
+/* Botão hambúrguer — oculto no mobile */
+.hamburger-btn { display: none; }
 
 .sidebar__brand {
   display: flex;
@@ -908,9 +931,11 @@ p  { font-size: 0.875rem; line-height: 1.5; color: var(--gray); }
 @media (min-width: 768px) {
   body { align-items: flex-start; }
 
-  /* Show sidebar, hide bottom nav */
-  .app-sidebar { display: flex; }
-  .bottom-nav  { display: none; }
+  /* Hambúrguer visível no desktop */
+  .hamburger-btn { display: flex !important; }
+
+  /* Sidebar já é fixed/drawer — sem alteração de display aqui */
+  .bottom-nav { display: none; }
 
   /* Main content area doesn't need bottom padding */
   .app-main .content,

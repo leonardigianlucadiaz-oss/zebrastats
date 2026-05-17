@@ -537,12 +537,16 @@
     document.getElementById('stepLabel').textContent = `Passo ${currentStep} de 3`;
     // Botão voltar
     document.getElementById('backBtn').style.display = currentStep > 1 ? 'block' : 'none';
-    // Botão continuar: step 3 fica escondido (tem seus próprios botões)
-    const footer = document.getElementById('footerNav');
-    footer.style.display = currentStep === 3 ? 'none' : 'block';
-    // Texto do botão
+    // Footer de navegação: oculto no passo 3 (que tem seus próprios botões)
+    document.getElementById('footerNav').style.display = currentStep === 3 ? 'none' : 'block';
+    // Texto do botão continuar
     const btn = document.getElementById('nextBtn');
     btn.innerHTML = `Continuar <i data-lucide="arrow-right" style="width:18px;height:18px;"></i>`;
+
+    // Botões de notificação: EXCLUSIVOS do passo 3
+    document.getElementById('enableNotifBtn').style.display = currentStep === 3 ? 'flex' : 'none';
+    document.getElementById('skipNotifBtn').style.display   = currentStep === 3 ? 'block' : 'none';
+
     lucide.createIcons();
 
     // Validação do estado atual
