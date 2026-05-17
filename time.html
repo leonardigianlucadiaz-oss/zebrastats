@@ -211,8 +211,8 @@
         <!-- Insight sazonal -->
         <div style="margin-top:14px;padding:12px;background:var(--input-bg);border-radius:var(--radius-sm);border-left:3px solid var(--gold);">
           <p style="font-size:0.8125rem;color:var(--white);font-weight:500;">💡 Insight</p>
-          <p style="font-size:0.75rem;color:var(--gray);margin-top:4px;line-height:1.5;">
-            O Torino FC tende a perder desempenho em novembro e dezembro, período em que mais produz zebras como azarão. Historicamente, recupera força em março.
+          <p style="font-size:0.75rem;color:var(--gray);margin-top:4px;line-height:1.5;" id="seasonalInsight">
+            Este time tende a perder desempenho em novembro e dezembro, período em que mais produz zebras como azarão. Historicamente, recupera força em março.
           </p>
         </div>
       </div>
@@ -886,6 +886,10 @@
       // Confrontos
       renderConfrontos(t.losing,  'losingList',  'red');
       renderConfrontos(t.winning, 'winningList', 'green');
+
+      // Insight sazonal dinâmico
+      const insightEl = document.getElementById('seasonalInsight');
+      if (insightEl) insightEl.textContent = `${t.name} tende a perder desempenho em novembro e dezembro, período em que mais produz zebras como azarão. Historicamente, recupera força em março.`;
 
       // Chart
       renderChart(t.seasonal);
