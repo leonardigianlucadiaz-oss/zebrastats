@@ -561,6 +561,87 @@ function updateSidebarUser() {
 }
 window.updateSidebarUser = updateSidebarUser;
 
+// ── BOTTOM NAV (mobile) ───────────────────────────────────────
+function initBottomNav() {
+  const nav = document.querySelector('.bottom-nav');
+  if (!nav) return;
+  const current = window.location.pathname.split('/').pop() || 'home.html';
+  const items = [
+    { href: 'home.html',    icon: 'home',        label: 'Home' },
+    { href: 'zebras.html',  icon: 'activity',    label: 'Zebras' },
+    { href: 'comparar.html',icon: 'git-compare', label: 'Comparar' },
+    { href: 'time.html',    icon: 'star',        label: 'Times' },
+    { href: 'perfil.html',  icon: 'user',        label: 'Perfil' },
+  ];
+  nav.innerHTML = items.map(item => {
+    const active = current === item.href || current.startsWith(item.href.replace('.html',''));
+    return `<a href="${item.href}" class="bottom-nav__item${active ? ' active' : ''}">
+      <span class="bottom-nav__icon"><i data-lucide="${item.icon}" style="width:20px;height:20px;display:block;"></i></span>
+      ${item.label}
+    </a>`;
+  }).join('');
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+// ── HAMBURGER MENU (desktop) ──────────────────────────────────
+function initHamburger() {
+  const navbar = document.querySelector('.navbar');
+  const sidebar = document.querySelector('.app-sidebar');
+  if (!navbar || !sidebar) return;
+
+  // Botão hambúrguer
+  const btn = document.createElement('button');
+  btn.className = 'hamburger-btn navbar__icon';
+  btn.setAttribute('aria-label', 'Menu');
+  btn.style.cssText = 'background:none;border:none;cursor:pointer;color:var(--white);display:none;align-items:center;justify-content:center;width:36px;height:36px;border-radius:8px;flex-shrink:0;';
+  btn.innerHTML = '<i data-lucide="menu" style="width:20px;height:20px;"></i>';
+  navbar.insertBefore(btn, navbar.firstChild);
+
+  // Backdrop
+  const backdrop = document.createElement('div');
+  backdrop.className = 'sidebar-backdrop';
+  document.body.appendChild(backdrop);
+
+  // Botão fechar dentro da sidebar
+  let closeBtn = sidebar.querySelector('.sidebar-close-btn');
+  if (!closeBtn) {
+    closeBtn = document.createElement('button');
+    closeBtn.className = 'sidebar-close-btn';
+    closeBtn.setAttribute('aria-label', 'Fechar menu');
+    closeBtn.style.cssText = 'position:absolute;top:14px;right:14px;background:none;border:none;cursor:pointer;color:var(--gray);display:none;align-items:center;padding:4px;border-radius:6px;';
+    closeBtn.innerHTML = '<i data-lucide="x" style="width:18px;height:18px;"></i>';
+    sidebar.style.position = 'fixed'; // garante posicionamento
+    sidebar.appendChild(closeBtn);
+  }
+
+  function openSidebar() {
+    sidebar.classList.add('sidebar--open');
+    backdrop.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    closeBtn.style.display = 'flex';
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+  function closeSidebar() {
+    sidebar.classList.remove('sidebar--open');
+    backdrop.classList.remove('active');
+    document.body.style.overflow = '';
+    closeBtn.style.display = 'none';
+  }
+
+  btn.addEventListener('click', () => {
+    sidebar.classList.contains('sidebar--open') ? closeSidebar() : openSidebar();
+  });
+  backdrop.addEventListener('click', closeSidebar);
+  closeBtn.addEventListener('click', closeSidebar);
+
+  // Fecha ao navegar por um link da sidebar
+  sidebar.querySelectorAll('.sidebar__nav-item').forEach(link => {
+    link.addEventListener('click', closeSidebar);
+  });
+
+  if (typeof lucide !== 'undefined') lucide.createIcons({ nodes: [btn] });
+}
+
 // ── INIT GLOBAL ───────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   updatePlanBadge();
@@ -568,6 +649,8 @@ document.addEventListener('DOMContentLoaded', () => {
   setActiveNavItem();
   initThemeToggle();
   updateSidebarUser();
+  initBottomNav();
+  initHamburger();
 
   // ── PWA: inject manifest link ──────────────────────────────────
   if (!document.querySelector('link[rel="manifest"]')) {

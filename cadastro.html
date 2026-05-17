@@ -105,26 +105,14 @@
               <span class="form-error text-red text-xs" id="confirmError" style="display:none;margin-top:2px;"></span>
             </div>
 
-            <!-- Times favoritos -->
-            <div class="form-group">
-              <label class="form-label">Seu time do coração (opcional)</label>
-              <div class="scroll-x" style="padding:4px 0;">
-                <button type="button" class="team-chip" data-team="Flamengo"><span class="team-dot" style="background:#CC1A1A;"></span>Flamengo</button>
-                <button type="button" class="team-chip" data-team="Palmeiras"><span class="team-dot" style="background:#1A7A1A;"></span>Palmeiras</button>
-                <button type="button" class="team-chip" data-team="Corinthians"><span class="team-dot" style="background:#444;"></span>Corinthians</button>
-                <button type="button" class="team-chip" data-team="São Paulo"><span class="team-dot" style="background:#CC1A1A;"></span>São Paulo</button>
-                <button type="button" class="team-chip" data-team="Outro"><i data-lucide="plus" style="width:12px;height:12px;vertical-align:middle;margin-right:2px;"></i>Outro</button>
-              </div>
-            </div>
-
             <button class="btn btn--primary" type="submit" id="registerBtn">
               Criar conta
             </button>
 
             <p class="text-xs text-gray" style="text-align:center;line-height:1.5;">
               Ao criar conta você aceita os
-              <a href="#" class="text-green">Termos de Uso</a> e a
-              <a href="#" class="text-green">Política de Privacidade</a>
+              <a href="#" class="text-green" onclick="openModal('modalTermos');return false;">Termos de Uso</a> e a
+              <a href="#" class="text-green" onclick="openModal('modalPrivacidade');return false;">Política de Privacidade</a>
             </p>
           </div>
         </form>
@@ -135,38 +123,46 @@
       </p>
 
     </div>
-    <div class="accent-bar"></div>
   </div>
 
-  <style>
-    .team-dot {
-      display: inline-block;
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      margin-right: 6px;
-      flex-shrink: 0;
-    }
-    .team-chip {
-      flex-shrink: 0;
-      padding: 7px 14px;
-      border-radius: var(--radius-pill);
-      background: var(--card2);
-      border: 1px solid var(--border);
-      color: var(--gray);
-      font-size: 0.8125rem;
-      font-family: inherit;
-      cursor: pointer;
-      transition: all var(--transition);
-      white-space: nowrap;
-    }
-    .team-chip.active,
-    .team-chip:hover {
-      background: var(--green-dim);
-      border-color: var(--green);
-      color: var(--white);
-    }
-  </style>
+  <!-- Modal Termos de Uso -->
+  <div id="modalTermos" style="display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);padding:24px 16px;overflow-y:auto;">
+    <div style="max-width:480px;margin:0 auto;background:var(--card);border-radius:var(--radius-lg);padding:24px;border:1px solid var(--border);">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <h3 style="font-size:1.1rem;font-weight:700;color:var(--white);">Termos de Uso</h3>
+        <button onclick="closeModal('modalTermos')" style="background:none;border:none;cursor:pointer;color:var(--gray);display:flex;"><i data-lucide="x" style="width:20px;height:20px;"></i></button>
+      </div>
+      <div style="font-size:0.85rem;color:var(--gray);line-height:1.7;display:flex;flex-direction:column;gap:12px;">
+        <p><strong style="color:var(--white);">1. Aceitação dos Termos</strong><br>Ao criar uma conta no ZebraStats, você concorda com estes Termos de Uso. Se não concordar, não utilize o serviço.</p>
+        <p><strong style="color:var(--white);">2. Uso do Serviço</strong><br>O ZebraStats fornece análises e estatísticas de futebol para fins informativos e de entretenimento. As informações não devem ser usadas como única base para decisões financeiras.</p>
+        <p><strong style="color:var(--white);">3. Conta do Usuário</strong><br>Você é responsável por manter a confidencialidade de suas credenciais e por todas as atividades realizadas em sua conta.</p>
+        <p><strong style="color:var(--white);">4. Propriedade Intelectual</strong><br>Todo o conteúdo do ZebraStats, incluindo algoritmos, design e textos, é de propriedade exclusiva da plataforma.</p>
+        <p><strong style="color:var(--white);">5. Limitação de Responsabilidade</strong><br>O ZebraStats não se responsabiliza por perdas financeiras decorrentes do uso das informações disponibilizadas.</p>
+        <p><strong style="color:var(--white);">6. Alterações</strong><br>Reservamo-nos o direito de modificar estes termos a qualquer momento, com aviso prévio aos usuários cadastrados.</p>
+      </div>
+      <button onclick="closeModal('modalTermos')" class="btn btn--primary" style="margin-top:20px;width:100%;">Entendi</button>
+    </div>
+  </div>
+
+  <!-- Modal Política de Privacidade -->
+  <div id="modalPrivacidade" style="display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);padding:24px 16px;overflow-y:auto;">
+    <div style="max-width:480px;margin:0 auto;background:var(--card);border-radius:var(--radius-lg);padding:24px;border:1px solid var(--border);">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <h3 style="font-size:1.1rem;font-weight:700;color:var(--white);">Política de Privacidade</h3>
+        <button onclick="closeModal('modalPrivacidade')" style="background:none;border:none;cursor:pointer;color:var(--gray);display:flex;"><i data-lucide="x" style="width:20px;height:20px;"></i></button>
+      </div>
+      <div style="font-size:0.85rem;color:var(--gray);line-height:1.7;display:flex;flex-direction:column;gap:12px;">
+        <p><strong style="color:var(--white);">1. Dados Coletados</strong><br>Coletamos nome, e-mail e preferências de times para personalizar sua experiência. Não coletamos dados de pagamento diretamente.</p>
+        <p><strong style="color:var(--white);">2. Uso dos Dados</strong><br>Seus dados são usados exclusivamente para operar o serviço, personalizar recomendações e enviar notificações que você autorizar.</p>
+        <p><strong style="color:var(--white);">3. Compartilhamento</strong><br>Não vendemos nem compartilhamos seus dados pessoais com terceiros, exceto quando exigido por lei.</p>
+        <p><strong style="color:var(--white);">4. Segurança</strong><br>Utilizamos criptografia e boas práticas de segurança para proteger suas informações. Senhas são armazenadas de forma hasheada.</p>
+        <p><strong style="color:var(--white);">5. Seus Direitos</strong><br>Você pode solicitar a exclusão da sua conta e de todos os seus dados a qualquer momento pelo e-mail de suporte.</p>
+        <p><strong style="color:var(--white);">6. Cookies</strong><br>Usamos cookies apenas para manter sua sessão ativa e melhorar a performance da plataforma.</p>
+      </div>
+      <button onclick="closeModal('modalPrivacidade')" class="btn btn--primary" style="margin-top:20px;width:100%;">Entendi</button>
+    </div>
+  </div>
+
 
   <script src="js/main.js"></script>
   <script>
@@ -197,14 +193,6 @@
       });
       label.textContent = val.length > 0 ? labels[strength - 1] || '' : '';
       label.style.color = val.length > 0 ? colors[strength - 1] : '';
-    });
-
-    // Team chip single-select
-    document.querySelectorAll('.team-chip').forEach(chip => {
-      chip.addEventListener('click', function() {
-        document.querySelectorAll('.team-chip').forEach(c => c.classList.remove('active'));
-        this.classList.add('active');
-      });
     });
 
     // Form validation + redirect
@@ -263,6 +251,21 @@
     ['name','email','password','confirmPassword'].forEach(id => {
       document.getElementById(id).addEventListener('input', function() {
         this.style.borderColor = '';
+      });
+    });
+
+    function openModal(id) {
+      document.getElementById(id).style.display = 'block';
+      document.body.style.overflow = 'hidden';
+      lucide.createIcons();
+    }
+    function closeModal(id) {
+      document.getElementById(id).style.display = 'none';
+      document.body.style.overflow = '';
+    }
+    document.querySelectorAll('[id^="modal"]').forEach(m => {
+      m.addEventListener('click', function(e) {
+        if (e.target === this) closeModal(this.id);
       });
     });
 
