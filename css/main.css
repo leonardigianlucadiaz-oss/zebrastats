@@ -1204,9 +1204,35 @@ p  { font-size: 0.875rem; line-height: 1.5; color: var(--gray); }
   font-size: 0.6875rem;
   font-weight: 700;
 }
-.pos-badge--cl  { background: var(--green-dim); color: var(--green); border: 1px solid rgba(46,230,92,0.4); }
-.pos-badge--eur { background: var(--gold-dim);  color: var(--gold);  border: 1px solid rgba(255,200,50,0.4);}
-.pos-badge--rel { background: var(--red-dim);   color: var(--red);   border: 1px solid rgba(238,68,68,0.4); }
+.pos-badge--cl       { background: var(--green-dim); color: var(--green); border: 1px solid rgba(46,230,92,0.4); }
+.pos-badge--eur      { background: rgba(30,120,255,0.12); color: #4D9FFF; border: 1px solid rgba(30,120,255,0.35); }
+.pos-badge--conf     { background: rgba(0,188,212,0.12);  color: #00C8D7; border: 1px solid rgba(0,188,212,0.35); }
+.pos-badge--rel-play { background: rgba(255,140,0,0.12);  color: #FF9C1A; border: 1px solid rgba(255,140,0,0.35); }
+.pos-badge--rel      { background: var(--red-dim);   color: var(--red);   border: 1px solid rgba(238,68,68,0.4); }
+
+/* ── LEAGUE RULES SECTION ── */
+.league-rules {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  margin-top: 12px;
+}
+.league-rules__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  cursor: pointer;
+  user-select: none;
+}
+.league-rules__header:hover { background: rgba(255,255,255,0.03); }
+.league-rules__title { font-size: 0.875rem; font-weight: 700; }
+.league-rules__body { padding: 4px 14px 12px; display: flex; flex-direction: column; gap: 8px; }
+.league-rules__item { display: flex; align-items: center; gap: 10px; font-size: 0.8125rem; color: var(--gray); }
+.league-rules__dot {
+  width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+}
 
 /* ── STAT BAR ROW (match stats) ── */
 .stat-row {
