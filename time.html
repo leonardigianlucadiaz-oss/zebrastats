@@ -1427,6 +1427,17 @@
     /* Bug 7 — tab bar scroll + fade hint */
     #timeTabBar::-webkit-scrollbar { display: none; }
 
+    .tab-bar {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      flex-wrap: nowrap;
+    }
+    .tab-bar::-webkit-scrollbar { display: none; }
+    @media (max-width: 480px) {
+      .tab-bar__item, .tab-item { font-size: 0.72rem; padding: 12px 8px; white-space: nowrap; }
+    }
+
     .time-tab-wrapper {
       position: relative;
     }

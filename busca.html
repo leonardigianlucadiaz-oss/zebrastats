@@ -101,7 +101,9 @@
         <div style="font-size:0.875rem;font-weight:600;margin-bottom:12px;display:flex;align-items:center;gap:6px;">
           <i data-lucide="star" style="width:15px;height:15px;color:var(--gold);"></i> Times Populares
         </div>
-        <div class="scroll-x" style="gap:10px;padding-bottom:4px;" id="popularTeams"></div>
+        <div class="popular-teams-wrap">
+          <div class="scroll-x" style="gap:10px;padding-bottom:4px;" id="popularTeams"></div>
+        </div>
       </div>
 
       <!-- SUGESTÕES POPULARES: LIGAS -->
@@ -163,6 +165,23 @@
 
   @keyframes spin  { to { transform: rotate(360deg); } }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+  /* ── POPULAR TEAMS SCROLL FADE ───────────────────────────── */
+  .popular-teams-wrap {
+    position: relative;
+  }
+  .popular-teams-wrap::after {
+    content: '';
+    position: absolute;
+    right: 0; top: 0; bottom: 0;
+    width: 48px;
+    background: linear-gradient(to right, transparent, var(--bg-base, #0f0f13));
+    pointer-events: none;
+  }
+
+  @media (max-width: 400px) {
+    .teams-grid, .cards-grid, .cards-grid-2 { grid-template-columns: 1fr !important; }
+  }
 
   /* ── RESULT SECTION ───────────────────────────────────────── */
   .results-section { margin-bottom: 4px; }

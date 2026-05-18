@@ -678,6 +678,18 @@ lucide.createIcons();
     min-width: 0;
   }
 
+  @media (max-width: 400px) {
+    .teams-grid, .cards-grid, .cards-grid-2 { grid-template-columns: 1fr !important; }
+  }
+
+  #destaquesBar > div {
+    scroll-snap-align: start;
+  }
+  #destaquesBar {
+    scroll-snap-type: x mandatory;
+    padding-right: 48px;
+  }
+
   .expl-team-card:hover { border-color:var(--green) !important; }
   .expl-league-card:hover { border-color:var(--gold) !important; }
 
