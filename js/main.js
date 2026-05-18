@@ -702,12 +702,46 @@ function initHamburger() {
   if (typeof lucide !== 'undefined') lucide.createIcons({ nodes: [btn] });
 }
 
+// ── PLAN BADGE (FREE/crown) ────────────────────────────────────
+function initPlanBadge() {
+  // Injeta badge FREE e botão upgrade no navbar se não existirem
+  const actions = document.querySelector('.navbar__actions, .navbar-actions');
+  if (!actions) return;
+  if (actions.querySelector('.plan-badge')) return; // já existe
+
+  // Badge FREE
+  const badge = document.createElement('span');
+  badge.className = 'plan-badge';
+  badge.textContent = 'FREE';
+  badge.style.cssText = 'font-size:0.6rem;font-weight:800;padding:2px 6px;border-radius:4px;background:var(--bg-card,#1a1a2e);color:var(--text-muted,#888);border:1px solid var(--border,#2a2a3e);letter-spacing:0.05em;cursor:pointer;';
+  badge.addEventListener('click', () => { window.location.href = 'assinatura.html'; });
+
+  // Botão coroa
+  const crown = document.createElement('button');
+  crown.className = 'navbar__icon';
+  crown.title = 'Fazer upgrade';
+  crown.innerHTML = '<i data-lucide="crown" style="width:18px;height:18px;color:var(--gold,#FFD700);"></i>';
+  crown.addEventListener('click', () => { window.location.href = 'assinatura.html'; });
+
+  // Insere antes do primeiro link do navbar
+  const firstLink = actions.querySelector('a, button');
+  if (firstLink) {
+    actions.insertBefore(crown, firstLink);
+    actions.insertBefore(badge, crown);
+  } else {
+    actions.appendChild(badge);
+    actions.appendChild(crown);
+  }
+  if (typeof lucide !== 'undefined') lucide.createIcons({ nodes: [crown] });
+}
+
 // ── INIT GLOBAL ───────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   updatePlanBadge();
   addRippleEffect();
   setActiveNavItem();
   initThemeToggle();
+  initPlanBadge();
   updateSidebarUser();
   initBottomNav();
   initHamburger();

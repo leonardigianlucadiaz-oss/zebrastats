@@ -135,10 +135,10 @@
     <div id="comparSuggestions">
       <p style="font-size:0.75rem;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;text-align:center;">Comparações populares</p>
       <div style="display:flex;flex-direction:column;gap:8px;">
-        <button class="compar-suggest-btn" data-a="FLA" data-b="FLU">Flamengo vs Fluminense</button>
-        <button class="compar-suggest-btn" data-a="RMA" data-b="BAR">Real Madrid vs Barcelona</button>
-        <button class="compar-suggest-btn" data-a="MCI" data-b="ARS">Man City vs Arsenal</button>
-        <button class="compar-suggest-btn" data-a="JUV" data-b="ITR">Juventus vs Inter</button>
+        <button class="compar-suggest-btn" data-a="FLA" data-b="FLU" data-lid="BRA"><img src="" class="popular-comp-league" data-lid="BRA" onerror="this.style.display='none'" style="width:16px;height:16px;border-radius:2px;object-fit:contain;margin-right:8px;flex-shrink:0;" alt="BRA">Flamengo vs Fluminense</button>
+        <button class="compar-suggest-btn" data-a="RMA" data-b="BAR" data-lid="ESP"><img src="" class="popular-comp-league" data-lid="ESP" onerror="this.style.display='none'" style="width:16px;height:16px;border-radius:2px;object-fit:contain;margin-right:8px;flex-shrink:0;" alt="ESP">Real Madrid vs Barcelona</button>
+        <button class="compar-suggest-btn" data-a="MCI" data-b="ARS" data-lid="ENG"><img src="" class="popular-comp-league" data-lid="ENG" onerror="this.style.display='none'" style="width:16px;height:16px;border-radius:2px;object-fit:contain;margin-right:8px;flex-shrink:0;" alt="ENG">Man City vs Arsenal</button>
+        <button class="compar-suggest-btn" data-a="JUV" data-b="ITR" data-lid="ITA"><img src="" class="popular-comp-league" data-lid="ITA" onerror="this.style.display='none'" style="width:16px;height:16px;border-radius:2px;object-fit:contain;margin-right:8px;flex-shrink:0;" alt="ITA">Juventus vs Inter</button>
       </div>
     </div>
   </div>
@@ -1083,6 +1083,13 @@ drawRadar({name:'Flamengo'},{name:'Liverpool'});
 // Pre-load league logos for dropdown display
 (async () => {
   await Promise.all(['BRA','ENG','ESP','ITA','GER','FRA','POR','HOL'].map(lid => loadLeagueLogo(lid)));
+  // Preenche logos nas comparações populares
+  document.querySelectorAll('.popular-comp-league').forEach(img => {
+    const lid = img.dataset.lid || 'BRA';
+    if (typeof LEAGUE_LOGOS !== 'undefined' && LEAGUE_LOGOS[lid]) {
+      img.src = LEAGUE_LOGOS[lid];
+    }
+  });
 })();
 
 // Check URL params for pre-selection
@@ -1194,11 +1201,6 @@ lucide.createIcons();
     cursor: pointer;
     transition: border-color 0.15s, background 0.15s;
     text-align: left;
-  }
-  .compar-suggest-btn::before {
-    content: '⚽';
-    margin-right: 8px;
-    font-size: 0.875rem;
   }
   .compar-suggest-btn::after {
     content: '→';

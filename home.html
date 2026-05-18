@@ -106,7 +106,7 @@
         <span style="font-size:0.6875rem;color:var(--gray);">Filtrar por liga</span>
         <a href="liga.html" style="font-size:0.6875rem;color:var(--green);font-weight:600;text-decoration:none;">Explorar ligas →</a>
       </div>
-      <div class="scroll-x" id="leagueFilter" style="gap:8px;">
+      <div class="scroll-x" id="leagueFilter" style="gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;flex-wrap:nowrap;">
         <button class="league-pill active" data-league="all">Todos</button>
         <button class="league-pill" data-league="BRA" data-lid="BRA"><span class="pill-logo" id="hpl-BRA"></span> Brasileirão</button>
         <button class="league-pill" data-league="ENG" data-lid="ENG"><span class="pill-logo" id="hpl-ENG"></span> Premier Lge</button>
@@ -184,6 +184,8 @@
       0%, 100% { opacity: 1; }
       50%       { opacity: 0.3; }
     }
+
+    #leagueFilter::-webkit-scrollbar { display: none; }
 
     .league-pill {
       flex-shrink: 0;

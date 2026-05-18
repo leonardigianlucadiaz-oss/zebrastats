@@ -225,13 +225,22 @@
 
     const filtered = activeFilter === 'all' ? NOTIFS : NOTIFS.filter(n => n.type === activeFilter);
     if (!filtered.length) {
-      main.innerHTML = `<div style="text-align:center;padding:48px 16px;color:var(--gray);">
-        <div style="width:48px;height:48px;border-radius:14px;background:var(--card2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
-          <i data-lucide="bell-off" style="width:22px;height:22px;opacity:0.5;"></i>
-        </div>
-        <div style="font-weight:600;margin-bottom:4px;">Nenhuma notificação</div>
-        <div style="font-size:0.8125rem;">Você está em dia!</div>
-      </div>`;
+      if (activeFilter === 'zebra' || activeFilter === 'jogo') {
+        main.innerHTML = `
+          <div style="text-align:center;padding:48px 16px;color:var(--text-muted,var(--gray));">
+            <i data-lucide="bell-off" style="width:40px;height:40px;margin-bottom:12px;opacity:0.35;display:block;margin-left:auto;margin-right:auto;"></i>
+            <p style="margin:0 0 6px;font-weight:600;font-size:0.95rem;">Nenhuma notificação aqui</p>
+            <p style="margin:0;font-size:0.8rem;opacity:0.7;">Ative alertas para receber notificações desta categoria</p>
+          </div>`;
+      } else {
+        main.innerHTML = `<div style="text-align:center;padding:48px 16px;color:var(--gray);">
+          <div style="width:48px;height:48px;border-radius:14px;background:var(--card2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
+            <i data-lucide="bell-off" style="width:22px;height:22px;opacity:0.5;"></i>
+          </div>
+          <div style="font-weight:600;margin-bottom:4px;">Nenhuma notificação</div>
+          <div style="font-size:0.8125rem;">Você está em dia!</div>
+        </div>`;
+      }
       lucide.createIcons();
       return;
     }

@@ -566,7 +566,7 @@
       } else if (activeJfilt === 'aovivo') {
         card.innerHTML = `
           <div class="game-card__league" style="display:flex;justify-content:space-between;">
-            <span>${leagueIcon}Rodada 12</span>
+            <span>${leagueIcon}${g.round ? 'Rodada ' + g.round : g.league || activeLid}</span>
             <span class="badge badge--live">${g.min}</span>
           </div>
           <div class="game-card__match">
@@ -580,7 +580,7 @@
         const color = diff > 0 ? 'var(--green)' : diff < 0 ? 'var(--red)' : 'var(--gray)';
         card.innerHTML = `
           <div class="game-card__league" style="display:flex;justify-content:space-between;">
-            <span>${leagueIcon}Rodada 12</span>
+            <span>${leagueIcon}${g.round ? 'Rodada ' + g.round : g.league || activeLid}</span>
             <span style="font-size:0.75rem;color:var(--gray);">${g.date}</span>
           </div>
           <div class="game-card__match">
@@ -945,9 +945,9 @@
         if (all.length) {
           ['proximos','aovivo','encerrados'].forEach(k => { JOGOS[k] = []; });
           all.forEach(m => {
-            if (m.isLive) JOGOS['aovivo'].push({ home:m.home, away:m.away, hs:m.hs, as:m.as, time:m.time, status:'live' });
-            else if (m.isFinished) JOGOS['encerrados'].push({ home:m.home, away:m.away, hs:m.hs, as:m.as, date:m.date });
-            else JOGOS['proximos'].push({ home:m.home, away:m.away, time:m.time, date:m.date });
+            if (m.isLive) JOGOS['aovivo'].push({ home:m.home, away:m.away, hs:m.hs, as:m.as, time:m.time, status:'live', league: activeLid, round: m.round || m.matchday || '' });
+            else if (m.isFinished) JOGOS['encerrados'].push({ home:m.home, away:m.away, hs:m.hs, as:m.as, date:m.date, league: activeLid, round: m.round || m.matchday || '' });
+            else JOGOS['proximos'].push({ home:m.home, away:m.away, time:m.time, date:m.date, league: activeLid, round: m.round || m.matchday || '' });
           });
           if (activeTab === 'jogos') renderJogos();
         }

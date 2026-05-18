@@ -95,23 +95,23 @@
     <div id="panel-card" class="card" style="display:flex;flex-direction:column;gap:14px;">
       <div class="form-group">
         <label class="form-label">Nome impresso no cartão</label>
-        <input class="form-input" type="text" placeholder="Ex: GIANLUCA L DIAZ" id="cardName" autocomplete="cc-name" />
+        <input class="form-input" type="text" placeholder="Ex: GIANLUCA L DIAZ" id="cardName" autocomplete="cc-name" required minlength="3" />
       </div>
       <div class="form-group">
         <label class="form-label">Número do cartão</label>
         <div style="position:relative;">
-          <input class="form-input" type="tel" placeholder="0000  0000  0000  0000" id="cardNumber" maxlength="19" autocomplete="cc-number" style="padding-right:48px;" />
+          <input class="form-input" type="tel" placeholder="0000  0000  0000  0000" id="cardNumber" maxlength="19" autocomplete="cc-number" style="padding-right:48px;" required pattern="[\d\s]{13,19}" />
           <span id="cardBrand" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:1.25rem;"></span>
         </div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
         <div class="form-group">
           <label class="form-label">Validade</label>
-          <input class="form-input" type="tel" placeholder="MM/AA" id="cardExpiry" maxlength="5" autocomplete="cc-exp" />
+          <input class="form-input" type="tel" placeholder="MM/AA" id="cardExpiry" maxlength="5" autocomplete="cc-exp" required pattern="\d{2}/\d{2}" />
         </div>
         <div class="form-group">
           <label class="form-label">CVV</label>
-          <input class="form-input" type="tel" placeholder="•••" id="cardCvv" maxlength="4" autocomplete="cc-csc" />
+          <input class="form-input" type="tel" placeholder="•••" id="cardCvv" maxlength="4" autocomplete="cc-csc" required pattern="\d{3,4}" />
         </div>
       </div>
       <div class="form-group" id="installmentsGroup">
@@ -301,17 +301,25 @@
     showToast('📄 Boleto enviado para seu e-mail');
   });
 
+  // ── VALIDAÇÃO DO FORMULÁRIO ───────────────────────────────────
+  function _validatePaymentForm() {
+    const name = document.getElementById('cardName')?.value?.trim() || '';
+    const num  = document.getElementById('cardNumber')?.value?.replace(/\s/g,'') || '';
+    const exp  = document.getElementById('cardExpiry')?.value?.trim() || '';
+    const cvv  = document.getElementById('cardCvv')?.value?.trim() || '';
+    if (name.length < 3) { showToast('Digite o nome do titular'); return false; }
+    if (!/^\d{13,19}$/.test(num)) { showToast('Número de cartão inválido'); return false; }
+    if (!/^\d{2}\/\d{2}$/.test(exp)) { showToast('Validade inválida (MM/AA)'); return false; }
+    if (!/^\d{3,4}$/.test(cvv)) { showToast('CVV inválido'); return false; }
+    return true;
+  }
+
   // ── CONFIRMAR PAGAMENTO ───────────────────────────────────────
   document.getElementById('confirmBtn').addEventListener('click', function() {
     const method = document.querySelector('.payment-method-tab.active').dataset.method;
 
     if (method === 'card') {
-      const num = document.getElementById('cardNumber').value.replace(/\s/g,'');
-      const exp = document.getElementById('cardExpiry').value;
-      const cvv = document.getElementById('cardCvv').value;
-      if (num.length < 16)  { showToast('Número do cartão incompleto'); return; }
-      if (exp.length < 5)   { showToast('Validade inválida'); return; }
-      if (cvv.length < 3)   { showToast('CVV inválido'); return; }
+      if (!_validatePaymentForm()) return;
     }
 
     this.textContent = 'Processando...';

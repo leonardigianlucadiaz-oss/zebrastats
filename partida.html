@@ -99,7 +99,7 @@
     <!-- ODDS PRÉ-JOGO -->
     <div style="display:flex;gap:0;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;">
       <div style="flex:1;padding:10px;text-align:center;border-right:1px solid var(--border);">
-        <div style="font-size:0.625rem;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Odd Botafogo</div>
+        <div id="homeOddLabel" style="font-size:0.625rem;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Odd Botafogo</div>
         <div style="font-size:1.125rem;font-weight:700;color:var(--green);">4.50</div>
       </div>
       <div style="flex:1;padding:10px;text-align:center;border-right:1px solid var(--border);">
@@ -107,7 +107,7 @@
         <div style="font-size:1.125rem;font-weight:700;">3.20</div>
       </div>
       <div style="flex:1;padding:10px;text-align:center;">
-        <div style="font-size:0.625rem;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Odd Flamengo</div>
+        <div id="awayOddLabel" style="font-size:0.625rem;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Odd Flamengo</div>
         <div style="font-size:1.125rem;font-weight:700;color:var(--red);">1.75</div>
       </div>
     </div>
@@ -446,6 +446,61 @@
       if (awayLabel && awayLabel.textContent.toLowerCase().includes('odd')) awayLabel.textContent = `Odd ${_urlAway}`;
     }
   }
+
+  // Atualiza labels de probabilidade, odds e abreviações com os times reais
+  (function _patchTeamLabels() {
+    const home = _urlHome || 'Casa';
+    const away = _urlAway || 'Fora';
+    const homeAbbr = home.substring(0,3).toUpperCase();
+    const awayAbbr = away.substring(0,3).toUpperCase();
+
+    // Abreviações nos escudos
+    document.querySelectorAll('[data-abbr="BOT"], .shield-abbr-home').forEach(el => {
+      el.setAttribute('data-abbr', homeAbbr);
+      if (el.tagName !== 'IMG') el.textContent = homeAbbr;
+    });
+    document.querySelectorAll('[data-abbr="FLA"], .shield-abbr-away').forEach(el => {
+      el.setAttribute('data-abbr', awayAbbr);
+      if (el.tagName !== 'IMG') el.textContent = awayAbbr;
+    });
+
+    // Probabilidades (busca pelo texto que contém "Botafogo" ou "Flamengo")
+    document.querySelectorAll('.prob-label, .team-prob-name, [id$="Prob"]').forEach(el => {
+      el.textContent = el.textContent.replace(/Botafogo/gi, home).replace(/Flamengo/gi, away);
+    });
+
+    // Labels de odds
+    document.querySelectorAll('.odd-label, .bet-team-name').forEach(el => {
+      el.textContent = el.textContent.replace(/Botafogo/gi, home).replace(/Flamengo/gi, away);
+    });
+
+    // Qualquer texto restante no DOM que contenha os times hardcoded
+    document.querySelectorAll('.match-details, .prob-bar-container, .odds-section').forEach(section => {
+      section.querySelectorAll('span, p, div').forEach(el => {
+        if (el.children.length === 0) {
+          el.textContent = el.textContent.replace(/Botafogo/gi, home).replace(/Flamengo/gi, away);
+        }
+      });
+    });
+
+    const hOdd = document.getElementById('homeOddLabel');
+    if (hOdd) hOdd.textContent = hOdd.textContent.replace(/Botafogo/gi, home);
+    const aOdd = document.getElementById('awayOddLabel');
+    if (aOdd) aOdd.textContent = aOdd.textContent.replace(/Flamengo/gi, away);
+
+    // Probability bar labels
+    const homeProb = document.getElementById('homeProb');
+    if (homeProb) homeProb.textContent = homeProb.textContent.replace(/Botafogo/gi, home);
+    const awayProb = document.getElementById('awayProb');
+    if (awayProb) awayProb.textContent = awayProb.textContent.replace(/Flamengo/gi, away);
+
+    // Tab Zebra: "Botafogo vencer" / "Flamengo vencer"
+    document.querySelectorAll('.card span, .card div').forEach(el => {
+      if (el.children.length === 0) {
+        el.textContent = el.textContent.replace(/Botafogo/gi, home).replace(/Flamengo/gi, away);
+      }
+    });
+  })();
 
   // ── SHARE ───────────────────────────────────────────────────────
   async function shareMatch() {
