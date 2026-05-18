@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
@@ -8,8 +8,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/main.css" />
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>tailwind.config = { corePlugins: { preflight: false } }</script>
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 </head>
 <body>
@@ -370,9 +368,7 @@
     const ziNum = parseFloat(_urlZi);
     const ziPct = (ziNum / 10) * 100;
     const ziValEl = document.getElementById('ziValue');
-    const ziScoreEl = document.getElementById('ziScore');
     if (ziValEl) ziValEl.textContent = _urlZi;
-    if (ziScoreEl) ziScoreEl.textContent = _urlZi;
     // Animate meter on page load
     requestAnimationFrame(() => requestAnimationFrame(() => {
       animateMeter(ziPct);
