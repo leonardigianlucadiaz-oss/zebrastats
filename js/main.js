@@ -446,7 +446,8 @@ function animateCounter(el, target, duration = 800) {
 }
 
 // ── DETECTAR DISPOSITIVO ───────────────────────────────────────
-const isMobile = /Mobi|Android|iPhone/i.test(navigator.userAgent);
+// Usa matchMedia (mais confiável que UA sniffing, cobre DevTools e tablets)
+const isMobile = window.matchMedia('(max-width: 768px)').matches;
 
 // ── RIPPLE EFFECT EM BOTÕES ────────────────────────────────────
 function addRippleEffect() {
