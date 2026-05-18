@@ -704,27 +704,33 @@ function initHamburger() {
 
 // ── PLAN BADGE (FREE/crown) ────────────────────────────────────
 function initPlanBadge() {
-  // Injeta badge FREE e botão upgrade no navbar se não existirem
-  const actions = document.querySelector('.navbar__actions, .navbar-actions');
-  if (!actions) return;
+  // Busca o container de ações no navbar
+  let actions = document.querySelector('.navbar__actions, .navbar-actions');
+  if (!actions) {
+    // Fallback: usa o próprio navbar como container
+    const navbar = document.querySelector('.navbar');
+    if (!navbar) return;
+    actions = navbar;
+  }
   if (actions.querySelector('.plan-badge')) return; // já existe
 
-  // Badge FREE
+  const plan = localStorage.getItem('zs_user_plan') || 'free';
+  if (plan === 'pro') return; // usuário PRO não vê o badge
+
   const badge = document.createElement('span');
   badge.className = 'plan-badge';
   badge.textContent = 'FREE';
-  badge.style.cssText = 'font-size:0.6rem;font-weight:800;padding:2px 6px;border-radius:4px;background:var(--bg-card,#1a1a2e);color:var(--text-muted,#888);border:1px solid var(--border,#2a2a3e);letter-spacing:0.05em;cursor:pointer;';
+  badge.style.cssText = 'font-size:0.6rem;font-weight:800;padding:2px 6px;border-radius:4px;background:var(--bg-card,#1a1a2e);color:var(--text-muted,#888);border:1px solid var(--border,#2a2a3e);letter-spacing:0.05em;cursor:pointer;white-space:nowrap;';
   badge.addEventListener('click', () => { window.location.href = 'assinatura.html'; });
 
-  // Botão coroa
   const crown = document.createElement('button');
   crown.className = 'navbar__icon';
-  crown.title = 'Fazer upgrade';
-  crown.innerHTML = '<i data-lucide="crown" style="width:18px;height:18px;color:var(--gold,#FFD700);"></i>';
+  crown.title = 'Fazer upgrade para PRO';
+  crown.style.cssText = 'background:none;border:none;cursor:pointer;color:var(--gold,#FFD700);display:flex;align-items:center;justify-content:center;padding:4px;';
+  crown.innerHTML = '<i data-lucide="crown" style="width:18px;height:18px;"></i>';
   crown.addEventListener('click', () => { window.location.href = 'assinatura.html'; });
 
-  // Insere antes do primeiro link do navbar
-  const firstLink = actions.querySelector('a, button');
+  const firstLink = actions.querySelector('a.navbar__icon, button.navbar__icon');
   if (firstLink) {
     actions.insertBefore(crown, firstLink);
     actions.insertBefore(badge, crown);

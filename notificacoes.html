@@ -338,6 +338,11 @@
   renderNotifs();
   initBellBadge();
   lucide.createIcons();
+
+  // Garante renderização mesmo que DOMContentLoaded já tenha disparado
+  document.addEventListener('DOMContentLoaded', () => {
+    if (typeof renderNotifs === 'function') renderNotifs();
+  });
 </script>
 <style>
   .bottom-nav__icon i { width: 20px; height: 20px; display: block; }

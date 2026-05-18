@@ -773,6 +773,23 @@ function _alertasUpdateBadge() {
   }
 }
 
+// ── PRESET ALERT SHORTCUTS ────────────────────────────────────────────────────
+function addPresetAlert(preset) {
+  const presets = {
+    'zebra-alta':   { league_id: null, min_zi: 70, label: 'Zebra Alta' },
+    'zebra-media':  { league_id: null, min_zi: 50, label: 'Zebra Média' },
+    'premier':      { league_id: 'ENG', min_zi: 40, label: 'Premier League' },
+    'brasileirao':  { league_id: 'BRA', min_zi: 40, label: 'Brasileirão' },
+  };
+  const p = presets[preset];
+  if (!p) return;
+  if (typeof ZebraDB !== 'undefined') {
+    ZebraDB.dbSaveAlert({ id: `preset-${preset}`, ...p, active: true });
+  }
+  showToast(`Alerta "${p.label}" ativado!`);
+  loadAlerts && loadAlerts();
+}
+
 // ── INIT ──────────────────────────────────────────────────────────────────────
 _alertasUpdateBadge();
 renderLeagueChips();
