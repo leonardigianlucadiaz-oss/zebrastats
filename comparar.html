@@ -470,46 +470,93 @@ function generateDummyH2H(teamA, teamB) {
 let selectedA = null;
 let selectedB = null;
 
+// Maps a league display name to our lid code
+function _guessLid(leagueName) {
+  const n = (leagueName || '').toLowerCase();
+  if (n.includes('premier') || n.includes('england')) return 'ENG';
+  if (n.includes('brasileir') || n.includes('brazil') || n.includes('série a')) return 'BRA';
+  if (n.includes('la liga') || n.includes('spain')) return 'ESP';
+  if (n.includes('serie a') || n.includes('italy')) return 'ITA';
+  if (n.includes('bundesliga') || n.includes('germany')) return 'GER';
+  if (n.includes('ligue') || n.includes('france')) return 'FRA';
+  if (n.includes('champions')) return 'UCL';
+  if (n.includes('portugal') || n.includes('liga nos')) return 'POR';
+  if (n.includes('eredivisie') || n.includes('netherlands')) return 'HOL';
+  return 'ENG';
+}
+
+// Renders dropdown items (local + SDB)
+function showDropdownItems(slot, dropdown, items, sdbIds) {
+  if (!items.length) {
+    dropdown.innerHTML = `<div class="slot-dd-empty">Nenhum time encontrado</div>`;
+    dropdown.style.display = 'block';
+    return;
+  }
+  dropdown.innerHTML = '';
+  items.forEach(t => {
+    const item = document.createElement('div');
+    item.className = 'slot-dd-item';
+    const logoUrl = LEAGUE_LOGOS[t.lid] || '';
+    const logoHtml = logoUrl
+      ? `<img src="${logoUrl}" style="width:13px;height:13px;object-fit:contain;flex-shrink:0;" onerror="this.style.display='none';">`
+      : flagImg(t.lid || 'ENG', 12);
+    item.innerHTML = `
+      <div class="slot-dd-crest" data-team="${t.id}">${(t.logo ? `<img src="${t.logo}" style="width:24px;height:24px;object-fit:contain;" onerror="this.style.display='none';">` : t.name.substring(0,3).toUpperCase())}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:0.8125rem;font-weight:600;">${t.name}</div>
+        <div style="font-size:0.6875rem;color:var(--gray);display:flex;align-items:center;gap:3px;">${logoHtml}${t.league || ''}</div>
+      </div>`;
+    item.addEventListener('click', () => { selectTeam(slot, t); });
+    // Async crest from SDB if not already loaded
+    if (!t.logo) {
+      const crestEl = item.querySelector(`[data-team="${t.id}"]`);
+      if (crestEl) {
+        const cu = getCrest(t.name);
+        if (cu) crestEl.innerHTML = `<img src="${cu}" style="width:24px;height:24px;object-fit:contain;" onerror="this.outerHTML='<span style=font-size:0.5rem;font-weight:700>${t.name.substring(0,3).toUpperCase()}</span>';">`;
+      }
+    }
+    dropdown.appendChild(item);
+  });
+  dropdown.style.display = 'block';
+}
+
 // ── SEARCH ────────────────────────────────────────────────────────────────────
 function setupSearch(slot) {
   const input    = document.getElementById(`input${slot}`);
   const dropdown = document.getElementById(`dropdown${slot}`);
 
+  let _searchTimer = null;
   input.addEventListener('input', () => {
-    const q = input.value.trim().toLowerCase();
+    clearTimeout(_searchTimer);
+    const q = input.value.trim();
     if (!q) { dropdown.innerHTML = ''; dropdown.style.display = 'none'; return; }
-    const results = ALL_TEAMS.filter(t => t.name.toLowerCase().includes(q) || t.league.toLowerCase().includes(q)).slice(0,6);
-    if (!results.length) {
-      dropdown.innerHTML = `<div class="slot-dd-empty">Nenhum time encontrado</div>`;
-      dropdown.style.display = 'block';
-      return;
+    const qL = q.toLowerCase();
+
+    // Immediate local results
+    const local = ALL_TEAMS.filter(t => t.name.toLowerCase().includes(qL) || t.league.toLowerCase().includes(qL)).slice(0, 6);
+    showDropdownItems(slot, dropdown, local, []);
+
+    // Debounced SDB search (after 350ms)
+    if (q.length >= 2 && typeof ZebraAPI !== 'undefined') {
+      _searchTimer = setTimeout(async () => {
+        try {
+          const res = await ZebraAPI.sportsDb.searchTeam(q);
+          const sdbTeams = (res?.teams || []).slice(0, 8).map(t => ({
+            id: t.idTeam || t.strTeam.toLowerCase().replace(/\s+/g,'-'),
+            name: t.strTeam,
+            league: t.strLeague || t.strCountry || '',
+            lid: _guessLid(t.strLeague || ''),
+            logo: t.strTeamBadge || t.strBadge || '',
+            sdbId: t.idTeam,
+          }));
+          // Merge: local first, then SDB results not already shown
+          const localNames = new Set(local.map(x => x.name.toLowerCase()));
+          const extra = sdbTeams.filter(t => !localNames.has(t.name.toLowerCase()));
+          const combined = [...local, ...extra].slice(0, 8);
+          showDropdownItems(slot, dropdown, combined, sdbTeams.map(t=>t.id));
+        } catch {}
+      }, 350);
     }
-    dropdown.innerHTML = '';
-    results.forEach(t => {
-      const item = document.createElement('div');
-      item.className = 'slot-dd-item';
-      const logoUrl = LEAGUE_LOGOS[t.lid] || '';
-      const logoHtml = logoUrl
-        ? `<img src="${logoUrl}" style="width:13px;height:13px;object-fit:contain;flex-shrink:0;" onerror="this.style.display='none';">`
-        : flagImg(t.lid, 12);
-      item.innerHTML = `
-        <div class="slot-dd-crest" data-team="${t.id}">${t.name.substring(0,3).toUpperCase()}</div>
-        <div style="flex:1;min-width:0;">
-          <div style="font-size:0.8125rem;font-weight:600;">${t.name}</div>
-          <div style="font-size:0.6875rem;color:var(--gray);display:flex;align-items:center;gap:3px;">${logoHtml}${t.league}</div>
-          <a href="time.html?team=${t.id}" onclick="event.stopPropagation()" style="font-size:0.6875rem;color:var(--green);text-decoration:none;display:block;margin-top:4px;opacity:0.8;">Ver perfil →</a>
-        </div>`;
-      item.addEventListener('click', () => { selectTeam(slot, t); });
-      dropdown.appendChild(item);
-    });
-    dropdown.style.display = 'block';
-    // Async: try to load crests for results
-    results.forEach(t => {
-      const el = dropdown.querySelector(`[data-team="${t.id}"]`);
-      if (!el) return;
-      const cu = getCrest(t.name);
-      if (cu) el.innerHTML = `<img src="${cu}" style="width:24px;height:24px;object-fit:contain;" onerror="this.outerHTML='<span style=font-size:0.5rem;font-weight:700>${t.name.substring(0,3).toUpperCase()}</span>';">`;
-    });
   });
 
   // Close dropdown on outside click
@@ -697,6 +744,9 @@ function renderComparison() {
 
   // Enriquece com H2H real da API-Football (assíncrono, sobrepõe se encontrar)
   fetchRealH2H(selectedA, selectedB);
+
+  // Enriquece stats com dados reais da API-Football (assíncrono)
+  fetchRealTeamStats(selectedA, selectedB);
 }
 
 async function fetchRealH2H(teamA, teamB) {
@@ -759,6 +809,38 @@ async function fetchRealH2H(teamA, teamB) {
     if (typeof lucide !== 'undefined') lucide.createIcons();
 
   } catch(e) { console.warn('[comparar] fetchRealH2H error:', e); }
+}
+
+async function fetchRealTeamStats(teamA, teamB) {
+  if (typeof ZebraAPI === 'undefined' || !ZebraAPI.isConfigured.apiFootball()) return;
+  for (const [team] of [[teamA], [teamB]]) {
+    try {
+      const searchRes = await ZebraAPI.apiFootball.searchTeam(team.name);
+      const apifTeam = searchRes?.[0]?.team;
+      if (!apifTeam?.id) continue;
+      const lid = team.lid || 'ENG';
+      const statsData = await ZebraAPI.apiFootball.getTeamStats(apifTeam.id, lid);
+      if (!statsData) continue;
+      const form = (statsData.form || '').split('').slice(0, 10).map(c => c === 'W' ? 'W' : c === 'D' ? 'D' : 'L');
+      const gfAvg = parseFloat(statsData.goals?.for?.average?.total) || null;
+      const gaAvg = parseFloat(statsData.goals?.against?.average?.total) || null;
+      if (!gfAvg && !gaAvg && !form.length) continue;
+      // Patch into TEAM_STATS for this session
+      TEAM_STATS[team.id] = Object.assign(TEAM_STATS[team.id] || {}, {
+        goalsFor:      gfAvg || 1.5,
+        goalsAgainst:  gaAvg || 1.5,
+        form:          form.length ? form : (TEAM_STATS[team.id]?.form || ['W','D','L','W','W','D','L','W','D','W']),
+        real: true,
+      });
+      // Re-render stats + radar with real data
+      if (selectedA && selectedB) {
+        renderStats(getStats(selectedA.id), getStats(selectedB.id));
+        renderForm(getStats(selectedA.id), getStats(selectedB.id));
+        drawRadar(selectedA, selectedB);
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+      }
+    } catch(e) { console.warn('[comparar] fetchRealTeamStats:', e); }
+  }
 }
 
 // ── H2H RECORD ────────────────────────────────────────────────────────────────

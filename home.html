@@ -497,16 +497,49 @@
     }
 
     // ── QUENTE AGORA ──────────────────────────────────────
-    function initHotLeagues() {
-      const HOT = [
-        { lid:'BRA', name:'Brasileirão', count:7, color:'var(--green)' },
-        { lid:'GER', name:'Bundesliga',  count:5, color:'var(--gold)' },
-        { lid:'ESP', name:'La Liga',     count:4, color:'var(--red)' },
+    async function initHotLeagues() {
+      const HOT_LIDS = [
+        { lid:'BRA', name:'Brasileirão', color:'var(--green)' },
+        { lid:'ENG', name:'Premier Lge', color:'var(--gold)'  },
+        { lid:'ESP', name:'La Liga',     color:'var(--red)'   },
+        { lid:'GER', name:'Bundesliga',  color:'#4D9FFF'      },
+        { lid:'ITA', name:'Serie A',     color:'#a78bfa'      },
+        { lid:'FRA', name:'Ligue 1',     color:'#f97316'      },
       ];
-      const max = HOT[0].count;
       const container = document.getElementById('hotLeagues');
       container.innerHTML = '';
-      HOT.forEach(l => {
+
+      // Show skeleton first
+      HOT_LIDS.slice(0,3).forEach(() => {
+        const sk = document.createElement('div');
+        sk.style.cssText = 'background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);height:90px;';
+        sk.innerHTML = `<div class="skel" style="height:100%;border-radius:var(--radius-md);"></div>`;
+        container.appendChild(sk);
+      });
+
+      // Fetch real counts in parallel (limit to 3 to avoid rate limits)
+      let counts = {};
+      if (typeof ZebraAPI !== 'undefined' && ZebraAPI.isConfigured.footballData() && typeof ZebraEngine !== 'undefined') {
+        try {
+          const results = await Promise.allSettled(
+            HOT_LIDS.map(l => ZebraAPI.fetchRealZebras(l.lid, 10))
+          );
+          results.forEach((r, i) => {
+            counts[HOT_LIDS[i].lid] = (r.status === 'fulfilled' && Array.isArray(r.value)) ? r.value.length : 0;
+          });
+        } catch {}
+      }
+
+      // Sort by count desc, take top 3
+      const sorted = HOT_LIDS
+        .map(l => ({ ...l, count: counts[l.lid] || 0 }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 3);
+
+      const maxCount = sorted[0]?.count || 1;
+
+      container.innerHTML = '';
+      sorted.forEach(l => {
         const card = document.createElement('div');
         card.className = 'hot-league-card';
         card.onclick = () => window.location.href = `liga.html?id=${l.lid}`;
@@ -514,16 +547,14 @@
           <div class="hot-league-card__logo">${flagImg(l.lid, 24)}</div>
           <div class="hot-league-card__name">${l.name}</div>
           <div class="hot-league-card__count">${l.count}</div>
-          <div class="hot-league-card__label">zebras esta semana</div>
-          <div class="hot-league-card__bar"><div class="hot-league-card__bar-fill" style="width:0%;background:${l.color};" data-target="${Math.round((l.count/max)*100)}"></div></div>`;
+          <div class="hot-league-card__label">zebras recentes</div>
+          <div class="hot-league-card__bar"><div class="hot-league-card__bar-fill" style="width:0%;background:${l.color};" data-target="${Math.round((l.count/maxCount)*100)}"></div></div>`;
         container.appendChild(card);
-        // Async logo upgrade
         loadLeagueLogo(l.lid).then(url => {
           const logo = card.querySelector('.hot-league-card__logo');
           if (url && logo) logo.innerHTML = `<img src="${url}" alt="${l.name}">`;
         });
       });
-      // Animate bars after paint
       requestAnimationFrame(() => requestAnimationFrame(() => {
         container.querySelectorAll('.hot-league-card__bar-fill').forEach(el => {
           el.style.width = el.dataset.target + '%';
@@ -704,45 +735,67 @@
       renderUpcoming();
     }
 
-    // ── ZEBRA RANKING (ZI máx 10.0) ──────────────────────
-    // FIX 19 — sort by zi desc and reassign positions
+    // ── ZEBRA RANKING — dados reais da API ────────────────
     const MEDALS = { 1:'🥇', 2:'🥈', 3:'🥉' };
-    const ZEBRA_RANKING_RAW = [
-      { name:'Luton Town',  league:'Premier League', zi:9.1 },
-      { name:'Augsburg',    league:'Bundesliga',     zi:8.7 },
-      { name:'Botafogo',    league:'Brasileirão',    zi:8.2 },
-      { name:'Lecce',       league:'Serie A',        zi:7.9 },
-      { name:'Angers',      league:'Ligue 1',        zi:9.4 },
-    ];
-    ZEBRA_RANKING_RAW.sort((a, b) => b.zi - a.zi);
-    const ZEBRA_RANKING = ZEBRA_RANKING_RAW.map((r, i) => ({
-      ...r,
-      pos: i + 1,
-      badge: String(r.zi),
-      color: r.zi >= 8 ? 'var(--green)' : 'var(--gold)',
-    }));
     const rankContainer = document.getElementById('zebraRanking');
-    ZEBRA_RANKING.forEach((r, idx) => {
-      const row = document.createElement('div');
-      row.className = 'ranking-row fade-in-up';
-      row.style.animationDelay = `${idx * 55}ms`;
-      const pct = Math.round((r.zi / 10) * 100);
-      row.innerHTML = `
-        <span class="ranking-row__pos">${MEDALS[r.pos] || '#' + r.pos}</span>
-        <div style="flex:1;">
-          <div class="ranking-row__name">${r.name}</div>
-          <div style="font-size:0.6875rem;color:var(--gray);margin-top:1px;">${r.league}</div>
-        </div>
-        <div class="ranking-row__bar" style="min-width:50px;">
-          <div class="ranking-row__bar-fill" style="width:${pct}%;background:${r.color};"></div>
-        </div>
-        <span class="badge ranking-row__badge" style="background:${r.color}22;color:${r.color};border:1px solid ${r.color}44;font-size:0.6875rem;">🦓 ${r.badge}</span>`;
-      row.addEventListener('click', () => {
-        const teamId = (r.name || '').toLowerCase().replace(/[\s\.]+/g,'-').replace(/[^a-z0-9-]/g,'');
-        window.location.href = `time.html?team=${encodeURIComponent(teamId)}`;
-      });
-      rankContainer.appendChild(row);
-    });
+
+    // Show skeleton while loading
+    for (let i = 0; i < 5; i++) {
+      const sk = document.createElement('div');
+      sk.className = 'ranking-row';
+      sk.innerHTML = `<div class="skel" style="height:44px;width:100%;border-radius:var(--radius-md);"></div>`;
+      rankContainer.appendChild(sk);
+    }
+
+    (async () => {
+      if (typeof ZebraAPI === 'undefined' || !ZebraAPI.isConfigured.footballData() || typeof ZebraEngine === 'undefined') {
+        rankContainer.innerHTML = '<div style="text-align:center;padding:16px;color:var(--gray);font-size:0.8125rem;">Dados indisponíveis</div>';
+        return;
+      }
+      try {
+        const results = await Promise.allSettled(
+          ['ENG','BRA','GER','ESP','ITA'].map(l => ZebraAPI.fetchRealZebras(l, 8))
+        );
+        const all = results
+          .filter(r => r.status === 'fulfilled' && Array.isArray(r.value))
+          .flatMap(r => r.value)
+          .sort((a, b) => b.zi - a.zi)
+          .slice(0, 5);
+
+        rankContainer.innerHTML = '';
+        if (!all.length) {
+          rankContainer.innerHTML = '<div style="text-align:center;padding:16px;color:var(--gray);font-size:0.8125rem;">Nenhuma zebra encontrada</div>';
+          return;
+        }
+        all.forEach((z, idx) => {
+          const pos   = idx + 1;
+          const color = z.zi >= 8 ? 'var(--green)' : z.zi >= 5 ? 'var(--gold)' : 'var(--gray)';
+          const pct   = Math.round((z.zi / 10) * 100);
+          const row   = document.createElement('div');
+          row.className = 'ranking-row fade-in-up';
+          row.style.animationDelay = `${idx * 55}ms`;
+          row.innerHTML = `
+            <span class="ranking-row__pos">${MEDALS[pos] || '#' + pos}</span>
+            <div style="flex:1;min-width:0;">
+              <div class="ranking-row__name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${z.home} ${z.hs}–${z.as} ${z.away}</div>
+              <div style="font-size:0.6875rem;color:var(--gray);margin-top:1px;">${z.league} · ${z.date}</div>
+            </div>
+            <div class="ranking-row__bar" style="min-width:50px;">
+              <div class="ranking-row__bar-fill" style="width:${pct}%;background:${color};"></div>
+            </div>
+            <span class="badge ranking-row__badge" style="background:${color}22;color:${color};border:1px solid ${color}44;font-size:0.6875rem;">🦓 ${z.zi}</span>`;
+          row.addEventListener('click', () => {
+            const p = new URLSearchParams({ home:z.home, away:z.away, score:`${z.hs}–${z.as}`, zi:z.zi, league:z.league, date:z.date, homeCrest:z.homeCrest||'', awayCrest:z.awayCrest||'' });
+            window.location.href = `partida.html?${p}`;
+          });
+          rankContainer.appendChild(row);
+        });
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+      } catch(e) {
+        rankContainer.innerHTML = '<div style="text-align:center;padding:16px;color:var(--gray);font-size:0.8125rem;">Erro ao carregar dados</div>';
+        console.warn('[home] zebraRanking:', e);
+      }
+    })();
 
     // ── ZEBRAS DO DIA — conteúdo PRO ─────────────────────
     function initZebrasDoDia() {

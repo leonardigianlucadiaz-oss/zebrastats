@@ -131,29 +131,7 @@
 <script>
 // ── DATASET ──────────────────────────────────────────────────────────────────
 // period: 'all' | 'week' | 'month'
-const RANKING_DATA = [
-  // ── Top all-time (zi desc order originally, will be sorted by JS) ──
-  { id:1,  home:'Angers',     away:'PSG',          hs:2, as:0, league:'Ligue 1',       lid:'FRA', date:'05/05/2024', period:'month', zi:9.4, odds_h:'8.50', odds_a:'1.38' },
-  { id:2,  home:'Luton',      away:'Man City',      hs:1, as:0, league:'Prem. League',  lid:'ENG', date:'02/05/2024', period:'month', zi:9.1, odds_h:'7.00', odds_a:'1.43' },
-  { id:3,  home:'Augsburg',   away:'Bayern',        hs:2, as:1, league:'Bundesliga',    lid:'GER', date:'07/05/2024', period:'week',  zi:8.7, odds_h:'6.00', odds_a:'1.50' },
-  { id:4,  home:'Botafogo',   away:'Flamengo',      hs:3, as:0, league:'Brasileirão',   lid:'BRA', date:'13/05/2024', period:'week',  zi:8.2, odds_h:'4.50', odds_a:'1.75' },
-  { id:5,  home:'Granada',    away:'Barça',         hs:1, as:0, league:'La Liga',       lid:'ESP', date:'04/05/2024', period:'week',  zi:8.0, odds_h:'5.80', odds_a:'1.55' },
-  { id:6,  home:'Lecce',      away:'Juventus',      hs:2, as:1, league:'Serie A',       lid:'ITA', date:'13/05/2024', period:'week',  zi:7.9, odds_h:'5.20', odds_a:'1.62' },
-  { id:7,  home:'Clermont',   away:'PSG',           hs:2, as:0, league:'Ligue 1',       lid:'FRA', date:'22/04/2024', period:'month', zi:7.7, odds_h:'7.20', odds_a:'1.40' },
-  { id:8,  home:'St. Pauli',  away:'Bayern',        hs:3, as:1, league:'Bundesliga',    lid:'GER', date:'29/04/2024', period:'month', zi:7.4, odds_h:'5.90', odds_a:'1.52' },
-  { id:9,  home:'Famalicão',  away:'Benfica',       hs:1, as:0, league:'Liga Portugal', lid:'POR', date:'15/04/2024', period:'month', zi:7.2, odds_h:'5.50', odds_a:'1.58' },
-  { id:10, home:'Bochum',     away:'Dortmund',      hs:2, as:0, league:'Bundesliga',    lid:'GER', date:'10/04/2024', period:'month', zi:7.1, odds_h:'5.10', odds_a:'1.65' },
-  { id:11, home:'Mallorca',   away:'Real Madrid',   hs:1, as:0, league:'La Liga',       lid:'ESP', date:'09/05/2024', period:'week',  zi:6.4, odds_h:'4.10', odds_a:'1.85' },
-  { id:12, home:'Bragantino', away:'Palmeiras',     hs:3, as:1, league:'Brasileirão',   lid:'BRA', date:'06/05/2024', period:'week',  zi:4.3, odds_h:'3.10', odds_a:'2.15' },
-  { id:13, home:'Empoli',     away:'Inter',         hs:2, as:2, league:'Serie A',       lid:'ITA', date:'08/05/2024', period:'week',  zi:5.1, odds_h:'5.50', odds_a:'1.55' },
-  { id:14, home:'Clermont',   away:'Monaco',        hs:3, as:2, league:'Ligue 1',       lid:'FRA', date:'03/05/2024', period:'week',  zi:3.8, odds_h:'2.90', odds_a:'2.30' },
-  { id:15, home:'Almería',    away:'Atlético',      hs:2, as:1, league:'La Liga',       lid:'ESP', date:'28/04/2024', period:'month', zi:6.9, odds_h:'4.80', odds_a:'1.70' },
-  { id:16, home:'Caen',       away:'Marseille',     hs:2, as:0, league:'Ligue 1',       lid:'FRA', date:'20/04/2024', period:'month', zi:6.1, odds_h:'4.30', odds_a:'1.80' },
-  { id:17, home:'Frosinone',  away:'Napoli',        hs:1, as:0, league:'Serie A',       lid:'ITA', date:'17/04/2024', period:'month', zi:5.8, odds_h:'4.00', odds_a:'1.90' },
-  { id:18, home:'Cuiabá',     away:'Fluminense',    hs:2, as:0, league:'Brasileirão',   lid:'BRA', date:'11/04/2024', period:'month', zi:5.5, odds_h:'3.80', odds_a:'2.00' },
-  { id:19, home:'Willem II',  away:'Ajax',          hs:3, as:1, league:'Eredivisie',    lid:'HOL', date:'06/04/2024', period:'month', zi:7.0, odds_h:'5.30', odds_a:'1.60' },
-  { id:20, home:'Las Palmas', away:'Girona',        hs:2, as:1, league:'La Liga',       lid:'ESP', date:'01/04/2024', period:'month', zi:4.7, odds_h:'3.30', odds_a:'2.10' },
-];
+const RANKING_DATA = [];  // populated by initRealRanking() from real API data
 
 // ── STATE ─────────────────────────────────────────────────────────────────────
 let activePeriodNew = 'semana';
@@ -506,9 +484,9 @@ updatePlanBadge();
 setTimeout(() => {
   showRanking();
   renderRanking();
-
-  // Async: try to upgrade crests
+  // Upgrade crests when data is available
   (async () => {
+    if (!RANKING_DATA.length) return;
     const lids = [...new Set(RANKING_DATA.map(z => z.lid))];
     await Promise.all(lids.map(lid => loadLeagueCrests(lid)));
     renderRanking();
@@ -523,7 +501,7 @@ async function initRealRanking() {
   if (typeof ZebraEngine === 'undefined') return;
 
   try {
-    const lids = ['ENG','ESP','ITA','BRA','GER','FRA'];
+    const lids = ['ENG','ESP','ITA','BRA','GER','FRA','POR'];
     const results = await Promise.allSettled(
       lids.map(lid => ZebraAPI.fetchRealZebras(lid, 15))
     );
