@@ -73,6 +73,15 @@
     </div>
   </section>
 
+  <!-- ZI SLIDER -->
+  <div id="ziSliderWrap">
+    <label>
+      <span>Índice Zebra mínimo</span>
+      <span id="ziSliderVal">0</span>
+    </label>
+    <input type="range" id="ziSlider" min="0" max="10" step="0.5" value="0" />
+  </div>
+
   <!-- HEATMAP SEMANAL -->
   <section style="padding:12px 16px;border-bottom:1px solid var(--border);background:var(--card2);">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
@@ -204,6 +213,14 @@
     return { grande:'🔴 Grande', media:'🟠 Média', leve:'🟡 Leve' }[cls];
   }
 
+  // ── ZI MAGNITUDE HELPER ──────────────────────────────────────
+  let _ziMinFilter = 0;
+  function _ziMagnitude(zi) {
+    if (zi >= 8) return { label: 'ÉPICA', color: 'var(--red)', glow: '0 0 8px rgba(255,50,50,0.5)' };
+    if (zi >= 5) return { label: 'FORTE', color: 'var(--gold)', glow: '0 0 8px rgba(255,200,50,0.4)' };
+    return { label: 'LEVE', color: 'var(--gray)', glow: 'none' };
+  }
+
   // ── LEAGUE BAR ──────────────────────────────────────────────
   function renderLeagueBar() {
     const bar = document.getElementById('leagueBar');
@@ -267,6 +284,7 @@
     let list = data;
     if (activeLeague !== 'all') list = list.filter(z => z.lid === activeLeague);
     if (activeFilter !== 'all') list = list.filter(z => ziClass(z) === activeFilter);
+    if (_ziMinFilter > 0) list = list.filter(z => (parseFloat(z.zi)||0) >= _ziMinFilter);
 
     document.getElementById('zebraCount').textContent = `${list.length} resultado${list.length !== 1 ? 's' : ''}`;
 
@@ -294,6 +312,9 @@
 
       const card = document.createElement('div');
       card.className = 'zebra-card';
+      card.dataset.zi = z.zi || 0;
+      const mag = _ziMagnitude(parseFloat(z.zi)||0);
+      card.style.boxShadow = mag.glow;
 
       const leagueBadge = LEAGUE_LOGOS[z.lid] || '';
       const leagueLogoHtml = leagueBadge
@@ -609,6 +630,20 @@
 
   initRealData();
   initBellBadge();
+
+  // ZI Slider
+  (function() {
+    const slider = document.getElementById('ziSlider');
+    const valEl  = document.getElementById('ziSliderVal');
+    if (!slider) return;
+    slider.addEventListener('input', function() {
+      _ziMinFilter = parseFloat(this.value);
+      valEl.textContent = _ziMinFilter;
+      renderZebras();
+      lucide.createIcons();
+    });
+  })();
+
   lucide.createIcons();
 </script>
 <style>
@@ -641,9 +676,28 @@
     from { opacity: 0; transform: translateY(12px); }
     to   { opacity: 1; transform: translateY(0); }
   }
+  @keyframes cardSlideIn {
+    from { opacity: 0; transform: translateX(-14px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
   .zebra-card-anim {
-    animation: fadeSlideIn 0.3s ease forwards;
+    animation: cardSlideIn 0.3s ease forwards;
     opacity: 0;
+  }
+
+  /* ── ZI SLIDER ── */
+  #ziSliderWrap {
+    padding: 10px 16px 12px;
+    border-bottom: 1px solid var(--border);
+    background: var(--card2);
+  }
+  #ziSliderWrap label {
+    font-size: 0.75rem; color: var(--gray);
+    display: flex; justify-content: space-between; margin-bottom: 6px;
+  }
+  #ziSlider {
+    width: 100%; accent-color: var(--green);
+    cursor: pointer;
   }
 
   /* ── ACCORDION EXPAND ── */

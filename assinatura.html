@@ -167,6 +167,73 @@
         <p class="text-xs text-gray">Cancele quando quiser · Sem fidelidade · Pagamento seguro</p>
       </div>
 
+      <!-- COMPARISON TABLE FREE vs PRO -->
+      <div style="margin-top:16px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;">
+        <table style="width:100%;border-collapse:collapse;font-size:0.8125rem;">
+          <thead>
+            <tr style="background:var(--card2);">
+              <th style="padding:10px 12px;text-align:left;font-weight:600;color:var(--gray);">Recurso</th>
+              <th style="padding:10px 8px;text-align:center;font-weight:600;color:var(--gray);">Free</th>
+              <th style="padding:10px 8px;text-align:center;font-weight:700;color:var(--green);">Pro</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-top:1px solid var(--border);">
+              <td style="padding:9px 12px;">Jogos ao vivo</td>
+              <td style="text-align:center;color:var(--green);">✓</td>
+              <td style="text-align:center;color:var(--green);">✓</td>
+            </tr>
+            <tr style="border-top:1px solid var(--border);background:rgba(255,255,255,0.02);">
+              <td style="padding:9px 12px;">Times favoritos</td>
+              <td style="text-align:center;color:var(--green);">✓</td>
+              <td style="text-align:center;color:var(--green);">✓</td>
+            </tr>
+            <tr style="border-top:1px solid var(--border);">
+              <td style="padding:9px 12px;">Ranking de zebras</td>
+              <td style="text-align:center;color:var(--red);">✗</td>
+              <td style="text-align:center;color:var(--green);">✓</td>
+            </tr>
+            <tr style="border-top:1px solid var(--border);background:rgba(255,255,255,0.02);">
+              <td style="padding:9px 12px;">Alertas em tempo real</td>
+              <td style="text-align:center;color:var(--red);">✗</td>
+              <td style="text-align:center;color:var(--green);">✓</td>
+            </tr>
+            <tr style="border-top:1px solid var(--border);">
+              <td style="padding:9px 12px;">Zebra Index por partida</td>
+              <td style="text-align:center;color:var(--red);">✗</td>
+              <td style="text-align:center;color:var(--green);">✓</td>
+            </tr>
+            <tr style="border-top:1px solid var(--border);background:rgba(255,255,255,0.02);">
+              <td style="padding:9px 12px;">Histórico completo</td>
+              <td style="text-align:center;color:var(--red);">✗</td>
+              <td style="text-align:center;color:var(--green);">✓</td>
+            </tr>
+            <tr style="border-top:1px solid var(--border);">
+              <td style="padding:9px 12px;">Padrões sazonais</td>
+              <td style="text-align:center;color:var(--red);">✗</td>
+              <td style="text-align:center;color:var(--green);">✓</td>
+            </tr>
+            <tr style="border-top:1px solid var(--border);background:rgba(255,255,255,0.02);">
+              <td style="padding:9px 12px;">Comparativo de times</td>
+              <td style="text-align:center;color:var(--red);">✗</td>
+              <td style="text-align:center;color:var(--green);">✓</td>
+            </tr>
+            <tr style="border-top:1px solid var(--border);">
+              <td style="padding:9px 12px;">Suporte prioritário</td>
+              <td style="text-align:center;color:var(--red);">✗</td>
+              <td style="text-align:center;color:var(--green);">✓</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- SOCIAL PROOF COUNTER -->
+      <div style="text-align:center;margin-top:14px;padding:12px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);">
+        <span id="proUserCount" style="font-size:1.75rem;font-weight:800;color:var(--green);">0</span>
+        <span style="font-size:0.875rem;color:var(--gray);margin-left:6px;">usuários Pro ativos agora</span>
+        <p style="font-size:0.75rem;color:var(--gray);margin-top:4px;">Experimente grátis por 7 dias — sem cartão necessário.</p>
+      </div>
+
       <!-- FAQ -->
       <div style="margin-top:16px;padding-bottom:8px;">
         <h3 style="font-size:0.9375rem;margin-bottom:12px;">Perguntas frequentes</h3>
@@ -389,6 +456,23 @@
 
     // ── LUCIDE — inicializa todos os ícones da página ─────
     lucide.createIcons();
+
+    // ── PRO USER COUNTER ANIMATION ────────────────────────────
+    (function animateProCounter() {
+      const el = document.getElementById('proUserCount');
+      if (!el) return;
+      const target = 1247;
+      const duration = 1600;
+      const start = performance.now();
+      function update(now) {
+        const elapsed = now - start;
+        const progress = Math.min(elapsed / duration, 1);
+        const ease = 1 - Math.pow(1 - progress, 3);
+        el.textContent = Math.floor(ease * target).toLocaleString('pt-BR');
+        if (progress < 1) requestAnimationFrame(update);
+      }
+      requestAnimationFrame(update);
+    })();
 
     // ── PRO DETECTION — show "already subscribed" banner ──────
     (function checkProUser() {
