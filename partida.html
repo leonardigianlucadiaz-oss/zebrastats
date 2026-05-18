@@ -143,6 +143,12 @@
         <div id="timelineEventsR" style="display:flex;flex-direction:column;gap:6px;"></div>
       </div>
 
+      <!-- POR QUE É UMA ZEBRA? -->
+      <div id="zebraExplanation" style="display:none;margin-bottom:12px;background:linear-gradient(135deg,rgba(46,230,92,0.07),rgba(255,200,50,0.06));border:1px solid rgba(46,230,92,0.25);border-radius:var(--radius-md);padding:14px;">
+        <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--green);margin-bottom:8px;">Por que é uma zebra?</div>
+        <p id="zebraExplanationText" style="font-size:0.8125rem;color:var(--text-muted,var(--gray));line-height:1.6;margin:0;"></p>
+      </div>
+
       <div class="section-header" style="margin-top:4px;"><span class="section-title"><i data-lucide="users" class="sec-ic"></i>Escalações</span></div>
       <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px 16px;">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
@@ -1082,6 +1088,32 @@
     }
   }
 
+  // ── "Por que é uma zebra?" explanation ──────────────────────────
+  (function _zebraExplanation() {
+    const params = new URLSearchParams(location.search);
+    const zi   = parseFloat(params.get('zi')  || 0);
+    const home = params.get('home') || 'Time da casa';
+    const away = params.get('away') || 'Favorito';
+    const score = params.get('score') || '';
+    if (!zi) return;
+
+    let text = '';
+    if (zi >= 8) {
+      text = `${home} realizou uma das maiores zebras da temporada ao ${score ? 'vencer por ' + score : 'superar'} ${away} com Índice Zebra de <strong>${zi}</strong>. As odds favoreciam amplamente ${away}, tornando este resultado extremamente improvável segundo os modelos estatísticos.`;
+    } else if (zi >= 5) {
+      text = `Com ZI ${zi}, o resultado de ${home} contra ${away}${score ? ' (' + score + ')' : ''} representa uma zebra considerável. ${away} era o claro favorito, mas ${home} conseguiu um desempenho acima do esperado.`;
+    } else {
+      text = `O confronto entre ${home} e ${away} apresenta um Índice Zebra de ${zi}, indicando uma surpresa moderada em relação às expectativas das odds pré-jogo.`;
+    }
+
+    const section = document.getElementById('zebraExplanation');
+    const textEl  = document.getElementById('zebraExplanationText');
+    if (section && textEl && text) {
+      textEl.innerHTML = text;
+      section.style.display = 'block';
+    }
+  })();
+
   initApifData();
   lucide.createIcons();
 </script>
@@ -1097,6 +1129,25 @@
   .zebra-meter-fill {
     background: linear-gradient(90deg, var(--gold) 0%, var(--green) 60%, var(--red) 100%);
   }
+
+  /* ── TIMELINE ANIMATION ── */
+  @keyframes timelineSlide {
+    from { opacity: 0; transform: translateX(-12px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  .timeline-event {
+    animation: timelineSlide 0.3s ease both;
+  }
+  #timelineEventsR .timeline-event:nth-child(1) { animation-delay: 0.1s; }
+  #timelineEventsR .timeline-event:nth-child(2) { animation-delay: 0.2s; }
+  #timelineEventsR .timeline-event:nth-child(3) { animation-delay: 0.3s; }
+  #timelineEventsR .timeline-event:nth-child(4) { animation-delay: 0.4s; }
+  #timelineEventsR .timeline-event:nth-child(5) { animation-delay: 0.5s; }
+  #timelineEvents  .timeline-event:nth-child(1) { animation-delay: 0.1s; }
+  #timelineEvents  .timeline-event:nth-child(2) { animation-delay: 0.2s; }
+  #timelineEvents  .timeline-event:nth-child(3) { animation-delay: 0.3s; }
+  #timelineEvents  .timeline-event:nth-child(4) { animation-delay: 0.4s; }
+  #timelineEvents  .timeline-event:nth-child(5) { animation-delay: 0.5s; }
 
   /* ── FACTOR CARDS ── */
   .factor-card {

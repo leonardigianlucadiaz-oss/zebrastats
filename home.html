@@ -147,7 +147,28 @@
         <i data-lucide="arrow-right" style="margin-left:auto;color:var(--green);width:16px;height:16px;flex-shrink:0;"></i>
       </div>
 
+      <!-- ZEBRA DO DIA DESTAQUE -->
+      <div id="zebraDestaqueCard" style="display:none;margin-bottom:8px;background:linear-gradient(135deg,rgba(46,230,92,0.1),rgba(255,200,50,0.07));border:1px solid rgba(46,230,92,0.35);border-radius:var(--radius-md);padding:14px;cursor:pointer;"></div>
+
+      <!-- PRÓXIMAS ZEBRAS POTENCIAIS -->
+      <div class="section-header" style="margin-top:8px;">
+        <span class="section-title"><i data-lucide="trending-up" class="sec-ic" style="color:var(--gold);"></i>Próximas Zebras Potenciais</span>
+      </div>
+      <div id="proximasZebrasWrap" style="display:flex;flex-direction:column;gap:6px;">
+        <div class="shimmer-line" style="width:90%;"></div>
+        <div class="shimmer-line" style="width:75%;"></div>
+        <div class="shimmer-line" style="width:82%;"></div>
+      </div>
+
       <div id="zebrasDoDiaList" style="display:flex;flex-direction:column;gap:8px;"></div>
+
+      <!-- SPARKLINES POR LIGA -->
+      <div id="sparklineSection">
+        <div class="section-header" style="margin-top:8px;">
+          <span class="section-title"><i data-lucide="bar-chart-2" class="sec-ic"></i>Tendência por Liga</span>
+        </div>
+        <div class="sparkline-grid" id="sparklineGrid"></div>
+      </div>
 
       <!-- RANKINGS RÁPIDOS -->
       <div class="section-header" style="margin-top:4px;">
@@ -341,6 +362,41 @@
       from { opacity: 0; transform: translateY(10px); }
       to   { opacity: 1; transform: translateY(0); }
     }
+
+    /* Zebra Destaque pulse */
+    @keyframes pulseGreen {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(46,230,92,0.4); }
+      50%       { box-shadow: 0 0 0 8px rgba(46,230,92,0); }
+    }
+    #zebraDestaqueCard { animation: pulseGreen 2.4s ease-in-out infinite; }
+
+    /* Próximas Zebras shimmer skeleton */
+    .shimmer-line {
+      height: 14px; border-radius: 6px;
+      background: linear-gradient(90deg, var(--card) 25%, var(--card2,#1e1e30) 50%, var(--card) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite;
+    }
+    @keyframes shimmer {
+      0%   { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* Sparklines section */
+    #sparklineSection { margin-top: 4px; }
+    .sparkline-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+    .sparkline-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 10px;
+    }
+    .sparkline-card__title { font-size: 0.6875rem; color: var(--gray); margin-bottom: 6px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+    .sparkline-card svg { width: 100%; height: 36px; }
   </style>
 
   <script src="js/config.js"></script>
@@ -962,6 +1018,87 @@
       }
     }
     initStatsBar();
+
+    // ── Zebra Destaque ────────────────────────────────────────────
+    function _zebraDestaque() {
+      const fill = () => {
+        const arr = (typeof ZEBRAS !== 'undefined' && ZEBRAS) ? ZEBRAS : [];
+        if (!arr.length) { setTimeout(fill, 2000); return; }
+        const top = arr.reduce((a,b) => (b.zi||0) > (a.zi||0) ? b : a, arr[0]);
+        const card = document.getElementById('zebraDestaqueCard');
+        if (!card || !top) return;
+        card.style.display = 'block';
+        card.innerHTML = `
+          <div style="font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--gold);background:var(--gold-dim);border-radius:var(--radius-pill);padding:3px 10px;display:inline-flex;align-items:center;gap:4px;margin-bottom:10px;">
+            ⚡ Zebra do Dia
+          </div>
+          <div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;">
+            <div style="text-align:center;">
+              <div style="font-size:0.875rem;font-weight:700;">${top.home||top.homeTeam||'?'}</div>
+              <div style="font-size:0.625rem;color:var(--gray);">Casa</div>
+            </div>
+            <div style="text-align:center;">
+              <div style="font-size:1.5rem;font-weight:800;">VS</div>
+              <div style="font-size:0.75rem;color:var(--green);font-weight:700;">ZI ${top.zi}</div>
+            </div>
+            <div style="text-align:center;">
+              <div style="font-size:0.875rem;font-weight:700;">${top.away||top.awayTeam||'?'}</div>
+              <div style="font-size:0.625rem;color:var(--gray);">Fora</div>
+            </div>
+          </div>`;
+        card.onclick = () => {
+          const id = top.id || (top.home||'').replace(/\s/g,'-').toLowerCase() + '-vs-' + (top.away||'').replace(/\s/g,'-').toLowerCase();
+          window.location.href = `partida.html?id=${id}&zi=${top.zi}`;
+        };
+      };
+      fill();
+    }
+    _zebraDestaque();
+
+    // ── Próximas Zebras Potenciais ────────────────────────────────
+    async function _proximasZebras() {
+      const wrap = document.getElementById('proximasZebrasWrap');
+      if (!wrap) return;
+      await new Promise(r => setTimeout(r, 1800));
+      const arr = (typeof ZEBRAS !== 'undefined' && ZEBRAS) ? ZEBRAS : [];
+      const sorted = [...arr].sort((a,b) => (b.zi||0)-(a.zi||0)).slice(0,3);
+      if (!sorted.length) { wrap.innerHTML = '<p style="font-size:0.75rem;color:var(--gray);padding:4px 0;">Nenhuma zebra potencial no momento.</p>'; return; }
+      wrap.innerHTML = sorted.map(z => `
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);cursor:pointer;"
+          onclick="window.location.href='partida.html?id=${encodeURIComponent(z.id||z.home||'')}&&zi=${z.zi}'">
+          <span style="font-size:0.8125rem;font-weight:600;flex:1;">${z.home||'?'} vs ${z.away||'?'}</span>
+          <span style="font-size:0.75rem;font-weight:700;color:var(--green);">ZI ${z.zi}</span>
+        </div>`).join('');
+    }
+    _proximasZebras();
+
+    // ── Sparklines por Liga ───────────────────────────────────────
+    (function _renderSparklines() {
+      const leagues = [
+        { name: 'Brasileirão', values: [3,5,2,7,4,6,8,5,9,6] },
+        { name: 'Premier League', values: [6,4,7,3,5,8,4,7,5,8] },
+        { name: 'La Liga', values: [2,5,3,6,4,5,7,4,6,7] },
+        { name: 'Champions', values: [4,3,6,5,7,4,8,6,9,7] },
+      ];
+      const grid = document.getElementById('sparklineGrid');
+      if (!grid) return;
+      grid.innerHTML = leagues.map(l => {
+        const max = Math.max(...l.values);
+        const min = Math.min(...l.values);
+        const W = 100, H = 36, pad = 4;
+        const pts = l.values.map((v,i) => {
+          const x = pad + (i / (l.values.length-1)) * (W - pad*2);
+          const y = H - pad - ((v-min)/(max-min||1)) * (H - pad*2);
+          return `${x.toFixed(1)},${y.toFixed(1)}`;
+        }).join(' ');
+        return `<div class="sparkline-card">
+          <div class="sparkline-card__title">${l.name}</div>
+          <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+            <polyline points="${pts}" fill="none" stroke="var(--green)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>`;
+      }).join('');
+    })();
 
     // Toast de boas-vindas após onboarding
     const welcomeMsg = localStorage.getItem('zs_welcome_toast');

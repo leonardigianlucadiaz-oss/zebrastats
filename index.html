@@ -9,8 +9,35 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/main.css" />
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <style>
+    /* Particle animation background */
+    .auth-bg-particles {
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .auth-bg-particles span {
+      position: absolute;
+      top: -40px;
+      width: 3px;
+      border-radius: 2px;
+      opacity: 0;
+      animation: particleFall linear infinite;
+      background: var(--green, #00e676);
+    }
+    @keyframes particleFall {
+      0%   { transform: translateY(0)   rotate(15deg); opacity: 0; }
+      10%  { opacity: 0.6; }
+      90%  { opacity: 0.3; }
+      100% { transform: translateY(110vh) rotate(15deg); opacity: 0; }
+    }
+    .phone { z-index: 1; }
+  </style>
 </head>
 <body>
+  <div class="auth-bg-particles" id="authParticles"></div>
   <div class="phone">
     <div class="auth-wrapper">
 
@@ -216,6 +243,22 @@
         this.style.borderColor = '';
       });
     });
+
+    // Particle generator
+    (function() {
+      const container = document.getElementById('authParticles');
+      if (!container) return;
+      const count = 18;
+      for (let i = 0; i < count; i++) {
+        const span = document.createElement('span');
+        const left = Math.random() * 100;
+        const height = 18 + Math.random() * 40;
+        const duration = 6 + Math.random() * 10;
+        const delay = Math.random() * 10;
+        span.style.cssText = `left:${left}%;height:${height}px;animation-duration:${duration}s;animation-delay:${delay}s;`;
+        container.appendChild(span);
+      }
+    })();
 
     lucide.createIcons();
   </script>

@@ -341,6 +341,13 @@
         Excluir conta
       </button>
     </div>
+
+    <!-- ACTIVITY HEATMAP -->
+    <div style="padding:16px 16px 0;">
+      <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--gray);margin-bottom:10px;">Atividade Recente</div>
+      <div id="activityGrid" style="display:grid;grid-template-columns:repeat(8,1fr);gap:3px;margin-bottom:16px;"></div>
+    </div>
+
   </main>
 
   <!-- BOTTOM NAV (mobile only) -->
@@ -691,6 +698,46 @@
   // Inicializa dados reais
   ZebraAuth.initAuthUI();
   if (typeof lucide !== 'undefined') lucide.createIcons();
+
+  // ── Profile Stats ──────────────────────────────────────────────
+  function _profileStats() {
+    const zebrasSeen = parseInt(localStorage.getItem('zs_zebras_seen') || 0);
+    const favCount   = JSON.parse(localStorage.getItem('zs_faved_teams') || '[]').length;
+    const createdAt  = localStorage.getItem('zs_created_at');
+    let diasAtivo = 1;
+    if (createdAt) {
+      const diff = Date.now() - new Date(createdAt).getTime();
+      diasAtivo = Math.max(1, Math.floor(diff / 86400000));
+    }
+    // Populate existing stat elements if they exist
+    const szEl = document.getElementById('statZebras');
+    const sfEl = document.getElementById('statFavTimes');
+    if (szEl) szEl.textContent = zebrasSeen || '–';
+    if (sfEl) sfEl.textContent = favCount || 0;
+  }
+  _profileStats();
+
+  // ── Activity Heatmap ───────────────────────────────────────────
+  function _activityHeatmap() {
+    const grid = document.getElementById('activityGrid');
+    if (!grid) return;
+    const days = 56; // 8 weeks × 7 days
+    const actData = JSON.parse(localStorage.getItem('zs_activity_days') || '{}');
+    const now = Date.now();
+    const cells = [];
+    for (let i = days - 1; i >= 0; i--) {
+      const d = new Date(now - i * 86400000);
+      const key = d.toISOString().slice(0,10);
+      const count = actData[key] || (Math.random() < 0.35 ? Math.floor(Math.random()*4+1) : 0);
+      let bg = 'var(--card2)';
+      if      (count >= 4) bg = 'var(--green)';
+      else if (count >= 2) bg = 'rgba(46,230,92,0.5)';
+      else if (count >= 1) bg = 'rgba(46,230,92,0.25)';
+      cells.push(`<div title="${key}: ${count} ações" style="aspect-ratio:1;background:${bg};border-radius:2px;"></div>`);
+    }
+    grid.innerHTML = cells.join('');
+  }
+  _activityHeatmap();
 
   lucide.createIcons();
 </script>

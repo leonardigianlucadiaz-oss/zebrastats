@@ -87,6 +87,12 @@
   <!-- PODIUM TOP 3 -->
   <div id="podiumBlock" style="display:none;"></div>
 
+  <!-- RANKING HERO (#1) -->
+  <div id="rankingHero" style="display:none;margin:0 0 4px;padding:14px 16px;background:linear-gradient(135deg,rgba(255,200,50,0.12),rgba(255,200,50,0.04));border-bottom:1px solid rgba(255,200,50,0.25);">
+    <div style="font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--gold);margin-bottom:8px;">👑 Maior Zebra da Temporada</div>
+    <div id="rankingHeroContent"></div>
+  </div>
+
   <!-- LISTA DE RANKING -->
   <main class="content" id="rankingMain" style="padding-bottom:80px;">
     <!-- skeleton -->
@@ -98,6 +104,12 @@
       <div class="rank-skeleton"></div>
     </div>
     <div id="rankingList" style="display:none;flex-direction:column;gap:10px;"></div>
+
+    <!-- BAR CHART SECTION -->
+    <div id="rankBarChart" style="display:none;margin-top:16px;padding:14px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);">
+      <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--gray);margin-bottom:10px;">Top ZI por Partida</div>
+      <div id="rankBarChartBars" style="display:flex;flex-direction:column;gap:8px;"></div>
+    </div>
 
     <!-- LOCK BANNER PRO -->
     <div class="lock-banner" id="rankLockBanner" style="display:none;" onclick="window.location.href='assinatura.html'">
@@ -564,6 +576,97 @@ async function initRealRanking() {
 }
 
 initRealRanking();
+
+// ── Ranking Hero ─────────────────────────────────────────────
+function _showRankingHero() {
+  if (!RANKING_DATA.length) return;
+  const top = RANKING_DATA[0];
+  const hero = document.getElementById('rankingHero');
+  const content = document.getElementById('rankingHeroContent');
+  if (!hero || !content) return;
+  content.innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;margin-bottom:8px;">
+      <div style="text-align:center;">
+        <div style="font-size:0.9375rem;font-weight:700;">${top.home||'?'}</div>
+        <div style="font-size:0.625rem;color:var(--gray);">Azarão</div>
+      </div>
+      <div style="text-align:center;">
+        <div style="font-size:1.5rem;font-weight:800;">${top.hs}–${top.as}</div>
+        <div style="font-size:0.75rem;color:var(--gold);font-weight:700;">ZI ${top.zi}</div>
+      </div>
+      <div style="text-align:center;">
+        <div style="font-size:0.9375rem;font-weight:700;">${top.away||'?'}</div>
+        <div style="font-size:0.625rem;color:var(--gray);">Favorito</div>
+      </div>
+    </div>
+    <div style="font-size:0.75rem;color:var(--gray);">${top.league||''} · ${top.date||''}</div>`;
+  hero.style.display = 'block';
+}
+
+// ── Evolution Arrows ──────────────────────────────────────────
+function _getEvolutionArrow(pos) {
+  const key = 'zs_prev_rank_' + pos;
+  const prev = parseInt(localStorage.getItem(key) || pos);
+  localStorage.setItem(key, pos);
+  if (prev > pos) return '<span style="color:var(--green);font-size:0.75rem;">▲</span>';
+  if (prev < pos) return '<span style="color:var(--red);font-size:0.75rem;">▼</span>';
+  return '<span style="color:var(--gray);font-size:0.75rem;">–</span>';
+}
+
+// Patch buildRankCard to include evolution arrow after position badge
+const _origBuildRankCard = buildRankCard;
+// (Arrows are injected via positionBadge override — handled in renderRanking via DOM patch)
+function _patchEvolutionArrows() {
+  document.querySelectorAll('#rankingList .zebra-card').forEach((card, i) => {
+    const posBadge = card.querySelector('[data-pos-badge]');
+    if (posBadge && !posBadge.dataset.arrowDone) {
+      posBadge.dataset.arrowDone = '1';
+      posBadge.insertAdjacentHTML('afterend', _getEvolutionArrow(i + 1));
+    }
+  });
+}
+
+// ── Bar Chart ────────────────────────────────────────────────
+function _renderBarChart() {
+  const section = document.getElementById('rankBarChart');
+  const barsEl  = document.getElementById('rankBarChartBars');
+  if (!section || !barsEl || !RANKING_DATA.length) return;
+  const top10 = RANKING_DATA.slice(0, 8);
+  const maxZi = top10[0].zi || 10;
+  barsEl.innerHTML = top10.map((z, i) => {
+    const pct = Math.round((z.zi / maxZi) * 100);
+    return `<div style="display:flex;align-items:center;gap:8px;">
+      <div style="font-size:0.6875rem;color:var(--gray);width:80px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0;">${z.home}</div>
+      <div style="flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden;">
+        <div id="rbar${i}" style="height:100%;width:0%;background:var(--green);border-radius:4px;transition:width 0.8s ease;"></div>
+      </div>
+      <div style="font-size:0.6875rem;font-weight:700;color:var(--green);width:28px;text-align:right;flex-shrink:0;">${z.zi}</div>
+    </div>`;
+  }).join('');
+  section.style.display = 'block';
+  // Animate bars after render
+  top10.forEach((z, i) => {
+    const pct = Math.round(((z.zi || 0) / maxZi) * 100);
+    setTimeout(() => {
+      const el = document.getElementById('rbar' + i);
+      if (el) el.style.width = pct + '%';
+    }, 100 + i * 80);
+  });
+}
+
+// Hook into renderRanking to call hero + bar chart
+const _origRenderRanking = typeof renderRanking === 'function' ? renderRanking : null;
+if (_origRenderRanking) {
+  window.renderRanking = function() {
+    _origRenderRanking();
+    setTimeout(() => {
+      _showRankingHero();
+      _renderBarChart();
+      _patchEvolutionArrows();
+    }, 200);
+  };
+}
+
 lucide.createIcons();
 </script>
 <style>
