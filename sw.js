@@ -1,5 +1,5 @@
 /* ZebraStats Service Worker — network-first para assets dinâmicos */
-const CACHE_NAME = 'zebrastats-v2';
+const CACHE_NAME = 'zebrastats-v3';
 const CACHE_VERSION = 2;
 
 // Assets imutáveis — cache-first (icons/images mudam raramente)
@@ -11,6 +11,7 @@ const STATIC_ASSETS = [
   'comparar.html','notificacoes.html','busca.html',
   'assinatura.html','pagamento.html','favoritos.html','explorar.html',
   'css/main.css','js/main.js','js/config.js','js/api.js','js/zebra-engine.js',
+  'js/auth.js','js/auth-guard.js','js/db.js',
   'manifest.json','icons/icon-192.svg','icons/icon-512.svg',
 ];
 

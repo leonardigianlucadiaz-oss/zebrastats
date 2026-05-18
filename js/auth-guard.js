@@ -13,7 +13,15 @@
   if (PUBLIC_PAGES.includes(currentPage)) return;
 
   // Aguarda Supabase estar disponível
-  if (typeof ZebraAuth === 'undefined') return;
+  if (typeof ZebraAuth === 'undefined') {
+    // auth.js não carregou (CDN timeout?) — redireciona para login por segurança
+    const PUBLIC_CHECK = ['index.html', 'cadastro.html', 'onboarding.html', ''];
+    const pg = location.pathname.split('/').pop() || 'index.html';
+    if (!PUBLIC_CHECK.includes(pg)) {
+      window.location.replace('index.html');
+    }
+    return;
+  }
 
   const user = await ZebraAuth.getSessionUser();
 

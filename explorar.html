@@ -652,6 +652,8 @@ function renderSearchHistory() {
 updatePlanBadge && updatePlanBadge();
 renderExplorar();
 lucide.createIcons();
+// Garante que todos os ícones Lucide estão inicializados
+if (typeof lucide !== 'undefined') lucide.createIcons();
 </script>
 
 <style>
