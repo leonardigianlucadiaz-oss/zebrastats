@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
@@ -8,8 +8,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/main.css" />
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>tailwind.config = { corePlugins: { preflight: false } }</script>
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 </head>
 <body>
@@ -136,7 +134,7 @@
     <div id="tab-tabela" style="display:none;">
       <!-- Legenda dinâmica por liga -->
       <div id="tableTopLegend" style="margin-bottom:8px;font-size:0.75rem;color:var(--gray);display:flex;flex-wrap:wrap;gap:8px;"></div>
-      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;">
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);overflow-x:auto;-webkit-overflow-scrolling:touch;">
         <table class="standings-table" id="standingsTable"></table>
       </div>
       <!-- Seção Regras recolhível -->

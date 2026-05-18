@@ -262,9 +262,15 @@ window.LEAGUE_LOGOS = Object.assign({
   GER: 'https://r2.thesportsdb.com/images/media/league/badge/teqh1b1679952008.png',
   FRA: 'https://r2.thesportsdb.com/images/media/league/badge/9f7z9d1742983155.png',
   POR: 'https://r2.thesportsdb.com/images/media/league/badge/lkfko71751917970.png',
+  PRT: 'https://r2.thesportsdb.com/images/media/league/badge/lkfko71751917970.png',
   UCL: 'https://r2.thesportsdb.com/images/media/league/badge/facv1u1742998896.png',
+  UEL: 'https://r2.thesportsdb.com/images/media/league/badge/zfb7en1701267893.png',
   HOL: 'https://r2.thesportsdb.com/images/media/league/badge/o6qdtj1534771842.png',
   NED: 'https://r2.thesportsdb.com/images/media/league/badge/o6qdtj1534771842.png',
+  ARG: 'https://r2.thesportsdb.com/images/media/league/badge/npo8011713382762.png',
+  MEX: 'https://r2.thesportsdb.com/images/media/league/badge/po2jzt1687536144.png',
+  MLS: 'https://r2.thesportsdb.com/images/media/league/badge/mq0zpu1687640611.png',
+  USA: 'https://r2.thesportsdb.com/images/media/league/badge/mq0zpu1687640611.png',
 }, window.LEAGUE_LOGOS || {});
 
 function _crestKeys(name) {
@@ -561,6 +567,59 @@ function updateSidebarUser() {
 }
 window.updateSidebarUser = updateSidebarUser;
 
+// ── MODAL (reutilizável em qualquer página) ────────────────────
+/**
+ * Abre um modal pelo ID do elemento.
+ * Suporta modais com inline display:none (cadastro.html) e
+ * com classe .show (perfil.html).
+ * @param {string} id - ID do elemento modal
+ */
+function openModal(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  // Inline-style modals: remove o display:none e mostra com block
+  if (el.style.display === 'none') el.style.display = 'block';
+  // Class-based modals
+  el.classList.add('show');
+  document.body.style.overflow = 'hidden';
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+/**
+ * Fecha um modal pelo ID do elemento.
+ * @param {string} id - ID do elemento modal
+ */
+function closeModal(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.remove('show');
+  // Restaura inline display:none para modais que o usam
+  el.style.display = 'none';
+  document.body.style.overflow = '';
+}
+window.openModal  = openModal;
+window.closeModal = closeModal;
+
+// ── INJETAR FAVORITOS NA SIDEBAR ──────────────────────────────
+/**
+ * Adiciona o link "Favoritos" na sidebar entre Ligas/Times e Perfil,
+ * caso ainda não exista. Roda após DOMContentLoaded em todas as páginas.
+ */
+function injectFavoritosNav() {
+  const sidebarNav = document.querySelector('.sidebar__nav');
+  if (!sidebarNav) return;
+  if (sidebarNav.querySelector('a[href="favoritos.html"]')) return;
+  const link = document.createElement('a');
+  link.href      = 'favoritos.html';
+  link.className = 'sidebar__nav-item';
+  link.innerHTML = '<i data-lucide="heart"></i><span>Favoritos</span>';
+  // Insere antes de Perfil, ou no final
+  const perfil = sidebarNav.querySelector('a[href="perfil.html"]');
+  if (perfil) sidebarNav.insertBefore(link, perfil);
+  else sidebarNav.appendChild(link);
+  if (typeof lucide !== 'undefined') lucide.createIcons({ nodes: [link] });
+}
+
 // ── BOTTOM NAV (mobile) ───────────────────────────────────────
 function initBottomNav() {
   const nav = document.querySelector('.bottom-nav');
@@ -651,6 +710,7 @@ document.addEventListener('DOMContentLoaded', () => {
   updateSidebarUser();
   initBottomNav();
   initHamburger();
+  injectFavoritosNav();
 
   // ── PWA: inject manifest link ──────────────────────────────────
   if (!document.querySelector('link[rel="manifest"]')) {

@@ -866,8 +866,16 @@ p  { font-size: 0.875rem; line-height: 1.5; color: var(--gray); }
   overflow-x: auto;
   padding-bottom: 4px;
   scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 .scroll-x::-webkit-scrollbar { display: none; }
+
+/* ── HIDE SCROLLBAR (utilitário para qualquer elemento com overflow-x:auto) ── */
+.hide-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.hide-scrollbar::-webkit-scrollbar { display: none; }
 
 /* ── LOCK BANNER ── */
 .lock-banner {

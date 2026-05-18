@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
@@ -8,8 +8,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/main.css" />
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>tailwind.config = { corePlugins: { preflight: false } }</script>
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 </head>
 <body>
@@ -60,7 +58,7 @@
     <!-- STATS BAR DO DIA -->
 <div id="statsDayBar" style="background:var(--card2);border-bottom:1px solid var(--border);padding:8px 16px;">
   <div style="display:flex;align-items:center;justify-content:space-between;max-width:100%;">
-    <div style="display:flex;align-items:center;gap:16px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;flex:1;min-width:0;">
+    <div class="hide-scrollbar" style="display:flex;align-items:center;gap:16px;overflow-x:auto;-webkit-overflow-scrolling:touch;flex:1;min-width:0;">
       <div style="display:flex;align-items:center;gap:5px;flex-shrink:0;">
         <span style="width:6px;height:6px;border-radius:50%;background:var(--red);animation:pulse 1.5s infinite;display:inline-block;"></span>
         <span style="font-size:0.75rem;color:var(--white);font-weight:600;" id="sdLive">–</span>
@@ -352,8 +350,6 @@
     let LIVE_GAMES     = [];
     let UPCOMING_GAMES = [];
     let activeLeagueFilter = 'all';
-
-    const LEAGUE_NAMES = { BRA:'Brasileirão', ENG:'Premier League', ESP:'La Liga', ITA:'Serie A', GER:'Bundesliga', FRA:'Ligue 1' };
 
     // ── SKELETON HELPERS ──────────────────────────────────
     function showSkeletonGames(containerId, count) {
