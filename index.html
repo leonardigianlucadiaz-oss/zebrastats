@@ -89,6 +89,12 @@
           </svg>
           Entrar com Google
         </button>
+
+        <button class="btn" type="button" id="guestBtn"
+          style="background:transparent;border:1px dashed var(--border,#2a2a3e);color:var(--text-muted);margin-top:4px;">
+          <i data-lucide="eye" style="width:15px;height:15px;margin-right:6px;"></i>
+          Explorar sem cadastro
+        </button>
       </div>
 
       <p class="auth-footer">
@@ -153,7 +159,14 @@
         btn.textContent = 'Entrar';
         btn.disabled = false;
         let msg = 'E-mail ou senha incorretos.';
-        if (error.message?.includes('Email not confirmed')) msg = 'Confirme seu e-mail antes de entrar.';
+        if (error.message?.includes('Email not confirmed'))
+          msg = '📧 Confirme seu e-mail antes de entrar. Verifique sua caixa de entrada.';
+        else if (error.message?.includes('Invalid login credentials'))
+          msg = 'E-mail ou senha incorretos.';
+        else if (error.message?.includes('Too many requests'))
+          msg = 'Muitas tentativas. Aguarde alguns minutos.';
+        else if (error.message?.includes('network') || error.message?.includes('fetch'))
+          msg = 'Erro de conexão. Verifique sua internet.';
         document.getElementById('passError').textContent = msg;
         document.getElementById('passError').style.display = 'block';
         return;
@@ -181,10 +194,20 @@
     });
 
     // Login com Google
-    document.querySelector('.btn--outline')?.addEventListener('click', async function() {
+    document.getElementById('googleBtn')?.addEventListener('click', async function() {
       this.textContent = 'Redirecionando...';
       this.disabled = true;
       await ZebraAuth.authSignInGoogle();
+    });
+
+    // Entrar como convidado
+    document.getElementById('guestBtn')?.addEventListener('click', function() {
+      localStorage.setItem('zs_guest', '1');
+      localStorage.setItem('zs_user_name', 'Convidado');
+      localStorage.setItem('zs_user_plan', 'free');
+      const params = new URLSearchParams(location.search);
+      const next = params.get('next');
+      window.location.href = next ? decodeURIComponent(next) : 'home.html';
     });
 
     // Reset border on input

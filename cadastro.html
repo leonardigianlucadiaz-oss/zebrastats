@@ -233,24 +233,52 @@
         btn.textContent = 'Criar conta';
         btn.disabled = false;
         let msg = error.message || 'Erro ao criar conta.';
-        if (msg.includes('already registered')) msg = 'Este e-mail já está cadastrado.';
-        showError('email', 'emailError', msg);
+        if (msg.includes('already registered') || msg.includes('already been registered'))
+          msg = 'Este e-mail já está cadastrado. <a href="index.html" style="color:var(--green)">Fazer login</a>';
+        else if (msg.includes('network') || msg.includes('fetch'))
+          msg = 'Erro de conexão. Verifique sua internet.';
+        else if (msg.includes('Password should be'))
+          msg = 'Senha deve ter ao menos 6 caracteres.';
+        const el = document.getElementById('emailError');
+        el.innerHTML = msg;
+        el.style.display = 'block';
+        document.getElementById('email').style.borderColor = 'var(--red)';
         return;
       }
 
       // Salva dados locais para onboarding
       localStorage.setItem('zs_user_name',  name);
       localStorage.setItem('zs_user_email', email);
+      localStorage.removeItem('zs_guest');
       localStorage.removeItem('zs_onboarded');
 
-      // Verifica se precisa confirmar e-mail
-      if (data.user && !data.session) {
-        btn.textContent = 'Verifique seu e-mail';
-        showToast('Enviamos um e-mail de confirmação. Verifique sua caixa de entrada!');
-        setTimeout(() => window.location.href = 'index.html', 3500);
-      } else {
+      // Se confirmação de e-mail está desligada → session existe → vai direto
+      if (data.session) {
         window.location.href = 'onboarding.html';
+        return;
       }
+
+      // Confirmação de e-mail obrigatória → mostra instruções claras
+      btn.textContent = 'Conta criada!';
+      const card = document.querySelector('.auth-card');
+      card.innerHTML = `
+        <div style="text-align:center;padding:8px 0;">
+          <div style="font-size:3rem;margin-bottom:12px;">📧</div>
+          <h2 style="font-size:1.2rem;font-weight:700;color:var(--white);margin:0 0 10px;">Confirme seu e-mail</h2>
+          <p style="color:var(--text-muted);font-size:0.9rem;line-height:1.6;margin:0 0 20px;">
+            Enviamos um link de confirmação para<br>
+            <strong style="color:var(--white);">${email}</strong><br><br>
+            Clique no link do e-mail para ativar sua conta e depois volte aqui para entrar.
+          </p>
+          <a href="index.html" class="btn btn--primary" style="display:block;text-decoration:none;margin-bottom:10px;">
+            Ir para o Login
+          </a>
+          <p style="font-size:0.8rem;color:var(--text-muted);">
+            Não recebeu? Verifique a pasta de spam ou
+            <a href="cadastro.html" style="color:var(--green);">tente novamente</a>
+          </p>
+        </div>
+      `;
     });
 
     ['name','email','password','confirmPassword'].forEach(id => {
