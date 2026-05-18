@@ -186,7 +186,9 @@
 
   let activeLeague = 'all';
   let activeFilter = 'all';
-  let activeZebraLiga = 'all'; // FIX 4
+  // Carrega ligas extras persitidas (adicionadas pelo modal)
+  const _extraFaved = new Set(JSON.parse(localStorage.getItem('zs_faved_leagues_extra') || '[]'));
+  LEAGUES.forEach(l => { if (_extraFaved.has(l.id)) l.faved = true; });
 
   function ziClass(z) {
     if (z.zi >= 7) return 'grande';
@@ -206,7 +208,7 @@
     const allPill = document.createElement('div');
     allPill.className = `league-fav-pill${activeLeague === 'all' ? ' active-league' : ''}`;
     allPill.innerHTML = `<span class="league-fav-pill__label" style="padding:6px 14px;display:flex;align-items:center;gap:5px;"><i data-lucide="globe" style="width:13px;height:13px;"></i> Todas</span>`;
-    allPill.addEventListener('click', () => { activeLeague = 'all'; activeZebraLiga = 'all'; renderLeagueBar(); renderZebras(); lucide.createIcons(); });
+    allPill.addEventListener('click', () => { activeLeague = 'all'; renderLeagueBar(); renderZebras(); lucide.createIcons(); });
     bar.appendChild(allPill);
 
     LEAGUES.forEach(l => {
@@ -225,7 +227,6 @@
       `;
       pill.querySelector('[data-lid]').addEventListener('click', () => {
         activeLeague = l.id;
-        activeZebraLiga = l.id; // FIX 1 — sync zebra filter with league bar
         renderLeagueBar();
         renderZebras();
         loadLeagueCrests(l.id);
@@ -259,10 +260,6 @@
     const isPro = getUserPlan() !== 'free';
 
     let data = [...ZEBRAS];
-    // FIX 4 — liga filter using correctly declared activeZebraLiga
-    if (activeZebraLiga !== 'all') {
-      data = data.filter(z => z.lid === activeZebraLiga || z.league === activeZebraLiga);
-    }
     let list = data;
     if (activeLeague !== 'all') list = list.filter(z => z.lid === activeLeague);
     if (activeFilter !== 'all') list = list.filter(z => ziClass(z) === activeFilter);
@@ -477,6 +474,11 @@
       `;
       item.addEventListener('click', () => {
         l.faved = !l.faved;
+        // Persistir estado no localStorage
+        if (l.faved) _extraFaved.add(l.id); else _extraFaved.delete(l.id);
+        try { localStorage.setItem('zs_faved_leagues_extra', JSON.stringify([..._extraFaved])); } catch {}
+        // Sincroniza com favoritos globais (main.js)
+        toggleFavLeague(l.id, l.name);
         renderModalLeagues(query);
         renderLeagueBar();
         showToast(l.faved ? `⭐ ${l.name} adicionada` : `${l.name} removida`);

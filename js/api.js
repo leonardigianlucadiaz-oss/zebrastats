@@ -100,7 +100,7 @@ const ZebraAPI = (() => {
       const k = this.key(); if (!k) return null;
       try {
         const sep = path.includes('?') ? '&' : '?';
-        const r = await fetch(`${this.BASE}${path}${sep}X-Auth-Token=${k}`);
+        const r = await fetch(`${this.BASE}${path}`, { headers: { 'X-Auth-Token': k } });
         if (!r.ok) { console.warn(`[FD] ${r.status} — ${path}`); return null; }
         const data = await r.json();
         _cache.set(ck, data);
@@ -250,7 +250,7 @@ const ZebraAPI = (() => {
 
     // Retorna mapa: "HomeTeam|AwayTeam" → { homeOdd, awayOdd }
     // Usa proxy (odds pré-jogo com bookmakers reais da Europa)
-    async getOddsMap(lid) {
+    async getOddsMap(lid, daysFrom = 3) {
       // Tenta via proxy primeiro (chave no servidor)
       let games = await _proxy.fetch('odds', { lid });
       // Fallback: direct com chave local
@@ -601,7 +601,7 @@ const ZebraAPI = (() => {
       const zebras = [];
       for (const m of matchData.matches) {
         const t = transform.fdMatch(m);
-        if (!t?.isFinished || !t.hs == null || !t.as == null) continue;
+        if (!t?.isFinished || t.hs == null || t.as == null) continue;
         if (t.winner === 'DRAW' || !t.winner) continue;
 
         const homePos  = posMap[t.homeFull]  || posMap[t.home];

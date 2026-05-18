@@ -868,9 +868,16 @@ function updatePushUI(state) {
 }
 
 (async function initPushUI() {
-  if (!('PushManager' in window)) {
+  // Verifica suporte a Notifications e PushManager (ausente em iOS Safari e alguns browsers)
+  if (!('Notification' in window) || !('PushManager' in window)) {
     const card = document.getElementById('pushCard');
-    if (card) card.style.display = 'none';
+    if (card) {
+      card.innerHTML = `<div style="display:flex;align-items:center;gap:10px;padding:14px;color:var(--gray);font-size:0.8125rem;">
+        <i data-lucide="bell-off" style="width:18px;height:18px;flex-shrink:0;"></i>
+        Notificações push não são suportadas neste navegador.
+      </div>`;
+      lucide.createIcons({ nodes: [card] });
+    }
     return;
   }
   const permission = Notification.permission;

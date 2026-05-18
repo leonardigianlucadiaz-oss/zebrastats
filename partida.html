@@ -134,18 +134,24 @@
     <!-- TAB: RESUMO -->
     <div id="tab-resumo">
       <div class="section-header"><span class="section-title"><i data-lucide="list" class="sec-ic"></i>Linha do Tempo</span></div>
+      <!-- Barra de 90min + eventos (mesmo container do tab-zebra, preenchido por initTimeline) -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px;margin-bottom:12px;">
+        <div style="position:relative;height:4px;background:var(--border);border-radius:2px;margin:18px 0 24px;">
+          <div style="position:absolute;left:0;top:0;height:100%;width:62%;background:linear-gradient(90deg,var(--green),var(--gold));border-radius:2px;"></div>
+          <div id="timelineDotsR"></div>
+        </div>
+        <div id="timelineEventsR" style="display:flex;flex-direction:column;gap:6px;"></div>
+      </div>
 
-      <!-- Timeline rendered by initTimeline() into #timelineEvents (FIX 1: static duplicate removed) -->
-
-      <div class="section-header" style="margin-top:16px;"><span class="section-title"><i data-lucide="users" class="sec-ic"></i>Escalações</span></div>
+      <div class="section-header" style="margin-top:4px;"><span class="section-title"><i data-lucide="users" class="sec-ic"></i>Escalações</span></div>
       <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px 16px;">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
           <div>
-            <div data-team="home" style="font-size:0.75rem;font-weight:700;color:var(--gray);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px;">Botafogo</div>
+            <div id="labelHome" style="font-size:0.75rem;font-weight:700;color:var(--gray);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px;">Casa</div>
             <div style="display:flex;flex-direction:column;gap:5px;font-size:0.8125rem;" id="squad-bot"></div>
           </div>
           <div>
-            <div data-team="away" style="font-size:0.75rem;font-weight:700;color:var(--gray);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px;">Flamengo</div>
+            <div id="labelAway" style="font-size:0.75rem;font-weight:700;color:var(--gray);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px;">Fora</div>
             <div style="display:flex;flex-direction:column;gap:5px;font-size:0.8125rem;" id="squad-fla"></div>
           </div>
         </div>
@@ -316,6 +322,7 @@
 <div class="toast" id="toast"></div>
 
 <script src="js/config.js"></script>
+<script src="js/zebra-engine.js"></script>
 <script src="js/api.js"></script>
 <script src="js/share.js"></script>
 <script src="js/main.js"></script>
@@ -340,16 +347,17 @@
   const _urlAwayId     = _urlParams.get('awayId')     || null;
 
   // Apply URL params to visible DOM if present
-  // FIX 15 — update all [data-team="home"/"away"] elements from URL params
   if (_urlHome) {
-    document.querySelectorAll('[id*="HomeTeam"],[id*="homeTeam"],[class*="home-team"],[data-team="home"]').forEach(el => el.textContent = _urlHome);
     const hn = document.getElementById('matchHomeName');
     if (hn) hn.textContent = _urlHome;
+    const lh = document.getElementById('labelHome');
+    if (lh) lh.textContent = _urlHome;
   }
   if (_urlAway) {
-    document.querySelectorAll('[id*="AwayTeam"],[id*="awayTeam"],[class*="away-team"],[data-team="away"]').forEach(el => el.textContent = _urlAway);
     const an = document.getElementById('matchAwayName');
     if (an) an.textContent = _urlAway;
+    const la = document.getElementById('labelAway');
+    if (la) la.textContent = _urlAway;
   }
 
   // 1. Score
@@ -711,51 +719,51 @@
   });
 
   // ── TIMELINE DE EVENTOS ─────────────────────────────────────────
-  function initTimeline() {
-    const EVENTS = [
-      { min:14, type:'goal',   team:'home', player:'Arrascaeta', icon:'circle-dot', color:'var(--green)' },
-      { min:27, type:'yellow', team:'away', player:'Casemiro',   icon:'square',     color:'var(--gold)'  },
-      { min:41, type:'goal',   team:'away', player:'Salah',      icon:'circle-dot', color:'var(--green)' },
-      { min:57, type:'red',    team:'home', player:'Léo Ortiz',  icon:'square',     color:'var(--red)'   },
-      { min:73, type:'goal',   team:'home', player:'Pedro',      icon:'circle-dot', color:'var(--green)' },
-      { min:88, type:'goal',   team:'away', player:'Núñez',      icon:'circle-dot', color:'var(--green)' },
-    ];
-
-    const dotsContainer = document.getElementById('timelineDots');
-    const eventsContainer = document.getElementById('timelineEvents');
-    if (!dotsContainer || !eventsContainer) return;
-
-    dotsContainer.innerHTML = '';
-    eventsContainer.innerHTML = '';
-
-    EVENTS.forEach(ev => {
-      // Dot on bar
+  // Preenche um par de containers (dots + eventos) com o array de eventos
+  function _fillTimeline(dotsId, eventsId, events) {
+    const dotsEl   = document.getElementById(dotsId);
+    const eventsEl = document.getElementById(eventsId);
+    if (!dotsEl || !eventsEl) return;
+    dotsEl.innerHTML   = '';
+    eventsEl.innerHTML = '';
+    events.forEach((ev, idx) => {
       const dot = document.createElement('div');
       dot.style.cssText = `position:absolute;top:50%;left:${ev.min/90*100}%;transform:translate(-50%,-50%);
-        width:12px;height:12px;border-radius:50%;background:${ev.color};border:2px solid var(--bg);
-        display:flex;align-items:center;justify-content:center;z-index:1;`;
-      const minLabel = document.createElement('span');
-      minLabel.style.cssText = `position:absolute;top:-18px;left:50%;transform:translateX(-50%);
-        font-size:0.5625rem;color:var(--gray);white-space:nowrap;`;
-      minLabel.textContent = `${ev.min}'`;
-      dot.appendChild(minLabel);
-      dotsContainer.appendChild(dot);
+        width:12px;height:12px;border-radius:50%;background:${ev.color};border:2px solid var(--bg);z-index:1;`;
+      const ml = document.createElement('span');
+      ml.style.cssText = 'position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-size:0.5625rem;color:var(--gray);white-space:nowrap;';
+      ml.textContent = `${ev.min}'`;
+      dot.appendChild(ml);
+      dotsEl.appendChild(dot);
 
-      // Event row
       const row = document.createElement('div');
-      row.style.cssText = `display:flex;align-items:center;gap:10px;padding:6px 0;
-        ${EVENTS.indexOf(ev) < EVENTS.length-1 ? 'border-bottom:1px solid var(--border);' : ''}`;
+      row.style.cssText = `display:flex;align-items:center;gap:10px;padding:6px 0;${idx < events.length-1 ? 'border-bottom:1px solid var(--border);' : ''}`;
       const isHome = ev.team === 'home';
+      const icon = ev.type === 'goal' ? '⚽' : ev.type === 'yellow' ? '🟨' : '🟥';
       row.innerHTML = `
         <span style="font-size:0.75rem;font-weight:700;color:var(--gray);min-width:28px;text-align:right;">${ev.min}'</span>
         <span style="width:8px;height:8px;border-radius:50%;background:${ev.color};flex-shrink:0;display:inline-block;"></span>
-        <span style="font-size:0.875rem;flex:1;${isHome ? '' : 'text-align:right;color:var(--gray);'}">${isHome ? ev.player : ''}</span>
-        <span style="font-size:0.75rem;color:var(--gray);text-align:center;">
-          ${ev.type === 'goal' ? '⚽' : ev.type === 'yellow' ? '🟨' : '🟥'}
-        </span>
-        <span style="font-size:0.875rem;flex:1;${isHome ? 'text-align:right;color:var(--gray);' : ''}">${isHome ? '' : ev.player}</span>`;
-      eventsContainer.appendChild(row);
+        <span style="font-size:0.875rem;flex:1;${isHome?'':'text-align:right;color:var(--gray);'}">${isHome?ev.player:''}</span>
+        <span style="font-size:0.75rem;color:var(--gray);text-align:center;">${icon}</span>
+        <span style="font-size:0.875rem;flex:1;${isHome?'text-align:right;color:var(--gray);':''}">${isHome?'':ev.player}</span>`;
+      eventsEl.appendChild(row);
     });
+  }
+
+  function initTimeline() {
+    const home = _urlHome || 'Casa';
+    const away = _urlAway || 'Fora';
+    const EVENTS = [
+      { min:14, type:'goal',   team:'home', player:home, color:'var(--green)' },
+      { min:27, type:'yellow', team:'away', player:away, color:'var(--gold)'  },
+      { min:41, type:'goal',   team:'away', player:away, color:'var(--green)' },
+      { min:57, type:'red',    team:'home', player:home, color:'var(--red)'   },
+      { min:73, type:'goal',   team:'home', player:home, color:'var(--green)' },
+      { min:88, type:'goal',   team:'away', player:away, color:'var(--green)' },
+    ];
+    // Popula aba Zebra e aba Resumo com os mesmos eventos
+    _fillTimeline('timelineDots',  'timelineEvents',  EVENTS);
+    _fillTimeline('timelineDotsR', 'timelineEventsR', EVENTS);
   }
 
   // ── ODDS COMPARATIVO ────────────────────────────────────────────
@@ -896,9 +904,13 @@
   function renderRealTimeline(events) {
     const dotsEl   = document.getElementById('timelineDots');
     const eventsEl = document.getElementById('timelineEvents');
+    const dotsElR  = document.getElementById('timelineDotsR');
+    const eventsElR= document.getElementById('timelineEventsR');
     if (!dotsEl || !eventsEl) return;
     dotsEl.innerHTML   = '';
     eventsEl.innerHTML = '';
+    if (dotsElR)  dotsElR.innerHTML  = '';
+    if (eventsElR) eventsElR.innerHTML = '';
 
     const filtered = events.filter(e =>
       ['Goal','Card','subst'].includes(e.type) && e.time?.elapsed != null
@@ -938,6 +950,9 @@
         <span style="font-size:0.75rem;color:var(--gray);text-align:center;">${icon}</span>
         <span style="font-size:0.875rem;flex:1;${isHome ? 'text-align:right;color:var(--gray);' : ''}">${isHome ? '' : player}</span>`;
       eventsEl.appendChild(row);
+      // Espelha na aba Resumo
+      if (dotsElR)  dotsElR.appendChild(dot.cloneNode(true));
+      if (eventsElR) eventsElR.appendChild(row.cloneNode(true));
     });
   }
 
@@ -946,10 +961,11 @@
     const home = lineups[0], away = lineups[1];
     const homeEl = document.getElementById('squad-bot');
     const awayEl = document.getElementById('squad-fla');
-    const homeLbl = document.querySelector('[data-team="home"]');
-    const awayLbl = document.querySelector('[data-team="away"]');
-    if (homeLbl) homeLbl.textContent = home.team?.name || _urlHome || 'Casa';
-    if (awayLbl) awayLbl.textContent = away.team?.name || _urlAway || 'Fora';
+    // Atualiza labels com nomes reais
+    const lh = document.getElementById('labelHome');
+    const la = document.getElementById('labelAway');
+    if (lh) lh.textContent = home.team?.name || _urlHome || 'Casa';
+    if (la) la.textContent = away.team?.name || _urlAway || 'Fora';
     const render = (el, lineup) => {
       if (!el) return;
       el.innerHTML = '';

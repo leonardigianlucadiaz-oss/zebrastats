@@ -291,11 +291,11 @@
     { id:'GER', name:'Bundesliga',        flag:'🇩🇪', flagCdn:'de',     sdbId:'4331' },
     { id:'FRA', name:'Ligue 1',           flag:'🇫🇷', flagCdn:'fr',     sdbId:'4334' },
     { id:'UCL', name:'Champions League',  flag:'🌍',  flagCdn:'eu',     sdbId:'4480' },
-    { id:'PRT', name:'Primeira Liga',     flag:'🇵🇹', flagCdn:'pt',     sdbId:'4344' },
+    { id:'POR', name:'Primeira Liga',     flag:'🇵🇹', flagCdn:'pt',     sdbId:'4344' },
     { id:'ARG', name:'Liga Argentina',    flag:'🇦🇷', flagCdn:'ar',     sdbId:'4406' },
     { id:'MEX', name:'Liga MX',           flag:'🇲🇽', flagCdn:'mx',     sdbId:'4350' },
     { id:'NED', name:'Eredivisie',        flag:'🇳🇱', flagCdn:'nl',     sdbId:'4337' },
-    { id:'USA', name:'MLS',               flag:'🇺🇸', flagCdn:'us',     sdbId:'4346' },
+    { id:'MLS', name:'MLS',               flag:'🇺🇸', flagCdn:'us',     sdbId:'4346' },
   ];
 
   // Times sugeridos (populares)
@@ -339,19 +339,27 @@
     loadLeagueLogosForOnboarding();
   }
 
-  async function loadLeagueLogosForOnboarding() {
+  function loadLeagueLogosForOnboarding() {
+    // Usa logos pré-cacheados de LEAGUE_LOGOS (main.js) — sem chamada de API
+    LEAGUES.forEach(l => {
+      const badge = (window.LEAGUE_LOGOS || {})[l.id] || '';
+      if (badge) {
+        const el = document.getElementById(`lf-${l.id}`);
+        if (el) el.innerHTML = `<img src="${badge}" class="lc-logo" onerror="this.parentElement.innerHTML='${l.flag}';">`;
+      }
+    });
+    // Tenta carregar logos via API para ligas sem cache (assíncrono, sem bloquear)
     if (!window.ZebraAPI) return;
-    for (const l of LEAGUES.slice(0, 8)) {
+    LEAGUES.forEach(async l => {
+      if ((window.LEAGUE_LOGOS || {})[l.id]) return; // já tem
       try {
-        // Usa sdbId numérico (ex: '4328') em vez do código da liga (ex: 'ENG')
-        const data = await ZebraAPI.sportsDb.getLeagueInfo(l.sdbId || l.id);
-        const badge = data?.leagues?.[0]?.strBadge || data?.leagues?.[0]?.strLogo || '';
+        const badge = await loadLeagueLogo(l.id);
         if (badge) {
           const el = document.getElementById(`lf-${l.id}`);
-          if (el) el.innerHTML = `<img src="${badge}" class="lc-logo" onerror="this.parentElement.textContent='${l.flag}';">`;
+          if (el) el.innerHTML = `<img src="${badge}" class="lc-logo" onerror="this.parentElement.innerHTML='${l.flag}';">`;
         }
       } catch {}
-    }
+    });
   }
 
   function toggleLeague(id, name, card) {
