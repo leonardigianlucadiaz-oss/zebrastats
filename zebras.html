@@ -208,7 +208,7 @@
     const allPill = document.createElement('div');
     allPill.className = `league-fav-pill${activeLeague === 'all' ? ' active-league' : ''}`;
     allPill.innerHTML = `<span class="league-fav-pill__label" style="padding:6px 14px;display:flex;align-items:center;gap:5px;"><i data-lucide="globe" style="width:13px;height:13px;"></i> Todas</span>`;
-    allPill.addEventListener('click', () => { activeLeague = 'all'; renderLeagueBar(); renderZebras(); lucide.createIcons(); });
+    allPill.addEventListener('click', () => { activeLeague = 'all'; renderLeagueBar(); renderZebras(); initRealData(); lucide.createIcons(); });
     bar.appendChild(allPill);
 
     LEAGUES.forEach(l => {
@@ -228,7 +228,7 @@
       pill.querySelector('[data-lid]').addEventListener('click', () => {
         activeLeague = l.id;
         renderLeagueBar();
-        renderZebras();
+        renderZebras(); initRealData();
         loadLeagueCrests(l.id);
       });
       pill.querySelector('[data-star]').addEventListener('click', e => {
@@ -570,25 +570,33 @@
     if (typeof ZebraAPI === 'undefined' || !ZebraAPI.isConfigured.footballData()) return;
     if (typeof ZebraEngine === 'undefined') return;
 
-    const lid = (activeLeague && activeLeague !== 'all') ? activeLeague.toUpperCase() : 'ENG'; // FIX 6
+    const FETCH_ALL = ['ENG','ESP','ITA','GER','BRA','FRA','POR'];
+    const lid = (activeLeague && activeLeague !== 'all') ? activeLeague.toUpperCase() : null;
     try {
-      const realZebras = await ZebraAPI.fetchRealZebras(lid, 15);
-      if (!realZebras.length) return;
+      let allZebras = [];
+      if (lid) {
+        allZebras = await ZebraAPI.fetchRealZebras(lid, 20);
+      } else {
+        const results = await Promise.allSettled(
+          FETCH_ALL.map(l => ZebraAPI.fetchRealZebras(l, 10))
+        );
+        allZebras = results
+          .filter(r => r.status === 'fulfilled' && Array.isArray(r.value))
+          .flatMap(r => r.value)
+          .sort((a, b) => b.zi - a.zi);
+      }
+      if (!allZebras.length) return;
       ZEBRAS.length = 0;
-      ZEBRAS.push(...realZebras);
+      ZEBRAS.push(...allZebras);
       renderZebras();
       const countEl = document.getElementById('zebraCount');
-      if (countEl) countEl.textContent = `${realZebras.length} zebras reais ⚡`;
-
-      // Calculate day-of-week distribution for heatmap
+      if (countEl) countEl.textContent = `${allZebras.length} zebras reais ⚡`;
       const dayCounts = [0,0,0,0,0,0,0];
-      realZebras.forEach(z => {
+      allZebras.forEach(z => {
         if (z.date) {
-          // z.date is "DD/MM" format
           const [d,m] = z.date.split('/').map(Number);
           const dt = new Date(new Date().getFullYear(), m-1, d);
-          const dow = dt.getDay(); // 0=Sun … 6=Sat
-          dayCounts[dow]++;
+          dayCounts[dt.getDay()]++;
         }
       });
       buildHeatmap(dayCounts);
