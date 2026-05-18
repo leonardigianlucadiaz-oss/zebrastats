@@ -327,7 +327,7 @@
 
     <!-- SAIR -->
     <div style="padding:16px;">
-      <button class="profile-menu-item profile-menu-item--red" style="border-radius:var(--radius-md);border:1px solid var(--border);" onclick="confirmLogout()">
+      <button class="profile-menu-item profile-menu-item--red" style="border-radius:var(--radius-md);border:1px solid var(--border);" onclick="ZebraAuth.authSignOut()">
         <div class="profile-menu-item__icon"><i data-lucide="log-out" style="width:18px;height:18px;"></i></div>
         <div class="profile-menu-item__text">
           <div class="profile-menu-item__label">Sair da Conta</div>
@@ -443,6 +443,10 @@
 
 <div class="toast" id="toast"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/db.js"></script>
+<script src="js/auth-guard.js"></script>
 <script src="js/config.js"></script>
 <script src="js/api.js"></script>
 <script src="js/main.js"></script>
@@ -683,6 +687,9 @@
     closeModal('editDadosModal');
     showToast('✓ Dados atualizados!');
   };
+
+  // Inicializa dados reais
+  ZebraAuth.initAuthUI();
 
   lucide.createIcons();
 </script>

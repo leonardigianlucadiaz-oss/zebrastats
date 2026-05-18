@@ -162,6 +162,8 @@
   </div>
 
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="js/auth.js"></script>
   <script src="js/main.js"></script>
   <script>
     // Toggle password buttons
@@ -193,8 +195,15 @@
       label.style.color = val.length > 0 ? colors[strength - 1] : '';
     });
 
-    // Form validation + redirect
-    document.getElementById('registerForm').addEventListener('submit', function(e) {
+    function showError(inputId, errorId, msg) {
+      document.getElementById(inputId).style.borderColor = 'var(--red)';
+      const el = document.getElementById(errorId);
+      el.textContent = msg;
+      el.style.display = 'block';
+    }
+
+    // Form validation + Supabase signUp
+    document.getElementById('registerForm').addEventListener('submit', async function(e) {
       e.preventDefault();
       const name    = document.getElementById('name').value.trim();
       const email   = document.getElementById('email').value.trim();
@@ -209,42 +218,40 @@
         document.getElementById(id).style.display = 'none';
       });
 
-      if (!name || name.length < 2) {
-        showError('name', 'nameError', 'Digite seu nome completo.');
-        valid = false;
-      }
-      if (!email || !/\S+@\S+\.\S+/.test(email)) {
-        showError('email', 'emailError', 'Digite um e-mail válido.');
-        valid = false;
-      }
-      if (!pass || pass.length < 6) {
-        showError('password', 'passError', 'Senha deve ter ao menos 6 caracteres.');
-        valid = false;
-      }
-      if (pass !== confirm) {
-        showError('confirmPassword', 'confirmError', 'As senhas não coincidem.');
-        valid = false;
+      if (!name || name.length < 2) { showError('name','nameError','Digite seu nome completo.'); valid=false; }
+      if (!email || !/\S+@\S+\.\S+/.test(email)) { showError('email','emailError','Digite um e-mail válido.'); valid=false; }
+      if (!pass || pass.length < 6) { showError('password','passError','Senha deve ter ao menos 6 caracteres.'); valid=false; }
+      if (pass !== confirm) { showError('confirmPassword','confirmError','As senhas não coincidem.'); valid=false; }
+      if (!valid) return;
+
+      const btn = document.getElementById('registerBtn');
+      btn.textContent = 'Criando conta...';
+      btn.disabled = true;
+
+      const { data, error } = await ZebraAuth.authSignUp(name, email, pass);
+      if (error) {
+        btn.textContent = 'Criar conta';
+        btn.disabled = false;
+        let msg = error.message || 'Erro ao criar conta.';
+        if (msg.includes('already registered')) msg = 'Este e-mail já está cadastrado.';
+        showError('email', 'emailError', msg);
+        return;
       }
 
-      if (valid) {
-        const btn = document.getElementById('registerBtn');
-        btn.textContent = 'Criando conta...';
-        btn.disabled = true;
-        // Salva nome para personalização no onboarding
-        localStorage.setItem('zs_user_name', name);
-        localStorage.setItem('zs_user_email', email);
-        // Remove flag de onboarding caso usuário refaça cadastro
-        localStorage.removeItem('zs_onboarded');
-        setTimeout(() => window.location.href = 'onboarding.html', 900);
+      // Salva dados locais para onboarding
+      localStorage.setItem('zs_user_name',  name);
+      localStorage.setItem('zs_user_email', email);
+      localStorage.removeItem('zs_onboarded');
+
+      // Verifica se precisa confirmar e-mail
+      if (data.user && !data.session) {
+        btn.textContent = 'Verifique seu e-mail';
+        showToast('Enviamos um e-mail de confirmação. Verifique sua caixa de entrada!');
+        setTimeout(() => window.location.href = 'index.html', 3500);
+      } else {
+        window.location.href = 'onboarding.html';
       }
     });
-
-    function showError(inputId, errorId, msg) {
-      document.getElementById(inputId).style.borderColor = 'var(--red)';
-      const el = document.getElementById(errorId);
-      el.textContent = msg;
-      el.style.display = 'block';
-    }
 
     ['name','email','password','confirmPassword'].forEach(id => {
       document.getElementById(id).addEventListener('input', function() {
