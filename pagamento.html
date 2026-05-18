@@ -234,6 +234,9 @@
 
 <div class="toast" id="toast"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/auth-guard.js"></script>
 <script src="js/main.js"></script>
 <script>
   // ── CONFIGURAÇÃO DO PLANO ─────────────────────────────────────
@@ -315,22 +318,57 @@
   }
 
   // ── CONFIRMAR PAGAMENTO ───────────────────────────────────────
+  async function processPayment() {
+    if (!_validatePaymentForm()) return;
+
+    const btn = document.getElementById('confirmBtn');
+    btn.textContent = 'Processando...';
+    btn.disabled = true;
+
+    try {
+      const user = await ZebraAuth.getSessionUser();
+      if (!user) { window.location.href = 'index.html'; return; }
+
+      const STRIPE_PRICE_ID = 'price_1QYourPriceIdHere'; // substituir após criar produto no Stripe
+      const PROXY = 'https://wjiicdzpjxacqjwxmtqy.supabase.co/functions/v1/create-checkout';
+
+      const sb = ZebraAuth.getSupabase();
+      const { data: { session: authSession } } = await sb.auth.getSession();
+
+      const res = await fetch(PROXY, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authSession.access_token}`,
+          'apikey': 'sb_publishable_fpVIYjV2j7N39MWz81Lumg_WjODiChX',
+        },
+        body: JSON.stringify({
+          priceId: STRIPE_PRICE_ID,
+          userId:  user.id,
+          successUrl: window.location.origin + '/home.html?upgrade=success',
+          cancelUrl:  window.location.origin + '/pagamento.html',
+        })
+      });
+
+      const { url, error } = await res.json();
+      if (error || !url) throw new Error(error || 'Erro ao criar sessão de pagamento');
+      window.location.href = url;
+
+    } catch(err) {
+      showToast('Erro ao processar pagamento: ' + err.message);
+      btn.textContent = 'Confirmar Pagamento';
+      btn.disabled = false;
+    }
+  }
+
   document.getElementById('confirmBtn').addEventListener('click', function() {
     const method = document.querySelector('.payment-method-tab.active').dataset.method;
-
     if (method === 'card') {
-      if (!_validatePaymentForm()) return;
+      processPayment();
+    } else {
+      // Pix/Boleto: demo mode (awaiting Stripe integration for these methods)
+      showToast('Método disponível em breve');
     }
-
-    this.textContent = 'Processando...';
-    this.disabled = true;
-    this.style.opacity = '0.7';
-
-    showToast('🎭 Modo demo — pagamento simulado');
-    setTimeout(() => {
-      setUserPlan('pro');
-      showSuccessScreen();
-    }, 2200);
   });
 
   // ── TELA DE SUCESSO ───────────────────────────────────────────

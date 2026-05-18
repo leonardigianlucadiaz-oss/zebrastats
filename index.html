@@ -80,8 +80,9 @@
 
         <div class="divider--text">ou continue com</div>
 
-        <button class="btn btn--outline" type="button" onclick="window.location.href='home.html'">
-          Entrar como convidado
+        <button class="btn btn--outline" type="button" id="googleBtn">
+          <i data-lucide="chrome" style="width:16px;height:16px;margin-right:8px;"></i>
+          Entrar com Google
         </button>
       </div>
 
@@ -92,9 +93,11 @@
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="js/auth.js"></script>
   <script src="js/main.js"></script>
   <script>
-    // Toggle password visibility
+    // Toggle password
     document.getElementById('togglePass').addEventListener('click', function() {
       const input = document.getElementById('password');
       input.type = input.type === 'password' ? 'text' : 'password';
@@ -102,8 +105,20 @@
       lucide.createIcons();
     });
 
-    // Form validation + redirect
-    document.getElementById('loginForm').addEventListener('submit', function(e) {
+    // Verifica se já está logado → redireciona
+    (async () => {
+      const user = await ZebraAuth.getSessionUser();
+      if (user) { window.location.replace('home.html'); return; }
+
+      // Verifica redirect após reset de senha
+      const params = new URLSearchParams(location.search);
+      if (params.get('reset') === '1') {
+        showToast('Senha redefinida! Faça login com a nova senha.');
+      }
+    })();
+
+    // Form submit — login real
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
       e.preventDefault();
       const email = document.getElementById('email').value.trim();
       const pass  = document.getElementById('password').value;
@@ -115,28 +130,61 @@
       if (!email || !/\S+@\S+\.\S+/.test(email)) {
         document.getElementById('emailError').textContent = 'Digite um e-mail válido.';
         document.getElementById('emailError').style.display = 'block';
-        document.getElementById('email').style.borderColor = 'var(--red)';
         valid = false;
       }
-
       if (!pass || pass.length < 6) {
         document.getElementById('passError').textContent = 'Senha deve ter ao menos 6 caracteres.';
         document.getElementById('passError').style.display = 'block';
-        document.getElementById('password').style.borderColor = 'var(--red)';
         valid = false;
       }
+      if (!valid) return;
 
-      if (valid) {
-        const btn = document.getElementById('loginBtn');
-        btn.textContent = 'Entrando...';
-        btn.disabled = true;
-        setTimeout(() => window.location.href = 'home.html', 800);
+      const btn = document.getElementById('loginBtn');
+      btn.textContent = 'Entrando...';
+      btn.disabled = true;
+
+      const { data, error } = await ZebraAuth.authSignIn(email, pass);
+      if (error) {
+        btn.textContent = 'Entrar';
+        btn.disabled = false;
+        let msg = 'E-mail ou senha incorretos.';
+        if (error.message?.includes('Email not confirmed')) msg = 'Confirme seu e-mail antes de entrar.';
+        document.getElementById('passError').textContent = msg;
+        document.getElementById('passError').style.display = 'block';
+        return;
       }
+
+      // Login bem-sucedido
+      const params = new URLSearchParams(location.search);
+      const next = params.get('next');
+      window.location.href = next ? decodeURIComponent(next) : 'home.html';
+    });
+
+    // Botão "Esqueci minha senha"
+    document.querySelector('a.text-green')?.addEventListener('click', async function(e) {
+      e.preventDefault();
+      const email = document.getElementById('email').value.trim();
+      if (!email || !/\S+@\S+\.\S+/.test(email)) {
+        document.getElementById('emailError').textContent = 'Digite seu e-mail primeiro.';
+        document.getElementById('emailError').style.display = 'block';
+        return;
+      }
+      this.textContent = 'Enviando...';
+      const { error } = await ZebraAuth.authResetPassword(email);
+      this.textContent = error ? 'Erro ao enviar' : 'E-mail enviado!';
+      if (!error) showToast('Verifique sua caixa de entrada para redefinir a senha.');
+    });
+
+    // Login com Google
+    document.querySelector('.btn--outline')?.addEventListener('click', async function() {
+      this.textContent = 'Redirecionando...';
+      this.disabled = true;
+      await ZebraAuth.authSignInGoogle();
     });
 
     // Reset border on input
     ['email','password'].forEach(id => {
-      document.getElementById(id).addEventListener('input', function() {
+      document.getElementById(id)?.addEventListener('input', function() {
         this.style.borderColor = '';
       });
     });
