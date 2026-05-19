@@ -56,9 +56,9 @@
     </nav>
     <div class="sidebar__footer">
       <div class="sidebar__user">
-        <div class="sidebar__user-avatar">G</div>
+        <div class="sidebar__user-avatar">·</div>
         <div class="sidebar__user-info">
-          <div class="sidebar__user-name">Gianluca</div>
+          <div class="sidebar__user-name">·</div>
           <div class="sidebar__user-plan">Plano Free</div>
         </div>
       </div>
@@ -284,6 +284,7 @@
 <div class="toast" id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/config.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/auth-guard.js"></script>
 <script src="js/main.js"></script>
@@ -381,21 +382,32 @@
       const STRIPE_PRICE_ID = 'price_1QYourPriceIdHere'; // substituir após criar produto no Stripe
       const PROXY = 'https://wjiicdzpjxacqjwxmtqy.supabase.co/functions/v1/create-checkout';
 
+      // Fix #12: bloqueia se o price ID ainda é placeholder
+      if (STRIPE_PRICE_ID.includes('YourPriceId')) {
+        showToast('⚙️ Pagamento em configuração. Tente novamente em breve.');
+        btn.textContent = 'Confirmar Pagamento';
+        btn.disabled = false;
+        return;
+      }
+
       const sb = ZebraAuth.getSupabase();
       const { data: { session: authSession } } = await sb.auth.getSession();
+
+      // Fix #1: usa BASE_URL para URLs de redirect (GitHub Pages compatível)
+      const base = (typeof ZEBRA_CONFIG !== 'undefined') ? ZEBRA_CONFIG.BASE_URL : window.location.origin;
 
       const res = await fetch(PROXY, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${authSession.access_token}`,
-          'apikey': 'sb_publishable_fpVIYjV2j7N39MWz81Lumg_WjODiChX',
+          'apikey': ZEBRA_CONFIG.SUPABASE_ANON,
         },
         body: JSON.stringify({
-          priceId: STRIPE_PRICE_ID,
-          userId:  user.id,
-          successUrl: window.location.origin + '/home.html?upgrade=success',
-          cancelUrl:  window.location.origin + '/pagamento.html',
+          priceId:    STRIPE_PRICE_ID,
+          userId:     user.id,
+          successUrl: `${base}/home.html?upgrade=success`,
+          cancelUrl:  `${base}/pagamento.html`,
         })
       });
 

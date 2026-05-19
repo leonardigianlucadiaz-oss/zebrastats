@@ -6,11 +6,17 @@
 (async function _authGuard() {
   const PUBLIC_PAGES = ['index.html', 'cadastro.html', 'onboarding.html', ''];
   const currentPage  = location.pathname.split('/').pop() || 'index.html';
+
+  // Páginas públicas não precisam de verificação
   if (PUBLIC_PAGES.includes(currentPage)) return;
 
+  // Fix #5: esconde o conteúdo imediatamente para evitar flash de dados protegidos.
+  // O body existe aqui porque os scripts estão no final do <body>.
+  if (document.body) document.body.style.visibility = 'hidden';
+
   // ── MODO CONVIDADO ─────────────────────────────────────────
-  // Se usuário entrou como convidado, permite acesso sem Supabase
   if (localStorage.getItem('zs_guest') === '1') {
+    document.body.style.visibility = ''; // restaura para convidado
     document.addEventListener('DOMContentLoaded', () => {
       _injectGuestBanner();
       _injectGuestSidebarInfo();
@@ -26,17 +32,24 @@
 
   const user = await ZebraAuth.getSessionUser();
 
+  // Restaura visibilidade após verificação (usuário autenticado ou redirect)
+  if (document.body) document.body.style.visibility = '';
+
   if (!user) {
     const redirect = encodeURIComponent(location.pathname + location.search);
     window.location.replace(`index.html?next=${redirect}`);
     return;
   }
 
-  // Verifica se a página exige PRO
+  // Fix #2: verifica PRO a partir da tabela profiles (não user_metadata)
+  // para detectar upgrades via Stripe corretamente
   const isProPage = document.documentElement.dataset.proOnly === 'true';
-  if (isProPage && !ZebraAuth.isPro(user)) {
-    window.location.replace('assinatura.html');
-    return;
+  if (isProPage) {
+    const pro = await ZebraAuth.isProFromDB(user.id);
+    if (!pro) {
+      window.location.replace('assinatura.html');
+      return;
+    }
   }
 
   // Inicializa UI com dados reais do usuário

@@ -18,7 +18,15 @@ const ZEBRA_CONFIG = {
   SUPABASE_ANON: 'sb_publishable_fpVIYjV2j7N39MWz81Lumg_WjODiChX',
   PROXY_BASE:    'https://wjiicdzpjxacqjwxmtqy.supabase.co/functions/v1/zebra-proxy',
 
+  // ── BASE_URL: compatível com GitHub Pages em subdiretório (#1) ──
+  // Ex: https://user.github.io/zebrastats  (não /home.html)
+  get BASE_URL() {
+    return window.location.origin +
+      window.location.pathname.replace(/\/[^/]*$/, '');
+  },
+
   // ── Indica se o proxy está disponível ───────────────────────
+  // Proxy é a estratégia primária; a api.js tem fallback por chamada direta (#4)
   get proxyEnabled() { return true; },
 
   // ── Legado: chaves locais (fallback se proxy indisponível) ───

@@ -15,14 +15,17 @@
 
 const ZebraAPI = (() => {
 
-  /* ── CACHE sessionStorage (TTL 5 min) ─────────────────────── */
+  /* ── CACHE sessionStorage ────────────────────────────────────
+   * TTL padrão: 5 min. Odds: 24h (fix #9 — The Odds API tem 500 req/mês)
+   */
   const _cache = {
-    get(k) {
+    get(k, customTTL) {
       try {
         const raw = sessionStorage.getItem(`zs_${k}`);
         if (!raw) return null;
         const { ts, d } = JSON.parse(raw);
-        if (Date.now() - ts > 300_000) { sessionStorage.removeItem(`zs_${k}`); return null; }
+        const ttl = customTTL || 300_000; // 5 min padrão
+        if (Date.now() - ts > ttl) { sessionStorage.removeItem(`zs_${k}`); return null; }
         return d;
       } catch { return null; }
     },
@@ -30,10 +33,14 @@ const ZebraAPI = (() => {
       try { sessionStorage.setItem(`zs_${k}`, JSON.stringify({ ts: Date.now(), d })); } catch {}
     },
   };
+  const ODDS_CACHE_TTL = 86_400_000; // 24 horas — preserva quota da Odds API
 
   /* ── PROXY HELPER (Supabase Edge Function) ──────────────────── */
   // Todas as chamadas passam pelo proxy quando disponível.
   // As chaves das APIs externas ficam nos Secrets do Supabase — nunca no frontend.
+  // Fix #4: quando o proxy falha, retorna null para que as funções individuais
+  // tentem o fallback de chamada direta com chave local (se configurada).
+  // O usuário vê tela vazia apenas se AMBOS (proxy + direto) falharem.
   const _proxy = {
     base() {
       return (typeof ZEBRA_CONFIG !== 'undefined' && ZEBRA_CONFIG.proxyEnabled)
@@ -54,12 +61,22 @@ const ZebraAPI = (() => {
             'Authorization': `Bearer ${anon}`,
           }
         });
-        if (!r.ok) { console.warn(`[Proxy] ${r.status} — ${action}`, params); return null; }
+        if (!r.ok) {
+          // Fix #4: log descritivo — ajuda debug quando Edge Function não está deployada
+          console.warn(`[Proxy] ${r.status} para "${action}" — verifique se a Edge Function zebra-proxy está deployada no Supabase.`);
+          return null; // dispara fallback na função chamadora
+        }
         const data = await r.json();
-        if (data?.error) { console.warn(`[Proxy] erro da função: ${data.error}`); return null; }
+        if (data?.error) {
+          console.warn(`[Proxy] erro da função "${action}": ${data.error}`);
+          return null;
+        }
         _cache.set(ck, data);
         return data;
-      } catch(e) { console.warn('[Proxy] rede:', e.message); return null; }
+      } catch(e) {
+        console.warn(`[Proxy] falha de rede para "${action}": ${e.message} — tentando fallback direto.`);
+        return null;
+      }
     },
   };
 
@@ -237,7 +254,8 @@ const ZebraAPI = (() => {
       const k = this.key(); if (!k) return [];
       const sport = this.SPORTS[lid]; if (!sport) return [];
       const ck = `odds_${lid}_${daysFrom}`;
-      const hit = _cache.get(ck); if (hit) return hit;
+      // Fix #9: TTL de 24h para economizar os 500 req/mês da tier gratuita
+      const hit = _cache.get(ck, ODDS_CACHE_TTL); if (hit) return hit;
       try {
         const url = `${this.BASE}/sports/${sport}/scores/?apiKey=${k}&daysFrom=${daysFrom}`;
         const r = await fetch(url);
@@ -249,8 +267,12 @@ const ZebraAPI = (() => {
     },
 
     // Retorna mapa: "HomeTeam|AwayTeam" → { homeOdd, awayOdd }
-    // Usa proxy (odds pré-jogo com bookmakers reais da Europa)
+    // Fix #9: cache de 24h — The Odds API tem apenas 500 req/mês na tier gratuita
     async getOddsMap(lid, daysFrom = 3) {
+      const oddsMapKey = `oddsmap_${lid}`;
+      const cached = _cache.get(oddsMapKey, ODDS_CACHE_TTL);
+      if (cached) return cached;
+
       // Tenta via proxy primeiro (chave no servidor)
       let games = await _proxy.fetch('odds', { lid });
       // Fallback: direct com chave local
@@ -274,6 +296,7 @@ const ZebraAPI = (() => {
           map[`${g.home_team}|${g.away_team}`] = { homeOdd: homeOut.price, awayOdd: awayOut.price };
         }
       });
+      _cache.set(oddsMapKey, map); // guarda com chave própria (TTL aplicado no get)
       return map;
     },
   };
