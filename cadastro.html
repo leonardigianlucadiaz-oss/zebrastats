@@ -162,6 +162,44 @@
   </div>
 
 
+  <style>
+    /* ── INPUT VALID STATE ───────────────────────────────────── */
+    .form-input.is-valid {
+      border-color: rgba(46,230,92,0.5) !important;
+    }
+    .input-valid-check {
+      position: absolute; right: 12px; top: 50%;
+      transform: translateY(-50%);
+      color: var(--green);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .form-input.is-valid ~ .input-valid-check { opacity: 1; }
+
+    /* ── STRENGTH PULSE ──────────────────────────────────────── */
+    @keyframes strengthPulse {
+      0%,100% { opacity:1; }
+      50%     { opacity:0.6; }
+    }
+    .strength-seg.strong-final {
+      animation: strengthPulse 0.8s ease 3;
+    }
+
+    /* ── CONFETTI ────────────────────────────────────────────── */
+    @keyframes confettiFall {
+      0%   { transform:translateY(-20px) rotate(0deg); opacity:1; }
+      100% { transform:translateY(80px)  rotate(360deg); opacity:0; }
+    }
+    .confetti-piece {
+      position:absolute;
+      width:6px; height:10px;
+      border-radius:2px;
+      animation: confettiFall 1s ease forwards;
+      pointer-events:none;
+    }
+  </style>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/main.js"></script>
@@ -194,6 +232,42 @@
       label.textContent = val.length > 0 ? labels[strength - 1] || '' : '';
       label.style.color = val.length > 0 ? colors[strength - 1] : '';
     });
+
+    // Real-time field validation indicators
+    ['name','email','confirmPassword'].forEach(id => {
+      const input = document.getElementById(id);
+      if (!input) return;
+      // insert check icon
+      const wrap = input.closest('div[style*="position:relative"]') || input.parentElement;
+      const check = document.createElement('span');
+      check.className = 'input-valid-check';
+      check.innerHTML = '<i data-lucide="check-circle" style="width:16px;height:16px;"></i>';
+      wrap.style.position = 'relative';
+      wrap.appendChild(check);
+      lucide.createIcons();
+
+      input.addEventListener('input', function() {
+        let valid = false;
+        if (id === 'name')    valid = this.value.trim().length >= 2;
+        if (id === 'email')   valid = /\S+@\S+\.\S+/.test(this.value.trim());
+        if (id === 'confirmPassword') valid = this.value.length >= 6 && this.value === document.getElementById('password').value;
+        this.classList.toggle('is-valid', valid);
+        this.style.borderColor = '';
+      });
+    });
+
+    // Pulse strength bar when it hits strong
+    document.getElementById('password').addEventListener('input', function() {
+      const segs = document.querySelectorAll('.strength-seg');
+      const val = this.value;
+      let strength = 0;
+      if (val.length >= 6) strength++;
+      if (/[A-Z]/.test(val) || /[0-9]/.test(val)) strength++;
+      if (/[^A-Za-z0-9]/.test(val) && val.length >= 8) strength++;
+      if (strength === 3) {
+        segs.forEach(s => { s.classList.add('strong-final'); setTimeout(()=>s.classList.remove('strong-final'),2500); });
+      }
+    }, true); // use capture to run after existing handler
 
     function showError(inputId, errorId, msg) {
       document.getElementById(inputId).style.borderColor = 'var(--red)';

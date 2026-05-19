@@ -345,13 +345,22 @@ let selectedTeam  = null;
 let selectedTw    = 'any';
 let selectedAdv   = 15;
 
+// ── COUNT-UP ANIMATION ────────────────────────────────────────────────────────
+function animateCount(id, target) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  let n = 0;
+  const step = () => { n = Math.min(n + 1, target); el.textContent = n; if (n < target) requestAnimationFrame(step); };
+  requestAnimationFrame(step);
+}
+
 // ── HEADER COUNTS ─────────────────────────────────────────────────────────────
 function updateCounts() {
   const active = alerts.filter(a => a.active).length;
   const triggered = alerts.reduce((s,a) => s + (a.triggeredToday||0), 0);
   const isPro = getUserPlan() !== 'free';
-  document.getElementById('activeCount').textContent   = active;
-  document.getElementById('totalTriggered').textContent= triggered;
+  animateCount('activeCount', active);
+  animateCount('totalTriggered', triggered);
   document.getElementById('limitCount').textContent    = isPro ? '∞' : `${alerts.length}/${FREE_LIMIT}`;
   document.getElementById('limitCount').style.color    = (!isPro && alerts.length >= FREE_LIMIT) ? 'var(--red)' : 'var(--gold)';
 }
@@ -1035,6 +1044,49 @@ lucide.createIcons();
     border-radius:4px;transition:color .15s,background .15s;
   }
   .alert-delete-btn:hover { color:var(--red);background:rgba(220,38,38,0.1); }
+
+  /* ── ALERT GLOW ANIMATION ───────────────────────────────── */
+  @keyframes alertGlow {
+    0%,100% { box-shadow: 0 0 0 0 rgba(46,230,92,0); }
+    50%     { box-shadow: 0 0 12px 2px rgba(46,230,92,0.25); }
+  }
+  .alert-card--active {
+    animation: alertGlow 2.5s ease infinite;
+    border-color: rgba(46,230,92,0.4) !important;
+  }
+
+  /* ── CSS TOGGLE SWITCH ──────────────────────────────────── */
+  .zs-toggle {
+    position:relative; display:inline-block;
+    width:40px; height:22px; flex-shrink:0;
+  }
+  .zs-toggle input { opacity:0; width:0; height:0; }
+  .zs-toggle__slider {
+    position:absolute; cursor:pointer; inset:0;
+    background:var(--border); border-radius:22px;
+    transition:background 0.3s;
+  }
+  .zs-toggle__slider::before {
+    content:''; position:absolute;
+    height:16px; width:16px; left:3px; bottom:3px;
+    background:#fff; border-radius:50%;
+    transition:transform 0.3s;
+  }
+  .zs-toggle input:checked + .zs-toggle__slider { background:var(--green); }
+  .zs-toggle input:checked + .zs-toggle__slider::before { transform:translateX(18px); }
+
+  /* ── FAB PULSE RING ─────────────────────────────────────── */
+  @keyframes fabRing {
+    0%   { transform:scale(1);   opacity:0.6; }
+    100% { transform:scale(1.5); opacity:0; }
+  }
+  .fab-btn::before {
+    content:''; position:absolute; inset:0;
+    border-radius:inherit;
+    background:rgba(46,230,92,0.35);
+    animation: fabRing 2s ease-out infinite;
+  }
+  .fab-btn { position:relative; overflow:visible !important; }
 </style>
 </body>
 </html>

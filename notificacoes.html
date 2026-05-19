@@ -259,10 +259,10 @@
       const groupUnread = items.filter(n => n.unread && !readIds.has(n.id)).length;
 
       const header = document.createElement('div');
-      header.style.cssText = 'padding:12px 16px 6px;font-size:0.6875rem;font-weight:600;color:var(--gray);text-transform:uppercase;letter-spacing:0.8px;display:flex;align-items:center;gap:6px;';
-      header.innerHTML = group + (groupUnread > 0
-        ? ` <span style="background:var(--green);color:#000;font-size:0.5625rem;font-weight:800;padding:1px 5px;border-radius:10px;">${groupUnread}</span>`
-        : '');
+      header.innerHTML = `<div style="padding:8px 16px 4px;display:flex;align-items:center;gap:6px;">
+        <span style="font-size:0.6875rem;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:0.8px;">${group}</span>
+        ${groupUnread > 0 ? `<span style="background:var(--green);color:#000;font-size:0.5625rem;font-weight:700;padding:1px 6px;border-radius:var(--radius-pill);">${groupUnread}</span>` : ''}
+      </div>`;
       main.appendChild(header);
 
       const groupWrap = document.createElement('div');
@@ -339,6 +339,14 @@
   initBellBadge();
   lucide.createIcons();
 
+  // Shake bell if unreads
+  if (getUnreadCount() > 0) {
+    setTimeout(() => {
+      const navBell = document.querySelector('.navbar [data-lucide="bell"], .navbar [data-lucide="bell-ring"]');
+      if (navBell) navBell.closest('button, a')?.classList.add('bell-shake');
+    }, 600);
+  }
+
   // Garante renderização mesmo que DOMContentLoaded já tenha disparado
   document.addEventListener('DOMContentLoaded', () => {
     if (typeof renderNotifs === 'function') renderNotifs();
@@ -349,6 +357,38 @@
   .chip-ic { width: 12px; height: 12px; display: block; flex-shrink: 0; }
   .filter-chip { display: inline-flex; align-items: center; gap: 5px; }
   .navbar__icon i { display: block; }
+
+  /* ── NOTIFICATION SLIDE-IN ────────────────────────────────── */
+  @keyframes notifSlideIn {
+    from { opacity:0; transform:translateX(16px); }
+    to   { opacity:1; transform:translateX(0); }
+  }
+  .notif-item {
+    animation: notifSlideIn 0.3s ease both;
+  }
+
+  /* ── UNREAD DOT PULSE ─────────────────────────────────────── */
+  @keyframes dotPulse {
+    0%,100% { transform:scale(1);   opacity:1; }
+    50%     { transform:scale(1.4); opacity:0.7; }
+  }
+  .notif-unread-dot {
+    width:8px; height:8px; border-radius:50%;
+    background:var(--green);
+    animation: dotPulse 1.5s ease infinite;
+    flex-shrink:0;
+  }
+
+  /* ── BELL SHAKE ───────────────────────────────────────────── */
+  @keyframes bellShake {
+    0%,100% { transform: rotate(0); }
+    15%     { transform: rotate(12deg); }
+    30%     { transform: rotate(-10deg); }
+    45%     { transform: rotate(8deg); }
+    60%     { transform: rotate(-5deg); }
+    75%     { transform: rotate(3deg); }
+  }
+  .bell-shake { animation: bellShake 0.7s ease; }
 </style>
 </body>
 </html>
