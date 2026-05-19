@@ -3,8 +3,9 @@
  * Supabase JS carregado via CDN antes deste arquivo.
  */
 
-const SUPA_URL  = 'https://wjiicdzpjxacqjwxmtqy.supabase.co';
-const SUPA_ANON = 'sb_publishable_fpVIYjV2j7N39MWz81Lumg_WjODiChX';
+// ── CONSTANTES vindas de config.js (fonte única de verdade — fix #10) ──────
+// ZEBRA_CONFIG.SUPABASE_URL / ZEBRA_CONFIG.SUPABASE_ANON são a referência canônica.
+// Nunca duplique essas chaves aqui.
 
 // Inicializa o cliente Supabase (singleton)
 let _supaClient = null;
@@ -14,7 +15,14 @@ function getSupabase() {
       console.error('[Auth] @supabase/supabase-js não carregado');
       return null;
     }
-    _supaClient = supabase.createClient(SUPA_URL, SUPA_ANON);
+    if (typeof ZEBRA_CONFIG === 'undefined') {
+      console.error('[Auth] ZEBRA_CONFIG não carregado (config.js deve vir antes de auth.js)');
+      return null;
+    }
+    _supaClient = supabase.createClient(
+      ZEBRA_CONFIG.SUPABASE_URL,
+      ZEBRA_CONFIG.SUPABASE_ANON
+    );
   }
   return _supaClient;
 }
@@ -28,15 +36,9 @@ async function authSignUp(name, email, password) {
     email, password,
     options: { data: { full_name: name, plan: 'free' } }
   });
-  if (!error && data?.user) {
-    // Cria perfil na tabela profiles
-    await sb.from('profiles').upsert({
-      id: data.user.id,
-      name,
-      plan: 'free',
-      created_at: new Date().toISOString()
-    });
-  }
+  // Fix #7: Não faz upsert manual aqui — o trigger on_auth_user_created
+  // → handle_new_user() já cria o perfil no banco. Dois writes simultâneos
+  // causavam condição de corrida.
   return { data, error };
 }
 
@@ -49,9 +51,11 @@ async function authSignIn(email, password) {
 async function authSignInGoogle() {
   const sb = getSupabase();
   if (!sb) return;
+  // Fix #1: usa BASE_URL para funcionar em GitHub Pages com subdiretório
+  const base = (typeof ZEBRA_CONFIG !== 'undefined') ? ZEBRA_CONFIG.BASE_URL : window.location.origin;
   return await sb.auth.signInWithOAuth({
     provider: 'google',
-    options: { redirectTo: window.location.origin + '/home.html' }
+    options: { redirectTo: `${base}/home.html` }
   });
 }
 
@@ -59,18 +63,22 @@ async function authSignOut() {
   const sb = getSupabase();
   if (!sb) return;
   await sb.auth.signOut();
-  // Limpa dados de sessão local (mantém tema)
-  const theme = localStorage.getItem('zs_theme');
+  // Fix #18: preserva tema E flag de migração concluída para não perder dados
+  const theme    = localStorage.getItem('zs_theme');
+  const migrated = localStorage.getItem(`zs_migrated_${localStorage.getItem('zs_uid') || ''}`);
   localStorage.clear();
-  if (theme) localStorage.setItem('zs_theme', theme);
+  if (theme)    localStorage.setItem('zs_theme', theme);
+  if (migrated) localStorage.setItem(`zs_migrated_${localStorage.getItem('zs_uid') || ''}`, migrated);
   window.location.href = 'index.html';
 }
 
 async function authResetPassword(email) {
   const sb = getSupabase();
   if (!sb) return { error: { message: 'Supabase indisponível' } };
+  // Fix #1: usa BASE_URL para funcionar em GitHub Pages com subdiretório
+  const base = (typeof ZEBRA_CONFIG !== 'undefined') ? ZEBRA_CONFIG.BASE_URL : window.location.origin;
   return await sb.auth.resetPasswordForEmail(email, {
-    redirectTo: window.location.origin + '/index.html?reset=1'
+    redirectTo: `${base}/index.html?reset=1`
   });
 }
 
@@ -90,12 +98,26 @@ async function getProfile(userId) {
 
 // ── PLAN HELPERS ──────────────────────────────────────────────
 
+// Fallback síncrono (apenas para verificações rápidas de UI local)
 function getUserPlan(user) {
-  return user?.user_metadata?.plan || 'free';
+  // Fix #3: usa a chave canônica 'zebrastats_plan' (alinhada com main.js)
+  return localStorage.getItem('zebrastats_plan')
+    || user?.user_metadata?.plan
+    || 'free';
 }
 
 function isPro(user) {
   return getUserPlan(user) === 'pro';
+}
+
+// Fix #2: versão assíncrona que consulta profiles (fonte autoritativa do Stripe)
+async function isProFromDB(userId) {
+  const sb = getSupabase();
+  if (!sb || !userId) return false;
+  try {
+    const { data } = await sb.from('profiles').select('plan').eq('id', userId).single();
+    return data?.plan === 'pro';
+  } catch { return false; }
 }
 
 // ── AUTH STATE LISTENER ────────────────────────────────────────
@@ -114,8 +136,15 @@ async function initAuthUI() {
   if (user) {
     const name  = user.user_metadata?.full_name || user.email?.split('@')[0] || 'Usuário';
     const email = user.email || '';
-    const plan  = getUserPlan(user);
     const initial = name.charAt(0).toUpperCase();
+
+    // Fix #2: plano autoritativo vem da tabela profiles (atualizada pelo Stripe webhook).
+    // user_metadata.plan só reflete o momento do cadastro — não acompanha upgrades.
+    let plan = user.user_metadata?.plan || 'free';
+    try {
+      const { data: profile } = await sb.from('profiles').select('plan').eq('id', user.id).single();
+      if (profile?.plan) plan = profile.plan;
+    } catch { /* usa fallback acima */ }
 
     // Sidebar user info
     const sidebarName  = document.querySelector('.sidebar__user-name');
@@ -144,9 +173,11 @@ async function initAuthUI() {
     }
 
     // Salva em localStorage para acesso offline rápido
-    localStorage.setItem('zs_user_name',  name);
-    localStorage.setItem('zs_user_email', email);
-    localStorage.setItem('zs_user_plan',  plan);
+    // Fix #3: usa 'zebrastats_plan' — mesma chave de main.js (PLAN_KEY)
+    localStorage.setItem('zs_user_name',    name);
+    localStorage.setItem('zs_user_email',   email);
+    localStorage.setItem('zs_uid',          user.id);
+    localStorage.setItem('zebrastats_plan', plan); // chave canônica
   }
 
   // Listener de mudança de estado (login/logout em outra aba)
@@ -161,5 +192,6 @@ async function initAuthUI() {
 window.ZebraAuth = {
   getSupabase, authSignUp, authSignIn, authSignInGoogle, authSignOut,
   authResetPassword, getSessionUser, getProfile, getUserPlan, isPro,
+  isProFromDB,  // Fix #2: versão async consultando profiles table
   initAuthUI
 };

@@ -1,24 +1,37 @@
-/* ZebraStats Service Worker — network-first para assets dinâmicos */
-const CACHE_NAME = 'zebrastats-v3';
-const CACHE_VERSION = 2;
+/* ZebraStats Service Worker — v4 */
+// Fix #13: CACHE_VERSION é agora usado no nome do cache (incrementar aqui invalida tudo)
+const CACHE_VERSION = 4;
+const CACHE_NAME    = `zebrastats-v${CACHE_VERSION}`;
 
 // Assets imutáveis — cache-first (icons/images mudam raramente)
 const IMMUTABLE_EXT = ['.png','.jpg','.jpeg','.svg','.webp','.woff','.woff2','.ico'];
 
+// Fix #14: adicionados teams-data.js e share.js que estavam faltando
 const STATIC_ASSETS = [
   'home.html','zebras.html','ranking.html','partida.html',
   'time.html','liga.html','alertas.html','perfil.html',
   'comparar.html','notificacoes.html','busca.html',
   'assinatura.html','pagamento.html','favoritos.html','explorar.html',
-  'css/main.css','js/main.js','js/config.js','js/api.js','js/zebra-engine.js',
+  'css/main.css',
+  'js/main.js','js/config.js','js/api.js','js/zebra-engine.js',
   'js/auth.js','js/auth-guard.js','js/db.js',
+  'js/teams-data.js','js/share.js', // fix #14
   'manifest.json','icons/icon-192.svg','icons/icon-512.svg',
 ];
 
 self.addEventListener('install', e => {
   e.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(STATIC_ASSETS).catch(() => {}))
+      .then(cache =>
+        // Fix #15: loga erros de pre-cache em vez de engoli-los silenciosamente
+        Promise.allSettled(
+          STATIC_ASSETS.map(url =>
+            cache.add(url).catch(err =>
+              console.warn(`[SW] Não foi possível pré-cachear: ${url}`, err.message)
+            )
+          )
+        )
+      )
       .then(() => self.skipWaiting())
   );
 });
@@ -38,10 +51,11 @@ self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
   if (url.origin !== self.location.origin) return;
 
-  const isImmutable = IMMUTABLE_EXT.some(ext => url.pathname.endsWith(ext));
+  const isImmutable  = IMMUTABLE_EXT.some(ext => url.pathname.endsWith(ext));
+  const isScriptOrStyle = url.pathname.endsWith('.js') || url.pathname.endsWith('.css');
 
   if (isImmutable) {
-    // Cache-first para imagens e fontes
+    // ── Cache-first para imagens e fontes ──────────────────────
     e.respondWith(
       caches.match(e.request).then(cached => {
         if (cached) return cached;
@@ -54,8 +68,26 @@ self.addEventListener('fetch', e => {
         }).catch(() => new Response('', { status: 503 }));
       })
     );
+
+  } else if (isScriptOrStyle) {
+    // ── Fix #20: Stale-While-Revalidate para JS e CSS ──────────
+    // Serve do cache imediatamente (zero latência), atualiza em segundo plano.
+    // Muito melhor que network-first em conexões instáveis.
+    e.respondWith(
+      caches.open(CACHE_NAME).then(cache =>
+        cache.match(e.request).then(cached => {
+          const networkFetch = fetch(e.request).then(res => {
+            if (res && res.status === 200) cache.put(e.request, res.clone());
+            return res;
+          }).catch(() => null);
+          // Retorna cache imediatamente; se não tem cache, espera a rede
+          return cached || networkFetch;
+        })
+      )
+    );
+
   } else {
-    // Network-first para HTML, JS, CSS — sempre busca versão nova
+    // ── Network-first para HTML ────────────────────────────────
     e.respondWith(
       fetch(e.request)
         .then(res => {

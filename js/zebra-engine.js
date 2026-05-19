@@ -65,27 +65,47 @@ const ZebraEngine = (() => {
   }
 
   // ── DETERMINAR AZARÃO ────────────────────────────────────────
-  // Retorna null se não é zebra, ou { azarao, winnerOdd, loserOdd }
+  // Retorna null se não é zebra, ou { azarao, winnerOdd, loserOdd, isDraw }
+  // Fix #19: empates de azarão são zebras legítimas (favorito deveria vencer mas não venceu).
+  // Ex: lanterna em 0-0 contra líder = zebra de empate. ZI calculado com fator 0.6.
   function _detectZebra({ homeScore, awayScore, homeOdd, awayOdd, homePosn, awayPosn }) {
     if (homeScore == null || awayScore == null) return null;
-    if (homeScore === awayScore) return null; // empate não é zebra
 
-    const homeWon = homeScore > awayScore;
-    const awayWon = !homeWon;
+    const isDraw  = homeScore === awayScore;
+    const homeWon = !isDraw && homeScore > awayScore;
+    const awayWon = !isDraw && !homeWon;
 
     // Por odds (mais confiável)
     if (homeOdd && awayOdd && homeOdd !== awayOdd) {
       const homeIsFav = homeOdd < awayOdd;
-      if (homeWon && !homeIsFav) return { azarao:'home', winnerOdd:homeOdd, loserOdd:awayOdd };
-      if (awayWon &&  homeIsFav) return { azarao:'away', winnerOdd:awayOdd, loserOdd:homeOdd };
-      return null; // favorito ganhou
+      if (!isDraw) {
+        if (homeWon && !homeIsFav) return { azarao:'home', winnerOdd:homeOdd, loserOdd:awayOdd, isDraw:false };
+        if (awayWon &&  homeIsFav) return { azarao:'away', winnerOdd:awayOdd, loserOdd:homeOdd, isDraw:false };
+        return null; // favorito ganhou
+      }
+      // Empate: zebra se havia favorito claro (diff de odds > 0.4)
+      const oddsGap = Math.abs((1/homeOdd) - (1/awayOdd));
+      if (oddsGap >= 0.15) {
+        // "azarao" = o que não deveria empatar (o favorito perdeu pontos)
+        const favSide = homeIsFav ? 'home' : 'away';
+        return { azarao: favSide, winnerOdd: homeIsFav ? awayOdd : homeOdd, loserOdd: homeIsFav ? homeOdd : awayOdd, isDraw: true };
+      }
+      return null; // jogo equilibrado, empate não surpreende
     }
 
     // Por posição (fallback)
     if (homePosn && awayPosn && homePosn !== awayPosn) {
       const homeIsFav = homePosn < awayPosn;
-      if (homeWon && !homeIsFav) return { azarao:'home', winnerOdd:null, loserOdd:null };
-      if (awayWon &&  homeIsFav) return { azarao:'away', winnerOdd:null, loserOdd:null };
+      if (!isDraw) {
+        if (homeWon && !homeIsFav) return { azarao:'home', winnerOdd:null, loserOdd:null, isDraw:false };
+        if (awayWon &&  homeIsFav) return { azarao:'away', winnerOdd:null, loserOdd:null, isDraw:false };
+        return null;
+      }
+      // Empate: zebra apenas se diferença de posição for grande (≥7)
+      if (Math.abs(homePosn - awayPosn) >= 7) {
+        const favSide = homeIsFav ? 'home' : 'away';
+        return { azarao: favSide, winnerOdd: null, loserOdd: null, isDraw: true };
+      }
       return null;
     }
 
@@ -178,13 +198,16 @@ const ZebraEngine = (() => {
       return { zi:0, class:null, azarao:null, isZebra:false };
     }
 
+    // Fix #19: empates reduzem o ZI em 40% — é surpreendente, mas menos que derrota
+    if (zebra.isDraw) zi *= 0.6;
+
     zi = Math.round(Math.min(9.9, Math.max(0, zi)) * 10) / 10;
     const cls = zi >= THRESHOLDS.GRANDE ? 'grande'
               : zi >= THRESHOLDS.MEDIA  ? 'media'
               : zi >= THRESHOLDS.LEVE   ? 'leve'
               : null;
 
-    return { zi, class: cls, azarao: zebra.azarao, isZebra: cls !== null };
+    return { zi, class: cls, azarao: zebra.azarao, isDraw: zebra.isDraw || false, isZebra: cls !== null };
   }
 
   // ── BATCH ────────────────────────────────────────────────────
