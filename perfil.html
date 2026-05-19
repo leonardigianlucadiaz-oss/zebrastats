@@ -54,11 +54,13 @@
   </nav>
 
   <!-- HERO DO PERFIL -->
-  <section style="background:linear-gradient(180deg,var(--card2) 0%,var(--bg) 100%);padding:24px 16px 20px;border-bottom:1px solid var(--border);">
+  <section style="background:linear-gradient(180deg,#0A1E35 0%,var(--bg) 100%);position:relative;overflow:hidden;padding:24px 16px 20px;border-bottom:1px solid var(--border);">
+      <!-- Zebra stripe decoration -->
+      <div style="position:absolute;top:0;left:0;right:0;height:4px;background:repeating-linear-gradient(90deg,var(--green) 0px,var(--green) 8px,transparent 8px,transparent 16px);opacity:0.5;"></div>
     <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;">
       <!-- Avatar com upload -->
       <label for="avatarUpload" style="cursor:pointer;position:relative;flex-shrink:0;" title="Alterar foto">
-        <div class="profile-avatar" id="avatarEl">G</div>
+        <div class="profile-avatar" id="avatarEl" style="overflow:hidden;font-size:1.75rem;">G</div>
         <div style="position:absolute;bottom:0;right:0;width:22px;height:22px;border-radius:50%;background:var(--green);border:2px solid var(--bg);display:flex;align-items:center;justify-content:center;">
           <i data-lucide="camera" style="width:11px;height:11px;color:#000;"></i>
         </div>
@@ -618,6 +620,37 @@
     grid.appendChild(addChip);
   }
   renderFavTeamsVisual();
+
+  // ── AVATAR PHOTO UPLOAD (zs_avatar key) ────────────────────────
+  document.getElementById('avatarUpload')?.addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file || !file.type.startsWith('image/')) return;
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      const avatarEl = document.getElementById('avatarEl');
+      if (avatarEl) {
+        avatarEl.style.backgroundImage = `url(${ev.target.result})`;
+        avatarEl.style.backgroundSize = 'cover';
+        avatarEl.style.backgroundPosition = 'center';
+        avatarEl.textContent = '';
+      }
+      try { localStorage.setItem('zs_avatar', ev.target.result); } catch {}
+    };
+    reader.readAsDataURL(file);
+  });
+  // Load saved avatar (zs_avatar key)
+  (function() {
+    const savedAvatar = localStorage.getItem('zs_avatar');
+    if (savedAvatar) {
+      const avatarEl = document.getElementById('avatarEl');
+      if (avatarEl) {
+        avatarEl.style.backgroundImage = `url(${savedAvatar})`;
+        avatarEl.style.backgroundSize = 'cover';
+        avatarEl.style.backgroundPosition = 'center';
+        avatarEl.textContent = '';
+      }
+    }
+  })();
 
   // ── AVATAR UPLOAD ─────────────────────────────────────────────
   const avatarUpload = document.getElementById('avatarUpload');

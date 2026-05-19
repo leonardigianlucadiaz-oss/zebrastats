@@ -313,6 +313,8 @@
       const card = document.createElement('div');
       card.className = 'zebra-card';
       card.dataset.zi = z.zi || 0;
+      const ziLevel = parseFloat(z.zi || 0) >= 7 ? 'grande' : parseFloat(z.zi || 0) >= 4 ? 'media' : 'leve';
+      card.setAttribute('data-zi-level', ziLevel);
       const mag = _ziMagnitude(parseFloat(z.zi)||0);
       card.style.boxShadow = mag.glow;
 
@@ -703,6 +705,27 @@
   /* ── ACCORDION EXPAND ── */
   .zebra-card--expanded { border-color: var(--green) !important; }
   .zebra-detail { animation: fadeSlideIn 0.2s ease both; }
+
+  /* ZI-proportional visual weight */
+  [data-zi-level="grande"] {
+    border-color: rgba(238,68,68,0.5) !important;
+    border-width: 2px !important;
+    box-shadow: 0 0 16px rgba(238,68,68,0.15), 0 2px 8px rgba(0,0,0,0.3) !important;
+  }
+  [data-zi-level="media"] {
+    border-color: rgba(255,140,0,0.45) !important;
+    border-width: 2px !important;
+    box-shadow: 0 0 12px rgba(255,140,0,0.1), 0 2px 6px rgba(0,0,0,0.3) !important;
+  }
+  [data-zi-level="leve"] {
+    /* default card style, no extra glow */
+    box-shadow: 0 1px 4px rgba(0,0,0,0.3) !important;
+  }
+  /* Grande cards get slightly more height/padding */
+  [data-zi-level="grande"] .game-card__match,
+  [data-zi-level="grande"].zebra-card {
+    padding: 16px !important;
+  }
 </style>
 </body>
 </html>

@@ -694,6 +694,21 @@ lucide.createIcons();
   /* Share button hover */
   .share-btn:hover { color: var(--green) !important; }
 
+  /* Zebra striping on ranking table rows */
+  .standings-table tbody tr:nth-child(even) td {
+    background: rgba(255,255,255,0.018);
+  }
+  .standings-table td {
+    padding: 11px 6px !important;
+  }
+  .standings-table th {
+    padding: 10px 6px !important;
+  }
+  /* Hover gets stronger effect */
+  .standings-table tr:hover td {
+    background: rgba(46,230,92,0.04) !important;
+  }
+
   /* ── PODIUM ───────────────────────────────────── */
   .podium-wrap {
     display: grid;
