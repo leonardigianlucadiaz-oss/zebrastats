@@ -7,9 +7,9 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg:         #0D1A2A;
-  --card:       #132338;
-  --card2:      #0E1F33;
+  --bg:         #060C15;
+  --card:       #0D1A2A;
+  --card2:      #0A1524;
   --green:      #2EE65C;
   --green-dim:  rgba(46, 230, 92, 0.12);
   --green-glow: rgba(46, 230, 92, 0.25);
@@ -20,8 +20,8 @@
   --white:      #FFFFFF;
   --gray:       #889AAA;
   --gray-dim:   rgba(136, 154, 170, 0.15);
-  --input-bg:   #101F33;
-  --border:     #1E3A55;
+  --input-bg:   #0A1825;
+  --border:     #152A3E;
   --dark-text:  #0D1A2A;
   --radius:     12px;
   --radius-sm:  8px;
@@ -29,13 +29,21 @@
   --radius-lg:  16px;
   --radius-xl:  20px;
   --radius-pill:999px;
-  --shadow:     0 4px 24px rgba(0,0,0,0.4);
+  --shadow:     0 1px 4px rgba(0,0,0,0.35), 0 4px 20px rgba(0,0,0,0.18);
+  --shadow-sm:  0 1px 3px rgba(0,0,0,0.4);
+  --shadow-lg:  0 8px 32px rgba(0,0,0,0.5);
+  --text-2xs:   0.6875rem;
+  --text-xs:    0.75rem;
+  --text-sm:    0.8125rem;
+  --text-base:  0.9375rem;
+  --text-lg:    1.125rem;
+  --text-xl:    1.25rem;
   --transition: 0.2s ease;
 }
 
 /* ── LIGHT THEME ─────────────────────────────────────────────── */
 [data-theme="light"] {
-  --bg:         #F0F4F8;
+  --bg:         #E8EEF5;
   --card:       #FFFFFF;
   --card2:      #E8EEF5;
   --green:      #1AAF45;
@@ -49,7 +57,7 @@
   --gray:       #5A6E82;
   --gray-dim:   rgba(90, 110, 130, 0.12);
   --input-bg:   #EDF2F7;
-  --border:     #C5D5E5;
+  --border:     rgba(0,0,0,0.1);
   --dark-text:  #0D1A2A;
   --shadow:     0 4px 24px rgba(0, 0, 0, 0.10);
 }
@@ -266,7 +274,7 @@ p  { font-size: 0.875rem; line-height: 1.5; color: var(--gray); }
 .text-gray   { color: var(--gray);  }
 .text-white  { color: var(--white); }
 .text-sm     { font-size: 0.75rem;  }
-.text-xs     { font-size: 0.6875rem;}
+.text-xs     { font-size: var(--text-xs);}
 .fw-600      { font-weight: 600; }
 .fw-700      { font-weight: 700; }
 
@@ -319,7 +327,7 @@ p  { font-size: 0.875rem; line-height: 1.5; color: var(--gray); }
 }
 
 .navbar__icon {
-  width: 32px; height: 32px;
+  width: 40px; height: 40px;
   border-radius: 50%;
   background: var(--border);
   display: flex; align-items: center; justify-content: center;
@@ -356,6 +364,7 @@ p  { font-size: 0.875rem; line-height: 1.5; color: var(--gray); }
   border-radius: var(--radius-lg);
   border: 1px solid var(--border);
   padding: 20px;
+  box-shadow: var(--shadow);
 }
 
 .card--green-border { border-color: rgba(46,230,92,0.5); }
@@ -444,6 +453,7 @@ p  { font-size: 0.875rem; line-height: 1.5; color: var(--gray); }
   left: 0;
   width: 100%;
   z-index: 100;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 .bottom-nav__item {
@@ -453,7 +463,9 @@ p  { font-size: 0.875rem; line-height: 1.5; color: var(--gray); }
   align-items: center;
   justify-content: center;
   gap: 4px;
-  padding: 10px 0 12px;
+  padding: 8px 4px 10px;
+  min-height: 56px;
+  position: relative;
   text-decoration: none;
   color: var(--gray);
   font-size: 0.6875rem;
@@ -463,6 +475,13 @@ p  { font-size: 0.875rem; line-height: 1.5; color: var(--gray); }
 }
 
 .bottom-nav__item.active { color: var(--green); }
+.bottom-nav__item.active .bottom-nav__icon {
+  background: rgba(46,230,92,0.12);
+  border-radius: 10px;
+  padding: 4px 10px;
+  margin: -4px -10px;
+  border: 1px solid rgba(46,230,92,0.2);
+}
 .bottom-nav__item:hover  { color: var(--white); }
 
 .bottom-nav__icon { font-size: 1.25rem; line-height: 1; }
@@ -553,6 +572,7 @@ p  { font-size: 0.875rem; line-height: 1.5; color: var(--gray); }
   padding: 12px 14px;
   cursor: pointer;
   transition: border-color var(--transition), transform var(--transition);
+  box-shadow: var(--shadow-sm);
 }
 
 .game-card:hover { transform: translateY(-1px); }
@@ -620,7 +640,7 @@ p  { font-size: 0.875rem; line-height: 1.5; color: var(--gray); }
 .team-pill__avatar.active { border-color: var(--green); transform: scale(1.05); }
 
 .team-pill__name {
-  font-size: 0.625rem;
+  font-size: var(--text-2xs);
   color: var(--gray);
   text-align: center;
   max-width: 56px;
@@ -636,6 +656,7 @@ p  { font-size: 0.875rem; line-height: 1.5; color: var(--gray); }
   border-radius: var(--radius-lg);
   padding: 20px;
   position: relative;
+  box-shadow: var(--shadow-sm);
 }
 
 .plan-card--highlight { border-color: rgba(46,230,92,0.6); }
@@ -740,7 +761,7 @@ p  { font-size: 0.875rem; line-height: 1.5; color: var(--gray); }
 .season-bar--mid   { background: var(--border); }
 
 .season-label {
-  font-size: 0.5625rem;
+  font-size: var(--text-2xs);
   color: var(--gray);
   text-align: center;
 }
@@ -852,7 +873,7 @@ p  { font-size: 0.875rem; line-height: 1.5; color: var(--gray); }
   flex-direction: column;
   gap: 12px;
   padding: 14px 16px;
-  padding-bottom: 80px; /* room for bottom nav on mobile */
+  padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
 }
 
 @media (min-width: 768px) {
@@ -869,6 +890,12 @@ p  { font-size: 0.875rem; line-height: 1.5; color: var(--gray); }
   -ms-overflow-style: none;
 }
 .scroll-x::-webkit-scrollbar { display: none; }
+
+/* Fade hint for horizontal scroll overflow */
+.scroll-x-fade {
+  -webkit-mask-image: linear-gradient(to right, black calc(100% - 40px), transparent 100%);
+  mask-image: linear-gradient(to right, black calc(100% - 40px), transparent 100%);
+}
 
 /* ── HIDE SCROLLBAR (utilitário para qualquer elemento com overflow-x:auto) ── */
 .hide-scrollbar {
@@ -977,6 +1004,28 @@ p  { font-size: 0.875rem; line-height: 1.5; color: var(--gray); }
   .cards-grid   { grid-template-columns: repeat(3, 1fr); }
 }
 
+/* ── DESKTOP: fixed sidebar ── */
+@media (min-width: 1024px) {
+  .app-sidebar {
+    position: sticky !important;
+    top: 0;
+    display: flex !important;
+    transform: translateX(0) !important;
+    height: 100vh;
+    align-self: flex-start;
+    z-index: 10;
+    flex-shrink: 0;
+    box-shadow: none;
+  }
+  /* Hide hamburger when sidebar is always visible */
+  .hamburger-btn { display: none !important; }
+  .sidebar-backdrop { display: none !important; }
+  /* Content area takes remaining space */
+  .app-main { min-width: 0; flex: 1; }
+  /* Ensure app-wrapper is flex row */
+  .app-wrapper { flex-direction: row; }
+}
+
 /* ── NAVBAR on desktop (inside app-main) ── */
 @media (min-width: 768px) {
   .navbar {
@@ -1028,7 +1077,8 @@ p  { font-size: 0.875rem; line-height: 1.5; color: var(--gray); }
 
 /* ── FILTER CHIP ── */
 .filter-chip {
-  padding: 5px 14px;
+  padding: 8px 16px;
+  min-height: 36px;
   border-radius: var(--radius-pill);
   font-size: 0.75rem;
   font-weight: 500;
@@ -1107,6 +1157,7 @@ p  { font-size: 0.875rem; line-height: 1.5; color: var(--gray); }
   padding: 14px 16px;
   cursor: pointer;
   transition: border-color var(--transition), transform var(--transition);
+  box-shadow: var(--shadow-sm);
 }
 .zebra-card:hover { transform: translateY(-1px); border-color: var(--green); }
 
@@ -1125,7 +1176,7 @@ p  { font-size: 0.875rem; line-height: 1.5; color: var(--gray); }
 
 .profile-stat { text-align: center; flex: 1; }
 .profile-stat__value { font-size: 1.125rem; font-weight: 700; color: var(--white); }
-.profile-stat__label { font-size: 0.625rem; color: var(--gray); margin-top: 2px; }
+.profile-stat__label { font-size: var(--text-xs); color: var(--gray); margin-top: 2px; }
 
 .profile-section-title {
   font-size: 0.6875rem;

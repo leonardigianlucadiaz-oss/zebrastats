@@ -1218,7 +1218,8 @@ lucide.createIcons();
   .section-title { display: inline-flex; align-items: center; }
 
   /* ── TEAM SLOT ──────────────────────────── */
-  .team-slot { position: relative; }
+  .team-slot { position: relative; transition: transform 0.2s; }
+  .team-slot:hover { transform: translateY(-1px); }
 
   .slot-search-wrap {
     display: flex; align-items: center; gap: 6px;
@@ -1258,6 +1259,35 @@ lucide.createIcons();
     align-items: center; gap: 8px;
     background: var(--green-dim); border: 1px solid rgba(46,230,92,0.3);
     border-radius: var(--radius); padding: 8px 10px;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    border: 1px solid var(--border);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+  }
+  .slot-filled__header {
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .slot-filled__shield {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem;
+    font-weight: 700;
+    border: 2px solid rgba(255,255,255,0.2);
+    flex-shrink: 0;
+  }
+  .slot-filled__name {
+    font-size: 0.9375rem;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+  .slot-filled__league {
+    font-size: 0.6875rem;
+    opacity: 0.7;
+    margin-top: 2px;
   }
   .slot-crest {
     width: 32px; height: 32px; border-radius: 50%;
