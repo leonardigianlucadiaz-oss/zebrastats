@@ -34,6 +34,10 @@
       100% { transform: translateY(110vh) rotate(15deg); opacity: 0; }
     }
     .phone { z-index: 1; }
+    @media (min-width: 768px) {
+      .phone { display: flex; align-items: center; justify-content: center; min-height: 100vh; width: 100%; }
+      .auth-wrapper { width: 420px; padding: 32px 0; }
+    }
   </style>
 </head>
 <body>

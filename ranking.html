@@ -541,7 +541,7 @@ initBellBadge();
 
 // ── DADOS REAIS (Football-Data.org + ZebraEngine) ────────────
 async function initRealRanking() {
-  if (typeof ZebraAPI === 'undefined' || !ZebraAPI.isConfigured.footballData()) return;
+  if (typeof ZebraAPI === 'undefined') return;
   if (typeof ZebraEngine === 'undefined') return;
 
   try {

@@ -432,7 +432,7 @@ p  { font-size: 0.875rem; line-height: 1.5; color: var(--gray); }
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   padding: 13px 14px;
-  font-size: 0.9375rem;
+  font-size: 1rem;
   font-family: inherit;
   color: var(--white);
   width: 100%;
@@ -1021,7 +1021,7 @@ p  { font-size: 0.875rem; line-height: 1.5; color: var(--gray); }
   .hamburger-btn { display: none !important; }
   .sidebar-backdrop { display: none !important; }
   /* Content area takes remaining space */
-  .app-main { min-width: 0; flex: 1; }
+  .app-main { min-width: 0; flex: 1; max-width: 860px; }
   /* Ensure app-wrapper is flex row */
   .app-wrapper { flex-direction: row; }
 }
