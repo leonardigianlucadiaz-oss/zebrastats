@@ -58,6 +58,21 @@
   <!-- CONTENT -->
   <main class="content">
 
+    <div id="favStatsBar" style="display:flex;gap:0;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;margin-bottom:8px;">
+      <div style="flex:1;padding:12px 16px;text-align:center;border-right:1px solid var(--border);">
+        <div style="font-size:1.25rem;font-weight:900;color:var(--green);" id="favTeamCount">0</div>
+        <div style="font-size:0.6875rem;color:var(--gray);">times</div>
+      </div>
+      <div style="flex:1;padding:12px 16px;text-align:center;border-right:1px solid var(--border);">
+        <div style="font-size:1.25rem;font-weight:900;color:var(--gold);" id="favLeagueCount">0</div>
+        <div style="font-size:0.6875rem;color:var(--gray);">ligas</div>
+      </div>
+      <div style="flex:1;padding:12px 16px;text-align:center;">
+        <div style="font-size:1.25rem;font-weight:900;color:var(--red);" id="favZebraCount">—</div>
+        <div style="font-size:0.6875rem;color:var(--gray);">zebras ativas</div>
+      </div>
+    </div>
+
     <div class="section-header">
       <span class="section-title"><i data-lucide="star" class="sec-ic"></i>Meus Times</span>
       <span style="font-size:0.6875rem;color:var(--gray);display:flex;align-items:center;gap:4px;"><i data-lucide="grip-vertical" style="width:12px;height:12px;"></i>Arraste para reordenar</span>
@@ -265,9 +280,52 @@ updatePlanBadge && updatePlanBadge();
 renderTeams();
 renderLeagues();
 lucide.createIcons();
+
+(function updateFavStats(){
+  const teams = getFavoritesArr ? getFavoritesArr() : [];
+  const leagues = getFavLeagues ? getFavLeagues() : [];
+  document.getElementById('favTeamCount').textContent = teams.length;
+  document.getElementById('favLeagueCount').textContent = leagues.length;
+  // animate counts
+  [{ id:'favTeamCount', val:teams.length }, { id:'favLeagueCount', val:leagues.length }].forEach(({id,val})=>{
+    let n=0; const el=document.getElementById(id);
+    const step=()=>{ n=Math.min(n+1,val); el.textContent=n; if(n<val) requestAnimationFrame(step); };
+    requestAnimationFrame(step);
+  });
+})();
 </script>
 
 <style>
+  /* ── SHIMMER SKELETON ─────────────────────────────────────── */
+  @keyframes shimmer {
+    0%   { background-position: -400px 0; }
+    100% { background-position:  400px 0; }
+  }
+  .skel-fav {
+    height:72px;border-radius:var(--radius-md);margin-bottom:10px;
+    background:linear-gradient(90deg,var(--card) 25%,var(--card2) 50%,var(--card) 75%);
+    background-size:800px 100%;
+    animation:shimmer 1.4s infinite;
+  }
+
+  /* ── ZEBRA WALK ANIMATION ─────────────────────────────────── */
+  @keyframes zebraWalk {
+    0%,100% { transform: rotate(-4deg); }
+    50%     { transform: rotate(4deg); }
+  }
+  .empty-zebra-icon {
+    font-size:3.5rem;display:inline-block;
+    animation: zebraWalk 1.5s ease-in-out infinite;
+    transform-origin: bottom center;
+  }
+
+  /* ── CARD REVEAL ANIMATION ────────────────────────────────── */
+  @keyframes favCardIn {
+    from { opacity:0; transform:translateX(-12px); }
+    to   { opacity:1; transform:translateX(0); }
+  }
+  .fav-team-card { animation: favCardIn 0.3s ease both; }
+
   .sec-ic { width:14px; height:14px; display:inline-block; vertical-align:middle; margin-right:5px; flex-shrink:0; }
   .section-title { display:inline-flex; align-items:center; }
   .bottom-nav__icon i { width:20px; height:20px; display:block; }

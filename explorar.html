@@ -60,20 +60,33 @@
     <div style="margin-bottom:16px;">
       <div class="section-header"><span class="section-title" style="display:inline-flex;align-items:center;"><i data-lucide="flame" style="width:14px;height:14px;color:var(--red);margin-right:5px;"></i>Em Destaque</span></div>
       <div class="scroll-x" style="gap:10px;" id="destaquesBar">
-        <div onclick="window.location.href='liga.html?id=BRA'" style="flex-shrink:0;background:linear-gradient(135deg,rgba(46,230,92,0.15),var(--card));border:1px solid rgba(46,230,92,0.3);border-radius:var(--radius-md);padding:10px 14px;cursor:pointer;min-width:140px;">
-          <div style="font-size:0.6875rem;color:var(--green);font-weight:700;margin-bottom:3px;">🇧🇷 BRASILEIRÃO</div>
-          <div style="font-size:0.8125rem;font-weight:600;">7 zebras</div>
-          <div style="font-size:0.6875rem;color:var(--gray);">esta semana</div>
+        <div onclick="window.location.href='liga.html?id=BRA'" class="league-card-explore" style="flex-shrink:0;min-width:130px;background:linear-gradient(135deg,rgba(46,230,92,0.1),var(--card));border-color:rgba(46,230,92,0.3);">
+          <div class="zebra-active-dot"></div>
+          <span class="league-card-explore__flag">🇧🇷</span>
+          <div class="league-card-explore__name">Brasileirão</div>
+          <div class="league-card-explore__zebra">🦓 7 zebras esta semana</div>
         </div>
-        <div onclick="window.location.href='liga.html?id=ENG'" style="flex-shrink:0;background:linear-gradient(135deg,rgba(255,200,50,0.12),var(--card));border:1px solid rgba(255,200,50,0.25);border-radius:var(--radius-md);padding:10px 14px;cursor:pointer;min-width:140px;">
-          <div style="font-size:0.6875rem;color:var(--gold);font-weight:700;margin-bottom:3px;">🏴󠁧󠁢󠁥󠁮󠁧󠁿 PREMIER LEAGUE</div>
-          <div style="font-size:0.8125rem;font-weight:600;">5 zebras</div>
-          <div style="font-size:0.6875rem;color:var(--gray);">esta semana</div>
+        <div onclick="window.location.href='liga.html?id=ENG'" class="league-card-explore" style="flex-shrink:0;min-width:130px;background:linear-gradient(135deg,rgba(255,200,50,0.08),var(--card));border-color:rgba(255,200,50,0.25);">
+          <div class="zebra-active-dot" style="background:var(--gold);"></div>
+          <span class="league-card-explore__flag">🏴󠁧󠁢󠁥󠁮󠁧󠁿</span>
+          <div class="league-card-explore__name">Premier League</div>
+          <div class="league-card-explore__zebra" style="color:var(--gold);">🦓 5 zebras esta semana</div>
         </div>
-        <div onclick="window.location.href='liga.html?id=ESP'" style="flex-shrink:0;background:linear-gradient(135deg,rgba(238,68,68,0.12),var(--card));border:1px solid rgba(238,68,68,0.25);border-radius:var(--radius-md);padding:10px 14px;cursor:pointer;min-width:140px;">
-          <div style="font-size:0.6875rem;color:var(--red);font-weight:700;margin-bottom:3px;">🇪🇸 LA LIGA</div>
-          <div style="font-size:0.8125rem;font-weight:600;">4 zebras</div>
-          <div style="font-size:0.6875rem;color:var(--gray);">esta semana</div>
+        <div onclick="window.location.href='liga.html?id=ESP'" class="league-card-explore" style="flex-shrink:0;min-width:130px;background:linear-gradient(135deg,rgba(238,68,68,0.08),var(--card));border-color:rgba(238,68,68,0.2);">
+          <span class="league-card-explore__flag">🇪🇸</span>
+          <div class="league-card-explore__name">La Liga</div>
+          <div class="league-card-explore__zebra" style="color:var(--red);">🦓 4 zebras esta semana</div>
+        </div>
+        <div onclick="window.location.href='liga.html?id=GER'" class="league-card-explore" style="flex-shrink:0;min-width:130px;">
+          <div class="zebra-active-dot"></div>
+          <span class="league-card-explore__flag">🇩🇪</span>
+          <div class="league-card-explore__name">Bundesliga</div>
+          <div class="league-card-explore__zebra">🦓 6 zebras esta semana</div>
+        </div>
+        <div onclick="window.location.href='liga.html?id=ITA'" class="league-card-explore" style="flex-shrink:0;min-width:130px;">
+          <span class="league-card-explore__flag">🇮🇹</span>
+          <div class="league-card-explore__name">Serie A</div>
+          <div class="league-card-explore__zebra">🦓 3 zebras esta semana</div>
         </div>
       </div>
     </div>
@@ -98,6 +111,24 @@
       <button class="filter-chip" data-filter="ligas">Ligas</button>
       <button class="filter-chip" data-filter="brasil">🇧🇷 Brasil</button>
       <button class="filter-chip" data-filter="europa">🌍 Europa</button>
+    </div>
+
+    <!-- TODAS AS LIGAS GRID -->
+    <div id="allLeaguesSection" style="margin-bottom:16px;">
+      <div style="font-size:0.875rem;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+        <i data-lucide="globe" style="width:15px;height:15px;color:var(--gray);"></i> Todas as Ligas
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;" id="allLeaguesGrid">
+        <div class="league-card-explore" onclick="location.href='liga.html?id=UCL'"><span class="league-card-explore__flag">🏆</span><div class="league-card-explore__name">Champions</div></div>
+        <div class="league-card-explore" onclick="location.href='liga.html?id=BRA'"><span class="league-card-explore__flag">🇧🇷</span><div class="league-card-explore__name">Brasileirão</div></div>
+        <div class="league-card-explore" onclick="location.href='liga.html?id=ENG'"><span class="league-card-explore__flag">🏴󠁧󠁢󠁥󠁮󠁧󠁿</span><div class="league-card-explore__name">Premier League</div></div>
+        <div class="league-card-explore" onclick="location.href='liga.html?id=ESP'"><span class="league-card-explore__flag">🇪🇸</span><div class="league-card-explore__name">La Liga</div></div>
+        <div class="league-card-explore" onclick="location.href='liga.html?id=ITA'"><span class="league-card-explore__flag">🇮🇹</span><div class="league-card-explore__name">Serie A</div></div>
+        <div class="league-card-explore" onclick="location.href='liga.html?id=GER'"><span class="league-card-explore__flag">🇩🇪</span><div class="league-card-explore__name">Bundesliga</div></div>
+        <div class="league-card-explore" onclick="location.href='liga.html?id=FRA'"><span class="league-card-explore__flag">🇫🇷</span><div class="league-card-explore__name">Ligue 1</div></div>
+        <div class="league-card-explore" onclick="location.href='liga.html?id=POR'"><span class="league-card-explore__flag">🇵🇹</span><div class="league-card-explore__name">Liga Portugal</div></div>
+        <div class="league-card-explore" onclick="location.href='liga.html?id=ARG'"><span class="league-card-explore__flag">🇦🇷</span><div class="league-card-explore__name">Liga Argentina</div></div>
+      </div>
     </div>
 
     <!-- Results -->
@@ -704,6 +735,51 @@ if (typeof lucide !== 'undefined') lucide.createIcons();
 
   #searchInput::placeholder { color:var(--gray); }
   #searchInput:focus { border-color:var(--green); }
+
+  /* ── LEAGUE CARD EXPLORE ──────────────────────────────────── */
+  .league-card-explore {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    cursor: pointer;
+    transition: border-color 0.2s, transform 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .league-card-explore:hover {
+    border-color: var(--green);
+    transform: translateY(-2px);
+  }
+  .league-card-explore__flag {
+    font-size: 1.75rem;
+    margin-bottom: 6px;
+    display: block;
+  }
+  .league-card-explore__name {
+    font-size: 0.8125rem;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .league-card-explore__zebra {
+    font-size: 0.6875rem;
+    color: var(--green);
+    margin-top: 3px;
+  }
+  .zebra-active-dot {
+    position: absolute;
+    top: 8px; right: 8px;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: dotPulse 1.5s ease infinite;
+  }
+  @keyframes dotPulse {
+    0%,100% { transform:scale(1); opacity:1; }
+    50%     { transform:scale(1.4); opacity:0.7; }
+  }
 </style>
 </body>
 </html>

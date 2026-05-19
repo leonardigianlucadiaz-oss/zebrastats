@@ -12,6 +12,27 @@
   <style>
     .navbar__icon i { display: block; }
     .payment-method-tab i { vertical-align: middle; }
+
+    /* ── PAYMENT METHOD TAB ANIMATION ────────────────────────── */
+    .payment-method-tab {
+      transition: all 0.2s ease !important;
+    }
+    .payment-method-tab.active {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(46,230,92,0.2);
+    }
+
+    /* ── INPUT FOCUS GLOW ────────────────────────────────────── */
+    .form-input:focus {
+      border-color: rgba(46,230,92,0.6) !important;
+      box-shadow: 0 0 0 3px rgba(46,230,92,0.1) !important;
+    }
+
+    /* ── SUCCESS POP ANIMATION ───────────────────────────────── */
+    @keyframes successPop {
+      from { transform:scale(0); opacity:0; }
+      to   { transform:scale(1); opacity:1; }
+    }
   </style>
 </head>
 <body>
@@ -166,6 +187,24 @@
       <button class="btn btn--outline" id="generateBoleto" style="width:100%;">Gerar e enviar por e-mail</button>
     </div>
 
+    <!-- Trust badges -->
+    <div style="display:flex;align-items:center;justify-content:center;gap:12px;padding:8px 0;flex-wrap:wrap;">
+      <div style="display:flex;align-items:center;gap:4px;font-size:0.6875rem;color:var(--gray);">
+        <i data-lucide="lock" style="width:12px;height:12px;color:var(--green);"></i>
+        <span>SSL 256-bit</span>
+      </div>
+      <div style="width:1px;height:14px;background:var(--border);"></div>
+      <div style="display:flex;align-items:center;gap:4px;font-size:0.6875rem;color:var(--gray);">
+        <i data-lucide="shield-check" style="width:12px;height:12px;color:var(--green);"></i>
+        <span>Stripe Secure</span>
+      </div>
+      <div style="width:1px;height:14px;background:var(--border);"></div>
+      <div style="display:flex;align-items:center;gap:4px;font-size:0.6875rem;color:var(--gray);">
+        <i data-lucide="refresh-ccw" style="width:12px;height:12px;color:var(--gold);"></i>
+        <span>Cancele quando quiser</span>
+      </div>
+    </div>
+
     <!-- CTA PRINCIPAL -->
     <button class="btn btn--gold" id="confirmBtn" style="display:flex;align-items:center;justify-content:center;gap:8px;">
       <i data-lucide="lock" style="width:16px;height:16px;"></i> Confirmar Pagamento · R$ 500,00
@@ -230,6 +269,16 @@
     <div style="font-size:0.8125rem;color:var(--gray);">Redirecionando em <span id="redirectCountdown" style="color:var(--white);font-weight:600;">5</span>s...</div>
   </div>
 
+</div>
+
+<!-- Confirmation overlay (shown after payment) -->
+<div id="payConfirmOverlay" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);align-items:center;justify-content:center;flex-direction:column;gap:16px;text-align:center;padding:32px;">
+  <div style="width:80px;height:80px;border-radius:50%;background:var(--green-dim,rgba(46,230,92,0.15));border:2px solid var(--green);display:flex;align-items:center;justify-content:center;animation:successPop 0.5s cubic-bezier(0.34,1.56,0.64,1) both;">
+    <i data-lucide="check" style="width:36px;height:36px;color:var(--green);"></i>
+  </div>
+  <div style="font-size:1.375rem;font-weight:700;">Pagamento confirmado!</div>
+  <div style="font-size:0.875rem;color:var(--gray);max-width:280px;line-height:1.6;">Sua conta PRO foi ativada. Aproveite todos os recursos sem limites.</div>
+  <a href="home.html" class="btn btn--primary" style="text-decoration:none;margin-top:8px;">Ir para o app</a>
 </div>
 
 <div class="toast" id="toast"></div>
