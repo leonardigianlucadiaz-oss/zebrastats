@@ -453,10 +453,10 @@
 <div class="toast" id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/config.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/db.js"></script>
 <script src="js/auth-guard.js"></script>
-<script src="js/config.js"></script>
 <script src="js/api.js"></script>
 <script src="js/main.js"></script>
 <script>
@@ -531,16 +531,21 @@
 
   // ── AVATAR DINÂMICO ──────────────────────────────────────
   (function initUserData() {
+    const isGuest    = localStorage.getItem('zs_guest') === '1';
     const savedName  = localStorage.getItem('zs_user_name');
     const savedEmail = localStorage.getItem('zs_user_email');
     if (savedName) {
       document.getElementById('userName').textContent = savedName;
       document.getElementById('avatarEl').textContent = savedName[0].toUpperCase();
-      // Sidebar avatar
       const sidebarAvatar = document.querySelector('.sidebar__user-avatar');
       if (sidebarAvatar) sidebarAvatar.textContent = savedName[0].toUpperCase();
     }
-    if (savedEmail) document.getElementById('userEmail').textContent = savedEmail;
+    if (isGuest) {
+      const emailEl = document.getElementById('userEmail');
+      if (emailEl) emailEl.style.display = 'none';
+    } else if (savedEmail) {
+      document.getElementById('userEmail').textContent = savedEmail;
+    }
   })();
 
   function confirmLogout() {
