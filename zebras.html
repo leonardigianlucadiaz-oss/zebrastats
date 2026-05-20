@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/main.css?v=3" />
+  <link rel="stylesheet" href="css/main.css?v=5" />
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 </head>
 <body>
@@ -54,7 +54,7 @@
   </nav>
 
   <!-- BARRA DE LIGAS -->
-  <section style="background:var(--card2);padding:12px 16px;border-bottom:1px solid var(--border);">
+  <section class="section-padded" style="background:var(--card2);padding:12px 16px;border-bottom:1px solid var(--border);">
     <div class="section-header" style="margin-bottom:10px;">
       <span class="section-title" style="font-size:0.875rem;"><i data-lucide="trophy" class="sec-ic"></i>Ligas</span>
       <button id="addLeagueBtn" style="background:none;border:none;color:var(--green);font-size:0.75rem;font-weight:600;cursor:pointer;font-family:inherit;">+ Adicionar Liga</button>
@@ -63,7 +63,7 @@
   </section>
 
   <!-- FILTROS DE MAGNITUDE -->
-  <section style="padding:10px 16px;border-bottom:1px solid var(--border);">
+  <section class="section-padded" style="padding:10px 16px;border-bottom:1px solid var(--border);">
     <div class="scroll-x" style="gap:8px;" id="filterRow">
       <button class="filter-chip active" data-filter="all">Todas</button>
       <button class="filter-chip" data-filter="grande"><i data-lucide="alert-circle" class="chip-ic" style="color:var(--red);"></i>Grande (7+)</button>
@@ -82,7 +82,7 @@
   </div>
 
   <!-- HEATMAP SEMANAL -->
-  <section style="padding:12px 16px;border-bottom:1px solid var(--border);background:var(--card2);">
+  <section class="section-padded" style="padding:12px 16px;border-bottom:1px solid var(--border);background:var(--card2);">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
       <span style="font-size:0.75rem;font-weight:600;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;">Intensidade da Semana</span>
       <span style="font-size:0.625rem;color:var(--gray);">zebras por dia</span>

@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/main.css?v=3" />
+  <link rel="stylesheet" href="css/main.css?v=5" />
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 </head>
 <body>
@@ -54,7 +54,7 @@
     </nav>
 
     <!-- STATS BAR DO DIA -->
-<div id="statsDayBar" style="background:var(--card2);border-bottom:1px solid var(--border);padding:8px 16px;">
+<div id="statsDayBar" style="background:var(--card2);border-bottom:1px solid var(--border);padding:8px 16px;" class="stats-day-bar">
   <div style="display:flex;align-items:center;justify-content:space-between;max-width:100%;">
     <div class="hide-scrollbar" style="display:flex;align-items:center;gap:16px;overflow-x:auto;-webkit-overflow-scrolling:touch;flex:1;min-width:0;">
       <div style="display:flex;align-items:center;gap:5px;flex-shrink:0;">
@@ -104,96 +104,106 @@
       </div>
     </section>
 
-    <!-- CONTEÚDO PRINCIPAL -->
-    <main class="content">
+    <!-- CONTEÚDO PRINCIPAL — 2 colunas no desktop, 1 coluna no mobile -->
+    <main class="content home-two-col">
 
-      <!-- AO VIVO -->
-      <div class="section-header">
-        <span class="section-title">
-          <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--red);margin-right:6px;animation:pulse 1.2s infinite;"></span>
-          Ao Vivo
-        </span>
-        <a href="zebras.html" class="section-link">Ver todos</a>
-      </div>
+      <!-- ── COLUNA PRINCIPAL (partidas) ── -->
+      <div class="home-col-main">
 
-      <div id="liveGames" style="display:flex;flex-direction:column;gap:10px;"></div>
-
-      <!-- FILTRO DE LIGAS -->
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:4px;margin-bottom:2px;">
-        <span style="font-size:0.6875rem;color:var(--gray);">Filtrar por liga</span>
-        <a href="liga.html" style="font-size:0.6875rem;color:var(--green);font-weight:600;text-decoration:none;">Explorar ligas →</a>
-      </div>
-      <div class="scroll-x" id="leagueFilter" style="gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;flex-wrap:nowrap;">
-        <button class="league-pill active" data-league="all">Todos</button>
-        <button class="league-pill" data-league="BRA" data-lid="BRA"><span class="pill-logo" id="hpl-BRA"></span> Brasileirão</button>
-        <button class="league-pill" data-league="ENG" data-lid="ENG"><span class="pill-logo" id="hpl-ENG"></span> Premier Lge</button>
-        <button class="league-pill" data-league="ESP" data-lid="ESP"><span class="pill-logo" id="hpl-ESP"></span> La Liga</button>
-        <button class="league-pill" data-league="ITA" data-lid="ITA"><span class="pill-logo" id="hpl-ITA"></span> Serie A</button>
-        <button class="league-pill" data-league="GER" data-lid="GER"><span class="pill-logo" id="hpl-GER"></span> Bundesliga</button>
-        <button class="league-pill" data-league="FRA" data-lid="FRA"><span class="pill-logo" id="hpl-FRA"></span> Ligue 1</button>
-        <button class="league-pill" data-league="UCL" data-lid="UCL"><span class="pill-logo" id="hpl-UCL"></span> Champions</button>
-      </div>
-
-      <!-- EM BREVE -->
-      <div class="section-header" style="margin-top:4px;">
-        <span class="section-title"><i data-lucide="clock" class="sec-ic"></i>Em Breve</span>
-        <a href="zebras.html" class="section-link">Ver agenda</a>
-      </div>
-
-      <div id="upcomingGames" style="display:flex;flex-direction:column;gap:10px;"></div>
-
-      <!-- QUENTE AGORA -->
-      <div class="section-header" style="margin-top:4px;">
-        <span class="section-title"><i data-lucide="flame" class="sec-ic" style="color:#ff6b35;"></i>Quente Agora</span>
-        <a href="zebras.html" class="section-link">Ver zebras</a>
-      </div>
-      <div id="hotLeagues" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:4px;"></div>
-
-      <!-- ZEBRAS DO DIA -->
-      <div class="section-header" style="margin-top:4px;">
-        <span class="section-title"><i data-lucide="zap" class="sec-ic"></i>Zebras do Dia</span>
-        <a href="assinatura.html" class="section-link text-gold"><i data-lucide="lock" style="width:12px;height:12px;vertical-align:middle;margin-right:3px;"></i>Pro</a>
-      </div>
-
-      <div class="lock-banner" onclick="window.location.href='assinatura.html'">
-        <i data-lucide="lock" style="width:20px;height:20px;color:var(--gold);flex-shrink:0;"></i>
-        <div>
-          <div style="font-size:0.875rem;font-weight:600;">Análise de zebras exclusiva</div>
-          <div style="font-size:0.75rem;font-weight:400;color:var(--gray);margin-top:2px;">Assine o Pro para ver probabilidades e histórico completo</div>
+        <!-- AO VIVO -->
+        <div class="section-header">
+          <span class="section-title">
+            <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--red);margin-right:6px;animation:pulse 1.2s infinite;"></span>
+            Ao Vivo
+          </span>
+          <a href="zebras.html" class="section-link">Ver todos</a>
         </div>
-        <i data-lucide="arrow-right" style="margin-left:auto;color:var(--green);width:16px;height:16px;flex-shrink:0;"></i>
-      </div>
 
-      <!-- ZEBRA DO DIA DESTAQUE -->
-      <div id="zebraDestaqueCard" style="display:none;margin-bottom:8px;background:linear-gradient(135deg,rgba(46,230,92,0.1),rgba(255,200,50,0.07));border:1px solid rgba(46,230,92,0.35);border-radius:var(--radius-md);padding:14px;cursor:pointer;"></div>
+        <div id="liveGames" style="display:flex;flex-direction:column;gap:10px;"></div>
 
-      <!-- PRÓXIMAS ZEBRAS POTENCIAIS -->
-      <div class="section-header" style="margin-top:8px;">
-        <span class="section-title"><i data-lucide="trending-up" class="sec-ic" style="color:var(--gold);"></i>Próximas Zebras Potenciais</span>
-      </div>
-      <div id="proximasZebrasWrap" style="display:flex;flex-direction:column;gap:6px;">
-        <div class="shimmer-line" style="width:90%;"></div>
-        <div class="shimmer-line" style="width:75%;"></div>
-        <div class="shimmer-line" style="width:82%;"></div>
-      </div>
+        <!-- FILTRO DE LIGAS -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:4px;margin-bottom:2px;">
+          <span style="font-size:0.6875rem;color:var(--gray);">Filtrar por liga</span>
+          <a href="liga.html" style="font-size:0.6875rem;color:var(--green);font-weight:600;text-decoration:none;">Explorar ligas →</a>
+        </div>
+        <div class="scroll-x" id="leagueFilter" style="gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;flex-wrap:nowrap;">
+          <button class="league-pill active" data-league="all">Todos</button>
+          <button class="league-pill" data-league="BRA" data-lid="BRA"><span class="pill-logo" id="hpl-BRA"></span> Brasileirão</button>
+          <button class="league-pill" data-league="ENG" data-lid="ENG"><span class="pill-logo" id="hpl-ENG"></span> Premier Lge</button>
+          <button class="league-pill" data-league="ESP" data-lid="ESP"><span class="pill-logo" id="hpl-ESP"></span> La Liga</button>
+          <button class="league-pill" data-league="ITA" data-lid="ITA"><span class="pill-logo" id="hpl-ITA"></span> Serie A</button>
+          <button class="league-pill" data-league="GER" data-lid="GER"><span class="pill-logo" id="hpl-GER"></span> Bundesliga</button>
+          <button class="league-pill" data-league="FRA" data-lid="FRA"><span class="pill-logo" id="hpl-FRA"></span> Ligue 1</button>
+          <button class="league-pill" data-league="UCL" data-lid="UCL"><span class="pill-logo" id="hpl-UCL"></span> Champions</button>
+        </div>
 
-      <div id="zebrasDoDiaList" style="display:flex;flex-direction:column;gap:8px;"></div>
+        <!-- EM BREVE -->
+        <div class="section-header" style="margin-top:4px;">
+          <span class="section-title"><i data-lucide="clock" class="sec-ic"></i>Em Breve</span>
+          <a href="zebras.html" class="section-link">Ver agenda</a>
+        </div>
 
-      <!-- SPARKLINES POR LIGA -->
-      <div id="sparklineSection">
+        <div id="upcomingGames" style="display:flex;flex-direction:column;gap:10px;"></div>
+
+        <!-- QUENTE AGORA -->
+        <div class="section-header" style="margin-top:4px;">
+          <span class="section-title"><i data-lucide="flame" class="sec-ic" style="color:#ff6b35;"></i>Quente Agora</span>
+          <a href="zebras.html" class="section-link">Ver zebras</a>
+        </div>
+        <div id="hotLeagues" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:4px;"></div>
+
+      </div><!-- /home-col-main -->
+
+      <!-- ── COLUNA LATERAL (analytics) ── -->
+      <div class="home-col-side">
+
+        <!-- ZEBRAS DO DIA -->
+        <div class="section-header" style="margin-top:4px;">
+          <span class="section-title"><i data-lucide="zap" class="sec-ic"></i>Zebras do Dia</span>
+          <a href="assinatura.html" class="section-link text-gold"><i data-lucide="lock" style="width:12px;height:12px;vertical-align:middle;margin-right:3px;"></i>Pro</a>
+        </div>
+
+        <div class="lock-banner" onclick="window.location.href='assinatura.html'">
+          <i data-lucide="lock" style="width:20px;height:20px;color:var(--gold);flex-shrink:0;"></i>
+          <div>
+            <div style="font-size:0.875rem;font-weight:600;">Análise de zebras exclusiva</div>
+            <div style="font-size:0.75rem;font-weight:400;color:var(--gray);margin-top:2px;">Assine o Pro para ver probabilidades e histórico completo</div>
+          </div>
+          <i data-lucide="arrow-right" style="margin-left:auto;color:var(--green);width:16px;height:16px;flex-shrink:0;"></i>
+        </div>
+
+        <!-- ZEBRA DO DIA DESTAQUE -->
+        <div id="zebraDestaqueCard" style="display:none;background:linear-gradient(135deg,rgba(46,230,92,0.1),rgba(255,200,50,0.07));border:1px solid rgba(46,230,92,0.35);border-radius:var(--radius-md);padding:14px;cursor:pointer;"></div>
+
+        <!-- PRÓXIMAS ZEBRAS POTENCIAIS -->
         <div class="section-header" style="margin-top:8px;">
-          <span class="section-title"><i data-lucide="bar-chart-2" class="sec-ic"></i>Tendência por Liga</span>
+          <span class="section-title"><i data-lucide="trending-up" class="sec-ic" style="color:var(--gold);"></i>Próximas Zebras</span>
         </div>
-        <div class="sparkline-grid" id="sparklineGrid"></div>
-      </div>
+        <div id="proximasZebrasWrap" style="display:flex;flex-direction:column;gap:6px;">
+          <div class="shimmer-line" style="width:90%;"></div>
+          <div class="shimmer-line" style="width:75%;"></div>
+          <div class="shimmer-line" style="width:82%;"></div>
+        </div>
 
-      <!-- RANKINGS RÁPIDOS -->
-      <div class="section-header" style="margin-top:4px;">
-        <span class="section-title"><i data-lucide="medal" class="sec-ic"></i>Top Zebras da Temporada</span>
-        <a href="ranking.html" class="section-link">Ver ranking</a>
-      </div>
+        <div id="zebrasDoDiaList" style="display:flex;flex-direction:column;gap:8px;"></div>
 
-      <div id="zebraRanking" style="display:flex;flex-direction:column;gap:8px;"></div>
+        <!-- SPARKLINES POR LIGA -->
+        <div id="sparklineSection">
+          <div class="section-header" style="margin-top:8px;">
+            <span class="section-title"><i data-lucide="bar-chart-2" class="sec-ic"></i>Tendência por Liga</span>
+          </div>
+          <div class="sparkline-grid" id="sparklineGrid"></div>
+        </div>
+
+        <!-- RANKINGS RÁPIDOS -->
+        <div class="section-header" style="margin-top:4px;">
+          <span class="section-title"><i data-lucide="medal" class="sec-ic"></i>Top Zebras da Temporada</span>
+          <a href="ranking.html" class="section-link">Ver ranking</a>
+        </div>
+
+        <div id="zebraRanking" style="display:flex;flex-direction:column;gap:8px;"></div>
+
+      </div><!-- /home-col-side -->
 
     </main>
 
