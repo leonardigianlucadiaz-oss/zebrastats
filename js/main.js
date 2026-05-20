@@ -793,6 +793,7 @@ function initPlanBadge() {
 document.addEventListener('DOMContentLoaded', () => {
   updatePlanBadge();
   addRippleEffect();
+  injectFavoritosNav(); // must run BEFORE setActiveNavItem so the Favoritos link exists when active-state is assigned
   setActiveNavItem();
   initThemeToggle();
   initPlanBadge();
@@ -801,7 +802,6 @@ document.addEventListener('DOMContentLoaded', () => {
   updateSidebarUser();
   initBottomNav();
   initHamburger();
-  injectFavoritosNav();
 
   // ── PWA: inject manifest link ──────────────────────────────────
   if (!document.querySelector('link[rel="manifest"]')) {
