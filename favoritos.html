@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/main.css?v=8" />
+  <link rel="stylesheet" href="css/main.css?v=9" />
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 </head>
 <body>
@@ -50,9 +50,11 @@
       <i data-lucide="arrow-left" style="width:20px;height:20px;"></i>
     </button>
     <span style="font-size:1rem;font-weight:700;flex:1;text-align:center;">Meus Favoritos</span>
-    <a href="explorar.html" class="navbar__icon" title="Explorar">
-      <i data-lucide="pencil" style="width:18px;height:18px;"></i>
-    </a>
+    <div class="navbar__actions">
+      <a href="explorar.html" class="navbar__icon" title="Explorar">
+        <i data-lucide="pencil" style="width:18px;height:18px;"></i>
+      </a>
+    </div>
   </nav>
 
   <!-- CONTENT -->
@@ -106,7 +108,7 @@
 <script src="js/db.js"></script>
 <script src="js/auth-guard.js?v=4"></script>
 <script src="js/api.js"></script>
-<script src="js/main.js?v=5"></script>
+<script src="js/main.js?v=7"></script>
 <script>
 const LEAGUE_NAMES = {
   BRA: 'Brasileirão',
@@ -350,3 +352,5 @@ lucide.createIcons();
 </style>
 </body>
 </html>
+
+

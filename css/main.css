@@ -1545,19 +1545,20 @@ input:checked + .toggle-slider::before { transform: translateX(20px); }
   /* ── 2. NAVBAR: taller, hide brand (shown in sidebar), larger padding ── */
   .navbar { height: 64px; padding: 0 32px; }
   .navbar__brand { display: none; }
-  /* Back-button navbars without sidebar: keep brand visible */
-  .back-navbar .navbar__brand { display: flex; }
-  /* Desktop page title in navbar */
+  /* Hide mobile back-button on desktop (sidebar handles navigation) */
+  .navbar > button:first-child { display: none !important; }
+  /* Desktop page title in navbar — also applied to repurposed inline spans */
   .navbar__page-title {
     display: block;
-    font-size: 1rem;
-    font-weight: 700;
-    color: var(--white);
-    flex: 1;
+    font-size: 1rem !important;
+    font-weight: 700 !important;
+    color: var(--white) !important;
+    flex: 1 !important;
     min-width: 0;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    text-align: left !important;
   }
 
   /* ── 3. TAB BAR: offset for taller navbar ── */
