@@ -240,6 +240,10 @@ body {
   flex-direction: column;
 }
 
+/* Guest banner spacer — prevents last card from hiding behind the fixed banner */
+.has-guest-banner .app-main { padding-bottom: 56px !important; }
+.has-guest-banner main      { padding-bottom: 56px !important; }
+
 /* ── CONTENT CONTAINER (max-width on desktop) ── */
 .content-container {
   width: 100%;

@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/main.css?v=3" />
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 </head>
 <body>
@@ -287,9 +287,9 @@
 <script src="js/config.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/db.js"></script>
-<script src="js/auth-guard.js"></script>
+<script src="js/auth-guard.js?v=3"></script>
 <script src="js/api.js"></script>
-<script src="js/main.js"></script>
+<script src="js/main.js?v=3"></script>
 <script>
 // ── CONSTANTS ─────────────────────────────────────────────────────────────────
 const ALERTS_KEY  = 'zs_alerts';
@@ -884,9 +884,9 @@ function updatePushUI(state) {
   } else if (state === 'denied') {
     btn.textContent = 'Bloqueado';
     btn.style.background = 'transparent';
-    btn.style.border = '1px solid var(--border)';
-    btn.style.color = 'var(--red)';
-    if (statusEl) { statusEl.textContent = 'Permissão negada pelo navegador'; statusEl.style.color = 'var(--red)'; }
+    btn.style.border = '1px solid rgba(255,170,0,0.35)';
+    btn.style.color = 'var(--gold,#FFD700)';
+    if (statusEl) { statusEl.textContent = 'Permissão negada pelo navegador'; statusEl.style.color = 'var(--gold,#FFD700)'; }
   } else {
     btn.textContent = 'Ativar';
     btn.style.background = 'var(--green)';
