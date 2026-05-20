@@ -1024,8 +1024,8 @@ p  { font-size: 0.875rem; line-height: 1.5; color: var(--gray); }
   /* Hide hamburger when sidebar is always visible */
   .hamburger-btn { display: none !important; }
   .sidebar-backdrop { display: none !important; }
-  /* Content area takes remaining space */
-  .app-main { min-width: 0; flex: 1; max-width: 860px; }
+  /* Content area takes remaining space — no max-width cap on desktop */
+  .app-main { min-width: 0; flex: 1; max-width: none; }
   /* Ensure app-wrapper is flex row */
   .app-wrapper { flex-direction: row; }
 }
@@ -1522,4 +1522,157 @@ input:checked + .toggle-slider::before { transform: translateX(20px); }
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   padding: 12px 14px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   DESKTOP OVERHAUL — ≥1024px
+   All rules here only affect screens ≥1024px. Mobile is unchanged.
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media (min-width: 1024px) {
+
+  /* ── 1. SIDEBAR: wider & more refined ── */
+  .app-sidebar { width: 280px; }
+  .sidebar__brand { padding: 22px 20px 20px; font-size: 1.2rem; }
+  .sidebar__brand-icon { width: 38px; height: 38px; font-size: 1.05rem; }
+  .sidebar__nav { padding: 16px 12px; gap: 4px; }
+  .sidebar__nav-item { padding: 11px 14px; font-size: 0.9375rem; }
+  .sidebar__footer { padding: 16px 20px; }
+
+  /* ── 2. NAVBAR: taller, hide brand (shown in sidebar), larger padding ── */
+  .navbar { height: 64px; padding: 0 32px; }
+  .navbar__brand { display: none; }
+  /* Back-button navbars without sidebar: keep brand visible */
+  .back-navbar .navbar__brand { display: flex; }
+
+  /* ── 3. TAB BAR: offset for taller navbar ── */
+  .tab-bar { top: 64px; }
+
+  /* ── 4. CONTENT: generous desktop spacing ── */
+  .content { padding: 28px 32px; gap: 20px; }
+
+  /* ── 5. SECTION HEADERS: larger titles on desktop ── */
+  .section-header { margin-bottom: 14px; }
+  .section-title  { font-size: 1rem; }
+
+  /* ── 6. CARDS: more padding + hover lift ── */
+  .card { padding: 22px 24px; }
+  .card:hover, .zebra-card:hover, .game-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  /* ── 7. CARD GRIDS: more columns on big screen ── */
+  .cards-grid   { grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .cards-grid-2 { grid-template-columns: repeat(2, 1fr); gap: 20px; }
+
+  /* ── 8. STATS BAR & HERO BANNER: desktop padding ── */
+  #statsDayBar { padding: 10px 32px; }
+  #heroBanner  { padding: 28px 32px 24px; }
+  #heroMatchTitle { font-size: 1.375rem !important; }
+  #heroZiValue    { font-size: 1.875rem !important; }
+  #heroMatchDesc  { font-size: 0.9375rem !important; }
+
+  /* ── 9. MEUS TIMES section bar ── */
+  .fav-teams-section { padding: 12px 32px; }
+
+  /* ── 10. HOME PAGE — 2-column grid layout ── */
+  main.home-two-col {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 0;
+    align-items: start;
+    padding: 0;
+  }
+  .home-col-main,
+  .home-col-side {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 28px 24px;
+    min-width: 0; /* prevent fr-column overflow */
+    overflow: hidden;
+  }
+  .home-col-main { padding-left: 32px; border-right: 1px solid var(--border); }
+  .home-col-side { padding-right: 32px; background: var(--card2); min-height: 100%; }
+
+  /* ── 11. ZEBRA LIST: 2-column card grid on desktop ── */
+  #zebraList {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 16px !important;
+  }
+
+  /* ── 12. HOT LEAGUES: 4 columns ── */
+  #hotLeagues { grid-template-columns: repeat(4, 1fr) !important; }
+
+  /* ── 13. ZEBRA CARD: larger on desktop ── */
+  .zebra-card { padding: 16px 18px; }
+
+  /* ── 14. GAME CARD: larger on desktop ── */
+  .game-card { padding: 14px 16px; }
+  .game-card__team { font-size: 1rem; }
+  .game-card__score { font-size: 1.375rem; min-width: 64px; }
+
+  /* ── 15. LOCK BANNER: desktop padding ── */
+  .lock-banner { padding: 18px 22px; font-size: 0.9375rem; }
+
+  /* ── 16. ZI BADGE: slightly larger ── */
+  .zi { min-width: 44px; height: 44px; font-size: 1.125rem; }
+
+  /* ── 17. FILTER CHIPS bar: more padding ── */
+  .filter-chips-bar,
+  #filterRow { padding: 10px 32px !important; }
+  section.filter-section { padding: 10px 32px; }
+
+  /* ── 18. LEAGUE BAR: desktop padding ── */
+  #leagueBar { padding-left: 32px; }
+
+  /* ── 19. HEATMAP: desktop padding ── */
+  .heatmap-section { padding: 14px 32px; }
+
+  /* ── 20. SCROLL-X sections: desktop padding ── */
+  .scroll-x-pad { padding-left: 32px; padding-right: 32px; }
+
+  /* ── 20b. Section-padded: desktop horizontal padding override ── */
+  .section-padded { padding-left: 32px !important; padding-right: 32px !important; }
+  .stats-day-bar  { padding-left: 32px !important; padding-right: 32px !important; }
+
+  /* ── 21. MODAL: wider ── */
+  .modal { max-width: 560px; width: 560px; }
+
+  /* ── 22. SUB-HERO (assinatura): bigger on desktop ── */
+  .sub-hero { padding: 48px 32px 28px; }
+  .sub-hero__icon  { font-size: 3rem; }
+  .sub-hero__title { font-size: 1.75rem; }
+
+  /* ── 23. PROFILE page ── */
+  .profile-desktop {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 28px;
+    align-items: start;
+  }
+
+  /* ── 24. RANKING TABLE: larger cells ── */
+  .ranking-table th,
+  .ranking-table td { padding: 12px 16px; font-size: 0.9375rem; }
+
+  /* ── 25. COMPARAR: side-by-side comparison ── */
+  .compare-desktop {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+}
+
+/* ── EXTRA WIDE ≥1400px ── */
+@media (min-width: 1400px) {
+  .app-sidebar  { width: 300px; }
+  .content      { padding: 32px 40px; }
+  main.home-two-col { grid-template-columns: 1fr 380px; }
+  .home-col-main { padding-left: 40px; }
+  .home-col-side { padding-right: 40px; }
+  #zebraList     { grid-template-columns: repeat(3, 1fr) !important; }
+  #hotLeagues    { grid-template-columns: repeat(6, 1fr) !important; }
 }
