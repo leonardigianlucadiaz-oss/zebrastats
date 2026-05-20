@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/main.css?v=5" />
+  <link rel="stylesheet" href="css/main.css?v=8" />
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 </head>
 <body>
@@ -52,7 +52,7 @@
   </nav>
 
   <!-- SELETOR DE LIGA (acima do hero) -->
-  <section style="background:var(--card2);padding:10px 16px;border-bottom:1px solid var(--border);">
+  <section class="section-padded" style="background:var(--card2);padding:10px 16px;border-bottom:1px solid var(--border);">
     <div class="scroll-x" style="gap:8px;" id="leaguePicker">
       <button class="filter-chip active" data-lid="BRA" data-name="Brasileirão Série A" data-sub="Brasil · Temporada 2025" data-lider="FLA" data-zebras="14" data-rodada="12ª"><span class="picker-logo" id="pl-BRA"></span> Brasileirão</button>
       <button class="filter-chip" data-lid="ENG" data-name="Premier League" data-sub="Inglaterra · Temporada 2024/25" data-lider="LFC" data-zebras="21" data-rodada="37ª"><span class="picker-logo" id="pl-ENG"></span> Premier Lge</button>
@@ -66,7 +66,7 @@
   </section>
 
   <!-- HERO DA LIGA -->
-  <section id="leagueHero" style="padding:20px 16px 16px;background:linear-gradient(135deg,rgba(46,230,92,0.07) 0%,var(--card2) 50%,var(--bg) 100%);border-bottom:1px solid var(--border);position:relative;overflow:hidden;">
+  <section id="leagueHero" class="section-padded" style="padding:20px 16px 16px;background:linear-gradient(135deg,rgba(46,230,92,0.07) 0%,var(--card2) 50%,var(--bg) 100%);border-bottom:1px solid var(--border);position:relative;overflow:hidden;">
     <!-- Fundo decorativo -->
     <div style="position:absolute;top:-20px;right:-20px;width:120px;height:120px;border-radius:50%;background:rgba(46,230,92,0.04);pointer-events:none;"></div>
     <div style="display:flex;align-items:center;gap:16px;margin-bottom:14px;">
@@ -196,9 +196,9 @@
 <script src="js/config.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/db.js"></script>
-<script src="js/auth-guard.js?v=3"></script>
+<script src="js/auth-guard.js?v=4"></script>
 <script src="js/api.js"></script>
-<script src="js/main.js?v=3"></script>
+<script src="js/main.js?v=5"></script>
 <script>
   // ── DATA ────────────────────────────────────────────────────────
   const JOGOS = {
