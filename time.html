@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/main.css?v=8" />
+  <link rel="stylesheet" href="css/main.css?v=10" />
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 </head>
 <body>
@@ -47,8 +47,10 @@
     <!-- HEADER -->
     <nav class="navbar">
       <button onclick="goBack('home.html')" class="navbar__icon" style="background:none;border:none;cursor:pointer;color:var(--white);display:flex;align-items:center;justify-content:center;"><i data-lucide="arrow-left" style="width:20px;height:20px;"></i></button>
-      <span style="font-size:1rem;font-weight:600;" id="navTitle">Perfil do Time</span>
-      <button id="favBtn" class="navbar__icon" title="Favoritar"><i data-lucide="star" style="width:18px;height:18px;"></i></button>
+      <span style="font-size:1rem;font-weight:600;flex:1;" id="navTitle">Perfil do Time</span>
+      <div class="navbar__actions">
+        <button id="favBtn" class="navbar__icon" title="Favoritar"><i data-lucide="star" style="width:18px;height:18px;"></i></button>
+      </div>
     </nav>
 
     <!-- HERO DO TIME -->
@@ -346,7 +348,7 @@
   <script src="js/auth-guard.js?v=4"></script>
   <script src="js/zebra-engine.js"></script>
   <script src="js/api.js"></script>
-  <script src="js/main.js?v=5"></script>
+  <script src="js/main.js?v=8"></script>
   <script src="js/teams-data.js"></script><!-- FIX 28 -->
   <script>
     // ── DATA ──────────────────────────────────────────────
@@ -1561,3 +1563,6 @@
   </style>
 </body>
 </html>
+
+
+

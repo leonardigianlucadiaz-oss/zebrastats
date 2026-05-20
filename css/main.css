@@ -1008,26 +1008,17 @@ p  { font-size: 0.875rem; line-height: 1.5; color: var(--gray); }
   .cards-grid   { grid-template-columns: repeat(3, 1fr); }
 }
 
-/* ── DESKTOP: fixed sidebar ── */
+/* ── DESKTOP: sidebar stays as hamburger drawer ── */
 @media (min-width: 1024px) {
-  .app-sidebar {
-    position: sticky !important;
-    top: 0;
-    display: flex !important;
-    transform: translateX(0) !important;
-    height: 100vh;
-    align-self: flex-start;
-    z-index: 10;
-    flex-shrink: 0;
-    box-shadow: none;
-  }
-  /* Hide hamburger when sidebar is always visible */
-  .hamburger-btn { display: none !important; }
-  .sidebar-backdrop { display: none !important; }
-  /* Content area takes remaining space — no max-width cap on desktop */
+  /* Sidebar remains a fixed drawer (position:fixed from base styles).
+     Hamburger button stays visible (display:flex from 768px rule).
+     Content takes full viewport width since sidebar is an overlay. */
   .app-main { min-width: 0; flex: 1; max-width: none; }
-  /* Ensure app-wrapper is flex row */
-  .app-wrapper { flex-direction: row; }
+  /* Guest banner redundant on desktop — sidebar already shows Convidado.
+     Also removes the padding-bottom that causes the page-jump bug. */
+  #guestBanner                  { display: none !important; }
+  .has-guest-banner .app-main   { padding-bottom: 0 !important; }
+  .has-guest-banner main        { padding-bottom: 0 !important; }
 }
 
 /* ── NAVBAR page-title: hidden by default, shown only on desktop ── */
@@ -1534,8 +1525,8 @@ input:checked + .toggle-slider::before { transform: translateX(20px); }
 
 @media (min-width: 1024px) {
 
-  /* ── 1. SIDEBAR: wider & more refined ── */
-  .app-sidebar { width: 280px; }
+  /* ── 1. SIDEBAR: wider on desktop drawer ── */
+  .app-sidebar { width: 300px; }
   .sidebar__brand { padding: 22px 20px 20px; font-size: 1.2rem; }
   .sidebar__brand-icon { width: 38px; height: 38px; font-size: 1.05rem; }
   .sidebar__nav { padding: 16px 12px; gap: 4px; }
@@ -1545,19 +1536,20 @@ input:checked + .toggle-slider::before { transform: translateX(20px); }
   /* ── 2. NAVBAR: taller, hide brand (shown in sidebar), larger padding ── */
   .navbar { height: 64px; padding: 0 32px; }
   .navbar__brand { display: none; }
-  /* Back-button navbars without sidebar: keep brand visible */
-  .back-navbar .navbar__brand { display: flex; }
-  /* Desktop page title in navbar */
+  /* Hide mobile back-button on desktop — but NOT the hamburger button */
+  .navbar > button.navbar__icon:not(.hamburger-btn) { display: none !important; }
+  /* Desktop page title in navbar — also applied to repurposed inline spans */
   .navbar__page-title {
     display: block;
-    font-size: 1rem;
-    font-weight: 700;
-    color: var(--white);
-    flex: 1;
+    font-size: 1rem !important;
+    font-weight: 700 !important;
+    color: var(--white) !important;
+    flex: 1 !important;
     min-width: 0;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    text-align: left !important;
   }
 
   /* ── 3. TAB BAR: offset for taller navbar ── */

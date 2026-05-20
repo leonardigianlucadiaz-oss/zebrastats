@@ -613,7 +613,19 @@ function initDesktopNavTitle() {
   const navbar = document.querySelector('.navbar');
   if (!navbar) return;
   if (navbar.querySelector('.navbar__page-title')) return; // already injected
-  // Extract short page name from <title>
+
+  // On mobile back-navbar pages there's already an inline <span> title
+  // as a DIRECT child of the navbar. Repurpose it instead of injecting a duplicate.
+  // Use :scope > to avoid matching nested spans inside brand/icons.
+  const inlineTitle = navbar.querySelector(':scope > span:not([class])');
+  if (inlineTitle) {
+    inlineTitle.classList.add('navbar__page-title');
+    // Clear inline text-align so CSS takes over (left-align on desktop)
+    inlineTitle.style.removeProperty('text-align');
+    return;
+  }
+
+  // Standard navbar: inject title (brand hidden on desktop, sidebar shows it)
   const rawTitle = document.title || '';
   const pageName = rawTitle.replace(/ZebraStats\s*[—–-]\s*/i, '').trim() || 'ZebraStats';
   const el = document.createElement('span');
@@ -781,6 +793,7 @@ function initPlanBadge() {
 document.addEventListener('DOMContentLoaded', () => {
   updatePlanBadge();
   addRippleEffect();
+  injectFavoritosNav(); // must run BEFORE setActiveNavItem so the Favoritos link exists when active-state is assigned
   setActiveNavItem();
   initThemeToggle();
   initPlanBadge();
@@ -789,7 +802,6 @@ document.addEventListener('DOMContentLoaded', () => {
   updateSidebarUser();
   initBottomNav();
   initHamburger();
-  injectFavoritosNav();
 
   // ── PWA: inject manifest link ──────────────────────────────────
   if (!document.querySelector('link[rel="manifest"]')) {
