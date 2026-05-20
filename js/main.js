@@ -602,6 +602,44 @@ function closeModal(id) {
 window.openModal  = openModal;
 window.closeModal = closeModal;
 
+// ── DESKTOP NAVBAR PAGE TITLE ────────────────────────────────
+/**
+ * On desktop (≥1024px) the .navbar__brand is hidden (brand lives in sidebar).
+ * This injects a page-title span on the left side of the navbar so it
+ * doesn't feel empty. Title comes from <title> "ZebraStats — PageName".
+ */
+function initDesktopNavTitle() {
+  if (window.innerWidth < 1024) return;
+  const navbar = document.querySelector('.navbar');
+  if (!navbar) return;
+  if (navbar.querySelector('.navbar__page-title')) return; // already injected
+  // Extract short page name from <title>
+  const rawTitle = document.title || '';
+  const pageName = rawTitle.replace(/ZebraStats\s*[—–-]\s*/i, '').trim() || 'ZebraStats';
+  const el = document.createElement('span');
+  el.className = 'navbar__page-title';
+  el.textContent = pageName;
+  // Insert before .navbar__actions so it sits on the left
+  const actions = navbar.querySelector('.navbar__actions');
+  if (actions) navbar.insertBefore(el, actions);
+  else navbar.appendChild(el);
+}
+
+// ── SIDEBAR SECTION LABEL ─────────────────────────────────────
+/**
+ * Adds a "NAVEGAÇÃO" section label above the first nav item on desktop.
+ * Makes the sidebar feel more structured.
+ */
+function initSidebarLabel() {
+  if (window.innerWidth < 1024) return;
+  const nav = document.querySelector('.sidebar__nav');
+  if (!nav || nav.querySelector('.sidebar__section-label')) return;
+  const label = document.createElement('div');
+  label.className = 'sidebar__section-label';
+  label.textContent = 'NAVEGAÇÃO';
+  nav.prepend(label);
+}
+
 // ── INJETAR FAVORITOS NA SIDEBAR ──────────────────────────────
 /**
  * Adiciona o link "Favoritos" na sidebar entre Ligas/Times e Perfil,
@@ -746,6 +784,8 @@ document.addEventListener('DOMContentLoaded', () => {
   setActiveNavItem();
   initThemeToggle();
   initPlanBadge();
+  initDesktopNavTitle();
+  initSidebarLabel();
   updateSidebarUser();
   initBottomNav();
   initHamburger();

@@ -1030,6 +1030,9 @@ p  { font-size: 0.875rem; line-height: 1.5; color: var(--gray); }
   .app-wrapper { flex-direction: row; }
 }
 
+/* ── NAVBAR page-title: hidden by default, shown only on desktop ── */
+.navbar__page-title { display: none; }
+
 /* ── NAVBAR on desktop (inside app-main) ── */
 @media (min-width: 768px) {
   .navbar {
@@ -1544,6 +1547,18 @@ input:checked + .toggle-slider::before { transform: translateX(20px); }
   .navbar__brand { display: none; }
   /* Back-button navbars without sidebar: keep brand visible */
   .back-navbar .navbar__brand { display: flex; }
+  /* Desktop page title in navbar */
+  .navbar__page-title {
+    display: block;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--white);
+    flex: 1;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 
   /* ── 3. TAB BAR: offset for taller navbar ── */
   .tab-bar { top: 64px; }
@@ -1560,6 +1575,39 @@ input:checked + .toggle-slider::before { transform: translateX(20px); }
   .card:hover, .zebra-card:hover, .game-card:hover {
     transform: translateY(-2px);
     box-shadow: var(--shadow-lg);
+  }
+
+  /* ── 7a. SIDEBAR SECTION LABEL on desktop ── */
+  .sidebar__section-label {
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--gray);
+    padding: 8px 12px 6px;
+    opacity: 0.7;
+  }
+
+  /* ── 7b. SIDEBAR brand: slightly larger green accent ── */
+  .sidebar__brand {
+    background: linear-gradient(135deg, var(--card) 0%, rgba(46,230,92,0.04) 100%);
+  }
+
+  /* ── 7c. SIDEBAR footer FREE→PRO badge: full-width button ── */
+  .sidebar__footer .badge--free {
+    text-align: center;
+    justify-content: center;
+    padding: 8px 12px;
+    border-radius: var(--radius-md);
+    font-size: 0.8125rem;
+    font-weight: 700;
+    background: var(--green-dim);
+    border: 1px solid rgba(46,230,92,0.35);
+    color: var(--green);
+    transition: background var(--transition);
+  }
+  .sidebar__footer .badge--free:hover {
+    background: rgba(46,230,92,0.2);
   }
 
   /* ── 7. CARD GRIDS: more columns on big screen ── */

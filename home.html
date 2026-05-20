@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/main.css?v=5" />
+  <link rel="stylesheet" href="css/main.css?v=8" />
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 </head>
 <body>
@@ -75,7 +75,7 @@
 </div>
 
     <!-- HERO BANNER -->
-    <div id="heroBanner" style="background:linear-gradient(135deg,rgba(46,230,92,0.08) 0%,rgba(255,200,50,0.05) 50%,var(--card2) 100%);border-bottom:1px solid var(--border);padding:20px 16px 16px;position:relative;overflow:hidden;">
+    <div id="heroBanner" class="section-padded" style="background:linear-gradient(135deg,rgba(46,230,92,0.08) 0%,rgba(255,200,50,0.05) 50%,var(--card2) 100%);border-bottom:1px solid var(--border);padding:20px 16px 16px;position:relative;overflow:hidden;">
       <!-- Background zebra pattern -->
       <div style="position:absolute;right:-20px;top:-10px;font-size:5rem;opacity:0.06;transform:rotate(15deg);pointer-events:none;">🦓</div>
       <div style="position:relative;z-index:1;">
@@ -94,7 +94,7 @@
     </div>
 
     <!-- MEUS TIMES (favorites bar) -->
-    <section style="background:var(--card2);padding:12px 16px;border-bottom:1px solid var(--border);">
+    <section class="section-padded" style="background:var(--card2);padding:12px 16px;border-bottom:1px solid var(--border);">
       <div class="section-header" style="margin-bottom:10px;">
         <span class="section-title" style="font-size:0.875rem;">Meus Times</span>
         <a href="#" class="section-link" id="editFavBtn">Editar</a>
@@ -430,10 +430,10 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/db.js"></script>
-  <script src="js/auth-guard.js?v=3"></script>
+  <script src="js/auth-guard.js?v=4"></script>
   <script src="js/zebra-engine.js"></script>
   <script src="js/api.js"></script>
-  <script src="js/main.js?v=3"></script>
+  <script src="js/main.js?v=5"></script>
   <script>
     // ── STATE ──────────────────────────────────────────────
     let LIVE_GAMES     = [];
