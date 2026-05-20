@@ -46,20 +46,21 @@ function _updateThemeButtons(theme) {
   });
 }
 
-function initThemeToggle() { // FIX 22 — try multiple selectors for navbar actions
+function initThemeToggle() {
   const theme = getTheme();
   const containers = document.querySelectorAll('.navbar__actions, .navbar-actions, [data-theme-toggle-host]');
   containers.forEach(actions => {
     if (actions.querySelector('.zs-theme-toggle')) return;
     const btn = document.createElement('button');
     btn.className = 'navbar__icon zs-theme-toggle';
+    btn.style.cssText = 'background:transparent;border:1px solid var(--border);flex-shrink:0;';
     btn.innerHTML = _themeIcon(theme);
     btn.title     = _themeTitle(theme);
     btn.setAttribute('aria-label', _themeTitle(theme));
     btn.addEventListener('click', toggleTheme);
-    // Insere antes do primeiro ícone (busca)
-    const firstIcon = actions.querySelector('a.navbar__icon');
-    if (firstIcon) actions.insertBefore(btn, firstIcon);
+    // Place theme toggle just before the search icon (first `a.navbar__icon`)
+    const searchIcon = actions.querySelector('a.navbar__icon[href*="busca"]');
+    if (searchIcon) actions.insertBefore(btn, searchIcon);
     else actions.appendChild(btn);
     if (typeof lucide !== 'undefined') lucide.createIcons({ nodes: [btn] });
   });
@@ -704,40 +705,37 @@ function initHamburger() {
 
 // ── PLAN BADGE (FREE/crown) ────────────────────────────────────
 function initPlanBadge() {
-  // Busca o container de ações no navbar
-  let actions = document.querySelector('.navbar__actions, .navbar-actions');
-  if (!actions) {
-    // Fallback: usa o próprio navbar como container
-    const navbar = document.querySelector('.navbar');
-    if (!navbar) return;
-    actions = navbar;
-  }
-  if (actions.querySelector('.plan-badge')) return; // já existe
+  // Only inject on pages that have .navbar__actions (brand pages)
+  // Back-button pages (alertas, perfil, partida…) do NOT have .navbar__actions
+  const actions = document.querySelector('.navbar__actions');
+  if (!actions) return;
+
+  // Dedup: skip if any plan indicator already present
+  if (actions.querySelector('.plan-badge, #planBadge, .badge--free')) return;
 
   const plan = localStorage.getItem('zs_user_plan') || 'free';
-  if (plan === 'pro') return; // usuário PRO não vê o badge
+  if (plan === 'pro') return; // PRO users don't see FREE badge
 
+  // FREE badge (subtle pill)
   const badge = document.createElement('span');
   badge.className = 'plan-badge';
   badge.textContent = 'FREE';
-  badge.style.cssText = 'font-size:0.6rem;font-weight:800;padding:2px 6px;border-radius:4px;background:var(--bg-card,#1a1a2e);color:var(--text-muted,#888);border:1px solid var(--border,#2a2a3e);letter-spacing:0.05em;cursor:pointer;white-space:nowrap;';
+  badge.style.cssText = 'font-size:0.6rem;font-weight:800;padding:2px 6px;border-radius:4px;background:transparent;color:var(--text-muted,#888);border:1px solid var(--border,#2a2a3e);letter-spacing:0.05em;cursor:pointer;white-space:nowrap;flex-shrink:0;';
   badge.addEventListener('click', () => { window.location.href = 'assinatura.html'; });
 
+  // Crown upgrade button
   const crown = document.createElement('button');
-  crown.className = 'navbar__icon';
+  crown.className = 'navbar__icon plan-crown';
   crown.title = 'Fazer upgrade para PRO';
-  crown.style.cssText = 'background:none;border:none;cursor:pointer;color:var(--gold,#FFD700);display:flex;align-items:center;justify-content:center;padding:4px;';
-  crown.innerHTML = '<i data-lucide="crown" style="width:18px;height:18px;"></i>';
+  crown.setAttribute('aria-label', 'Upgrade para PRO');
+  crown.style.cssText = 'background:var(--gold-dim,rgba(255,200,50,0.1));color:var(--gold,#FFD700);border:1px solid rgba(255,200,50,0.25);flex-shrink:0;';
+  crown.innerHTML = '<i data-lucide="crown" style="width:16px;height:16px;"></i>';
   crown.addEventListener('click', () => { window.location.href = 'assinatura.html'; });
 
-  const firstLink = actions.querySelector('a.navbar__icon, button.navbar__icon');
-  if (firstLink) {
-    actions.insertBefore(crown, firstLink);
-    actions.insertBefore(badge, crown);
-  } else {
-    actions.appendChild(badge);
-    actions.appendChild(crown);
-  }
+  // Prepend: FREE badge then crown, before the existing icons
+  actions.prepend(crown);
+  actions.prepend(badge);
+
   if (typeof lucide !== 'undefined') lucide.createIcons({ nodes: [crown] });
 }
 

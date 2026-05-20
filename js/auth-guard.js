@@ -62,6 +62,8 @@
 
   // ── HELPERS MODO CONVIDADO ─────────────────────────────────
   function _injectGuestBanner() {
+    // Always mark body so CSS can add extra bottom padding
+    document.body.classList.add('has-guest-banner');
     if (document.getElementById('guestBanner')) return;
     const banner = document.createElement('div');
     banner.id = 'guestBanner';
@@ -80,6 +82,8 @@
       <a href="index.html" onclick="localStorage.removeItem('zs_guest')" style="color:var(--text-muted);text-decoration:none;">Sair</a>
     `;
     document.body.appendChild(banner);
+    // Signal CSS to add extra bottom padding so last card isn't hidden under banner
+    document.body.classList.add('has-guest-banner');
   }
 
   function _injectGuestSidebarInfo() {
