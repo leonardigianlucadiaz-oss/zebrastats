@@ -433,7 +433,7 @@
   <script src="js/auth-guard.js?v=4"></script>
   <script src="js/zebra-engine.js"></script>
   <script src="js/api.js"></script>
-  <script src="js/main.js?v=8"></script>
+  <script src="js/main.js?v=9"></script>
   <script>
     // ── STATE ──────────────────────────────────────────────
     let LIVE_GAMES     = [];
@@ -524,12 +524,21 @@
             <div style="width:${awayProb}%;background:var(--red);"></div>
           </div>`;
         card.addEventListener('click', () => {
+          if (g.id) {
+            try {
+              localStorage.setItem('zs_current_match_id', String(g.id));
+              localStorage.setItem('zs_current_match_lid', g.lid || g.league_id || '');
+            } catch {}
+          } else {
+            try { localStorage.removeItem('zs_current_match_id'); } catch {}
+          }
           const navParams = new URLSearchParams({
             home:   g.home || '',
             away:   g.away || '',
             score:  (g.hs !== undefined && g.as !== undefined) ? `${g.hs} – ${g.as}` : '',
             league: g.league || '',
             zi:     g.zi !== undefined ? g.zi : '',
+            ...(g.id ? { fixtureId: g.id } : {}),
           });
           window.location.href = `partida.html?${navParams.toString()}`;
         });
@@ -572,12 +581,21 @@
             </div>
           </div>`;
         card.addEventListener('click', () => {
+          if (g.id) {
+            try {
+              localStorage.setItem('zs_current_match_id', String(g.id));
+              localStorage.setItem('zs_current_match_lid', g.lid || g.league_id || '');
+            } catch {}
+          } else {
+            try { localStorage.removeItem('zs_current_match_id'); } catch {}
+          }
           const navParams = new URLSearchParams({
             home:   g.home || '',
             away:   g.away || '',
             score:  '',
             league: g.league || '',
             time:   g.time || '',
+            ...(g.id ? { fixtureId: g.id } : {}),
           });
           window.location.href = `partida.html?${navParams.toString()}`;
         });
@@ -883,7 +901,15 @@
             </div>
             <span class="badge ranking-row__badge" style="background:${color}22;color:${color};border:1px solid ${color}44;font-size:0.6875rem;">🦓 ${z.zi}</span>`;
           row.addEventListener('click', () => {
-            const p = new URLSearchParams({ home:z.home, away:z.away, score:`${z.hs}–${z.as}`, zi:z.zi, league:z.league, date:z.date, homeCrest:z.homeCrest||'', awayCrest:z.awayCrest||'' });
+            if (z.id) {
+              try {
+                localStorage.setItem('zs_current_match_id', String(z.id));
+                localStorage.setItem('zs_current_match_lid', z.lid || '');
+              } catch {}
+            } else {
+              try { localStorage.removeItem('zs_current_match_id'); } catch {}
+            }
+            const p = new URLSearchParams({ home:z.home, away:z.away, score:`${z.hs}–${z.as}`, zi:z.zi, league:z.league, date:z.date, homeCrest:z.homeCrest||'', awayCrest:z.awayCrest||'', ...(z.id ? { fixtureId: z.id } : {}) });
             window.location.href = `partida.html?${p}`;
           });
           rankContainer.appendChild(row);
@@ -924,7 +950,15 @@
                 <span style="font-size:0.875rem;font-weight:700;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${z.away}</span>
               </div>`;
             card.addEventListener('click', () => {
-              const p = new URLSearchParams({ home:z.home, away:z.away, score:`${z.hs} – ${z.as}`, zi:z.zi, league:z.league, date:z.date, ziClass:z.ziClass||'leve' });
+              if (z.id) {
+                try {
+                  localStorage.setItem('zs_current_match_id', String(z.id));
+                  localStorage.setItem('zs_current_match_lid', z.lid || '');
+                } catch {}
+              } else {
+                try { localStorage.removeItem('zs_current_match_id'); } catch {}
+              }
+              const p = new URLSearchParams({ home:z.home, away:z.away, score:`${z.hs} – ${z.as}`, zi:z.zi, league:z.league, date:z.date, ziClass:z.ziClass||'leve', ...(z.id ? { fixtureId: z.id } : {}) });
               window.location.href = `partida.html?${p}`;
             });
             container.appendChild(card);

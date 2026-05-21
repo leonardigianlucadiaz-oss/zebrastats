@@ -802,6 +802,7 @@ document.addEventListener('DOMContentLoaded', () => {
   updateSidebarUser();
   initBottomNav();
   initHamburger();
+  initBellBadge();
 
   // ── PWA: inject manifest link ──────────────────────────────────
   if (!document.querySelector('link[rel="manifest"]')) {

@@ -166,7 +166,7 @@
 <script src="js/auth-guard.js?v=4"></script>
 <script src="js/zebra-engine.js"></script>
 <script src="js/api.js"></script>
-<script src="js/main.js?v=8"></script>
+<script src="js/main.js?v=9"></script>
 <script>
   const LEAGUES = [
     { id:'BRA', flag:'🇧🇷', name:'Brasileirão Série A', country:'Brasil',     faved:true  },
@@ -422,6 +422,15 @@
         // Build params and navigate to partida.html
         const zi = parseFloat(z.zi || z.index || 0);
         const ziClass = zi >= 7 ? 'grande' : zi >= 4 ? 'media' : 'leve';
+        // Store real match ID so partida.html can fetch live data
+        if (z.id) {
+          try {
+            localStorage.setItem('zs_current_match_id', String(z.id));
+            localStorage.setItem('zs_current_match_lid', z.lid || '');
+          } catch {}
+        } else {
+          try { localStorage.removeItem('zs_current_match_id'); } catch {}
+        }
         const navParams = new URLSearchParams({
           home:   z.home   || z.homeTeam  || '',
           away:   z.away   || z.awayTeam  || '',
@@ -430,6 +439,7 @@
           league: z.league || z.liga      || 'Futebol',
           date:   z.date   || z.data      || '',
           ziClass,
+          ...(z.id ? { fixtureId: z.id } : {}),
         });
         window.location.href = `partida.html?${navParams.toString()}`;
       });

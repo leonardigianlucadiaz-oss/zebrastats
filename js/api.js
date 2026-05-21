@@ -656,6 +656,7 @@ const ZebraAPI = (() => {
         }
 
         zebras.push({
+          id: t.id,
           home: t.home, away: t.away,
           hs: t.hs, as: t.as,
           league: _LEAGUE_LABEL[lid] || lid, lid,
