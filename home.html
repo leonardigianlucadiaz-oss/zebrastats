@@ -435,10 +435,17 @@
   <script src="js/api.js"></script>
   <script src="js/main.js?v=9"></script>
   <script>
+    // ── CONSTANTS ─────────────────────────────────────────
+    const ALL_LIDS  = ['BRA','ENG','ESP','ITA','GER','FRA','UCL','POR'];
+    const LID_LABEL = { BRA:'Brasileirão', ENG:'Premier League', ESP:'La Liga', ITA:'Serie A', GER:'Bundesliga', FRA:'Ligue 1', UCL:'Champions League', POR:'Liga Portugal' };
+
     // ── STATE ──────────────────────────────────────────────
     let LIVE_GAMES     = [];
     let UPCOMING_GAMES = [];
     let activeLeagueFilter = 'all';
+    // Shared zebra data across all sections
+    const _zebrasByLid = {}; // { ENG:[...], BRA:[...], ... }
+    let _zebraLoadedCount = 0;
 
     // ── SKELETON HELPERS ──────────────────────────────────
     function showSkeletonGames(containerId, count) {
@@ -603,48 +610,37 @@
       });
     }
 
-    // ── QUENTE AGORA ──────────────────────────────────────
-    async function initHotLeagues() {
-      const HOT_LIDS = [
-        { lid:'BRA', name:'Brasileirão', color:'var(--green)' },
-        { lid:'ENG', name:'Premier Lge', color:'var(--gold)'  },
-        { lid:'ESP', name:'La Liga',     color:'var(--red)'   },
-        { lid:'GER', name:'Bundesliga',  color:'#4D9FFF'      },
-        { lid:'ITA', name:'Serie A',     color:'#a78bfa'      },
-        { lid:'FRA', name:'Ligue 1',     color:'#f97316'      },
-      ];
+    // ── QUENTE AGORA — atualizado progressivamente ────────
+    const HOT_LIDS_META = [
+      { lid:'BRA', name:'Brasileirão', color:'var(--green)' },
+      { lid:'ENG', name:'Premier Lge', color:'var(--gold)'  },
+      { lid:'ESP', name:'La Liga',     color:'var(--red)'   },
+      { lid:'GER', name:'Bundesliga',  color:'#4D9FFF'      },
+      { lid:'ITA', name:'Serie A',     color:'#a78bfa'      },
+      { lid:'FRA', name:'Ligue 1',     color:'#f97316'      },
+    ];
+
+    function initHotLeagues() {
       const container = document.getElementById('hotLeagues');
       container.innerHTML = '';
-
-      // Show skeleton first
-      HOT_LIDS.slice(0,3).forEach(() => {
+      HOT_LIDS_META.slice(0,3).forEach(() => {
         const sk = document.createElement('div');
         sk.style.cssText = 'background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);height:90px;';
         sk.innerHTML = `<div class="skel" style="height:100%;border-radius:var(--radius-md);"></div>`;
         container.appendChild(sk);
       });
+    }
 
-      // Fetch real counts in parallel (limit to 3 to avoid rate limits)
-      let counts = {};
-      if (typeof ZebraAPI !== 'undefined' && ZebraAPI.isConfigured.footballData() && typeof ZebraEngine !== 'undefined') {
-        try {
-          const results = await Promise.allSettled(
-            HOT_LIDS.map(l => ZebraAPI.fetchRealZebras(l.lid, 10))
-          );
-          results.forEach((r, i) => {
-            counts[HOT_LIDS[i].lid] = (r.status === 'fulfilled' && Array.isArray(r.value)) ? r.value.length : 0;
-          });
-        } catch {}
-      }
-
-      // Sort by count desc, take top 3
-      const sorted = HOT_LIDS
-        .map(l => ({ ...l, count: counts[l.lid] || 0 }))
-        .sort((a, b) => b.count - a.count)
+    function _updateHotLeagues() {
+      const container = document.getElementById('hotLeagues');
+      if (!container) return;
+      const sorted = HOT_LIDS_META
+        .map(l => ({ ...l, count: (_zebrasByLid[l.lid] || []).length }))
+        .filter(l => l.count > 0)
+        .sort((a,b) => b.count - a.count)
         .slice(0, 3);
-
-      const maxCount = sorted[0]?.count || 1;
-
+      if (!sorted.length) return;
+      const maxCount = sorted[0].count || 1;
       container.innerHTML = '';
       sorted.forEach(l => {
         const card = document.createElement('div');
@@ -782,80 +778,97 @@
     });
 
     // ── INIT GAMES FROM API ───────────────────────────────
+    // Busca todas as ligas em paralelo e renderiza progressivamente
+    // à medida que cada liga responde — sem esperar por todas.
     async function initGames() {
       showSkeletonGames('liveGames', 2);
       showSkeletonGames('upcomingGames', 3);
 
-      const LEAGUES = ['ENG','ESP','ITA','GER','BRA'];
-      const LEAGUE_LABEL = { BRA:'Brasileirão', ENG:'Premier League', ESP:'La Liga', ITA:'Serie A', GER:'Bundesliga', FRA:'Ligue 1' };
+      let anyRendered = false;
 
-      let gotLive = false, gotUpcoming = false;
-
-      // ── RapidAPI — jogos ao vivo ──────────────────────────
+      // RapidAPI — jogos ao vivo (se configurado)
       if (ZebraAPI.isConfigured.rapidApi()) {
-        try {
-          const rapid = await ZebraAPI.rapidApi.getLiveMatches();
+        ZebraAPI.rapidApi.getLiveMatches().then(rapid => {
           const matches = rapid?.response || rapid?.data || [];
-          if (Array.isArray(matches) && matches.length) {
-            matches.slice(0,8).forEach(m => {
-              LIVE_GAMES.push({
-                home: m.homeTeam?.name || m.home_name || '—',
-                away: m.awayTeam?.name || m.away_name || '—',
-                hs:   m.score?.home ?? m.homeScore ?? '?',
-                as:   m.score?.away ?? m.awayScore ?? '?',
-                min:  m.elapsed ? `${m.elapsed}'` : '🔴',
-                league: m.league?.name || m.competition || '—',
-                league_id: 'all',
-                homeCrest: m.homeTeam?.logo || '',
-                awayCrest: m.awayTeam?.logo || '',
-                zebra: false,
-              });
+          if (!Array.isArray(matches) || !matches.length) return;
+          matches.slice(0,12).forEach(m => {
+            LIVE_GAMES.push({
+              home: m.homeTeam?.name || m.home_name || '—',
+              away: m.awayTeam?.name || m.away_name || '—',
+              hs:   m.score?.home ?? m.homeScore ?? '?',
+              as:   m.score?.away ?? m.awayScore ?? '?',
+              min:  m.elapsed ? `${m.elapsed}'` : '🔴',
+              league: m.league?.name || m.competition || '—',
+              league_id: 'all', homeCrest: m.homeTeam?.logo || '',
+              awayCrest: m.awayTeam?.logo || '', zebra: false,
             });
-            gotLive = true;
-          }
-        } catch(e) { console.warn('[RapidAPI] live:', e); }
+          });
+          renderLive();
+        }).catch(() => {});
       }
 
-      // ── Football-Data.org — partidas ─────────────────────
-      if (ZebraAPI.isConfigured.footballData()) {
-        try {
-          const [liveRes, schedRes] = await Promise.all([
-            Promise.all(LEAGUES.map(l => ZebraAPI.footballData.getMatches(l,'IN_PLAY',4).catch(()=>null))),
-            Promise.all(LEAGUES.map(l => ZebraAPI.footballData.getMatches(l,'SCHEDULED',5).catch(()=>null))),
-          ]);
-
-          const fdLive = liveRes.flatMap((r,i) =>
-            (r?.matches||[]).map(m => {
-              const t = ZebraAPI.transform.fdMatch(m);
-              return t ? { ...t, league: LEAGUE_LABEL[LEAGUES[i]]||'—', league_id: LEAGUES[i] } : null;
-            }).filter(Boolean));
-
-          const fdUpcoming = schedRes.flatMap((r,i) =>
-            (r?.matches||[]).map(m => {
-              const t = ZebraAPI.transform.fdMatch(m);
-              return t ? { ...t, league: LEAGUE_LABEL[LEAGUES[i]]||'—', league_id: LEAGUES[i] } : null;
-            }).filter(Boolean));
-
-          if (fdLive.length && !gotLive) {
-            fdLive.forEach(m => LIVE_GAMES.push({ home:m.home, away:m.away, hs:m.hs??'?', as:m.as??'?', min:m.time||'🔴', league:m.league, league_id:m.league_id, homeCrest:m.homeCrest, awayCrest:m.awayCrest, zebra:false }));
-            gotLive = true;
+      if (!ZebraAPI.isConfigured.footballData()) {
+        setTimeout(() => {
+          if (!anyRendered) {
+            emptyState('liveGames',    'Nenhum jogo ao vivo.');
+            emptyState('upcomingGames','Configure a API para ver os próximos jogos.',
+              '<a href="perfil.html" style="color:var(--green)">Configurar →</a>');
           }
-          if (fdUpcoming.length) {
-            fdUpcoming.slice(0,10).forEach(m => UPCOMING_GAMES.push({ home:m.home, away:m.away, time:m.time, league:m.league, league_id:m.league_id, homeCrest:m.homeCrest, awayCrest:m.awayCrest }));
-            gotUpcoming = true;
-          }
-        } catch(e) { console.warn('[FD] matches:', e); }
+        }, 3000);
+        return;
       }
 
-      renderLive();
-      renderUpcoming();
+      // Busca TODAS as ligas em paralelo — renderiza assim que cada uma chega
+      ALL_LIDS.forEach(lid => {
+        Promise.all([
+          ZebraAPI.footballData.getMatches(lid, 'IN_PLAY',    5).catch(() => null),
+          ZebraAPI.footballData.getMatches(lid, 'SCHEDULED',  6).catch(() => null),
+        ]).then(([liveR, schedR]) => {
+          let added = false;
+
+          (liveR?.matches || []).forEach(m => {
+            const t = ZebraAPI.transform.fdMatch(m);
+            if (!t) return;
+            // Evita duplicatas (mesmo id)
+            if (!LIVE_GAMES.find(x => x.id === t.id)) {
+              LIVE_GAMES.push({ ...t, league: LID_LABEL[lid]||lid, league_id: lid });
+              added = true;
+            }
+          });
+
+          (schedR?.matches || []).forEach(m => {
+            const t = ZebraAPI.transform.fdMatch(m);
+            if (!t) return;
+            if (!UPCOMING_GAMES.find(x => x.id === t.id)) {
+              UPCOMING_GAMES.push({ ...t, league: LID_LABEL[lid]||lid, league_id: lid });
+              added = true;
+            }
+          });
+
+          if (added) {
+            anyRendered = true;
+            // Ordena "Em Breve" por horário (mais próximo primeiro)
+            UPCOMING_GAMES.sort((a, b) => new Date(a.utcDate || '9999') - new Date(b.utcDate || '9999'));
+            renderLive();
+            renderUpcoming();
+          }
+        }).catch(e => console.warn(`[home] games ${lid}:`, e));
+      });
+
+      // Fallback: se nenhuma liga respondeu em 8s, mostra estado vazio
+      setTimeout(() => {
+        if (!anyRendered) {
+          if (!LIVE_GAMES.length)    emptyState('liveGames',    'Nenhum jogo ao vivo agora.');
+          if (!UPCOMING_GAMES.length) emptyState('upcomingGames','Nenhum jogo agendado em breve.');
+        }
+      }, 8000);
     }
 
-    // ── ZEBRA RANKING — dados reais da API ────────────────
+    // ── ZEBRA RANKING + SHARED DATA LOADER ───────────────
     const MEDALS = { 1:'🥇', 2:'🥈', 3:'🥉' };
     const rankContainer = document.getElementById('zebraRanking');
 
-    // Show skeleton while loading
+    // Skeleton
     for (let i = 0; i < 5; i++) {
       const sk = document.createElement('div');
       sk.className = 'ranking-row';
@@ -863,187 +876,108 @@
       rankContainer.appendChild(sk);
     }
 
-    (async () => {
+    function _renderRankingFromCache() {
+      const all = Object.values(_zebrasByLid).flat().sort((a,b) => b.zi - a.zi).slice(0, 5);
+      if (!all.length) return;
+      rankContainer.innerHTML = '';
+      all.forEach((z, idx) => {
+        const pos   = idx + 1;
+        const color = z.zi >= 8 ? 'var(--green)' : z.zi >= 5 ? 'var(--gold)' : 'var(--gray)';
+        const pct   = Math.round((z.zi / 10) * 100);
+        const row   = document.createElement('div');
+        row.className = 'ranking-row fade-in-up';
+        row.style.animationDelay = `${idx * 55}ms`;
+        row.innerHTML = `
+          <span class="ranking-row__pos">${MEDALS[pos] || '#' + pos}</span>
+          <div style="flex:1;min-width:0;">
+            <div class="ranking-row__name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${z.home} ${z.hs}–${z.as} ${z.away}</div>
+            <div style="font-size:0.6875rem;color:var(--gray);margin-top:1px;">${z.league} · ${z.date}</div>
+          </div>
+          <div class="ranking-row__bar" style="min-width:50px;">
+            <div class="ranking-row__bar-fill" style="width:${pct}%;background:${color};"></div>
+          </div>
+          <span class="badge ranking-row__badge" style="background:${color}22;color:${color};border:1px solid ${color}44;font-size:0.6875rem;">🦓 ${z.zi}</span>`;
+        row.addEventListener('click', () => {
+          if (z.id) {
+            try { localStorage.setItem('zs_current_match_id', String(z.id)); localStorage.setItem('zs_current_match_lid', z.lid||''); } catch {}
+          } else { try { localStorage.removeItem('zs_current_match_id'); } catch {} }
+          const p = new URLSearchParams({ home:z.home, away:z.away, score:`${z.hs}–${z.as}`, zi:z.zi, league:z.league, date:z.date, homeCrest:z.homeCrest||'', awayCrest:z.awayCrest||'', ...(z.id ? { fixtureId: z.id } : {}) });
+          window.location.href = `partida.html?${p}`;
+        });
+        rankContainer.appendChild(row);
+      });
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    // ── CARREGADOR CENTRAL: busca zebras de TODAS as ligas ───
+    // Cada liga resolve independentemente e atualiza todos os widgets.
+    function _loadAllZebras() {
       if (typeof ZebraAPI === 'undefined' || !ZebraAPI.isConfigured.footballData() || typeof ZebraEngine === 'undefined') {
-        rankContainer.innerHTML = '<div style="text-align:center;padding:16px;color:var(--gray);font-size:0.8125rem;">Dados indisponíveis</div>';
+        rankContainer.innerHTML = '<div style="text-align:center;padding:16px;color:var(--gray);font-size:0.8125rem;">Dados indisponíveis — configure a API em Perfil</div>';
         return;
       }
-      try {
-        const results = await Promise.allSettled(
-          ['ENG','BRA','GER','ESP','ITA'].map(l => ZebraAPI.fetchRealZebras(l, 8))
-        );
-        const all = results
-          .filter(r => r.status === 'fulfilled' && Array.isArray(r.value))
-          .flatMap(r => r.value)
-          .sort((a, b) => b.zi - a.zi)
-          .slice(0, 5);
-
-        rankContainer.innerHTML = '';
-        if (!all.length) {
-          rankContainer.innerHTML = '<div style="text-align:center;padding:16px;color:var(--gray);font-size:0.8125rem;">Nenhuma zebra encontrada</div>';
-          return;
-        }
-        all.forEach((z, idx) => {
-          const pos   = idx + 1;
-          const color = z.zi >= 8 ? 'var(--green)' : z.zi >= 5 ? 'var(--gold)' : 'var(--gray)';
-          const pct   = Math.round((z.zi / 10) * 100);
-          const row   = document.createElement('div');
-          row.className = 'ranking-row fade-in-up';
-          row.style.animationDelay = `${idx * 55}ms`;
-          row.innerHTML = `
-            <span class="ranking-row__pos">${MEDALS[pos] || '#' + pos}</span>
-            <div style="flex:1;min-width:0;">
-              <div class="ranking-row__name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${z.home} ${z.hs}–${z.as} ${z.away}</div>
-              <div style="font-size:0.6875rem;color:var(--gray);margin-top:1px;">${z.league} · ${z.date}</div>
-            </div>
-            <div class="ranking-row__bar" style="min-width:50px;">
-              <div class="ranking-row__bar-fill" style="width:${pct}%;background:${color};"></div>
-            </div>
-            <span class="badge ranking-row__badge" style="background:${color}22;color:${color};border:1px solid ${color}44;font-size:0.6875rem;">🦓 ${z.zi}</span>`;
-          row.addEventListener('click', () => {
-            if (z.id) {
-              try {
-                localStorage.setItem('zs_current_match_id', String(z.id));
-                localStorage.setItem('zs_current_match_lid', z.lid || '');
-              } catch {}
-            } else {
-              try { localStorage.removeItem('zs_current_match_id'); } catch {}
-            }
-            const p = new URLSearchParams({ home:z.home, away:z.away, score:`${z.hs}–${z.as}`, zi:z.zi, league:z.league, date:z.date, homeCrest:z.homeCrest||'', awayCrest:z.awayCrest||'', ...(z.id ? { fixtureId: z.id } : {}) });
-            window.location.href = `partida.html?${p}`;
-          });
-          rankContainer.appendChild(row);
-        });
-        if (typeof lucide !== 'undefined') lucide.createIcons();
-      } catch(e) {
-        rankContainer.innerHTML = '<div style="text-align:center;padding:16px;color:var(--gray);font-size:0.8125rem;">Erro ao carregar dados</div>';
-        console.warn('[home] zebraRanking:', e);
-      }
-    })();
-
-    // ── ZEBRAS DO DIA — conteúdo PRO ─────────────────────
-    function initZebrasDoDia() {
-      const isPro = getUserPlan() === 'pro';
-
-      // Tenta carregar zebras reais
-      if (typeof ZebraAPI !== 'undefined' && ZebraAPI.isConfigured.footballData() && typeof ZebraEngine !== 'undefined') {
-        ZebraAPI.fetchRealZebras('ENG', 5).then(real => {
-          if (!real.length) return;
-          // Substitui o conteúdo do container com as zebras reais
-          const container = document.getElementById('zebrasDoDiaList');
-          if (!container) return;
-          container.innerHTML = '';
-          real.slice(0, isPro ? 5 : 2).forEach(z => {
-            const cls = z.ziClass || 'leve';
-            const clr = cls==='grande'?'var(--red)':cls==='media'?'var(--gold)':'var(--gray)';
-            const card = document.createElement('div');
-            card.className = 'zebra-card';
-            card.style.cursor = 'pointer';
-            card.innerHTML = `
-              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-                <span style="font-size:0.6875rem;color:var(--gray);">${z.league} · ${z.date} ⚡</span>
-                <span style="font-size:0.75rem;font-weight:800;padding:3px 8px;border-radius:6px;background:${clr}22;color:${clr};">ZI ${z.zi}</span>
-              </div>
-              <div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;">
-                <span style="font-size:0.875rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${z.home}</span>
-                <span style="font-size:1.25rem;font-weight:800;color:var(--white);">${z.hs}–${z.as}</span>
-                <span style="font-size:0.875rem;font-weight:700;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${z.away}</span>
-              </div>`;
-            card.addEventListener('click', () => {
-              if (z.id) {
-                try {
-                  localStorage.setItem('zs_current_match_id', String(z.id));
-                  localStorage.setItem('zs_current_match_lid', z.lid || '');
-                } catch {}
-              } else {
-                try { localStorage.removeItem('zs_current_match_id'); } catch {}
-              }
-              const p = new URLSearchParams({ home:z.home, away:z.away, score:`${z.hs} – ${z.as}`, zi:z.zi, league:z.league, date:z.date, ziClass:z.ziClass||'leve', ...(z.id ? { fixtureId: z.id } : {}) });
-              window.location.href = `partida.html?${p}`;
-            });
-            container.appendChild(card);
-          });
-          if (typeof lucide !== 'undefined') lucide.createIcons();
-          // Dispara evento para atualizar o hero banner "Zebra do Dia"
-          document.dispatchEvent(new CustomEvent('zebrasLoaded', { detail: real }));
+      ALL_LIDS.forEach(lid => {
+        ZebraAPI.fetchRealZebras(lid, 15).then(zebras => {
+          if (!zebras.length) return;
+          _zebrasByLid[lid] = zebras;
+          _zebraLoadedCount++;
+          // Atualiza todos os widgets que dependem de zebras
+          _renderRankingFromCache();
+          _updateHotLeagues();
+          _updateZebrasDoDia(zebras, lid);
+          _updateSparklines();
+          _updateStatsBar();
+          // Dispara evento para o hero banner
+          document.dispatchEvent(new CustomEvent('zebrasLoaded', { detail: Object.values(_zebrasByLid).flat() }));
         }).catch(() => {});
-      }
+      });
+    }
 
+    // ── ZEBRAS DO DIA — atualizado pelo carregador central ───
+    // _updateZebrasDoDia é chamada a cada liga que resolve.
+    // Acumula todas as zebras e mostra as top-N ordenadas por ZI.
+    function initZebrasDoDia() {
       const lockBanner = document.querySelector('.lock-banner');
-      const sectionLink = document.querySelector('.section-link.text-gold');
-
+      const isPro = getUserPlan() === 'pro';
       if (isPro && lockBanner) {
         lockBanner.style.display = 'none';
+        const sectionLink = document.querySelector('.section-link.text-gold');
         if (sectionLink) sectionLink.style.display = 'none';
-
-        const zebrasDia = [
-          { home:'Bragantino', away:'Flamengo',   zi:'4.8', score:'3–1', odds:'6.20', liga:'Brasileirão', homeRole:'Azarão', awayRole:'Favorito' },
-          { home:'Getafe',     away:'Barcelona',  zi:'4.5', score:'1–0', odds:'7.50', liga:'La Liga',      homeRole:'Azarão', awayRole:'Favorito' },
-          { home:'Empoli',     away:'Inter',      zi:'4.1', score:'2–2', odds:'5.80', liga:'Serie A',      homeRole:'Azarão', awayRole:'Favorito' },
-        ];
-
-        const container = document.createElement('div');
-        container.style.cssText = 'display:flex;flex-direction:column;gap:10px;';
-
-        // Primeiro item como hero card grande
-        const [hero, ...rest] = zebrasDia;
-        const heroCard = document.createElement('div');
-        heroCard.className = 'zebra-dia-hero';
-        heroCard.onclick = () => window.location.href = 'zebras.html';
-        heroCard.innerHTML = `
-          <div class="zebra-dia-hero__badge">🦓 MAIOR ZEBRA DO DIA</div>
-          <div class="zebra-dia-hero__teams">
-            <div class="zebra-dia-hero__team">
-              <div class="gc-crest" style="width:48px;height:48px;">${crestImg(hero.home,40) || `<span>${hero.home.substring(0,3).toUpperCase()}</span>`}</div>
-              <div class="zebra-dia-hero__team-name">${hero.home}</div>
-              <div class="zebra-dia-hero__team-role" style="color:var(--green);">${hero.homeRole}</div>
-            </div>
-            <div class="zebra-dia-hero__score">
-              <div class="zebra-dia-hero__score-val">${hero.score}</div>
-              <div class="zebra-dia-hero__zi">ZI ${hero.zi}</div>
-            </div>
-            <div class="zebra-dia-hero__team away">
-              <div class="gc-crest" style="width:48px;height:48px;">${crestImg(hero.away,40) || `<span>${hero.away.substring(0,3).toUpperCase()}</span>`}</div>
-              <div class="zebra-dia-hero__team-name">${hero.away}</div>
-              <div class="zebra-dia-hero__team-role">${hero.awayRole}</div>
-            </div>
-          </div>
-          <div class="zebra-dia-hero__footer">
-            <span>${hero.liga}</span>
-            <span class="zebra-dia-hero__odd">odd ${hero.odds}</span>
-          </div>`;
-        container.appendChild(heroCard);
-
-        // Demais itens como game-cards compactos
-        rest.forEach(z => {
-          const card = document.createElement('div');
-          card.className = 'game-card game-card--zebra';
-          card.style.cursor = 'pointer';
-          card.onclick = () => window.location.href = 'zebras.html';
-          card.innerHTML = `
-            <div class="game-card__league" style="display:flex;justify-content:space-between;">
-              <span>${z.liga}</span>
-              <span class="zebra-index-badge zi--grande">🦓 ZI ${z.zi}</span>
-            </div>
-            <div class="gc-teams" style="margin:8px 0;">
-              <div class="gc-team-block">
-                <div class="gc-crest">${crestImg(z.home,32) || `<span>${z.home.substring(0,3).toUpperCase()}</span>`}</div>
-                <span class="gc-team-name">${z.home}</span>
-              </div>
-              <div class="gc-score-block">
-                <div style="font-size:1.375rem;font-weight:700;">${z.score}</div>
-                <div style="font-size:0.6875rem;color:var(--gold);font-weight:600;">odd ${z.odds}</div>
-              </div>
-              <div class="gc-team-block away">
-                <div class="gc-crest">${crestImg(z.away,32) || `<span>${z.away.substring(0,3).toUpperCase()}</span>`}</div>
-                <span class="gc-team-name">${z.away}</span>
-              </div>
-            </div>`;
-          container.appendChild(card);
-        });
-
-        lockBanner.parentNode.insertBefore(container, lockBanner.nextSibling);
       }
+    }
+
+    function _updateZebrasDoDia() {
+      const container = document.getElementById('zebrasDoDiaList');
+      if (!container) return;
+      const isPro = getUserPlan() === 'pro';
+      const all = Object.values(_zebrasByLid).flat().sort((a,b) => b.zi - a.zi);
+      if (!all.length) return;
+      const shown = all.slice(0, isPro ? 8 : 3);
+      container.innerHTML = '';
+      shown.forEach(z => {
+        const cls = z.ziClass || 'leve';
+        const clr = cls==='grande'?'var(--red)':cls==='media'?'var(--gold)':'var(--gray)';
+        const card = document.createElement('div');
+        card.className = 'zebra-card';
+        card.style.cursor = 'pointer';
+        card.innerHTML = `
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+            <span style="font-size:0.6875rem;color:var(--gray);">${z.league} · ${z.date} ⚡</span>
+            <span style="font-size:0.75rem;font-weight:800;padding:3px 8px;border-radius:6px;background:${clr}22;color:${clr};">ZI ${z.zi}</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;">
+            <span style="font-size:0.875rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${z.home}</span>
+            <span style="font-size:1.25rem;font-weight:800;color:var(--white);">${z.hs}–${z.as}</span>
+            <span style="font-size:0.875rem;font-weight:700;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${z.away}</span>
+          </div>`;
+        card.addEventListener('click', () => {
+          if (z.id) { try { localStorage.setItem('zs_current_match_id', String(z.id)); localStorage.setItem('zs_current_match_lid', z.lid||''); } catch {} }
+          else { try { localStorage.removeItem('zs_current_match_id'); } catch {} }
+          const p = new URLSearchParams({ home:z.home, away:z.away, score:`${z.hs}–${z.as}`, zi:z.zi, league:z.league, date:z.date, ziClass:z.ziClass||'leve', ...(z.id ? { fixtureId: z.id } : {}) });
+          window.location.href = `partida.html?${p}`;
+        });
+        container.appendChild(card);
+      });
     }
 
     // ── EDIT FAV BUTTON ───────────────────────────────────
@@ -1053,153 +987,175 @@
     });
 
     // ── INIT ──────────────────────────────────────────────
-    initHotLeagues();
+    initHotLeagues();     // renderiza skeletons imediatos
     initFavBar();
     initLeaguePills();
-    initGames();
-    initZebrasDoDia();
+    initSparklines();     // renderiza skeletons de sparklines
+    initGames();          // busca jogos de todas as ligas
+    initZebrasDoDia();    // configura seção (esconde lock-banner se PRO)
     initBellBadge();
+    _loadAllZebras();     // carregador central: busca zebras de todas as ligas
+                          // e atualiza ranking, hotLeagues, sparklines, zebrasDoDia, statsBar
 
-    // Populate hero banner with best zebra
+    // Populate hero banner — atualiza sempre que um novo lote de zebras chega
     (function _heroBanner() {
-      const el = document.getElementById('heroMatchTitle');
+      const el  = document.getElementById('heroMatchTitle');
       const elL = document.getElementById('heroMatchLeague');
       const elZ = document.getElementById('heroZiValue');
       const elD = document.getElementById('heroMatchDesc');
       if (!el) return;
-      // Fallback: se zebrasLoaded não disparar em 4s, mostra dados estáticos
+      // Fallback após 8s se nenhuma liga respondeu
       const heroFallbackTimer = setTimeout(() => {
         if (el.textContent === 'Carregando...') {
           el.textContent = 'Nenhuma zebra disponível agora';
-          elL.textContent = 'Verifique sua conexão ou tente mais tarde';
+          elL.textContent = 'Verifique sua conexão ou configure a API em Perfil';
           if (elZ) elZ.textContent = '–';
         }
-      }, 4000);
+      }, 8000);
+      let heroBestZi = 0;
       document.addEventListener('zebrasLoaded', function(e) {
         clearTimeout(heroFallbackTimer);
         const zebras = e.detail || [];
         if (!zebras.length) return;
         const top = zebras.sort((a,b) => b.zi - a.zi)[0];
-        el.textContent = `${top.home} vs ${top.away}`;
+        if (!top || top.zi <= heroBestZi) return; // só atualiza se achou ZI maior
+        heroBestZi = top.zi;
+        el.textContent  = `${top.home} vs ${top.away}`;
         elL.textContent = `${top.league} · ${top.date}`;
         if (elZ) elZ.textContent = top.zi;
         const cls = top.zi >= 7 ? 'Grande' : top.zi >= 4 ? 'Média' : 'Leve';
-        if (elD) elD.textContent = `Zebra ${cls} — ZI ${top.zi}. Favorito: ${top.away}.`;
-      }, { once: true });
+        if (elD) elD.textContent = `Zebra ${cls} — ZI ${top.zi}. Azarão: ${top.azarao || top.home}.`;
+      });
     })();
 
     lucide.createIcons();
 
-    // Stats bar counters — real data from API
-    async function initStatsBar() {
-      // FIX 20 — use user's last-viewed league instead of hardcoded 'ENG'
-      const userLid = localStorage.getItem('zs_last_league') || 'ENG';
-      try {
-        // Fetch real matches for today from proxy
-        const data = await ZebraAPI.footballData.getMatches(userLid, 'SCHEDULED', 20).catch(() => null);
-        const liveData = await ZebraAPI.footballData.getMatches(userLid, 'IN_PLAY', 10).catch(() => null);
-        const liveCount = liveData?.matches?.length || 0;
-        const todayCount = (data?.matches?.length || 0) + liveCount;
+    // Stats bar — atualizada pelo carregador central
+    function initStatsBar() { /* aguarda _loadAllZebras */ }
 
-        // Get real zebras for ZI high count
-        const zebras = await ZebraAPI.fetchRealZebras(userLid, 20).catch(() => []);
-        const highZiCount = zebras.filter(z => z.zi >= 7).length;
+    function _updateStatsBar() {
+      const allZebras = Object.values(_zebrasByLid).flat();
+      const highZiCount = allZebras.filter(z => z.zi >= 7).length;
+      const totalZebras = allZebras.length;
 
-        if (document.getElementById('sdLive'))
-          document.getElementById('sdLive').textContent = liveCount > 0 ? `${liveCount} ao vivo` : 'Ao vivo';
-        if (document.getElementById('sdHighZi'))
-          document.getElementById('sdHighZi').textContent = highZiCount > 0 ? `${highZiCount} zebras ZI alto` : 'ZI alto';
-        if (document.getElementById('sdTotal'))
-          document.getElementById('sdTotal').textContent = todayCount > 0 ? `${todayCount} jogos hoje` : 'Ver agenda';
-      } catch(e) {
-        // fallback to reasonable static values
-        document.getElementById('sdLive')   && (document.getElementById('sdLive').textContent   = 'Ao vivo');
-        document.getElementById('sdHighZi') && (document.getElementById('sdHighZi').textContent = 'ZI alto');
-        document.getElementById('sdTotal')  && (document.getElementById('sdTotal').textContent  = 'Ver agenda');
-      }
+      // Jogos ao vivo e agendados já estão em LIVE_GAMES/UPCOMING_GAMES
+      const liveCount = LIVE_GAMES.length;
+      const todayCount = UPCOMING_GAMES.length;
+
+      const sdLive   = document.getElementById('sdLive');
+      const sdHighZi = document.getElementById('sdHighZi');
+      const sdTotal  = document.getElementById('sdTotal');
+
+      if (sdLive)   sdLive.textContent   = liveCount   > 0 ? `${liveCount} ao vivo`       : 'Ao vivo';
+      if (sdHighZi) sdHighZi.textContent = highZiCount > 0 ? `${highZiCount} grandes zebras` : `${totalZebras} zebras`;
+      if (sdTotal)  sdTotal.textContent  = todayCount  > 0 ? `${todayCount} jogos em breve` : 'Ver agenda';
     }
     initStatsBar();
 
-    // ── Zebra Destaque ────────────────────────────────────────────
-    function _zebraDestaque() {
-      const fill = () => {
-        const arr = (typeof ZEBRAS !== 'undefined' && ZEBRAS) ? ZEBRAS : [];
-        if (!arr.length) { setTimeout(fill, 2000); return; }
-        const top = arr.reduce((a,b) => (b.zi||0) > (a.zi||0) ? b : a, arr[0]);
-        const card = document.getElementById('zebraDestaqueCard');
-        if (!card || !top) return;
-        card.style.display = 'block';
-        card.innerHTML = `
-          <div style="font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--gold);background:var(--gold-dim);border-radius:var(--radius-pill);padding:3px 10px;display:inline-flex;align-items:center;gap:4px;margin-bottom:10px;">
-            ⚡ Zebra do Dia
+    // ── Zebra Destaque — atualizado pelo carregador central ──────
+    function _zebraDestaque() { /* aguarda _loadAllZebras via evento zebrasLoaded */ }
+    document.addEventListener('zebrasLoaded', function(e) {
+      const arr = e.detail || [];
+      const top = arr.reduce((a,b) => (b.zi||0) > (a.zi||0) ? b : a, arr[0]);
+      const card = document.getElementById('zebraDestaqueCard');
+      if (!card || !top) return;
+      card.style.display = 'block';
+      card.innerHTML = `
+        <div style="font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--gold);background:var(--gold-dim);border-radius:var(--radius-pill);padding:3px 10px;display:inline-flex;align-items:center;gap:4px;margin-bottom:10px;">
+          ⚡ Zebra do Dia · ${top.league}
+        </div>
+        <div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;">
+          <div style="text-align:center;">
+            <div style="font-size:0.875rem;font-weight:700;">${top.home||'?'}</div>
+            <div style="font-size:0.625rem;color:var(--gray);">Casa</div>
           </div>
-          <div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;">
-            <div style="text-align:center;">
-              <div style="font-size:0.875rem;font-weight:700;">${top.home||top.homeTeam||'?'}</div>
-              <div style="font-size:0.625rem;color:var(--gray);">Casa</div>
-            </div>
-            <div style="text-align:center;">
-              <div style="font-size:1.5rem;font-weight:800;">VS</div>
-              <div style="font-size:0.75rem;color:var(--green);font-weight:700;">ZI ${top.zi}</div>
-            </div>
-            <div style="text-align:center;">
-              <div style="font-size:0.875rem;font-weight:700;">${top.away||top.awayTeam||'?'}</div>
-              <div style="font-size:0.625rem;color:var(--gray);">Fora</div>
-            </div>
-          </div>`;
-        card.onclick = () => {
-          const id = top.id || (top.home||'').replace(/\s/g,'-').toLowerCase() + '-vs-' + (top.away||'').replace(/\s/g,'-').toLowerCase();
-          window.location.href = `partida.html?id=${id}&zi=${top.zi}`;
-        };
+          <div style="text-align:center;">
+            <div style="font-size:1.25rem;font-weight:800;">${top.hs}–${top.as}</div>
+            <div style="font-size:0.75rem;color:var(--green);font-weight:700;">ZI ${top.zi}</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:0.875rem;font-weight:700;">${top.away||'?'}</div>
+            <div style="font-size:0.625rem;color:var(--gray);">Fora</div>
+          </div>
+        </div>`;
+      card.onclick = () => {
+        if (top.id) { try { localStorage.setItem('zs_current_match_id', String(top.id)); localStorage.setItem('zs_current_match_lid', top.lid||''); } catch {} }
+        const p = new URLSearchParams({ home:top.home, away:top.away, score:`${top.hs}–${top.as}`, zi:top.zi, league:top.league||'', ...(top.id ? { fixtureId: top.id } : {}) });
+        window.location.href = `partida.html?${p}`;
       };
-      fill();
-    }
+    });
     _zebraDestaque();
 
-    // ── Próximas Zebras Potenciais ────────────────────────────────
-    async function _proximasZebras() {
+    // ── Próximas Zebras Potenciais — atualizado pelo carregador ──
+    function _proximasZebras() { /* aguarda _loadAllZebras */ }
+    document.addEventListener('zebrasLoaded', function(e) {
       const wrap = document.getElementById('proximasZebrasWrap');
       if (!wrap) return;
-      await new Promise(r => setTimeout(r, 1800));
-      const arr = (typeof ZEBRAS !== 'undefined' && ZEBRAS) ? ZEBRAS : [];
-      const sorted = [...arr].sort((a,b) => (b.zi||0)-(a.zi||0)).slice(0,3);
+      const sorted = (e.detail || []).sort((a,b) => (b.zi||0)-(a.zi||0)).slice(0,3);
       if (!sorted.length) { wrap.innerHTML = '<p style="font-size:0.75rem;color:var(--gray);padding:4px 0;">Nenhuma zebra potencial no momento.</p>'; return; }
       wrap.innerHTML = sorted.map(z => `
         <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);cursor:pointer;"
-          onclick="window.location.href='partida.html?id=${encodeURIComponent(z.id||z.home||'')}&&zi=${z.zi}'">
-          <span style="font-size:0.8125rem;font-weight:600;flex:1;">${z.home||'?'} vs ${z.away||'?'}</span>
-          <span style="font-size:0.75rem;font-weight:700;color:var(--green);">ZI ${z.zi}</span>
+          onclick="(function(){${z.id ? `try{localStorage.setItem('zs_current_match_id','${z.id}');localStorage.setItem('zs_current_match_lid','${z.lid||''}');}catch(e){}` : ''}window.location.href='partida.html?home=${encodeURIComponent(z.home||'')}&away=${encodeURIComponent(z.away||'')}&zi=${z.zi}&league=${encodeURIComponent(z.league||'')}${z.id ? `&fixtureId=${z.id}` : ''}'})()">
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:0.8125rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${z.home||'?'} vs ${z.away||'?'}</div>
+            <div style="font-size:0.6875rem;color:var(--gray);">${z.league} · ${z.date}</div>
+          </div>
+          <span style="font-size:0.75rem;font-weight:700;color:var(--green);flex-shrink:0;">ZI ${z.zi}</span>
         </div>`).join('');
-    }
+    });
     _proximasZebras();
 
-    // ── Sparklines por Liga ───────────────────────────────────────
-    (function _renderSparklines() {
-      const leagues = [
-        { name: 'Brasileirão', values: [3,5,2,7,4,6,8,5,9,6] },
-        { name: 'Premier League', values: [6,4,7,3,5,8,4,7,5,8] },
-        { name: 'La Liga', values: [2,5,3,6,4,5,7,4,6,7] },
-        { name: 'Champions', values: [4,3,6,5,7,4,8,6,9,7] },
-      ];
+    // ── Sparklines por Liga — dados reais ────────────────────────
+    const SPARK_LIDS = ['BRA','ENG','ESP','UCL'];
+
+    function initSparklines() {
       const grid = document.getElementById('sparklineGrid');
       if (!grid) return;
-      grid.innerHTML = leagues.map(l => {
-        const max = Math.max(...l.values);
-        const min = Math.min(...l.values);
+      // Skeleton enquanto carrega
+      grid.innerHTML = SPARK_LIDS.map(lid => `
+        <div class="sparkline-card">
+          <div class="sparkline-card__title">${LID_LABEL[lid]||lid}</div>
+          <div class="skel" style="height:36px;border-radius:4px;"></div>
+        </div>`).join('');
+    }
+
+    function _updateSparklines() {
+      const grid = document.getElementById('sparklineGrid');
+      if (!grid) return;
+      // Só atualiza se tiver dados de pelo menos 2 das 4 ligas de interesse
+      const ready = SPARK_LIDS.filter(l => _zebrasByLid[l]?.length).length;
+      if (ready < 1) return;
+      grid.innerHTML = '';
+      SPARK_LIDS.forEach(lid => {
+        const zebras = (_zebrasByLid[lid] || []).slice(0, 12);
+        const values = zebras.map(z => z.zi).reverse();
+        if (!values.length) values.push(0, 0, 0, 0);
+        const max = Math.max(...values, 1);
+        const min = Math.min(...values, 0);
         const W = 100, H = 36, pad = 4;
-        const pts = l.values.map((v,i) => {
-          const x = pad + (i / (l.values.length-1)) * (W - pad*2);
-          const y = H - pad - ((v-min)/(max-min||1)) * (H - pad*2);
+        const pts = values.map((v, i) => {
+          const x = pad + (i / Math.max(values.length - 1, 1)) * (W - pad * 2);
+          const y = H - pad - ((v - min) / (max - min || 1)) * (H - pad * 2);
           return `${x.toFixed(1)},${y.toFixed(1)}`;
         }).join(' ');
-        return `<div class="sparkline-card">
-          <div class="sparkline-card__title">${l.name}</div>
+        const avgZi = zebras.length ? (zebras.reduce((s,z) => s + z.zi, 0) / zebras.length).toFixed(1) : '–';
+        const card = document.createElement('div');
+        card.className = 'sparkline-card';
+        card.style.cursor = 'pointer';
+        card.onclick = () => window.location.href = `liga.html?id=${lid}`;
+        card.innerHTML = `
+          <div class="sparkline-card__title">${LID_LABEL[lid]||lid}</div>
           <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
-            <polyline points="${pts}" fill="none" stroke="var(--green)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            ${values.length >= 2
+              ? `<polyline points="${pts}" fill="none" stroke="var(--green)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>`
+              : '<text x="50%" y="55%" text-anchor="middle" fill="var(--gray)" font-size="8">sem dados</text>'}
           </svg>
-        </div>`;
-      }).join('');
-    })();
+          <div style="font-size:0.5625rem;color:var(--gray);margin-top:2px;">${zebras.length} zebra${zebras.length!==1?'s':''} · ZI médio ${avgZi}</div>`;
+        grid.appendChild(card);
+      });
+    }
+
+    initSparklines();
 
     // Toast de boas-vindas após onboarding
     const welcomeMsg = localStorage.getItem('zs_welcome_toast');

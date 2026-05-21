@@ -16,7 +16,7 @@
 const ZebraAPI = (() => {
 
   /* ── CACHE sessionStorage ────────────────────────────────────
-   * TTL padrão: 5 min. Odds: 24h (fix #9 — The Odds API tem 500 req/mês)
+   * TTL padrão: 10 min. Odds: 24h (fix #9 — The Odds API tem 500 req/mês)
    */
   const _cache = {
     get(k, customTTL) {
@@ -24,7 +24,7 @@ const ZebraAPI = (() => {
         const raw = sessionStorage.getItem(`zs_${k}`);
         if (!raw) return null;
         const { ts, d } = JSON.parse(raw);
-        const ttl = customTTL || 300_000; // 5 min padrão
+        const ttl = customTTL || 600_000; // 10 min padrão
         if (Date.now() - ts > ttl) { sessionStorage.removeItem(`zs_${k}`); return null; }
         return d;
       } catch { return null; }
@@ -34,6 +34,27 @@ const ZebraAPI = (() => {
     },
   };
   const ODDS_CACHE_TTL = 86_400_000; // 24 horas — preserva quota da Odds API
+
+  /* ── CACHE localStorage (persiste entre abas/recargas) ────────
+   * TTL: 30 min para zebras, 60 min para standings.
+   * Elimina refetch completo a cada nova aba ou F5.
+   */
+  const _lsCache = {
+    get(k, ttl) {
+      try {
+        const raw = localStorage.getItem(`zs_lsc_${k}`);
+        if (!raw) return null;
+        const { ts, d } = JSON.parse(raw);
+        if (Date.now() - ts > ttl) { localStorage.removeItem(`zs_lsc_${k}`); return null; }
+        return d;
+      } catch { return null; }
+    },
+    set(k, d) {
+      try { localStorage.setItem(`zs_lsc_${k}`, JSON.stringify({ ts: Date.now(), d })); } catch {}
+    },
+  };
+  const LS_ZEBRAS_TTL   = 30 * 60 * 1000; // 30 min
+  const LS_STANDING_TTL = 60 * 60 * 1000; // 60 min
 
   /* ── PROXY HELPER (Supabase Edge Function) ──────────────────── */
   // Todas as chamadas passam pelo proxy quando disponível.
@@ -127,7 +148,12 @@ const ZebraAPI = (() => {
 
     async getStandings(lid) {
       const c = this.COMPS[lid]; if (!c) return null;
-      return this._fetch(`/competitions/${c}/standings?season=${this.SEASON(lid)}`, lid);
+      const lsKey = `fd_stand_${lid}_${this.SEASON(lid)}`;
+      const lsHit = _lsCache.get(lsKey, LS_STANDING_TTL);
+      if (lsHit) return lsHit;
+      const data = await this._fetch(`/competitions/${c}/standings?season=${this.SEASON(lid)}`, lid);
+      if (data) _lsCache.set(lsKey, data);
+      return data;
     },
     async getMatches(lid, status, limit = 8) {
       const c = this.COMPS[lid]; if (!c) return null;
@@ -596,6 +622,11 @@ const ZebraAPI = (() => {
     if (!_proxy.base() && !FD.key()) return [];
     if (typeof ZebraEngine === 'undefined') return [];
 
+    // Check localStorage cache first (30 min) — survives F5 and new tabs
+    const lsKey = `zebras_${lid}_${limit}`;
+    const lsHit = _lsCache.get(lsKey, LS_ZEBRAS_TTL);
+    if (lsHit) return lsHit;
+
     try {
       // 1. Busca partidas finalizadas + tabela em paralelo
       const [matchData, standData] = await Promise.all([
@@ -673,7 +704,9 @@ const ZebraAPI = (() => {
         });
       }
 
-      return zebras.sort((a, b) => b.zi - a.zi);
+      const sorted = zebras.sort((a, b) => b.zi - a.zi);
+      if (sorted.length) _lsCache.set(lsKey, sorted); // cache result for 30 min
+      return sorted;
     } catch(e) {
       console.warn('[fetchRealZebras] erro:', e.message);
       return [];
