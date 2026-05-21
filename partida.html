@@ -335,7 +335,7 @@
 <script src="js/auth-guard.js?v=4"></script>
 <script src="js/api.js"></script>
 <script src="js/share.js"></script>
-<script src="js/main.js?v=8"></script>
+<script src="js/main.js?v=9"></script>
 <script>
   // ── URL PARAMS ────────────────────────────────────────────────
   const _urlParams  = new URLSearchParams(location.search);
@@ -646,8 +646,16 @@
   async function initRealData() {
     if (typeof ZebraAPI === 'undefined') return;
 
-    const storedId  = localStorage.getItem('zs_current_match_id');
-    const storedLid = localStorage.getItem('zs_current_match_lid') || 'BRA';
+    // Priority: URL param ?fixtureId= > localStorage > fallback last finished match
+    const _urlP     = new URLSearchParams(window.location.search);
+    const urlId     = _urlP.get('fixtureId');
+    const storedId  = urlId || localStorage.getItem('zs_current_match_id');
+    const storedLid = localStorage.getItem('zs_current_match_lid') || _urlP.get('league') || 'BRA';
+
+    // Keep localStorage in sync if we got it from URL
+    if (urlId) {
+      try { localStorage.setItem('zs_current_match_id', urlId); } catch {}
+    }
 
     try {
       let rawMatch = null;

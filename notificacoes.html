@@ -84,7 +84,7 @@
 <script src="js/db.js"></script>
 <script src="js/auth-guard.js?v=4"></script>
 <script src="js/api.js"></script>
-<script src="js/main.js?v=8"></script>
+<script src="js/main.js?v=9"></script>
 <script>
   // ── STORAGE KEYS ────────────────────────────────────────────
   const NOTIFS_READ_KEY = 'zs_notifs_read';
@@ -161,13 +161,14 @@
       if (!all.length) return;
 
       const now = Date.now();
+      const newAlertNotifs = [];
       // Inject zebra alert notifications at the top (unread = true for top 3)
       all.forEach((z, i) => {
         const id = `real-zebra-${z.home}-${z.away}`.replace(/\s+/g,'-').toLowerCase();
         if (NOTIFS.find(x => x.id === id)) return;
         const cls = z.ziClass || (z.zi >= 7 ? 'grande' : z.zi >= 4 ? 'media' : 'leve');
         const clsLabel = cls === 'grande' ? '🔴 Grande' : cls === 'media' ? '🟠 Média' : '🟡 Leve';
-        NOTIFS.unshift({
+        const notif = {
           id,
           group: 'Hoje',
           type: 'zebra',
@@ -177,9 +178,21 @@
           title: `ZEBRA ALERT — ${z.home} ${z.hs}×${z.as} ${z.away}`,
           desc: `Zebra Index ${z.zi} (${clsLabel}) · ${z.league} · ${z.date}${z.odds_h && z.odds_h !== '–' ? ` · Odd ${z.odds_h}` : ''}`,
           ts: now - i * 3600000,
-          link: `partida.html?home=${encodeURIComponent(z.home)}&away=${encodeURIComponent(z.away)}&score=${z.hs}-${z.as}&zi=${z.zi}&league=${encodeURIComponent(z.league)}&date=${encodeURIComponent(z.date)}&homeCrest=${encodeURIComponent(z.homeCrest||'')}&awayCrest=${encodeURIComponent(z.awayCrest||'')}`,
-        });
+          link: `partida.html?home=${encodeURIComponent(z.home)}&away=${encodeURIComponent(z.away)}&score=${z.hs}-${z.as}&zi=${z.zi}&league=${encodeURIComponent(z.league)}&date=${encodeURIComponent(z.date)}&homeCrest=${encodeURIComponent(z.homeCrest||'')}&awayCrest=${encodeURIComponent(z.awayCrest||'')}${z.id ? '&fixtureId='+z.id : ''}`,
+        };
+        NOTIFS.unshift(notif);
+        if (i < 3) newAlertNotifs.push({ id, ts: notif.ts }); // persist unread ones
       });
+
+      // Persist unread zebra alerts so bell badge works on all pages (zs_alert_notifs)
+      if (newAlertNotifs.length) {
+        try {
+          const existing = JSON.parse(localStorage.getItem('zs_alert_notifs') || '[]');
+          const existingIds = new Set(existing.map(x => x.id));
+          const merged = [...newAlertNotifs.filter(n => !existingIds.has(n.id)), ...existing].slice(0, 20);
+          localStorage.setItem('zs_alert_notifs', JSON.stringify(merged));
+        } catch {}
+      }
 
       renderNotifs();
       lucide.createIcons();
