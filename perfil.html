@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/main.css?v=10" />
+  <link rel="stylesheet" href="css/main.css?v=11" />
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 </head>
 <body>
@@ -740,7 +740,7 @@
   // ── Profile Stats ──────────────────────────────────────────────
   function _profileStats() {
     const zebrasSeen = parseInt(localStorage.getItem('zs_zebras_seen') || 0);
-    const favCount   = JSON.parse(localStorage.getItem('zs_faved_teams') || '[]').length;
+    const favCount   = JSON.parse(localStorage.getItem('zebrastats_favorites') || '[]').length;
     const createdAt  = localStorage.getItem('zs_created_at');
     let diasAtivo = 1;
     if (createdAt) {

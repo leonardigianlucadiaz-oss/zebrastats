@@ -78,9 +78,6 @@ body {
   background: var(--bg);
   color: var(--white);
   min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -89,16 +86,14 @@ body {
   display: flex;
   min-height: 100vh;
   width: 100%;
-  max-width: 1440px;
-  margin: 0 auto;
   background: var(--bg);
   position: relative;
-  border: 1px solid var(--border);
+  border-right: 1px solid var(--border);
 }
 
 /* ── SIDEBAR — drawer hambúrguer ── */
 .app-sidebar {
-  display: none;
+  display: flex;
   flex-direction: column;
   width: 260px;
   flex-shrink: 0;
@@ -106,16 +101,25 @@ body {
   border-right: 1px solid var(--border);
   height: 100vh;
   overflow-y: auto;
+  overflow-x: hidden;
   /* drawer: oculto fora da tela por padrão */
   position: fixed;
   top: 0; left: 0; bottom: 0;
   z-index: 600;
   transform: translateX(-280px);
-  transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  visibility: hidden;
+  pointer-events: none;
+  /* close: transform animates, then visibility hides */
+  transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+              visibility 0s linear 0.28s;
 }
 .app-sidebar.sidebar--open {
-  display: flex;
   transform: translateX(0);
+  visibility: visible;
+  pointer-events: auto;
+  /* open: visibility shows immediately, then transform animates */
+  transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+              visibility 0s linear 0s;
 }
 
 /* Backdrop do hambúrguer */
@@ -172,7 +176,7 @@ body {
   gap: 12px;
   padding: 10px 12px;
   border-radius: var(--radius-md);
-  color: var(--gray);
+  color: rgba(255, 255, 255, 0.72);
   text-decoration: none;
   font-size: 0.9375rem;
   font-weight: 500;
@@ -180,6 +184,7 @@ body {
   cursor: pointer;
   border: 1px solid transparent;
 }
+[data-theme="light"] .sidebar__nav-item { color: var(--gray); }
 .sidebar__nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
 .sidebar__nav-item:hover  { background: var(--card2); color: var(--white); }
 .sidebar__nav-item.active {
@@ -968,7 +973,6 @@ p  { font-size: 0.875rem; line-height: 1.5; color: var(--gray); }
 
 /* ── RESPONSIVE: desktop layout ── */
 @media (min-width: 768px) {
-  body { align-items: flex-start; }
 
   /* Hambúrguer visível no desktop */
   .hamburger-btn { display: flex !important; }
