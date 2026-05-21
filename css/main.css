@@ -61,6 +61,15 @@
   --dark-text:  #0D1A2A;
   --shadow:     0 4px 24px rgba(0, 0, 0, 0.10);
 }
+/* Light mode: sidebar nav text readable on white */
+[data-theme="light"] .sidebar__nav-item { color: var(--gray); }
+/* Light mode: profile hero — replace hardcoded dark gradient */
+[data-theme="light"] .profile-hero {
+  background: linear-gradient(180deg, rgba(26,175,69,0.08) 0%, var(--bg) 100%) !important;
+}
+[data-theme="light"] .profile-hero .profile-hero__accent {
+  background: linear-gradient(90deg, var(--green), rgba(26,175,69,0.2)) !important;
+}
 
 /* Transição suave ao trocar tema */
 body, .app-wrapper, .app-sidebar, .app-main,
