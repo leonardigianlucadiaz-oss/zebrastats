@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/main.css?v=10" />
+  <link rel="stylesheet" href="css/main.css?v=11" />
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 </head>
 <body>
@@ -657,7 +657,15 @@
       bar.innerHTML = '';
 
       // Monta lista: favoritos reais (sem duplicatas) + completar com defaults até 5
-      const favIds  = [...new Set(getFavorites())];
+      // Dedup case-insensitive de IDs (ex: "arsenal" e "Arsenal" são o mesmo time)
+      const _rawIds = getFavorites();
+      const _seenIds = new Set();
+      const favIds = _rawIds.filter(id => {
+        const key = id.toLowerCase().trim();
+        if (_seenIds.has(key)) return false;
+        _seenIds.add(key);
+        return true;
+      });
       const favMeta = getFavTeamsData();
 
       // Times com meta salva (nome + crest já conhecido)
@@ -922,6 +930,8 @@
             container.appendChild(card);
           });
           if (typeof lucide !== 'undefined') lucide.createIcons();
+          // Dispara evento para atualizar o hero banner "Zebra do Dia"
+          document.dispatchEvent(new CustomEvent('zebrasLoaded', { detail: real }));
         }).catch(() => {});
       }
 
@@ -1023,18 +1033,25 @@
       const elZ = document.getElementById('heroZiValue');
       const elD = document.getElementById('heroMatchDesc');
       if (!el) return;
-      // Will be populated by real data when available
-      // For now, show a loading state that real data will fill
+      // Fallback: se zebrasLoaded não disparar em 4s, mostra dados estáticos
+      const heroFallbackTimer = setTimeout(() => {
+        if (el.textContent === 'Carregando...') {
+          el.textContent = 'Nenhuma zebra disponível agora';
+          elL.textContent = 'Verifique sua conexão ou tente mais tarde';
+          if (elZ) elZ.textContent = '–';
+        }
+      }, 4000);
       document.addEventListener('zebrasLoaded', function(e) {
+        clearTimeout(heroFallbackTimer);
         const zebras = e.detail || [];
         if (!zebras.length) return;
         const top = zebras.sort((a,b) => b.zi - a.zi)[0];
         el.textContent = `${top.home} vs ${top.away}`;
         elL.textContent = `${top.league} · ${top.date}`;
-        elZ.textContent = top.zi;
+        if (elZ) elZ.textContent = top.zi;
         const cls = top.zi >= 7 ? 'Grande' : top.zi >= 4 ? 'Média' : 'Leve';
-        elD.textContent = `Zebra ${cls} — ZI ${top.zi}. Favorito: ${top.away}.`;
-      });
+        if (elD) elD.textContent = `Zebra ${cls} — ZI ${top.zi}. Favorito: ${top.away}.`;
+      }, { once: true });
     })();
 
     lucide.createIcons();

@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/main.css?v=10" />
+  <link rel="stylesheet" href="css/main.css?v=11" />
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 </head>
 <body>
@@ -286,11 +286,24 @@ lucide.createIcons();
 (function updateFavStats(){
   const teams = getFavoritesArr ? getFavoritesArr() : [];
   const leagues = getFavLeagues ? getFavLeagues() : [];
+  // Conta times com ZI ativo (zi >= 4) com base nos dados salvos
+  const teamMeta = (typeof getFavTeamsData === 'function') ? getFavTeamsData() : {};
+  const zebraAtiva = teams.filter(id => {
+    const zi = parseFloat((teamMeta[id] || {}).zi);
+    return !isNaN(zi) && zi >= 4;
+  }).length;
+
   document.getElementById('favTeamCount').textContent = teams.length;
   document.getElementById('favLeagueCount').textContent = leagues.length;
+  document.getElementById('favZebraCount').textContent = zebraAtiva;
   // animate counts
-  [{ id:'favTeamCount', val:teams.length }, { id:'favLeagueCount', val:leagues.length }].forEach(({id,val})=>{
+  [
+    { id:'favTeamCount',   val:teams.length   },
+    { id:'favLeagueCount', val:leagues.length },
+    { id:'favZebraCount',  val:zebraAtiva     }
+  ].forEach(({id,val})=>{
     let n=0; const el=document.getElementById(id);
+    if (!el) return;
     const step=()=>{ n=Math.min(n+1,val); el.textContent=n; if(n<val) requestAnimationFrame(step); };
     requestAnimationFrame(step);
   });
