@@ -203,106 +203,13 @@
 <script src="js/main.js?v=9"></script>
 <script>
   // ── DATA ────────────────────────────────────────────────────────
-  const JOGOS = {
-    proximos: [
-      { home:'Flamengo',   away:'Botafogo',   time:'18/05 · 16h00', league:'Rodada 13' },
-      { home:'Palmeiras',  away:'São Paulo',  time:'18/05 · 18h30', league:'Rodada 13' },
-      { home:'Corinthians',away:'Santos',     time:'19/05 · 20h00', league:'Rodada 13' },
-      { home:'Grêmio',     away:'Internacional', time:'20/05 · 21h30', league:'Rodada 13' },
-    ],
-    aovivo: [
-      { home:'Atlético-MG',away:'Cruzeiro', hs:1, as:0, min:"54'", zebra:true  },
-      { home:'Vasco',      away:'Fluminense',hs:0, as:2, min:"71'", zebra:false },
-    ],
-    encerrados: [
-      { home:'Botafogo',  away:'Flamengo',  hs:3, as:0, date:'Ontem', zebra:true  },
-      { home:'São Paulo', away:'Palmeiras', hs:1, as:1, date:'12/05', zebra:false },
-      { home:'Grêmio',   away:'Corinthians',hs:2,as:1, date:'11/05', zebra:false },
-      { home:'Fortaleza', away:'Bahia',     hs:2, as:0, date:'10/05', zebra:false },
-    ],
-  };
-
-  const STANDINGS = [
-    { pos:1,  name:'Flamengo',    p:28, j:12, v:9, e:1, d:2, gp:28, gc:10, sg:18, zi:5.2, posClass:'cl' },
-    { pos:2,  name:'Palmeiras',   p:25, j:12, v:8, e:1, d:3, gp:22, gc:12, sg:10, zi:4.1, posClass:'cl' },
-    { pos:3,  name:'Atlético-MG', p:22, j:12, v:7, e:1, d:4, gp:18, gc:11, sg:7,  zi:3.8, posClass:'cl' },
-    { pos:4,  name:'São Paulo',   p:21, j:12, v:6, e:3, d:3, gp:15, gc:10, sg:5,  zi:2.9, posClass:'eur'},
-    { pos:5,  name:'Botafogo',    p:20, j:12, v:6, e:2, d:4, gp:20, gc:14, sg:6,  zi:6.4, posClass:'eur'},
-    { pos:6,  name:'Corinthians', p:18, j:12, v:5, e:3, d:4, gp:14, gc:13, sg:1,  zi:3.2, posClass:''   },
-    { pos:7,  name:'Fluminense',  p:17, j:12, v:5, e:2, d:5, gp:12, gc:14, sg:-2, zi:2.5, posClass:''   },
-    { pos:8,  name:'Internacional',p:16,j:12, v:5, e:1, d:6, gp:16, gc:17, sg:-1, zi:3.0, posClass:''   },
-    { pos:9,  name:'Vasco',       p:14, j:12, v:4, e:2, d:6, gp:11, gc:16, sg:-5, zi:2.2, posClass:''   },
-    { pos:10, name:'Grêmio',      p:13, j:12, v:3, e:4, d:5, gp:10, gc:14, sg:-4, zi:1.9, posClass:''   },
-    { pos:11, name:'Cruzeiro',    p:13, j:12, v:3, e:4, d:5, gp:11, gc:15, sg:-4, zi:2.1, posClass:''   },
-    { pos:12, name:'Bragantino',  p:12, j:12, v:3, e:3, d:6, gp:13, gc:18, sg:-5, zi:4.8, posClass:''   },
-    { pos:13, name:'Bahia',       p:11, j:12, v:3, e:2, d:7, gp:10, gc:17, sg:-7, zi:1.8, posClass:''   },
-    { pos:14, name:'Fortaleza',   p:10, j:12, v:2, e:4, d:6, gp:9,  gc:18, sg:-9, zi:1.5, posClass:''   },
-    { pos:15, name:'Santos',      p:9,  j:12, v:2, e:3, d:7, gp:8,  gc:19, sg:-11,zi:1.3, posClass:''   },
-    { pos:16, name:'Vitória',     p:8,  j:12, v:2, e:2, d:8, gp:7,  gc:21, sg:-14,zi:1.1, posClass:'rel'},
-    { pos:17, name:'Athletico',   p:7,  j:12, v:1, e:4, d:7, gp:6,  gc:18, sg:-12,zi:0.9, posClass:'rel'},
-    { pos:18, name:'Cuiabá',      p:6,  j:12, v:1, e:3, d:8, gp:5,  gc:22, sg:-17,zi:0.7, posClass:'rel'},
-    { pos:19, name:'América-MG',  p:5,  j:12, v:1, e:2, d:9, gp:4,  gc:25, sg:-21,zi:0.5, posClass:'rel'},
-    { pos:20, name:'Goiás',       p:4,  j:12, v:1, e:1, d:10,gp:3,  gc:28, sg:-25,zi:0.3, posClass:'rel'},
-  ];
-
-  const ARTILHEIROS = [
-    { name:'Pedro',            team:'Flamengo',     gols:10, ast:4, flag:'🇧🇷' },
-    { name:'Rony',             team:'Palmeiras',    gols:8,  ast:3, flag:'🇧🇷' },
-    { name:'Hulk',             team:'Atlético-MG',  gols:7,  ast:2, flag:'🇧🇷' },
-    { name:'Gabi',             team:'Flamengo',     gols:6,  ast:2, flag:'🇧🇷' },
-    { name:'Calleri',          team:'São Paulo',    gols:5,  ast:1, flag:'🇦🇷' },
-    { name:'Cano',             team:'Fluminense',   gols:5,  ast:2, flag:'🇦🇷' },
-    { name:'Vegetti',          team:'Vasco',        gols:4,  ast:1, flag:'🇦🇷' },
-    { name:'Marcos Leonardo',  team:'Fluminense',   gols:4,  ast:0, flag:'🇧🇷' },
-    { name:'Lucca',            team:'Corinthians',  gols:4,  ast:2, flag:'🇧🇷' },
-    { name:'Rafael Borré',     team:'Internacional',gols:3,  ast:1, flag:'🇨🇴' },
-    { name:'Everaldo',         team:'Fortaleza',    gols:3,  ast:1, flag:'🇧🇷' },
-    { name:'Deyverson',        team:'Cuiabá',       gols:3,  ast:0, flag:'🇧🇷' },
-  ];
-
-  const ASSISTENCIAS = [
-    { name:'Arrascaeta',       team:'Flamengo',     ast:7, gols:3, flag:'🇺🇾' },
-    { name:'Raphael Veiga',    team:'Palmeiras',    ast:6, gols:4, flag:'🇧🇷' },
-    { name:'De Pena',          team:'Fluminense',   ast:5, gols:2, flag:'🇺🇾' },
-    { name:'Canobbio',         team:'Athletico',    ast:4, gols:2, flag:'🇺🇾' },
-    { name:'Praxedes',         team:'Flamengo',     ast:4, gols:1, flag:'🇧🇷' },
-    { name:'Dudu',             team:'Palmeiras',    ast:4, gols:2, flag:'🇧🇷' },
-    { name:'Ph Ganso',         team:'Fluminense',   ast:3, gols:1, flag:'🇧🇷' },
-    { name:'Everton Ribeiro',  team:'Bahia',        ast:3, gols:2, flag:'🇧🇷' },
-    { name:'Edenilson',        team:'Internacional',ast:3, gols:1, flag:'🇧🇷' },
-    { name:'Yuri Alberto',     team:'Corinthians',  ast:2, gols:4, flag:'🇧🇷' },
-    { name:'Ademir',           team:'Atlético-MG',  ast:2, gols:1, flag:'🇧🇷' },
-    { name:'Gustavo Scarpa',   team:'Atlético-MG',  ast:2, gols:2, flag:'🇧🇷' },
-  ];
-
-  const CLUBE_STATS = [
-    { name:'Botafogo',    zi:6.4, won:3, suffered:4 },
-    { name:'Flamengo',    zi:5.2, won:2, suffered:3 },
-    { name:'Bragantino',  zi:4.8, won:2, suffered:3 },
-    { name:'Palmeiras',   zi:4.1, won:1, suffered:3 },
-    { name:'Corinthians', zi:3.2, won:1, suffered:2 },
-    { name:'São Paulo',   zi:2.9, won:1, suffered:2 },
-    { name:'Internacional',zi:3.0, won:1, suffered:3 },
-    { name:'Fluminense',  zi:2.5, won:0, suffered:2 },
-    { name:'Atlético-MG', zi:3.8, won:2, suffered:3 },
-    { name:'Vasco',       zi:2.2, won:0, suffered:3 },
-    { name:'Grêmio',      zi:1.9, won:0, suffered:2 },
-    { name:'Cruzeiro',    zi:2.1, won:0, suffered:2 },
-    { name:'Bahia',       zi:1.8, won:0, suffered:2 },
-    { name:'Fortaleza',   zi:1.5, won:0, suffered:2 },
-    { name:'Santos',      zi:1.3, won:0, suffered:2 },
-    { name:'Vitória',     zi:1.1, won:0, suffered:1 },
-    { name:'Athletico',   zi:0.9, won:0, suffered:1 },
-    { name:'Cuiabá',      zi:0.7, won:0, suffered:1 },
-    { name:'América-MG',  zi:0.5, won:0, suffered:1 },
-    { name:'Goiás',       zi:0.3, won:0, suffered:0 },
-  ];
-
-  const ZEBRAS_LIGA = [
-    { home:'Botafogo',   away:'Flamengo',   hs:3, as:0, zi:8.2, date:'Ontem' },
-    { home:'Bragantino', away:'Palmeiras',  hs:3, as:1, zi:4.3, date:'06/05' },
-    { home:'Fortaleza',  away:'Fluminense', hs:2, as:0, zi:5.1, date:'03/05' },
-  ];
+  // All arrays start empty — populated by real API calls in initRealData()
+  const JOGOS = { proximos: [], aovivo: [], encerrados: [] };
+  const STANDINGS = [];
+  const ARTILHEIROS = [];
+  const ASSISTENCIAS = [];
+  const CLUBE_STATS = [];
+  const ZEBRAS_LIGA = [];
 
   // ── REGRAS POR LIGA ──────────────────────────────────────────────
   // zones: posições, classe de cor e rótulo
@@ -832,13 +739,18 @@
   function renderZebrasTab() {
     const container = document.getElementById('ligaZebras');
     container.innerHTML = '';
+    if (!ZEBRAS_LIGA.length) {
+      container.innerHTML = `<p class="text-gray text-sm" style="text-align:center;padding:24px;">Nenhuma zebra encontrada</p>`;
+      return;
+    }
     ZEBRAS_LIGA.forEach(z => {
-      const cls = z.zi >= 7 ? 'grande' : z.zi >= 4 ? 'media' : 'leve';
+      const cls = z.ziClass || (z.zi >= 7 ? 'grande' : z.zi >= 4 ? 'media' : 'leve');
+      const leagueLabel = z.league || z.lid || activeLid;
       const card = document.createElement('div');
       card.className = 'zebra-card';
       card.innerHTML = `
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-          <span class="text-xs text-gray">Brasileirão · ${z.date}</span>
+          <span class="text-xs text-gray">${leagueLabel} · ${z.date}</span>
           <span class="zebra-index-badge zi--${cls}">🦓 ${z.zi}</span>
         </div>
         <div style="display:flex;align-items:center;justify-content:space-between;">
@@ -847,16 +759,20 @@
           <span style="font-size:0.9375rem;font-weight:600;flex:1;text-align:right;">${z.away}</span>
         </div>`;
       card.addEventListener('click', () => {
-        const ziVal = z.zi || 0;
-        const ziClass = ziVal >= 7 ? 'grande' : ziVal >= 4 ? 'media' : 'leve';
+        if (z.id) {
+          try { localStorage.setItem('zs_current_match_id', String(z.id)); localStorage.setItem('zs_current_match_lid', z.lid || activeLid); } catch {}
+        } else {
+          try { localStorage.removeItem('zs_current_match_id'); } catch {}
+        }
         const navParams = new URLSearchParams({
-          home:   z.home || '',
-          away:   z.away || '',
-          score:  (z.hs !== undefined && z.as !== undefined) ? `${z.hs} – ${z.as}` : '',
-          league: document.getElementById('leagueName')?.textContent || activeLid,
-          zi:     z.zi || '',
-          date:   z.date || '',
-          ziClass,
+          home:    z.home || '',
+          away:    z.away || '',
+          score:   (z.hs !== undefined && z.as !== undefined) ? `${z.hs} – ${z.as}` : '',
+          league:  document.getElementById('leagueName')?.textContent || activeLid,
+          zi:      z.zi || '',
+          date:    z.date || '',
+          ziClass: z.ziClass || (z.zi >= 7 ? 'grande' : z.zi >= 4 ? 'media' : 'leve'),
+          ...(z.id ? { fixtureId: z.id } : {}),
         });
         window.location.href = `partida.html?${navParams.toString()}`;
       });
@@ -989,6 +905,13 @@
             else if (m.isFinished) JOGOS['encerrados'].push({ home:m.home, away:m.away, hs:m.hs, as:m.as, date:m.date, league: activeLid, round: m.round || m.matchday || '' });
             else JOGOS['proximos'].push({ home:m.home, away:m.away, time:m.time, date:m.date, league: activeLid, round: m.round || m.matchday || '' });
           });
+          // Update hero rodada stat with the highest round found in real data
+          const rounds = all.filter(m => m.round || m.matchday).map(m => m.round || m.matchday || '').filter(Boolean);
+          if (rounds.length) {
+            const maxRound = rounds.sort().pop();
+            const statRodadaEl = document.getElementById('statRodada');
+            if (statRodadaEl) statRodadaEl.textContent = maxRound;
+          }
           if (activeTab === 'jogos') renderJogos();
         }
       } catch(e) { console.warn('FD matches error:', e); }
@@ -1030,9 +953,28 @@
       } catch(e) { console.warn('FD scorers error:', e); }
     }
 
+    async function loadZebrasLiga() {
+      try {
+        const zebras = await ZebraAPI.fetchRealZebras(lid, 20);
+        if (zebras && zebras.length) {
+          ZEBRAS_LIGA.length = 0;
+          zebras.forEach(z => ZEBRAS_LIGA.push(z));
+          const statZebrasEl = document.getElementById('statZebras');
+          if (statZebrasEl) statZebrasEl.textContent = zebras.length;
+          if (activeTab === 'zebras') renderZebrasTab();
+        } else {
+          if (activeTab === 'zebras') renderZebrasTab();
+        }
+      } catch(e) {
+        console.warn('fetchRealZebras error:', e);
+        if (activeTab === 'zebras') renderZebrasTab();
+      }
+    }
+
     loadStandings();
     loadFDMatches();
     loadFDScorers();
+    loadZebrasLiga();
   }
   // ── URL PARAM ?id= ─────────────────────────────────────────────
   (function applyUrlParam() {
