@@ -352,312 +352,39 @@
   <script src="js/teams-data.js"></script><!-- FIX 28 -->
   <script>
     // ── DATA ──────────────────────────────────────────────
-    const TEAMS = {
-      torino: {
-        name: 'Torino FC', abbr: 'TOR', league: 'Serie A · Itália',
-        color: '#851414', stadium: 'Olimpico Grande Torino',
-        w:8, d:5, l:11, zebras:7, zi: 6.4,
-        rating: 3.5,
-        ratingDesc: 'Alta frequência de resultados inesperados nas últimas 3 temporadas.',
-        losing:  [
-          { name:'Juventus',  abbr:'JUV', rec:'0V 1E 4D', period:'3 temp.', color:'#333' },
-          { name:'Inter',     abbr:'INT', rec:'1V 1E 3D', period:'2 temp.', color:'#003399' },
-          { name:'Atalanta',  abbr:'ATA', rec:'1V 0E 4D', period:'3 temp.', color:'#00008B' },
-        ],
-        winning: [
-          { name:'Empoli',    abbr:'EMP', rec:'4V 1E 0D', period:'3 temp.', color:'#005BAC' },
-          { name:'Lecce',     abbr:'LEC', rec:'3V 2E 0D', period:'2 temp.', color:'#FFC000' },
-          { name:'Frosinone', abbr:'FRO', rec:'3V 1E 1D', period:'2 temp.', color:'#003F8F' },
-        ],
-        seasonal: [
-          {m:'Ago',v:55},{m:'Set',v:50},{m:'Out',v:44},{m:'Nov',v:36},
-          {m:'Dez',v:33},{m:'Jan',v:42},{m:'Fev',v:54},{m:'Mar',v:67},
-          {m:'Abr',v:72},{m:'Mai',v:65},
-        ],
-        lastMatches: [
-          {home:'Torino',away:'Juventus', hs:0,as:2, date:'05/05',result:'D'},
-          {home:'Lecce', away:'Torino',   hs:1,as:2, date:'28/04',result:'W'},
-          {home:'Torino',away:'Inter',    hs:0,as:3, date:'21/04',result:'D'},
-          {home:'Empoli',away:'Torino',   hs:0,as:1, date:'14/04',result:'W'},
-          {home:'Torino',away:'Atalanta', hs:1,as:2, date:'07/04',result:'D'},
-        ],
-      },
-      flamengo: {
-        name: 'Flamengo', abbr: 'FLA', league: 'Brasileirão · Série A',
-        color: '#CC1A1A', w:14, d:4, l:6, zebras:5, zi: 5.3,
-        rating: 4.5,
-        ratingDesc: 'Frequentemente favorito e causa surpresas jogando como azarão fora de casa.',
-        losing:  [
-          { name:'Atletico MG', abbr:'ATM', rec:'1V 2E 4D', period:'3 temp.', color:'333' },
-          { name:'Fluminense',  abbr:'FLU', rec:'2V 1E 3D', period:'2 temp.', color:'#8B0000' },
-        ],
-        winning: [
-          { name:'Bahia',      abbr:'BAH', rec:'5V 1E 0D', period:'3 temp.', color:'#003399' },
-          { name:'Fortaleza',  abbr:'FOR', rec:'4V 2E 0D', period:'3 temp.', color:'#8B0000' },
-          { name:'Cruzeiro',   abbr:'CRU', rec:'4V 1E 1D', period:'2 temp.', color:'#003399' },
-        ],
-        seasonal: [
-          {m:'Abr',v:62},{m:'Mai',v:68},{m:'Jun',v:74},{m:'Jul',v:70},
-          {m:'Ago',v:65},{m:'Set',v:72},{m:'Out',v:60},{m:'Nov',v:55},
-          {m:'Dez',v:78},{m:'Jan',v:58},
-        ],
-        lastMatches: [
-          {home:'Flamengo',away:'Palmeiras',hs:1,as:2,date:'06/05',result:'D'},
-          {home:'Bahia',   away:'Flamengo', hs:0,as:3,date:'29/04',result:'W'},
-          {home:'Flamengo',away:'Flu',      hs:2,as:2,date:'22/04',result:'E'},
-          {home:'Flamengo',away:'Cruzeiro', hs:3,as:0,date:'15/04',result:'W'},
-        ],
-      },
-      'real-madrid': {
-        name: 'Real Madrid', abbr: 'RMA', league: 'La Liga · Espanha',
-        color: '#1a1a6e', w:22, d:5, l:5, zebras:4, zi: 4.1,
-        rating: 4.0,
-        ratingDesc: 'Raramente perde como favorito, mas causa surpresas importantes.',
-        losing:  [
-          { name:'Barcelona', abbr:'BAR', rec:'2V 3E 5D', period:'3 temp.', color:'#a50044' },
-          { name:'Atletico',  abbr:'ATM', rec:'2V 2E 4D', period:'3 temp.', color:'#cc0000' },
-        ],
-        winning: [
-          { name:'Getafe',    abbr:'GET', rec:'6V 1E 0D', period:'3 temp.', color:'#003399' },
-          { name:'Alavés',    abbr:'ALA', rec:'5V 2E 0D', period:'3 temp.', color:'#003399' },
-          { name:'Celta',     abbr:'CEL', rec:'5V 1E 1D', period:'3 temp.', color:'#6fc3df' },
-        ],
-        seasonal:  [{m:'Ago',v:70},{m:'Set',v:75},{m:'Out',v:68},{m:'Nov',v:72},{m:'Dez',v:80},{m:'Jan',v:65},{m:'Fev',v:74},{m:'Mar',v:82},{m:'Abr',v:78},{m:'Mai',v:85}],
-        lastMatches: [
-          {home:'Real Madrid',away:'Man City',  hs:3,as:3,date:'08/05',result:'E'},
-          {home:'Real Madrid',away:'Celta',     hs:4,as:0,date:'01/05',result:'W'},
-          {home:'Mallorca',   away:'Real Madrid',hs:1,as:0,date:'25/04',result:'D'},
-          {home:'Real Madrid',away:'Bayern',    hs:2,as:1,date:'17/04',result:'W'},
-          {home:'Atlético',   away:'Real Madrid',hs:2,as:1,date:'10/04',result:'D'},
-        ],
-      },
-      'man-city': {
-        name: 'Manchester City', abbr: 'MCI', league: 'Premier League · Inglaterra',
-        color: '#6cabdd', w:19, d:7, l:6, zebras:6, zi: 5.8,
-        rating: 3.8,
-        ratingDesc: 'Alta intensidade de pressão — zebras frequentes em jogos fora de casa.',
-        losing:  [
-          { name:'Arsenal',  abbr:'ARS', rec:'2V 2E 4D', period:'3 temp.', color:'#ef0107' },
-          { name:'Liverpool',abbr:'LIV', rec:'2V 3E 4D', period:'3 temp.', color:'#c8102e' },
-        ],
-        winning: [
-          { name:'Burnley',  abbr:'BUR', rec:'6V 0E 0D', period:'3 temp.', color:'#6c1d45' },
-          { name:'Everton',  abbr:'EVE', rec:'5V 1E 1D', period:'3 temp.', color:'#003399' },
-          { name:'Wolves',   abbr:'WOL', rec:'4V 2E 1D', period:'2 temp.', color:'#fdb913' },
-        ],
-        seasonal:  [{m:'Ago',v:60},{m:'Set',v:66},{m:'Out',v:71},{m:'Nov',v:68},{m:'Dez',v:74},{m:'Jan',v:70},{m:'Fev',v:76},{m:'Mar',v:80},{m:'Abr',v:72},{m:'Mai',v:69}],
-        lastMatches: [
-          {home:'Man City',away:'Tottenham',hs:2,as:0,date:'07/05',result:'W'},
-          {home:'Wolves', away:'Man City',  hs:0,as:5,date:'01/05',result:'W'},
-          {home:'Man City',away:'Arsenal',  hs:0,as:1,date:'24/04',result:'D'},
-          {home:'Chelsea',away:'Man City',  hs:0,as:2,date:'17/04',result:'W'},
-          {home:'Man City',away:'Luton',    hs:5,as:1,date:'13/04',result:'W'},
-        ],
-      },
-      'bayern': {
-        name: 'Bayern München', abbr: 'FCB', league: 'Bundesliga · Alemanha',
-        color: '#dc052d', w:20, d:4, l:8, zebras:9, zi: 7.2,
-        rating: 4.2,
-        ratingDesc: 'Gigante que surpreende negativamente com frequência incomum no século.',
-        losing:  [
-          { name:'Dortmund', abbr:'BVB', rec:'3V 2E 5D', period:'3 temp.', color:'#fde100' },
-          { name:'Augsburg', abbr:'AUG', rec:'1V 1E 3D', period:'3 temp.', color:'#ba3733' },
-        ],
-        winning: [
-          { name:'Mainz',     abbr:'MAI', rec:'5V 1E 0D', period:'3 temp.', color:'#e00000' },
-          { name:'Bochum',    abbr:'BOC', rec:'4V 2E 0D', period:'3 temp.', color:'#005ca9' },
-          { name:'Wolfsburg', abbr:'WOB', rec:'4V 1E 1D', period:'2 temp.', color:'#009a44' },
-        ],
-        seasonal:  [{m:'Ago',v:72},{m:'Set',v:78},{m:'Out',v:65},{m:'Nov',v:58},{m:'Dez',v:71},{m:'Jan',v:63},{m:'Fev',v:70},{m:'Mar',v:66},{m:'Abr',v:54},{m:'Mai',v:60}],
-        lastMatches: [
-          {home:'Bayern', away:'Real Madrid', hs:1,as:2,date:'08/05',result:'D'},
-          {home:'Augsburg',away:'Bayern',      hs:2,as:1,date:'01/05',result:'D'},
-          {home:'Bayern', away:'Wolfsburg',   hs:3,as:0,date:'25/04',result:'W'},
-          {home:'St.Pauli',away:'Bayern',     hs:3,as:1,date:'18/04',result:'D'},
-          {home:'Bayern', away:'Dortmund',    hs:0,as:2,date:'11/04',result:'D'},
-        ],
-      },
-      'psg': {
-        name: 'Paris Saint-Germain', abbr: 'PSG', league: 'Ligue 1 · França',
-        color: '#004170', w:21, d:5, l:6, zebras:8, zi: 6.9,
-        rating: 4.0,
-        ratingDesc: 'Dominante internamente mas zebras frequentes em competições europeias.',
-        losing:  [
-          { name:'Marseille',abbr:'OM',  rec:'2V 2E 4D', period:'3 temp.', color:'#009fc8' },
-          { name:'Monaco',   abbr:'ASM', rec:'2V 1E 3D', period:'3 temp.', color:'#e0000e' },
-        ],
-        winning: [
-          { name:'Angers',   abbr:'ANG', rec:'6V 0E 0D', period:'3 temp.', color:'#000000' },
-          { name:'Troyes',   abbr:'TRO', rec:'5V 1E 0D', period:'3 temp.', color:'#ffffff' },
-          { name:'Clermont', abbr:'CLF', rec:'5V 0E 1D', period:'2 temp.', color:'#e0000e' },
-        ],
-        seasonal:  [{m:'Ago',v:76},{m:'Set',v:80},{m:'Out',v:74},{m:'Nov',v:78},{m:'Dez',v:82},{m:'Jan',v:71},{m:'Fev',v:77},{m:'Mar',v:73},{m:'Abr',v:68},{m:'Mai',v:64}],
-        lastMatches: [
-          {home:'PSG',    away:'Dortmund',  hs:0,as:1,date:'07/05',result:'D'},
-          {home:'Reims',  away:'PSG',       hs:0,as:3,date:'30/04',result:'W'},
-          {home:'PSG',    away:'Monaco',    hs:2,as:0,date:'23/04',result:'W'},
-          {home:'Angers', away:'PSG',       hs:2,as:0,date:'07/04',result:'D'},
-          {home:'PSG',    away:'Barcelona', hs:3,as:2,date:'02/04',result:'W'},
-        ],
-      },
-      'palmeiras': {
-        name: 'Palmeiras', abbr: 'PAL', league: 'Brasileirão · Série A',
-        color: '#006437', w:16, d:6, l:4, zebras:4, zi: 4.5,
-        rating: 3.5,
-        ratingDesc: 'Sólido mas perde como favorito contra times médios com certa frequência.',
-        losing:  [
-          { name:'Flamengo',   abbr:'FLA', rec:'2V 2E 4D', period:'3 temp.', color:'#cc1a1a' },
-          { name:'Atletico MG',abbr:'ATM', rec:'2V 1E 3D', period:'3 temp.', color:'#333' },
-        ],
-        winning: [
-          { name:'Cuiabá',     abbr:'CUI', rec:'5V 1E 0D', period:'3 temp.', color:'#facc15' },
-          { name:'Fortaleza',  abbr:'FOR', rec:'4V 2E 0D', period:'3 temp.', color:'#8b0000' },
-          { name:'América MG', abbr:'AMG', rec:'4V 1E 1D', period:'2 temp.', color:'#006400' },
-        ],
-        seasonal:  [{m:'Abr',v:64},{m:'Mai',v:70},{m:'Jun',v:75},{m:'Jul',v:68},{m:'Ago',v:72},{m:'Set',v:78},{m:'Out',v:65},{m:'Nov',v:60},{m:'Dez',v:74},{m:'Jan',v:62}],
-        lastMatches: [
-          {home:'Palmeiras', away:'Flamengo',   hs:0,as:1,date:'06/05',result:'D'},
-          {home:'Bragantino',away:'Palmeiras',  hs:3,as:1,date:'29/04',result:'D'},
-          {home:'Palmeiras', away:'Cruzeiro',   hs:2,as:0,date:'22/04',result:'W'},
-          {home:'Cuiabá',    away:'Palmeiras',  hs:0,as:2,date:'15/04',result:'W'},
-          {home:'Palmeiras', away:'AtleticoMG', hs:1,as:1,date:'08/04',result:'E'},
-        ],
-      },
-      'barcelona': {
-        name: 'Barcelona', abbr: 'BAR', league: 'La Liga · Espanha',
-        color: '#a50044', w:20, d:4, l:8, zebras:7, zi: 6.2,
-        rating: 3.8,
-        ratingDesc: 'Fase de reconstrução — zebras mais frequentes que no histórico recente.',
-        losing:  [
-          { name:'Real Madrid',abbr:'RMA', rec:'2V 2E 5D', period:'3 temp.', color:'#1a1a6e' },
-          { name:'Girona',     abbr:'GIR', rec:'1V 1E 2D', period:'1 temp.', color:'#cc0000' },
-        ],
-        winning: [
-          { name:'Celta',    abbr:'CEL', rec:'5V 1E 1D', period:'3 temp.', color:'#6fc3df' },
-          { name:'Getafe',   abbr:'GET', rec:'5V 2E 0D', period:'3 temp.', color:'#003399' },
-          { name:'Villarreal',abbr:'VIL', rec:'4V 2E 1D', period:'3 temp.', color:'#ffd700' },
-        ],
-        seasonal:  [{m:'Ago',v:65},{m:'Set',v:70},{m:'Out',v:74},{m:'Nov',v:68},{m:'Dez',v:72},{m:'Jan',v:64},{m:'Fev',v:69},{m:'Mar',v:75},{m:'Abr',v:71},{m:'Mai',v:67}],
-        lastMatches: [
-          {home:'Barcelona', away:'PSG',       hs:2,as:3,date:'06/05',result:'D'},
-          {home:'Granada',   away:'Barcelona', hs:1,as:0,date:'29/04',result:'D'},
-          {home:'Barcelona', away:'Valencia',  hs:4,as:2,date:'22/04',result:'W'},
-          {home:'Real Madrid',away:'Barcelona',hs:3,as:2,date:'14/04',result:'D'},
-          {home:'Barcelona', away:'Napoli',    hs:3,as:1,date:'10/04',result:'W'},
-        ],
-      },
-      'arsenal': {
-        name: 'Arsenal', abbr: 'ARS', league: 'Premier League · Inglaterra',
-        color: '#ef0107', w:21, d:5, l:6, zebras:5, zi: 5.1,
-        rating: 3.6,
-        ratingDesc: 'Consistente mas title races amplificam pressão e criam zebras no final.',
-        losing:  [
-          { name:'Man City', abbr:'MCI', rec:'2V 2E 4D', period:'3 temp.', color:'#6cabdd' },
-          { name:'Aston Villa',abbr:'AVL',rec:'1V 2E 3D', period:'3 temp.', color:'#670e36' },
-        ],
-        winning: [
-          { name:'Everton',  abbr:'EVE', rec:'5V 1E 0D', period:'3 temp.', color:'#003399' },
-          { name:'Burnley',  abbr:'BUR', rec:'4V 2E 0D', period:'3 temp.', color:'#6c1d45' },
-          { name:'Brentford',abbr:'BRE', rec:'4V 1E 1D', period:'3 temp.', color:'#e30613' },
-        ],
-        seasonal:  [{m:'Ago',v:62},{m:'Set',v:68},{m:'Out',v:72},{m:'Nov',v:69},{m:'Dez',v:74},{m:'Jan',v:66},{m:'Fev',v:73},{m:'Mar',v:77},{m:'Abr',v:70},{m:'Mai',v:68}],
-        lastMatches: [
-          {home:'Arsenal',  away:'Man City',  hs:1,as:0,date:'06/05',result:'W'},
-          {home:'Tottenham',away:'Arsenal',   hs:0,as:3,date:'30/04',result:'W'},
-          {home:'Arsenal',  away:'Chelsea',   hs:5,as:0,date:'23/04',result:'W'},
-          {home:'Wolves',   away:'Arsenal',   hs:0,as:2,date:'16/04',result:'W'},
-          {home:'Arsenal',  away:'Aston Villa',hs:0,as:2,date:'09/04',result:'D'},
-        ],
-      },
-      'liverpool': {
-        name: 'Liverpool', abbr: 'LIV', league: 'Premier League · Inglaterra',
-        color: '#c8102e', w:19, d:5, l:8, zebras:6, zi: 5.6,
-        rating: 3.7,
-        ratingDesc: 'Transição pós-Klopp — fase de zebras mais frequentes enquanto se readapta.',
-        losing:  [
-          { name:'Man City', abbr:'MCI', rec:'2V 3E 5D', period:'3 temp.', color:'#6cabdd' },
-          { name:'Man Utd',  abbr:'MUN', rec:'2V 2E 4D', period:'3 temp.', color:'#da291c' },
-        ],
-        winning: [
-          { name:'Burnley',  abbr:'BUR', rec:'5V 1E 0D', period:'3 temp.', color:'#6c1d45' },
-          { name:'Wolves',   abbr:'WOL', rec:'4V 2E 1D', period:'3 temp.', color:'#fdb913' },
-          { name:'Brentford',abbr:'BRE', rec:'4V 1E 1D', period:'2 temp.', color:'#e30613' },
-        ],
-        seasonal:  [{m:'Ago',v:64},{m:'Set',v:70},{m:'Out',v:65},{m:'Nov',v:68},{m:'Dez',v:75},{m:'Jan',v:62},{m:'Fev',v:69},{m:'Mar',v:74},{m:'Abr',v:68},{m:'Mai',v:63}],
-        lastMatches: [
-          {home:'Liverpool', away:'Tottenham', hs:4,as:2,date:'05/05',result:'W'},
-          {home:'Everton',   away:'Liverpool', hs:0,as:2,date:'28/04',result:'W'},
-          {home:'Liverpool', away:'Fulham',    hs:3,as:1,date:'21/04',result:'W'},
-          {home:'Crystal P', away:'Liverpool', hs:2,as:1,date:'14/04',result:'D'},
-          {home:'Liverpool', away:'Man City',  hs:1,as:1,date:'10/03',result:'E'},
-        ],
-      },
-      'atletico-mg': {
-        name: 'Atlético Mineiro', abbr: 'CAM', league: 'Brasileirão · Série A',
-        color: '#000000', w:15, d:7, l:5, zebras:5, zi: 5.0,
-        rating: 3.4,
-        ratingDesc: 'Equipe equilibrada com histórico relevante de zebras no Brasileirão.',
-        losing:  [
-          { name:'Flamengo',abbr:'FLA', rec:'2V 1E 3D', period:'3 temp.', color:'#cc1a1a' },
-          { name:'Palmeiras',abbr:'PAL',rec:'2V 2E 3D', period:'3 temp.', color:'#006437' },
-        ],
-        winning: [
-          { name:'Cuiabá',    abbr:'CUI', rec:'4V 2E 0D', period:'3 temp.', color:'#facc15' },
-          { name:'Goiás',     abbr:'GOI', rec:'4V 1E 1D', period:'3 temp.', color:'#00a859' },
-          { name:'America MG',abbr:'AMG', rec:'3V 2E 1D', period:'2 temp.', color:'#006400' },
-        ],
-        seasonal:  [{m:'Abr',v:58},{m:'Mai',v:64},{m:'Jun',v:68},{m:'Jul',v:62},{m:'Ago',v:66},{m:'Set',v:72},{m:'Out',v:60},{m:'Nov',v:55},{m:'Dez',v:70},{m:'Jan',v:58}],
-        lastMatches: [
-          {home:'AtleticoMG',away:'Flamengo',  hs:1,as:1,date:'05/05',result:'E'},
-          {home:'AtleticoMG',away:'Palmeiras', hs:1,as:1,date:'28/04',result:'E'},
-          {home:'Cruzeiro',  away:'AtleticoMG',hs:0,as:2,date:'21/04',result:'W'},
-          {home:'AtleticoMG',away:'Bahia',     hs:3,as:0,date:'14/04',result:'W'},
-          {home:'Cuiabá',    away:'AtleticoMG',hs:0,as:1,date:'07/04',result:'W'},
-        ],
-      },
-      'juventus': {
-        name: 'Juventus', abbr: 'JUV', league: 'Serie A · Itália',
-        color: '#000000', w:17, d:6, l:9, zebras:8, zi: 6.6,
-        rating: 3.9,
-        ratingDesc: 'Passou por crise recente — zebras contra times menores marcam a era pós-Allegri.',
-        losing:  [
-          { name:'Inter',   abbr:'INT', rec:'1V 2E 5D', period:'3 temp.', color:'#003399' },
-          { name:'Napoli',  abbr:'NAP', rec:'2V 1E 4D', period:'3 temp.', color:'#099dd1' },
-        ],
-        winning: [
-          { name:'Frosinone',abbr:'FRO', rec:'4V 2E 0D', period:'3 temp.', color:'#003f8f' },
-          { name:'Lecce',    abbr:'LEC', rec:'3V 2E 1D', period:'3 temp.', color:'#ffc000' },
-          { name:'Empoli',   abbr:'EMP', rec:'4V 1E 1D', period:'3 temp.', color:'#005bac' },
-        ],
-        seasonal:  [{m:'Ago',v:60},{m:'Set',v:55},{m:'Out',v:48},{m:'Nov',v:52},{m:'Dez',v:58},{m:'Jan',v:64},{m:'Fev',v:62},{m:'Mar',v:68},{m:'Abr',v:65},{m:'Mai',v:58}],
-        lastMatches: [
-          {home:'Juventus',away:'Torino',    hs:2,as:0,date:'05/05',result:'W'},
-          {home:'Lecce',   away:'Juventus',  hs:2,as:1,date:'28/04',result:'D'},
-          {home:'Juventus',away:'Milan',     hs:0,as:0,date:'21/04',result:'E'},
-          {home:'Frosinone',away:'Juventus', hs:1,as:0,date:'14/04',result:'D'},
-          {home:'Juventus',away:'Lazio',     hs:3,as:1,date:'07/04',result:'W'},
-        ],
-      },
-    };
+    // Team data is loaded dynamically from SDB API — no TEAMS mock object
+    let currentTeamSdbId = null;
+    let currentTeamData = null; // { name, abbr, badge, color, venue, league, lid, founded }
 
-    // FIX 28 — expose TEAMS as window.TEAMS_DATA for cross-page access
-    window.TEAMS_DATA = Object.assign(window.TEAMS_DATA || {}, TEAMS);
-
-    let currentTeam = 'torino';
+    let currentTeam = '';  // team name string — set when a team is loaded
     let isFavorited = false;
 
-    // ── TEAM SELECTOR ────────────────────────────────────
+    // SDB league IDs mapping (for fetchRealZebras)
+    const SDB_LEAGUE_IDS = { BRA:4351, ENG:4328, ESP:4335, ITA:4332, GER:4331, FRA:4334, POR:4344 };
+
+    // ── TEAM SELECTOR ─── dynamic from SDB ───────────────
     const selectorEl = document.getElementById('teamSelector');
-    Object.keys(TEAMS).forEach(key => {
-      const t = TEAMS[key];
-      const btn = document.createElement('button');
-      btn.className = `team-chip${key === currentTeam ? ' active' : ''}`;
-      btn.textContent = t.name;
-      btn.dataset.team = key;
-      btn.style.cssText = 'flex-shrink:0;padding:6px 14px;border-radius:999px;background:var(--card);border:1px solid var(--border);color:var(--gray);font-size:0.8125rem;font-family:inherit;cursor:pointer;white-space:nowrap;transition:all 0.2s;';
-      btn.addEventListener('click', () => loadTeam(key));
-      selectorEl.appendChild(btn);
-    });
+    const selectorLid = new URLSearchParams(location.search).get('lid') || 'BRA';
+
+    // Load team selector chips from SDB
+    async function loadTeamSelector(lid) {
+      try {
+        const sdbLid = SDB_LEAGUE_IDS[lid] || SDB_LEAGUE_IDS['BRA'];
+        const data = await ZebraAPI.sportsDb.getAllTeams(sdbLid);
+        const teams = data?.teams || [];
+        selectorEl.innerHTML = '';
+        teams.forEach(t => {
+          const btn = document.createElement('button');
+          btn.className = 'team-chip';
+          btn.textContent = t.strTeam || t.strTeamShort || '';
+          btn.dataset.sdbid = t.idTeam || '';
+          btn.dataset.name  = t.strTeam || '';
+          btn.style.cssText = 'flex-shrink:0;padding:6px 14px;border-radius:999px;background:var(--card);border:1px solid var(--border);color:var(--gray);font-size:0.8125rem;font-family:inherit;cursor:pointer;white-space:nowrap;transition:all 0.2s;';
+          btn.addEventListener('click', () => loadTeam(t.strTeam, t.idTeam));
+          selectorEl.appendChild(btn);
+        });
+      } catch(e) { console.warn('[time] loadTeamSelector error:', e); }
+    }
 
     // ── RENDER ZI VISUAL ──────────────────────────────────
     function renderStars(rating) {
@@ -681,106 +408,73 @@
       el.appendChild(wrap);
     }
 
-    // ── RENDER BIGGEST ZEBRAS ─────────────────────────────
-    function renderBiggestZebras(teamName) {
+    // ── RENDER BIGGEST ZEBRAS — uses real API ─────────────
+    async function renderBiggestZebras(teamNameFilter) {
       const container = document.getElementById('biggestZebrasList');
       if (!container) return;
-      // Mock zebras mais improváveis do time
-      const BIGGEST = {
-        torino: [
-          { home:'Lecce', away:'Torino',   hs:1, as:2, zi:6.1, date:'28/04', odds:'5.20' },
-          { home:'Empoli',away:'Torino',   hs:0, as:1, zi:5.5, date:'14/04', odds:'4.80' },
-          { home:'Torino',away:'Juventus', hs:2, as:1, zi:7.3, date:'11/02', odds:'6.00' },
-        ],
-        flamengo: [
-          { home:'Flamengo', away:'Palmeiras',hs:3, as:0, zi:5.8, date:'10/03', odds:'4.50' },
-          { home:'Bahia',    away:'Flamengo', hs:0, as:3, zi:4.9, date:'29/04', odds:'3.80' },
-          { home:'Flamengo', away:'Atl.-MG',  hs:2, as:1, zi:6.2, date:'18/01', odds:'5.10' },
-        ],
-        'real-madrid': [
-          { home:'Mallorca',   away:'Real Madrid', hs:1, as:0, zi:6.8, date:'25/04', odds:'5.50' },
-          { home:'Real Madrid',away:'Atletico',    hs:1, as:2, zi:5.2, date:'01/02', odds:'4.20' },
-          { home:'Girona',     away:'Real Madrid', hs:4, as:2, zi:7.1, date:'10/11', odds:'6.80' },
-        ],
-        'man-city': [
-          { home:'Brentford', away:'Man City', hs:2, as:1, zi:6.4, date:'05/01', odds:'5.80' },
-          { home:'Man City',  away:'Arsenal',  hs:0, as:1, zi:5.3, date:'24/04', odds:'4.10' },
-          { home:'Wolves',    away:'Man City', hs:2, as:0, zi:7.0, date:'20/09', odds:'7.50' },
-        ],
-        'bayern': [
-          { home:'Augsburg', away:'Bayern',  hs:2, as:1, zi:7.5, date:'01/05', odds:'6.80' },
-          { home:'Bayern',   away:'Bochum',  hs:0, as:1, zi:6.9, date:'02/02', odds:'8.00' },
-          { home:'St.Pauli', away:'Bayern',  hs:3, as:1, zi:8.1, date:'18/04', odds:'9.50' },
-        ],
-        'psg': [
-          { home:'Angers',    away:'PSG',      hs:2, as:0, zi:8.3, date:'07/04', odds:'8.50' },
-          { home:'PSG',       away:'Dortmund', hs:0, as:1, zi:6.1, date:'07/05', odds:'4.80' },
-          { home:'Marseille', away:'PSG',      hs:3, as:2, zi:5.7, date:'30/10', odds:'4.20' },
-        ],
-        'palmeiras': [
-          { home:'Bragantino',away:'Palmeiras', hs:3, as:1, zi:5.5, date:'29/04', odds:'4.90' },
-          { home:'Palmeiras', away:'Cuiabá',    hs:0, as:1, zi:4.8, date:'12/08', odds:'3.70' },
-          { home:'Fortaleza', away:'Palmeiras', hs:2, as:0, zi:5.9, date:'15/09', odds:'5.20' },
-        ],
-        'barcelona': [
-          { home:'Granada',    away:'Barcelona', hs:1, as:0, zi:7.2, date:'29/04', odds:'6.50' },
-          { home:'Real Madrid',away:'Barcelona', hs:3, as:2, zi:4.5, date:'14/04', odds:'3.80' },
-          { home:'Barcelona',  away:'Girona',    hs:1, as:4, zi:6.8, date:'21/01', odds:'5.90' },
-        ],
-        'arsenal': [
-          { home:'Aston Villa',away:'Arsenal', hs:2, as:0, zi:5.8, date:'09/04', odds:'4.60' },
-          { home:'Arsenal',    away:'West Ham',hs:0, as:2, zi:5.3, date:'11/02', odds:'3.90' },
-          { home:'Fulham',     away:'Arsenal', hs:3, as:2, zi:6.5, date:'14/10', odds:'5.80' },
-        ],
-        'liverpool': [
-          { home:'Crystal P', away:'Liverpool', hs:2, as:1, zi:6.2, date:'14/04', odds:'5.40' },
-          { home:'Liverpool', away:'Man City',  hs:1, as:1, zi:4.8, date:'10/03', odds:'3.50' },
-          { home:'Brentford', away:'Liverpool', hs:3, as:1, zi:7.0, date:'18/11', odds:'7.20' },
-        ],
-        'atletico-mg': [
-          { home:'Cuiabá',    away:'AtleticoMG', hs:2, as:0, zi:5.6, date:'18/06', odds:'4.80' },
-          { home:'AtleticoMG',away:'Flamengo',   hs:0, as:3, zi:4.9, date:'22/09', odds:'3.70' },
-          { home:'Goiás',     away:'AtleticoMG', hs:2, as:1, zi:6.3, date:'05/11', odds:'5.50' },
-        ],
-        'juventus': [
-          { home:'Frosinone', away:'Juventus', hs:1, as:0, zi:7.1, date:'14/04', odds:'6.20' },
-          { home:'Lecce',     away:'Juventus', hs:2, as:1, zi:6.5, date:'28/04', odds:'5.60' },
-          { home:'Juventus',  away:'Sassuolo', hs:0, as:0, zi:5.8, date:'09/12', odds:'4.90' },
-        ],
-      };
-      const list = BIGGEST[currentTeam] || BIGGEST.torino;
-      container.innerHTML = '';
-      list.forEach((z, i) => {
-        const cls = z.zi >= 7 ? 'grande' : z.zi >= 4 ? 'media' : 'leve';
-        const hc = crestImg(z.home, 20);
-        const ac = crestImg(z.away, 20);
-        const card = document.createElement('div');
-        card.style.cssText = 'background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:10px 14px;cursor:pointer;';
-        card.innerHTML = `
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-            <span style="font-size:0.6875rem;color:var(--gray);">${z.date} · odd ${z.odds}</span>
-            <span class="zebra-index-badge zi--${cls}">🦓 ZI ${z.zi}</span>
-          </div>
-          <div style="display:flex;align-items:center;justify-content:space-between;">
-            <span style="display:flex;align-items:center;gap:5px;font-size:0.875rem;font-weight:600;flex:1;">${hc}${z.home}</span>
-            <span style="font-size:1.25rem;font-weight:700;min-width:56px;text-align:center;color:var(--green);">${z.hs} – ${z.as}</span>
-            <span style="display:flex;align-items:center;justify-content:flex-end;gap:5px;font-size:0.875rem;font-weight:600;flex:1;">${z.away}${ac}</span>
-          </div>`;
-        card.addEventListener('click', () => window.location.href = 'partida.html');
-        container.appendChild(card);
-      });
+      container.innerHTML = `<div style="padding:20px;text-align:center;color:var(--gray);font-size:0.8125rem;">Carregando zebras...</div>`;
+      try {
+        // Use the current league lid from selectorLid or fall back to BRA
+        const lid = selectorLid || 'BRA';
+        const allZebras = await ZebraAPI.fetchRealZebras(lid, 50);
+        const tname = (teamNameFilter || currentTeam || '').toLowerCase();
+        // Filter zebras that involve this team
+        const list = (allZebras || []).filter(z => {
+          const h = (z.home || '').toLowerCase();
+          const a = (z.away || '').toLowerCase();
+          return h.includes(tname) || a.includes(tname) ||
+                 tname.includes(h.split(' ')[0]) || tname.includes(a.split(' ')[0]);
+        }).slice(0, 10);
+
+        container.innerHTML = '';
+        if (!list.length) {
+          container.innerHTML = `<div style="padding:20px;text-align:center;color:var(--gray);font-size:0.8125rem;">Nenhuma zebra encontrada para este time</div>`;
+          return;
+        }
+        list.forEach(z => {
+          const cls = z.zi >= 7 ? 'grande' : z.zi >= 4 ? 'media' : 'leve';
+          const hc = typeof crestImg === 'function' ? crestImg(z.home, 20) : '';
+          const ac = typeof crestImg === 'function' ? crestImg(z.away, 20) : '';
+          const card = document.createElement('div');
+          card.style.cssText = 'background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:10px 14px;cursor:pointer;';
+          card.innerHTML = `
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+              <span style="font-size:0.6875rem;color:var(--gray);">${z.date}${z.odds_h ? ' · odd ' + z.odds_h : ''}</span>
+              <span class="zebra-index-badge zi--${cls}">🦓 ZI ${z.zi}</span>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <span style="display:flex;align-items:center;gap:5px;font-size:0.875rem;font-weight:600;flex:1;">${hc}${z.home}</span>
+              <span style="font-size:1.25rem;font-weight:700;min-width:56px;text-align:center;color:var(--green);">${z.hs} – ${z.as}</span>
+              <span style="display:flex;align-items:center;justify-content:flex-end;gap:5px;font-size:0.875rem;font-weight:600;flex:1;">${z.away}${ac}</span>
+            </div>`;
+          card.addEventListener('click', () => {
+            if (z.id) { try { localStorage.setItem('zs_current_match_id', String(z.id)); } catch {} }
+            const p = new URLSearchParams({ home:z.home||'', away:z.away||'', score:`${z.hs}–${z.as}`, zi:z.zi||'', date:z.date||'', ...(z.id?{fixtureId:z.id}:{}) });
+            window.location.href = `partida.html?${p.toString()}`;
+          });
+          container.appendChild(card);
+        });
+      } catch(e) {
+        console.warn('[time] renderBiggestZebras error:', e);
+        container.innerHTML = `<div style="padding:20px;text-align:center;color:var(--gray);font-size:0.8125rem;">Dados indisponíveis</div>`;
+      }
     }
 
     // ── RENDER CONFRONTOS ─────────────────────────────────
     function renderConfrontos(list, containerId, type) {
       const el = document.getElementById(containerId);
+      if (!el) return;
       el.innerHTML = '';
+      if (!list || !list.length) {
+        el.innerHTML = `<div style="padding:12px 14px;font-size:0.8125rem;color:var(--gray);">Dados históricos indisponíveis</div>`;
+        return;
+      }
       list.forEach(t => {
         const row = document.createElement('div');
         row.className = `confronto-row confronto-row--${type}`;
         row.innerHTML = `
           <div class="confronto-row__avatar" style="background:${t.color}33;border:1px solid ${t.color}66;color:var(--white);">
-            ${t.abbr.substring(0,3)}
+            ${(t.abbr||t.name||'').substring(0,3)}
           </div>
           <span class="confronto-row__name">${t.name}</span>
           <span class="confronto-row__record" style="color:${type==='red'?'var(--red)':'var(--green)'};">${t.rec}</span>
@@ -794,6 +488,10 @@
     function renderChart(data) {
       const el = document.getElementById('seasonChart');
       if (!el) return;
+      if (!data || data.length < 2) {
+        el.innerHTML = `<div style="padding:16px;text-align:center;color:var(--gray);font-size:0.8125rem;">Dados sazonais indisponíveis</div>`;
+        return;
+      }
       const W = el.clientWidth || 300, H = 90;
       const pad = { l:28, r:8, t:10, b:20 };
       const vals = data.map(d => d.v);
@@ -891,77 +589,142 @@
       });
     }
 
-    // ── LOAD TEAM ─────────────────────────────────────────
-    function loadTeam(key) {
-      currentTeam = key;
-      const t = TEAMS[key];
+    // ── LOAD TEAM — main entry point ─────────────────────
+    // Accepts a team name (string) and optional SDB team ID.
+    // When called from URL param: loadTeam(name)
+    // When called from selector chips: loadTeam(name, sdbId)
+    async function loadTeam(name, sdbId) {
+      if (!name) return;
+      currentTeam = name;
+      currentTeamSdbId = sdbId || null;
 
-      // Update hero
-      document.getElementById('navTitle').textContent  = t.name;
-      document.getElementById('heroShield').textContent = t.abbr;
-      document.getElementById('heroName').textContent   = t.name;
-      document.getElementById('heroLeague').textContent = t.stadium ? `${t.league} · ${t.stadium}` : t.league;
-      document.getElementById('teamHero').style.background = `linear-gradient(160deg,${t.color} 0%,${t.color}55 100%)`;
-      document.getElementById('statW').textContent = t.w;
-      document.getElementById('statD').textContent = t.d;
-      document.getElementById('statL').textContent = t.l;
-      document.getElementById('statZebra').textContent = t.zebras;
+      // Show skeleton / placeholder hero while loading
+      document.getElementById('navTitle').textContent   = name;
+      document.getElementById('heroName').textContent   = name;
+      document.getElementById('heroShield').textContent = name.substring(0,3).toUpperCase();
+      document.getElementById('heroLeague').textContent = '—';
+      document.getElementById('statW').textContent = '—';
+      document.getElementById('statD').textContent = '—';
+      document.getElementById('statL').textContent = '—';
+      document.getElementById('statZebra').textContent = '—';
 
-      // Rating
-      document.getElementById('starScore').textContent    = t.rating;
-      document.getElementById('starDescription').textContent = t.ratingDesc;
-      renderStars(t.rating);
+      // Show empty confrontos / chart while real data loads
+      renderConfrontos([], 'losingList',  'red');
+      renderConfrontos([], 'winningList', 'green');
+      renderChart([]);
 
-      // Confrontos
-      renderConfrontos(t.losing,  'losingList',  'red');
-      renderConfrontos(t.winning, 'winningList', 'green');
+      // Show loading in last matches
+      const lmEl = document.getElementById('lastMatchesList');
+      if (lmEl) lmEl.innerHTML = `<div style="padding:16px;text-align:center;color:var(--gray);font-size:0.8125rem;">Carregando partidas...</div>`;
 
-      // Insight sazonal dinâmico
-      const insightEl = document.getElementById('seasonalInsight');
-      if (insightEl) insightEl.textContent = `${t.name} tende a perder desempenho em novembro e dezembro, período em que mais produz zebras como azarão. Historicamente, recupera força em março.`;
-
-      // Chart
-      renderChart(t.seasonal);
-
-      // Last matches
-      renderLastMatches(t.lastMatches);
-
-      // Biggest zebras
-      renderBiggestZebras(key);
-
-      // Update ZI distribution bars
-      const ratingPct = Math.round((t.rating / 5) * 100);
-      const asUnderdog = Math.min(95, ratingPct + 10);
-      const caused = Math.max(15, ratingPct - 10);
-      const barU = document.getElementById('barAsUnderdog');
-      const barC = document.getElementById('barCaused');
-      const lblU = document.getElementById('barAsUnderdogLabel');
-      const lblC = document.getElementById('barCausedLabel');
-      if (barU) { barU.style.width = `${asUnderdog}%`; lblU.textContent = `${asUnderdog}%`; }
-      if (barC) { barC.style.width = `${caused}%`;     lblC.textContent = `${caused}%`; }
-
-      // Update selector
+      // Update selector chips
       document.querySelectorAll('#teamSelector button').forEach(b => {
-        b.style.background   = b.dataset.team === key ? 'var(--green-dim)' : 'var(--card)';
-        b.style.borderColor  = b.dataset.team === key ? 'var(--green)'     : 'var(--border)';
-        b.style.color        = b.dataset.team === key ? 'var(--white)'     : 'var(--gray)';
+        const isActive = b.dataset.name === name || b.dataset.sdbid === String(sdbId || '');
+        b.style.background  = isActive ? 'var(--green-dim)' : 'var(--card)';
+        b.style.borderColor = isActive ? 'var(--green)'     : 'var(--border)';
+        b.style.color       = isActive ? 'var(--white)'     : 'var(--gray)';
       });
-
-      // Reset favorite
-      currentSdbTeamId = null;
-      syncTeamFavBtn();
 
       // Wire comparar button
       const cBtn = document.getElementById('compararBtn');
-      if (cBtn) cBtn.href = `comparar.html?a=${key}`;
+      if (cBtn) cBtn.href = `comparar.html?a=${encodeURIComponent(name)}`;
+
+      // Reset stars to neutral until real data loads
+      document.getElementById('starScore').textContent = '—';
+      document.getElementById('starDescription').textContent = 'Carregando dados...';
+
+      syncTeamFavBtn();
+
+      // Fetch SDB data
+      try {
+        const results = await ZebraAPI.sportsDb.searchTeam(name);
+        if (!results?.teams?.length) {
+          document.getElementById('heroLeague').textContent = 'Time não encontrado na API';
+          return;
+        }
+        const raw = results.teams[0];
+        const searchWords = name.toLowerCase().replace(/\b(fc|sc|ac|cf|sd|ud)\b/g,'').trim().split(/\s+/).filter(w => w.length > 2);
+        const resultName  = (raw.strTeam || '').toLowerCase();
+        const isMatch = !searchWords.length || searchWords.some(w => resultName.includes(w));
+        if (!isMatch) { console.warn('[Time] SDB mismatch:', raw.strTeam, '≠', name); }
+
+        const team = ZebraAPI.transform.sdbTeam(raw);
+        currentTeamSdbId = raw.idTeam || null;
+        currentTeamData  = { name: team.name || name, abbr: (raw.strTeamShort || name.substring(0,3)).toUpperCase(), badge: team.logo || '', color: raw.strColour1 ? '#' + raw.strColour1.replace('#','') : '#2EE65C', venue: team.stadium || '', league: raw.strLeague || '', lid: selectorLid || 'BRA', founded: raw.intFormedYear || '' };
+
+        // Update hero text
+        document.getElementById('navTitle').textContent    = currentTeamData.name;
+        document.getElementById('heroName').textContent    = currentTeamData.name;
+        document.getElementById('heroLeague').textContent  = currentTeamData.venue ? `${currentTeamData.league} · ${currentTeamData.venue}` : currentTeamData.league;
+        const heroColor = currentTeamData.color || '#2EE65C';
+        document.getElementById('teamHero').style.background = `linear-gradient(160deg,${heroColor} 0%,${heroColor}55 100%)`;
+
+        // Badge
+        if (team.logo) {
+          const shield = document.getElementById('heroShield');
+          shield.innerHTML = `<img src="${team.logo}" alt="${currentTeamData.name}" style="width:54px;height:54px;object-fit:contain;">`;
+          shield.style.cssText = 'background:transparent;border:none;';
+          if (typeof saveFavTeamMeta === 'function') saveFavTeamMeta(currentTeamSdbId, { name: currentTeamData.name, crest: team.logo, color: heroColor });
+        } else {
+          document.getElementById('heroShield').textContent = currentTeamData.abbr;
+        }
+
+        syncTeamFavBtn();
+
+        // Real players for escalação
+        if (currentTeamSdbId) {
+          ZebraAPI.sportsDb.getSquad(currentTeamSdbId).then(squad => {
+            if (squad && squad.length) {
+              window._realPlayers = squad;
+              const activeTabEl = document.querySelector('#timeTabBar .tab-bar__item.active');
+              if (activeTabEl && activeTabEl.dataset.tab === 'escalacao') renderEscalacao();
+            }
+          }).catch(() => {});
+        }
+
+        // Real last matches
+        if (currentTeamSdbId) {
+          try {
+            const evts = await ZebraAPI.sportsDb.getTeamLastEvents(currentTeamSdbId);
+            const events = evts?.results || evts?.events || [];
+            if (events.length) {
+              const mapped = events.slice(0,5).map(e => {
+                const m = ZebraAPI.transform.sdbEvent ? ZebraAPI.transform.sdbEvent(e) : { date: e.dateEvent || '' };
+                const isHome = (e.strHomeTeam || '').toLowerCase().includes(currentTeamData.name.toLowerCase().split(' ')[0]);
+                const hs = parseInt(e.intHomeScore) || 0;
+                const as2 = parseInt(e.intAwayScore) || 0;
+                let result = 'E';
+                if (hs !== as2) result = (isHome ? hs > as2 : as2 > hs) ? 'W' : 'L';
+                return { home: e.strHomeTeam, away: e.strAwayTeam, hs, as: as2, date: m.date || e.dateEvent || '', result };
+              });
+              // Derive W/D/L from real matches
+              const wins   = mapped.filter(m => m.result === 'W').length;
+              const draws  = mapped.filter(m => m.result === 'E').length;
+              const losses = mapped.filter(m => m.result === 'L').length;
+              document.getElementById('statW').textContent = wins;
+              document.getElementById('statD').textContent = draws;
+              document.getElementById('statL').textContent = losses;
+              renderLastMatches(mapped);
+            } else {
+              if (lmEl) lmEl.innerHTML = `<div style="padding:16px;text-align:center;color:var(--gray);font-size:0.8125rem;">Nenhuma partida encontrada</div>`;
+            }
+          } catch(e) { console.warn('[time] last events error:', e); }
+        }
+
+        // Biggest zebras (async, doesn't block)
+        renderBiggestZebras(currentTeamData.name);
+
+      } catch(e) {
+        console.warn('[time] loadTeam SDB error:', e);
+        document.getElementById('heroLeague').textContent = 'Erro ao carregar dados';
+      }
     }
 
     // ── FAVORITE BUTTON ───────────────────────────────────
-    let currentSdbTeamId = null;
-
     function syncTeamFavBtn() {
       const favBtn = document.getElementById('favBtn');
-      isFavorited = currentSdbTeamId ? isFavorite(currentSdbTeamId) : false;
+      if (!favBtn) return;
+      isFavorited = currentTeamSdbId ? (typeof isFavorite === 'function' ? isFavorite(currentTeamSdbId) : false) : false;
       favBtn.innerHTML = isFavorited
         ? '<i data-lucide="star" style="width:18px;height:18px;fill:var(--gold);color:var(--gold);"></i>'
         : '<i data-lucide="star" style="width:18px;height:18px;"></i>';
@@ -969,115 +732,57 @@
     }
 
     document.getElementById('favBtn').addEventListener('click', function() {
-      const t = TEAMS[currentTeam];
-      const id = currentSdbTeamId || currentTeam;
+      const id = currentTeamSdbId || currentTeam;
+      const tname = currentTeamData?.name || currentTeam;
       const crest = document.querySelector('#heroShield img')?.src || '';
-      isFavorited = toggleFavorite(id, t.name, { crest, color: t.color });
+      const color = currentTeamData?.color || '#2EE65C';
+      isFavorited = typeof toggleFavorite === 'function' ? toggleFavorite(id, tname, { crest, color }) : false;
       this.innerHTML = isFavorited
         ? '<i data-lucide="star" style="width:18px;height:18px;fill:var(--gold);color:var(--gold);"></i>'
         : '<i data-lucide="star" style="width:18px;height:18px;"></i>';
       lucide.createIcons();
-      animFavBtn(this);
+      if (typeof animFavBtn === 'function') animFavBtn(this);
     });
 
     // ── SEASON SELECTOR ───────────────────────────────────
     document.getElementById('seasonSelect').addEventListener('change', function() {
-      // Simula dados diferentes por temporada (embaralhados)
-      const t = TEAMS[currentTeam];
-      const shuffled = [...t.seasonal].map(d => ({ ...d, v: Math.max(25, Math.min(85, d.v + (Math.random()*20-10)|0)) }));
-      renderChart(shuffled);
-      showToast(`📅 Temporada ${this.value} carregada`);
+      // No real seasonal data source — show placeholder
+      renderChart([]);
+      showToast(`📅 Temporada ${this.value} — dados sazonais em breve`);
     });
 
     // ── INIT ──────────────────────────────────────────────
-    // Suporte a ?team=flamengo (ou qualquer chave em TEAMS)
+    // URL params: ?team=Flamengo&lid=BRA
     const _urlTeam = new URLSearchParams(location.search).get('team');
-    loadTeam(TEAMS[_urlTeam] ? _urlTeam : 'torino');
+    const _urlLid  = new URLSearchParams(location.search).get('lid') || selectorLid;
 
-    // ── API REAL DATA ─────────────────────────────────────
-    async function initRealData() {
-      const searchTeam = localStorage.getItem('zs_search_team');
-      if (searchTeam) localStorage.removeItem('zs_search_team');
-      const t = TEAMS[currentTeam];
-      const teamName = searchTeam || t?.name;
-      if (!teamName) return;
+    // Load the team selector chips for the lid
+    loadTeamSelector(_urlLid);
 
-      try {
-        const results = await ZebraAPI.sportsDb.searchTeam(teamName);
-        if (!results?.teams?.length) return;
-        const raw  = results.teams[0];
-        // Defensive: verify the API result is actually the team we searched for
-        const searchWords = teamName.toLowerCase().replace(/\b(fc|sc|ac|cf|sd|ud)\b/g,'').trim().split(/\s+/).filter(w => w.length > 2);
-        const resultName  = (raw.strTeam || '').toLowerCase();
-        const isMatch = searchWords.some(w => resultName.includes(w));
-        if (!isMatch) { console.warn('[Time] SDB mismatch:', raw.strTeam, '≠', teamName); return; }
-        const team = ZebraAPI.transform.sdbTeam(raw);
-        currentSdbTeamId = raw.idTeam || null;
-
-        // Escudo no hero
-        if (team.logo) {
-          const shield = document.getElementById('heroShield');
-          shield.innerHTML = `<img src="${team.logo}" alt="${team.name}" style="width:54px;height:54px;object-fit:contain;">`;
-          shield.style.cssText = 'background:transparent;border:none;';
-          // salva meta para a barra de favoritos no home
-          saveFavTeamMeta(currentSdbTeamId, { name: team.name, crest: team.logo, color: t.color });
-        }
-        if (team.stadium) {
-          document.getElementById('heroLeague').textContent = `${t.league} · ${team.stadium}`;
-        }
-        syncTeamFavBtn();
-
-        // Try to load real players from TheSportsDB
-        if (currentSdbTeamId) {
-          try {
-            const squad = await ZebraAPI.sportsDb.getSquad(currentSdbTeamId);
-            if (squad && squad.length) {
-              window._realPlayers = squad;
-              // Re-render escalacao tab if active
-              const activeTabEl = document.querySelector('#timeTabBar .tab-bar__item.active');
-              if (activeTabEl && activeTabEl.dataset.tab === 'escalacao') renderEscalacao();
-            }
-          } catch(e) { console.warn('[time] players load error:', e); }
-        }
-
-        // Últimas partidas via SDB
-        if (currentSdbTeamId) {
-          const evts = await ZebraAPI.sportsDb.getTeamLastEvents(currentSdbTeamId);
-          const events = evts?.results || evts?.events || [];
-          if (events.length) {
-            const mapped = events.slice(0,5).map(e => {
-              const m = ZebraAPI.transform.sdbEvent(e);
-              const isHome = e.strHomeTeam === team.name;
-              const hs = parseInt(e.intHomeScore) || 0;
-              const as = parseInt(e.intAwayScore) || 0;
-              let result = 'E';
-              if (hs !== as) result = (isHome ? hs > as : as > hs) ? 'W' : 'L'; // FIX 10 — was 'D', should be 'L'
-              return { home: e.strHomeTeam, away: e.strAwayTeam, hs, as, date: m.date, result };
-            });
-            renderLastMatches(mapped);
-          }
-        }
-      } catch(e) { console.warn('SDB team search error:', e); }
+    if (_urlTeam) {
+      loadTeam(decodeURIComponent(_urlTeam.replace(/-/g,' ')));
+    } else {
+      // Default to checking localStorage for a remembered team
+      const _savedTeam = localStorage.getItem('zs_last_team');
+      if (_savedTeam) {
+        loadTeam(decodeURIComponent(_savedTeam));
+      }
+      // else: show empty hero — user picks a team from selector
     }
+
+    // ── API REAL DATA — legacy initRealData kept as no-op ─────────
+    async function initRealData() {
+      // Real data loading is now handled inside loadTeam()
+      // This function kept for backwards compatibility with initApifTeamStats()
+    }
+
     // ── BLOCO PRO: preenche estatísticas quando assinante ─────────
     function initProContent() {
-      if (getUserPlan() !== 'pro') return;
+      if (typeof getUserPlan !== 'function' || getUserPlan() !== 'pro') return;
       const proBlock = document.querySelector('.pro-content');
       if (!proBlock) return;
       proBlock.style.display = 'flex';
-
-      // Preenche com dados do time atual (mock enquanto API real não está integrada)
-      const key = currentTeam;
-      const t   = TEAMS[key] || {};
-      const zi  = (t.zi || 3.0).toFixed(1);
-      const rate = Math.round((parseFloat(zi) / 5) * 38) + '%';
-      const odd  = (3.5 + parseFloat(zi) * 0.4).toFixed(2);
-      const countEl = document.getElementById('proZebraCount');
-      const rateEl  = document.getElementById('proZebraRate');
-      const oddEl   = document.getElementById('proAvgOdd');
-      if (countEl) countEl.textContent = Math.round(parseFloat(zi) * 2);
-      if (rateEl)  rateEl.textContent  = rate;
-      if (oddEl)   oddEl.textContent   = odd;
+      // Leave Pro stats as '—' until real zebra data is loaded
     }
 
     initRealData();
@@ -1087,7 +792,7 @@
     // ── API-FOOTBALL: estatísticas reais da temporada ─────────
     async function initApifTeamStats() {
       if (typeof ZebraAPI === 'undefined' || !ZebraAPI.isConfigured.apiFootball()) return;
-      const teamName = TEAMS[currentTeam]?.name || currentTeam;
+      const teamName = currentTeam || '';
       if (!teamName) return;
 
       try {
@@ -1097,8 +802,7 @@
         if (!apifTeam?.id) return;
 
         // Determina liga a partir do time atual
-        const team = TEAMS[currentTeam];
-        const lid  = team?.lid || 'ENG';
+        const lid  = currentTeamData?.lid || selectorLid || 'ENG';
         const statsRes = await ZebraAPI.apiFootball.getTeamStats(apifTeam.id, lid);
         if (!statsRes) return;
 
@@ -1168,11 +872,7 @@
       });
     });
 
-    // ── WIRE COMPARAR BUTTON ──────────────────────────────
-    const comparBtn = document.getElementById('compararBtn');
-    if (comparBtn) {
-      comparBtn.href = `comparar.html?a=${currentTeam || 'torino'}`;
-    }
+    // comparar button wired inside loadTeam() — no default needed here
 
     // ── LAYOUTS DE FORMAÇÃO (coordenadas no SVG 220×310) ─────────
     const FORMATIONS = {
@@ -1280,12 +980,12 @@
 
     // ── RENDER ESCALAÇÃO ──────────────────────────────────
     function renderEscalacao() {
-      const team = TEAMS[currentTeam] || Object.values(TEAMS)[0];
-      const color = team.color || '#2EE65C';
+      const color = currentTeamData?.color || '#2EE65C';
 
-      // Dados da escalação do time
-      const lineupData = TEAM_LINEUPS[currentTeam] || TEAM_LINEUPS.torino;
-      let formation   = lineupData.formation;
+      // Default formation — real data from API overrides if window._realPlayers is available
+      const defaultFormation = '4-3-3';
+      const lineupData = TEAM_LINEUPS[currentTeam] || { formation: defaultFormation, starters: Array(11).fill('Jogador'), bench: [] };
+      let formation    = lineupData.formation;
       let starterNames = [...lineupData.starters];
       let benchData    = [...lineupData.bench];
 
@@ -1407,14 +1107,14 @@
     }
 
     // ── RENDER TRANSFERS ──────────────────────────────────
-    // FIX 11 — show Transfermarkt link instead of empty state
+    // Show Transfermarkt link — no fake data
     function renderTransfers() {
       const inEl  = document.getElementById('transfersIn');
       const outEl = document.getElementById('transfersOut');
       if (!inEl || !outEl) return;
 
-      const team = TEAMS[currentTeam] || Object.values(TEAMS)[0];
-      const tmQuery = encodeURIComponent(team.name || currentTeam || '');
+      const tname = currentTeamData?.name || currentTeam || '';
+      const tmQuery = encodeURIComponent(tname);
       const tmLink = `https://www.transfermarkt.com.br/schnellsuche/ergebnis/schnellsuche?query=${tmQuery}`;
       const linkHtml = `
         <div style="padding:20px;text-align:center;color:var(--gray);font-size:0.8125rem;">
@@ -1464,21 +1164,8 @@
       }).join('');
     }
 
-    // Hook into team rendering
-    const _origRenderTeam = typeof renderTeam === 'function' ? renderTeam : null;
-    if (_origRenderTeam) {
-      window.renderTeam = function(team) {
-        _origRenderTeam(team);
-        setTimeout(() => _renderStatsSparklines(team), 100);
-      };
-    } else {
-      // Fallback: run with current TEAM data after short delay
-      setTimeout(() => {
-        const urlTeam = new URLSearchParams(location.search).get('team');
-        const team = (typeof TEAMS !== 'undefined' && TEAMS[urlTeam]) ? TEAMS[urlTeam] : {};
-        _renderStatsSparklines(team);
-      }, 300);
-    }
+    // Render sparklines with whatever data is available
+    setTimeout(() => _renderStatsSparklines(currentTeamData || {}), 400);
 
     lucide.createIcons();
   </script>
