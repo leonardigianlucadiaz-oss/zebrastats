@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/main.css?v=11" />
+  <link rel="stylesheet" href="css/main.css?v=12" />
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 </head>
 <body>
@@ -183,17 +183,25 @@
     { id:'MLS', flag:'🇺🇸', name:'MLS',                 country:'EUA',        faved:false },
   ];
 
+  // Gera datas relativas ao dia atual para dados de exemplo
+  (function _fixDemoDatesFn(){
+    const _d = (offset, time) => {
+      const dt = new Date(); dt.setDate(dt.getDate() - offset);
+      return String(dt.getDate()).padStart(2,'0') + '/' + String(dt.getMonth()+1).padStart(2,'0') + ' · ' + time + ' (Demo)';
+    };
+    window._demoDate = _d;
+  })();
   const ZEBRAS = [
-    { home:'Botafogo',    away:'Flamengo',    hs:3, as:0, league:'Brasileirão', lid:'BRA', date:'Hoje · 16h00',   zi:8.2, odds_h:'4.50', odds_a:'1.75' },
-    { home:'Lecce',       away:'Juventus',    hs:2, as:1, league:'Serie A',     lid:'ITA', date:'Hoje · 14h00',   zi:7.9, odds_h:'5.20', odds_a:'1.62' },
-    { home:'Luton',       away:'Man City',    hs:1, as:0, league:'Prem. League',lid:'ENG', date:'Ontem · 13h30',  zi:9.1, odds_h:'7.00', odds_a:'1.43' },
-    { home:'Mallorca',    away:'Real Madrid', hs:1, as:0, league:'La Liga',     lid:'ESP', date:'09/05 · 20h00',  zi:6.4, odds_h:'4.10', odds_a:'1.85' },
-    { home:'Empoli',      away:'Inter',       hs:2, as:2, league:'Serie A',     lid:'ITA', date:'08/05 · 19h45',  zi:5.1, odds_h:'5.50', odds_a:'1.55' },
-    { home:'Augsburg',    away:'Bayern',      hs:2, as:1, league:'Bundesliga',  lid:'GER', date:'07/05 · 15h30',  zi:8.7, odds_h:'6.00', odds_a:'1.50' },
-    { home:'Bragantino',  away:'Palmeiras',   hs:3, as:1, league:'Brasileirão', lid:'BRA', date:'06/05 · 20h00',  zi:4.3, odds_h:'3.10', odds_a:'2.15' },
-    { home:'Angers',      away:'PSG',         hs:2, as:0, league:'Ligue 1',     lid:'FRA', date:'05/05 · 21h00',  zi:9.4, odds_h:'8.50', odds_a:'1.38' },
-    { home:'Granada',     away:'Barça',       hs:1, as:0, league:'La Liga',     lid:'ESP', date:'04/05 · 19h00',  zi:8.0, odds_h:'5.80', odds_a:'1.55' },
-    { home:'Clermont',    away:'Monaco',      hs:3, as:2, league:'Ligue 1',     lid:'FRA', date:'03/05 · 17h00',  zi:3.8, odds_h:'2.90', odds_a:'2.30' },
+    { home:'Botafogo',    away:'Flamengo',    hs:3, as:0, league:'Brasileirão', lid:'BRA', date:_demoDate(0,'16h00'), zi:8.2, odds_h:'4.50', odds_a:'1.75' },
+    { home:'Lecce',       away:'Juventus',    hs:2, as:1, league:'Serie A',     lid:'ITA', date:_demoDate(0,'14h00'), zi:7.9, odds_h:'5.20', odds_a:'1.62' },
+    { home:'Luton',       away:'Man City',    hs:1, as:0, league:'Premier Lg',  lid:'ENG', date:_demoDate(1,'13h30'), zi:9.1, odds_h:'7.00', odds_a:'1.43' },
+    { home:'Mallorca',    away:'Real Madrid', hs:1, as:0, league:'La Liga',     lid:'ESP', date:_demoDate(2,'20h00'), zi:6.4, odds_h:'4.10', odds_a:'1.85' },
+    { home:'Empoli',      away:'Inter',       hs:2, as:2, league:'Serie A',     lid:'ITA', date:_demoDate(3,'19h45'), zi:5.1, odds_h:'5.50', odds_a:'1.55' },
+    { home:'Augsburg',    away:'Bayern',      hs:2, as:1, league:'Bundesliga',  lid:'GER', date:_demoDate(4,'15h30'), zi:8.7, odds_h:'6.00', odds_a:'1.50' },
+    { home:'Bragantino',  away:'Palmeiras',   hs:3, as:1, league:'Brasileirão', lid:'BRA', date:_demoDate(5,'20h00'), zi:4.3, odds_h:'3.10', odds_a:'2.15' },
+    { home:'Angers',      away:'PSG',         hs:2, as:0, league:'Ligue 1',     lid:'FRA', date:_demoDate(6,'21h00'), zi:9.4, odds_h:'8.50', odds_a:'1.38' },
+    { home:'Granada',     away:'Barça',       hs:1, as:0, league:'La Liga',     lid:'ESP', date:_demoDate(7,'19h00'), zi:8.0, odds_h:'5.80', odds_a:'1.55' },
+    { home:'Clermont',    away:'Monaco',      hs:3, as:2, league:'Ligue 1',     lid:'FRA', date:_demoDate(8,'17h00'), zi:3.8, odds_h:'2.90', odds_a:'2.30' },
   ];
 
   let activeLeague = 'all';
@@ -592,9 +600,35 @@
   })();
 
   // ── INTEGRAÇÃO COM APIS ──────────────────────────────────────
+  const _CACHE_KEY = 'zs_zebras_cache';
+  const _CACHE_TTL = 30 * 60 * 1000; // 30 min
+
+  function _loadCache() {
+    try {
+      const raw = localStorage.getItem(_CACHE_KEY);
+      if (!raw) return null;
+      const { ts, data } = JSON.parse(raw);
+      if (Date.now() - ts > _CACHE_TTL) return null;
+      return data;
+    } catch { return null; }
+  }
+  function _saveCache(data) {
+    try { localStorage.setItem(_CACHE_KEY, JSON.stringify({ ts: Date.now(), data })); } catch {}
+  }
+
   async function initRealData() {
     if (typeof ZebraAPI === 'undefined' || !ZebraAPI.isConfigured.footballData()) return;
     if (typeof ZebraEngine === 'undefined') return;
+
+    // Show cached data immediately (no lag)
+    const cached = _loadCache();
+    if (cached && cached.length) {
+      ZEBRAS.length = 0;
+      ZEBRAS.push(...cached);
+      renderZebras();
+      const countEl = document.getElementById('zebraCount');
+      if (countEl) countEl.textContent = `${cached.length} zebras ⚡`;
+    }
 
     const FETCH_ALL = ['ENG','ESP','ITA','GER','BRA','FRA','POR'];
     const lid = (activeLeague && activeLeague !== 'all') ? activeLeague.toUpperCase() : null;
@@ -612,6 +646,7 @@
           .sort((a, b) => b.zi - a.zi);
       }
       if (!allZebras.length) return;
+      _saveCache(allZebras);
       ZEBRAS.length = 0;
       ZEBRAS.push(...allZebras);
       renderZebras();
