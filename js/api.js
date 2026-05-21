@@ -120,6 +120,7 @@ const ZebraAPI = (() => {
       if (_proxy.base() && lid) {
         const action = path.includes('/standings') ? 'standings'
                      : path.includes('/matches')   ? 'matches'
+                     : path.includes('/scorers')   ? 'fd-scorers'
                      : null;
         if (action) {
           const params = { lid };
@@ -128,6 +129,10 @@ const ZebraAPI = (() => {
             const limit  = path.match(/limit=(\d+)/)?.[1];
             if (status) params.status = status;
             if (limit)  params.limit  = limit;
+          }
+          if (action === 'fd-scorers') {
+            const limit = path.match(/limit=(\d+)/)?.[1];
+            if (limit) params.limit = limit;
           }
           const data = await _proxy.fetch(action, params);
           if (data) { _cache.set(ck, data); return data; }
@@ -221,7 +226,7 @@ const ZebraAPI = (() => {
       return this._fetch(`eventslast.php?id=${teamId}`, 'sdb-events-last', { teamId });
     },
     async getTeamNextEvents(teamId) {
-      return this._fetch(`eventsnext.php?id=${teamId}`);
+      return this._fetch(`eventsnext.php?id=${teamId}`, 'sdb-next-events', { teamId });
     },
     async getSquad(teamId) {
       // Try proxy first
@@ -272,6 +277,7 @@ const ZebraAPI = (() => {
       ENG:'soccer_epl', ESP:'soccer_spain_la_liga', ITA:'soccer_italy_serie_a',
       GER:'soccer_germany_bundesliga', FRA:'soccer_france_ligue_one',
       BRA:'soccer_brazil_campeonato', POR:'soccer_portugal_primeira_liga',
+      UCL:'soccer_uefa_champs_league',
     },
 
     key() { return (typeof ZEBRA_CONFIG !== 'undefined' ? ZEBRA_CONFIG.ODDS_API_KEY : '') || ''; },
@@ -372,6 +378,40 @@ const ZebraAPI = (() => {
 
     async getPredictions(fixtureId) {
       return this._p('apif-predictions', { fixtureId: String(fixtureId) });
+    },
+
+    // Partidas ao vivo (todas as ligas ou só uma)
+    async getLiveFixtures(lid) {
+      return this._p('apif-live', lid ? { lid } : {});
+    },
+
+    // Tabela de classificação (mais rica que FD: forma recente, casa/fora)
+    async getStandings(lid) {
+      const season = this.SEASONS[lid] || '2024';
+      return this._p('apif-standings', { lid, season });
+    },
+
+    // Artilheiros da liga
+    async getTopScorers(lid) {
+      const season = this.SEASONS[lid] || '2024';
+      return this._p('apif-top-scorers', { lid, season });
+    },
+
+    // Elenco completo (jogadores com foto, nº camisa, posição)
+    async getSquad(teamId) {
+      const raw = await _proxy.fetch('apif-squad', { teamId: String(teamId) });
+      // response = [{ team:{…}, players:[{id, name, number, pos, photo}] }]
+      return raw?.response?.[0]?.players ?? null;
+    },
+
+    // Lesionados/suspensos de uma partida ou time
+    async getInjuries(params = {}) {
+      // params: { fixtureId } ou { teamId, lid } ou { lid }
+      const p = {};
+      if (params.fixtureId) p.fixtureId = String(params.fixtureId);
+      if (params.teamId)    p.teamId    = String(params.teamId);
+      if (params.lid)       p.lid       = params.lid;
+      return this._p('apif-injuries', p);
     },
 
     // Transforma resposta de fixture para formato ZebraStats

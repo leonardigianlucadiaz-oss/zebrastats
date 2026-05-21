@@ -1,3 +1,7 @@
+// ZebraStats — Cron job: verifica partidas de hoje e dispara alertas de zebra
+// Executado diariamente via Supabase Cron (Dashboard → Database → Cron Jobs)
+// Configuração sugerida: todos os dias às 08:00 UTC ("0 8 * * *")
+
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
@@ -6,9 +10,47 @@ const CORS = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+// Ligas monitoradas (FD ID → lid)
 const LEAGUES: Record<string, string> = {
-  ENG: '2021', ESP: '2014', ITA: '2019',
-  GER: '2002', BRA: '2013', FRA: '2015', POR: '2017',
+  '2021': 'ENG',  // Premier League
+  '2014': 'ESP',  // La Liga
+  '2019': 'ITA',  // Serie A
+  '2002': 'GER',  // Bundesliga
+  '2015': 'FRA',  // Ligue 1
+  '2013': 'BRA',  // Brasileirão
+  '2017': 'POR',  // Liga Portugal
+  '2001': 'UCL',  // Champions League
+}
+
+// The Odds API — chave de esporte por liga
+const ODDS_SPORTS: Record<string, string> = {
+  ENG: 'soccer_epl',
+  ESP: 'soccer_spain_la_liga',
+  ITA: 'soccer_italy_serie_a',
+  GER: 'soccer_germany_bundesliga',
+  FRA: 'soccer_france_ligue_one',
+  BRA: 'soccer_brazil_campeonato',
+  POR: 'soccer_portugal_primeira_liga',
+  UCL: 'soccer_uefa_champs_league',
+}
+
+// Calcula o Zebra Index (0–10) a partir das odds de casa e fora
+// ZI alto = grande zebra potencial (azarão com chance real de vencer)
+function calcZI(homeOdd: number, awayOdd: number): { zi: number; favOdd: number; dogOdd: number; dogIsHome: boolean } {
+  const dogIsHome = homeOdd > awayOdd
+  const favOdd    = dogIsHome ? awayOdd : homeOdd
+  const dogOdd    = dogIsHome ? homeOdd : awayOdd
+  // Fórmula: quanto maior a disparidade, maior o ZI (máx 10)
+  // Ratio 2 (dogOdd/favOdd) → ZI ≈ 3; ratio 3 → ZI ≈ 6; ratio 4+ → ZI ≈ 9+
+  const zi = Math.min(10, Math.round(((dogOdd / favOdd) - 1) * 3 * 10) / 10)
+  return { zi, favOdd, dogOdd, dogIsHome }
+}
+
+// Normaliza nome de time para comparação (remove acentos, caixa baixa)
+function normName(s: string): string {
+  return s.toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]/g, '')
 }
 
 serve(async (req) => {
@@ -18,85 +60,167 @@ serve(async (req) => {
     Deno.env.get('SUPABASE_URL') || '',
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
   )
-  const FD_KEY = Deno.env.get('FOOTBALL_DATA_KEY') || ''
+  const FD_KEY   = Deno.env.get('FOOTBALL_DATA_KEY') || ''
+  const ODDS_KEY = Deno.env.get('ODDS_API_KEY') || ''
+
+  if (!FD_KEY) {
+    return new Response(JSON.stringify({ error: 'FOOTBALL_DATA_KEY não configurada' }), {
+      status: 503, headers: { ...CORS, 'Content-Type': 'application/json' }
+    })
+  }
 
   let alertsSent = 0
+  const zebraMatches: any[] = []
 
   try {
-    // Busca todas as partidas de hoje
-    const today = new Date().toISOString().split('T')[0]
-    const results: any[] = []
+    const today    = new Date().toISOString().split('T')[0]
+    const tomorrow = new Date(Date.now() + 86_400_000).toISOString().split('T')[0]
 
-    for (const [lid, fdId] of Object.entries(LEAGUES)) {
+    // ── 1. Busca partidas de hoje em todas as ligas ──────────────
+    const todayMatches: Array<{ lid: string; homeTeam: string; awayTeam: string; matchId: number; kickoff: string }> = []
+
+    for (const [fdId, lid] of Object.entries(LEAGUES)) {
       try {
-        const res = await fetch(
-          `https://api.football-data.org/v4/competitions/${fdId}/matches?dateFrom=${today}&dateTo=${today}`,
+        const res  = await fetch(
+          `https://api.football-data.org/v4/competitions/${fdId}/matches?dateFrom=${today}&dateTo=${tomorrow}&status=SCHEDULED`,
           { headers: { 'X-Auth-Token': FD_KEY } }
         )
-        const json = await res.json()
+        if (!res.ok) continue
+        const json    = await res.json()
         const matches = json.matches || []
-
         for (const m of matches) {
-          if (!m.odds) continue
-          const homeOdd = m.odds?.homeWin
-          const awayOdd = m.odds?.awayWin
-          if (!homeOdd || !awayOdd) continue
-
-          // Detecta favorito vs azarão
-          const homeFav   = homeOdd < awayOdd
-          const favOdd    = homeFav ? homeOdd  : awayOdd
-          const dogOdd    = homeFav ? awayOdd  : homeOdd
-          const favTeam   = homeFav ? m.homeTeam?.name : m.awayTeam?.name
-          const dogTeam   = homeFav ? m.awayTeam?.name : m.homeTeam?.name
-
-          // ZI estimado baseado nas odds
-          const zi = Math.round(((dogOdd / favOdd) - 1) * 30)
-          if (zi < 40) continue // só zebras relevantes
-
-          results.push({ lid, favTeam, dogTeam, dogOdd, zi, matchId: m.id, kickoff: m.utcDate })
+          todayMatches.push({
+            lid,
+            homeTeam: m.homeTeam?.name ?? '',
+            awayTeam: m.awayTeam?.name ?? '',
+            matchId:  m.id,
+            kickoff:  m.utcDate,
+          })
         }
-      } catch(e) {
-        console.error(`[check-zebras] Erro na liga ${lid}:`, e.message)
+      } catch (e: any) {
+        console.error(`[check-zebras] Erro FD liga ${lid}:`, e.message)
       }
     }
 
-    if (!results.length) {
-      return new Response(JSON.stringify({ checked: true, alerts: 0 }), {
+    if (!todayMatches.length) {
+      return new Response(JSON.stringify({ checked: true, alerts: 0, message: 'Sem partidas hoje' }), {
         headers: { ...CORS, 'Content-Type': 'application/json' }
       })
     }
 
-    // Busca usuários com alertas ativos
+    // ── 2. Busca odds por liga (The Odds API) ────────────────────
+    // Agrupa partidas por liga para minimizar chamadas à Odds API
+    const lidSet = [...new Set(todayMatches.map(m => m.lid))]
+    const oddsMap: Record<string, { home: string; away: string; homeOdd: number; awayOdd: number }[]> = {}
+
+    if (ODDS_KEY) {
+      for (const lid of lidSet) {
+        const sport = ODDS_SPORTS[lid]
+        if (!sport) continue
+        try {
+          const res = await fetch(
+            `https://api.the-odds-api.com/v4/sports/${sport}/odds/?apiKey=${ODDS_KEY}&regions=eu&markets=h2h&oddsFormat=decimal`
+          )
+          if (!res.ok) continue
+          const events = await res.json()
+          oddsMap[lid] = (Array.isArray(events) ? events : []).map((ev: any) => {
+            // Pega a melhor odd média entre os bookmakers disponíveis
+            let homeSum = 0, awaySum = 0, count = 0
+            for (const bm of (ev.bookmakers || [])) {
+              const h2h = bm.markets?.find((mk: any) => mk.key === 'h2h')
+              if (!h2h) continue
+              const home = h2h.outcomes?.find((o: any) => o.name === ev.home_team)
+              const away = h2h.outcomes?.find((o: any) => o.name === ev.away_team)
+              if (home && away) { homeSum += home.price; awaySum += away.price; count++ }
+            }
+            if (!count) return null
+            return {
+              home:    ev.home_team,
+              away:    ev.away_team,
+              homeOdd: Math.round((homeSum / count) * 100) / 100,
+              awayOdd: Math.round((awaySum / count) * 100) / 100,
+            }
+          }).filter(Boolean)
+        } catch (e: any) {
+          console.error(`[check-zebras] Odds API erro (${lid}):`, e.message)
+        }
+      }
+    }
+
+    // ── 3. Cruza partidas FD com odds ────────────────────────────
+    for (const match of todayMatches) {
+      const lidOdds = oddsMap[match.lid] || []
+
+      // Tenta encontrar a partida nas odds pelo nome do time (normalizado)
+      const homeNorm = normName(match.homeTeam)
+      const awayNorm = normName(match.awayTeam)
+      const oddsEntry = lidOdds.find(o =>
+        o && (normName(o.home).includes(homeNorm.slice(0, 5)) ||
+              homeNorm.includes(normName(o.home).slice(0, 5))) &&
+        (normName(o.away).includes(awayNorm.slice(0, 5)) ||
+              awayNorm.includes(normName(o.away).slice(0, 5)))
+      )
+
+      if (!oddsEntry) continue // sem odds = pula
+
+      const { zi, favOdd, dogOdd, dogIsHome } = calcZI(oddsEntry.homeOdd, oddsEntry.awayOdd)
+      if (zi < 3) continue // só zebras relevantes (ZI ≥ 3 de 10)
+
+      const favTeam = dogIsHome ? match.awayTeam : match.homeTeam
+      const dogTeam = dogIsHome ? match.homeTeam : match.awayTeam
+
+      zebraMatches.push({
+        lid:      match.lid,
+        favTeam,
+        dogTeam,
+        favOdd,
+        dogOdd,
+        zi,
+        matchId:  match.matchId,
+        kickoff:  match.kickoff,
+      })
+    }
+
+    if (!zebraMatches.length) {
+      return new Response(JSON.stringify({ checked: true, alerts: 0, partidas: todayMatches.length }), {
+        headers: { ...CORS, 'Content-Type': 'application/json' }
+      })
+    }
+
+    // ── 4. Busca usuários com alertas ativos ─────────────────────
     const { data: alerts } = await sb.from('user_alerts')
       .select('user_id, league_id, min_zi, push_enabled, email_enabled')
       .eq('active', true)
 
     for (const alert of (alerts || [])) {
-      const relevant = results.filter(r =>
+      const minZi = alert.min_zi ?? 4 // ZI mínimo padrão = 4 (escala 0-10)
+      const relevant = zebraMatches.filter(r =>
         (!alert.league_id || r.lid === alert.league_id) &&
-        r.zi >= (alert.min_zi || 40)
+        r.zi >= minZi
       )
       if (!relevant.length) continue
 
       for (const z of relevant) {
-        // Salva notificação na tabela
         await sb.from('notifications').insert({
           user_id: alert.user_id,
-          type: 'zebra_alert',
-          title: `🦓 ZEBRA — ${z.dogTeam} pode surpreender!`,
-          body: `ZI ${z.zi} · Odd ${z.dogOdd} · ${z.lid}`,
-          data: z,
-          read: false,
+          type:    'zebra_alert',
+          title:   `🦓 ZEBRA — ${z.dogTeam} pode surpreender!`,
+          body:    `ZI ${z.zi.toFixed(1)} · Odd ${z.dogOdd} · ${z.lid}`,
+          data:    z,
+          read:    false,
         })
         alertsSent++
       }
     }
 
-    return new Response(JSON.stringify({ checked: true, alerts: alertsSent, zebras: results.length }), {
-      headers: { ...CORS, 'Content-Type': 'application/json' }
-    })
-  } catch(err) {
-    return new Response(JSON.stringify({ error: err.message }), {
+    return new Response(
+      JSON.stringify({ checked: true, alerts: alertsSent, zebras: zebraMatches.length, partidas: todayMatches.length }),
+      { headers: { ...CORS, 'Content-Type': 'application/json' } }
+    )
+
+  } catch (e: any) {
+    console.error('[check-zebras] Erro geral:', e.message)
+    return new Response(JSON.stringify({ error: e.message }), {
       status: 500, headers: { ...CORS, 'Content-Type': 'application/json' }
     })
   }

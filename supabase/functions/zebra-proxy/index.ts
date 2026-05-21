@@ -16,14 +16,15 @@ const FD_IDS: Record<string, number> = {
   FRA: 2015, BRA: 2013, POR: 2017, UCL: 2001,
 };
 const APIF_IDS: Record<string, number> = {
-  ENG: 39, ESP: 140, ITA: 135, GER: 78,
-  FRA: 61, BRA: 71,  POR: 94,  UCL: 2, HOL: 88,
+  ENG: 39,  ESP: 140, ITA: 135, GER: 78,
+  FRA: 61,  BRA: 71,  POR: 94,  UCL: 2, HOL: 88,
 };
 const APIF_BASE = "https://v3.football.api-sports.io";
 const SDB_IDS: Record<string, number> = {
   ENG: 4328, ESP: 4335, ITA: 4332, GER: 4331,
   FRA: 4334, BRA: 4351, POR: 4344, UCL: 4480, HOL: 4337,
 };
+// Chaves de esporte da The Odds API (soccer_*)
 const ODDS_SPORTS: Record<string, string> = {
   ENG: "soccer_epl",
   ESP: "soccer_spain_la_liga",
@@ -32,20 +33,16 @@ const ODDS_SPORTS: Record<string, string> = {
   FRA: "soccer_france_ligue_one",
   BRA: "soccer_brazil_campeonato",
   POR: "soccer_portugal_primeira_liga",
+  UCL: "soccer_uefa_champs_league",
 };
 
-// ── Cache simples em memória (por invocação) ───────────────────
-const _cache = new Map<string, { data: unknown; ts: number }>();
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutos
-
-async function fetchCached(url: string, init?: RequestInit): Promise<unknown> {
-  const hit = _cache.get(url);
-  if (hit && Date.now() - hit.ts < CACHE_TTL) return hit.data;
+// ── Helpers ────────────────────────────────────────────────────
+// NOTA: Edge Functions são stateless — esta função faz fetch direto.
+// O cache de longa duração (30 min / 60 min) vive no cliente (localStorage).
+async function apiFetch(url: string, init?: RequestInit): Promise<unknown> {
   const r = await fetch(url, init);
   if (!r.ok) throw new Error(`HTTP ${r.status}: ${url}`);
-  const data = await r.json();
-  _cache.set(url, { data, ts: Date.now() });
-  return data;
+  return r.json();
 }
 
 function ok(data: unknown) {
@@ -69,116 +66,187 @@ Deno.serve(async (req: Request) => {
   const lid    = (url.searchParams.get("lid") ?? "ENG").toUpperCase();
 
   try {
-    // ── Football-Data.org: partidas ──────────────────────────
+
+    // ════════════════════════════════════════════════════════════
+    // ── FOOTBALL-DATA.ORG ────────────────────────────────────────
+    // ════════════════════════════════════════════════════════════
+
+    // ── Partidas da liga ─────────────────────────────────────────
     if (action === "matches") {
       const key = Deno.env.get("FOOTBALL_DATA_KEY");
       if (!key) return err("FOOTBALL_DATA_KEY não configurada", 503);
-      const lid_id = FD_IDS[lid];
+      const lid_id  = FD_IDS[lid];
       if (!lid_id) return err(`Liga desconhecida: ${lid}`, 400);
-      const status = url.searchParams.get("status") ?? "FINISHED";
-      const limit  = url.searchParams.get("limit")  ?? "20";
-      const data = await fetchCached(
-        `https://api.football-data.org/v4/competitions/${lid_id}/matches?status=${status}&limit=${limit}`,
+      const status   = url.searchParams.get("status")   ?? "FINISHED";
+      const limit    = url.searchParams.get("limit")    ?? "20";
+      const dateFrom = url.searchParams.get("dateFrom") ?? "";
+      const dateTo   = url.searchParams.get("dateTo")   ?? "";
+      let qs = `status=${status}&limit=${limit}`;
+      if (dateFrom) qs += `&dateFrom=${dateFrom}`;
+      if (dateTo)   qs += `&dateTo=${dateTo}`;
+      const data = await apiFetch(
+        `https://api.football-data.org/v4/competitions/${lid_id}/matches?${qs}`,
         { headers: { "X-Auth-Token": key } }
       );
       return ok(data);
     }
 
-    // ── Football-Data.org: tabela de classificação ───────────
+    // ── Tabela de classificação ──────────────────────────────────
     if (action === "standings") {
       const key = Deno.env.get("FOOTBALL_DATA_KEY");
       if (!key) return err("FOOTBALL_DATA_KEY não configurada", 503);
       const lid_id = FD_IDS[lid];
       if (!lid_id) return err(`Liga desconhecida: ${lid}`, 400);
-      const data = await fetchCached(
+      const data = await apiFetch(
         `https://api.football-data.org/v4/competitions/${lid_id}/standings`,
         { headers: { "X-Auth-Token": key } }
       );
       return ok(data);
     }
 
-    // ── The Odds API: odds pré-jogo (bookmakers reais) ──────
+    // ── Artilharia / artilheiros da competição ───────────────────
+    if (action === "fd-scorers") {
+      const key = Deno.env.get("FOOTBALL_DATA_KEY");
+      if (!key) return err("FOOTBALL_DATA_KEY não configurada", 503);
+      const lid_id = FD_IDS[lid];
+      if (!lid_id) return err(`Liga desconhecida: ${lid}`, 400);
+      const limit = url.searchParams.get("limit") ?? "10";
+      const data = await apiFetch(
+        `https://api.football-data.org/v4/competitions/${lid_id}/scorers?limit=${limit}`,
+        { headers: { "X-Auth-Token": key } }
+      );
+      return ok(data);
+    }
+
+    // ── Detalhes de um time (badge, nome curto, fundação etc.) ───
+    if (action === "fd-team") {
+      const key    = Deno.env.get("FOOTBALL_DATA_KEY");
+      if (!key) return err("FOOTBALL_DATA_KEY não configurada", 503);
+      const teamId = url.searchParams.get("teamId") ?? "";
+      if (!teamId) return err("Parâmetro 'teamId' obrigatório", 400);
+      const data = await apiFetch(
+        `https://api.football-data.org/v4/teams/${teamId}`,
+        { headers: { "X-Auth-Token": key } }
+      );
+      return ok(data);
+    }
+
+    // ════════════════════════════════════════════════════════════
+    // ── THE ODDS API ─────────────────────────────────────────────
+    // ════════════════════════════════════════════════════════════
+
+    // ── Odds pré-jogo (bookmakers reais) ─────────────────────────
     if (action === "odds") {
       const key = Deno.env.get("ODDS_API_KEY");
       if (!key) return err("ODDS_API_KEY não configurada — odds serão estimadas", 503);
       const sport = ODDS_SPORTS[lid];
       if (!sport) return err(`Liga sem odds disponível: ${lid}`, 400);
-      const data = await fetchCached(
+      const data = await apiFetch(
         `https://api.the-odds-api.com/v4/sports/${sport}/odds/?apiKey=${key}&regions=eu&markets=h2h&oddsFormat=decimal`
       );
       return ok(data);
     }
 
-    // ── The Odds API: scores recentes (resultados) ───────────
+    // ── Scores recentes / resultados ─────────────────────────────
     if (action === "odds-scores") {
       const key = Deno.env.get("ODDS_API_KEY");
       if (!key) return err("ODDS_API_KEY não configurada", 503);
       const sport = ODDS_SPORTS[lid];
       if (!sport) return err(`Liga sem odds disponível: ${lid}`, 400);
       const days = url.searchParams.get("days") ?? "3";
-      const data = await fetchCached(
+      const data = await apiFetch(
         `https://api.the-odds-api.com/v4/sports/${sport}/scores/?apiKey=${key}&daysFrom=${days}`
       );
       return ok(data);
     }
 
-    // ── TheSportsDB: buscar time por nome ────────────────────
+    // ════════════════════════════════════════════════════════════
+    // ── THESPORTSDB ──────────────────────────────────────────────
+    // ════════════════════════════════════════════════════════════
+
+    // ── Buscar time por nome ─────────────────────────────────────
     if (action === "sdb-team") {
       const key  = Deno.env.get("THESPORTSDB_KEY") ?? "123";
       const name = url.searchParams.get("name") ?? "";
       if (!name) return err("Parâmetro 'name' obrigatório", 400);
-      const data = await fetchCached(
+      const data = await apiFetch(
         `https://www.thesportsdb.com/api/v1/json/${key}/searchteams.php?t=${encodeURIComponent(name)}`
       );
       return ok(data);
     }
 
-    // ── TheSportsDB: tabela da liga ──────────────────────────
+    // ── Tabela da liga ───────────────────────────────────────────
     if (action === "sdb-table") {
       const key    = Deno.env.get("THESPORTSDB_KEY") ?? "123";
       const sdb_id = SDB_IDS[lid];
       if (!sdb_id) return err(`Liga desconhecida: ${lid}`, 400);
       const season = url.searchParams.get("season") ?? "2024-2025";
-      const data = await fetchCached(
+      const data = await apiFetch(
         `https://www.thesportsdb.com/api/v1/json/${key}/lookuptable.php?l=${sdb_id}&s=${season}`
       );
       return ok(data);
     }
 
-    // ── TheSportsDB: últimos eventos do time ─────────────────
+    // ── Últimos eventos (resultados recentes) de um time ────────
     if (action === "sdb-events-last") {
       const key    = Deno.env.get("THESPORTSDB_KEY") ?? "123";
       const teamId = url.searchParams.get("teamId") ?? "";
       if (!teamId) return err("Parâmetro 'teamId' obrigatório", 400);
-      const data = await fetchCached(
+      const data = await apiFetch(
         `https://www.thesportsdb.com/api/v1/json/${key}/eventslast.php?id=${teamId}`
       );
       return ok(data);
     }
 
-    // ── TheSportsDB: todos os times da liga ──────────────────
+    // ── Próximos eventos de um time ──────────────────────────────
+    if (action === "sdb-next-events") {
+      const key    = Deno.env.get("THESPORTSDB_KEY") ?? "123";
+      const teamId = url.searchParams.get("teamId") ?? "";
+      if (!teamId) return err("Parâmetro 'teamId' obrigatório", 400);
+      const data = await apiFetch(
+        `https://www.thesportsdb.com/api/v1/json/${key}/eventsnext.php?id=${teamId}`
+      );
+      return ok(data);
+    }
+
+    // ── Todos os times da liga ───────────────────────────────────
     if (action === "sdb-teams") {
       const key    = Deno.env.get("THESPORTSDB_KEY") ?? "123";
       const sdb_id = SDB_IDS[lid];
       if (!sdb_id) return err(`Liga desconhecida: ${lid}`, 400);
-      const data = await fetchCached(
+      const data = await apiFetch(
         `https://www.thesportsdb.com/api/v1/json/${key}/lookup_all_teams.php?id=${sdb_id}`
       );
       return ok(data);
     }
 
-    // ── TheSportsDB: jogadores do time ───────────────────────
+    // ── Jogadores de um time (nome, foto, posição, nº camisa) ───
     if (action === "sdb-players") {
       const key    = Deno.env.get("THESPORTSDB_KEY") ?? "123";
       const teamId = url.searchParams.get("teamId") ?? "";
       if (!teamId) return err("Parâmetro 'teamId' obrigatório", 400);
-      const data = await fetchCached(
+      const data = await apiFetch(
         `https://www.thesportsdb.com/api/v1/json/${key}/lookup_all_players.php?id=${teamId}`
       );
       return ok(data);
     }
 
-    // ── API-Football: partidas da liga ───────────────────────
+    // ── Detalhes de um jogador por ID ────────────────────────────
+    if (action === "sdb-player") {
+      const key      = Deno.env.get("THESPORTSDB_KEY") ?? "123";
+      const playerId = url.searchParams.get("playerId") ?? "";
+      if (!playerId) return err("Parâmetro 'playerId' obrigatório", 400);
+      const data = await apiFetch(
+        `https://www.thesportsdb.com/api/v1/json/${key}/lookupplayer.php?id=${playerId}`
+      );
+      return ok(data);
+    }
+
+    // ════════════════════════════════════════════════════════════
+    // ── API-FOOTBALL (v3.football.api-sports.io) ─────────────────
+    // ════════════════════════════════════════════════════════════
+
+    // ── Partidas da liga (por temporada, últimas, próximas) ──────
     if (action === "apif-fixtures") {
       const key = Deno.env.get("APIF_KEY");
       if (!key) return err("APIF_KEY não configurada", 503);
@@ -187,71 +255,89 @@ Deno.serve(async (req: Request) => {
       const season = url.searchParams.get("season") ?? "2024";
       const last   = url.searchParams.get("last");
       const next   = url.searchParams.get("next");
+      const date   = url.searchParams.get("date");
+      const status = url.searchParams.get("status");
       let qs = `league=${league}&season=${season}`;
-      if (last) qs += `&last=${last}`;
-      if (next) qs += `&next=${next}`;
-      const data = await fetchCached(`${APIF_BASE}/fixtures?${qs}`,
+      if (last)   qs += `&last=${last}`;
+      if (next)   qs += `&next=${next}`;
+      if (date)   qs += `&date=${date}`;
+      if (status) qs += `&status=${status}`;
+      const data = await apiFetch(`${APIF_BASE}/fixtures?${qs}`,
         { headers: { "x-apisports-key": key } });
       return ok(data);
     }
 
-    // ── API-Football: estatísticas da partida (xG, chutes, posse)
+    // ── Partidas ao vivo ─────────────────────────────────────────
+    if (action === "apif-live") {
+      const key = Deno.env.get("APIF_KEY");
+      if (!key) return err("APIF_KEY não configurada", 503);
+      const league = APIF_IDS[lid];
+      // Se lid=ALL retorna todos ao vivo; caso contrário filtra pela liga
+      const qs = league && lid !== "ALL"
+        ? `live=all&league=${league}`
+        : `live=all`;
+      const data = await apiFetch(`${APIF_BASE}/fixtures?${qs}`,
+        { headers: { "x-apisports-key": key } });
+      return ok(data);
+    }
+
+    // ── Estatísticas da partida (xG, chutes, posse) ──────────────
     if (action === "apif-fixture-stats") {
       const key = Deno.env.get("APIF_KEY");
       if (!key) return err("APIF_KEY não configurada", 503);
       const fixtureId = url.searchParams.get("fixtureId") ?? "";
       if (!fixtureId) return err("Parâmetro 'fixtureId' obrigatório", 400);
-      const data = await fetchCached(`${APIF_BASE}/fixtures/statistics?fixture=${fixtureId}`,
+      const data = await apiFetch(`${APIF_BASE}/fixtures/statistics?fixture=${fixtureId}`,
         { headers: { "x-apisports-key": key } });
       return ok(data);
     }
 
-    // ── API-Football: eventos da partida (gols, cartões, subs) ─
+    // ── Eventos da partida (gols, cartões, substituições) ────────
     if (action === "apif-fixture-events") {
       const key = Deno.env.get("APIF_KEY");
       if (!key) return err("APIF_KEY não configurada", 503);
       const fixtureId = url.searchParams.get("fixtureId") ?? "";
       if (!fixtureId) return err("Parâmetro 'fixtureId' obrigatório", 400);
-      const data = await fetchCached(`${APIF_BASE}/fixtures/events?fixture=${fixtureId}`,
+      const data = await apiFetch(`${APIF_BASE}/fixtures/events?fixture=${fixtureId}`,
         { headers: { "x-apisports-key": key } });
       return ok(data);
     }
 
-    // ── API-Football: escalações confirmadas ─────────────────
+    // ── Escalações confirmadas ───────────────────────────────────
     if (action === "apif-fixture-lineups") {
       const key = Deno.env.get("APIF_KEY");
       if (!key) return err("APIF_KEY não configurada", 503);
       const fixtureId = url.searchParams.get("fixtureId") ?? "";
       if (!fixtureId) return err("Parâmetro 'fixtureId' obrigatório", 400);
-      const data = await fetchCached(`${APIF_BASE}/fixtures/lineups?fixture=${fixtureId}`,
+      const data = await apiFetch(`${APIF_BASE}/fixtures/lineups?fixture=${fixtureId}`,
         { headers: { "x-apisports-key": key } });
       return ok(data);
     }
 
-    // ── API-Football: confronto direto (H2H) ─────────────────
+    // ── Confronto direto (H2H) ───────────────────────────────────
     if (action === "apif-h2h") {
       const key = Deno.env.get("APIF_KEY");
       if (!key) return err("APIF_KEY não configurada", 503);
       const h2h  = url.searchParams.get("h2h") ?? "";
       if (!h2h) return err("Parâmetro 'h2h' obrigatório (ex: 33-34)", 400);
       const last = url.searchParams.get("last") ?? "10";
-      const data = await fetchCached(`${APIF_BASE}/fixtures/headtohead?h2h=${h2h}&last=${last}`,
+      const data = await apiFetch(`${APIF_BASE}/fixtures/headtohead?h2h=${h2h}&last=${last}`,
         { headers: { "x-apisports-key": key } });
       return ok(data);
     }
 
-    // ── API-Football: buscar time por nome ───────────────────
+    // ── Buscar time por nome ─────────────────────────────────────
     if (action === "apif-team-search") {
       const key  = Deno.env.get("APIF_KEY");
       if (!key) return err("APIF_KEY não configurada", 503);
       const name = url.searchParams.get("name") ?? "";
       if (!name) return err("Parâmetro 'name' obrigatório", 400);
-      const data = await fetchCached(`${APIF_BASE}/teams?name=${encodeURIComponent(name)}`,
+      const data = await apiFetch(`${APIF_BASE}/teams?name=${encodeURIComponent(name)}`,
         { headers: { "x-apisports-key": key } });
       return ok(data);
     }
 
-    // ── API-Football: estatísticas do time na temporada ──────
+    // ── Estatísticas do time na temporada ────────────────────────
     if (action === "apif-team-stats") {
       const key = Deno.env.get("APIF_KEY");
       if (!key) return err("APIF_KEY não configurada", 503);
@@ -260,24 +346,96 @@ Deno.serve(async (req: Request) => {
       const league = APIF_IDS[lid];
       if (!league) return err(`Liga desconhecida: ${lid}`, 400);
       const season = url.searchParams.get("season") ?? "2024";
-      const data = await fetchCached(
+      const data = await apiFetch(
         `${APIF_BASE}/teams/statistics?team=${teamId}&league=${league}&season=${season}`,
         { headers: { "x-apisports-key": key } });
       return ok(data);
     }
 
-    // ── API-Football: previsão de resultado ──────────────────
+    // ── Tabela de classificação da API-Football ──────────────────
+    // (mais rica que FD: forma recente, gols casa/fora, sequências)
+    if (action === "apif-standings") {
+      const key = Deno.env.get("APIF_KEY");
+      if (!key) return err("APIF_KEY não configurada", 503);
+      const league = APIF_IDS[lid];
+      if (!league) return err(`Liga desconhecida: ${lid}`, 400);
+      const season = url.searchParams.get("season") ?? "2024";
+      const data = await apiFetch(
+        `${APIF_BASE}/standings?league=${league}&season=${season}`,
+        { headers: { "x-apisports-key": key } });
+      return ok(data);
+    }
+
+    // ── Artilheiros da liga ──────────────────────────────────────
+    if (action === "apif-top-scorers") {
+      const key = Deno.env.get("APIF_KEY");
+      if (!key) return err("APIF_KEY não configurada", 503);
+      const league = APIF_IDS[lid];
+      if (!league) return err(`Liga desconhecida: ${lid}`, 400);
+      const season = url.searchParams.get("season") ?? "2024";
+      const data = await apiFetch(
+        `${APIF_BASE}/players/topscorers?league=${league}&season=${season}`,
+        { headers: { "x-apisports-key": key } });
+      return ok(data);
+    }
+
+    // ── Elenco completo de um time (foto, nº camisa, posição) ────
+    // Retorna todos os jogadores do time com foto e número de camisa
+    if (action === "apif-squad") {
+      const key    = Deno.env.get("APIF_KEY");
+      if (!key) return err("APIF_KEY não configurada", 503);
+      const teamId = url.searchParams.get("teamId") ?? "";
+      if (!teamId) return err("Parâmetro 'teamId' obrigatório", 400);
+      const data = await apiFetch(
+        `${APIF_BASE}/players/squads?team=${teamId}`,
+        { headers: { "x-apisports-key": key } });
+      return ok(data);
+    }
+
+    // ── Lesionados / suspensos da liga ou partida ────────────────
+    if (action === "apif-injuries") {
+      const key = Deno.env.get("APIF_KEY");
+      if (!key) return err("APIF_KEY não configurada", 503);
+      const fixtureId = url.searchParams.get("fixtureId");
+      const teamId    = url.searchParams.get("teamId");
+      const league    = APIF_IDS[lid];
+      const season    = url.searchParams.get("season") ?? "2024";
+      let qs = "";
+      if (fixtureId) {
+        qs = `fixture=${fixtureId}`;
+      } else if (teamId) {
+        qs = `team=${teamId}&league=${league}&season=${season}`;
+      } else if (league) {
+        qs = `league=${league}&season=${season}`;
+      } else {
+        return err("Forneça 'fixtureId', 'teamId' ou 'lid'", 400);
+      }
+      const data = await apiFetch(`${APIF_BASE}/injuries?${qs}`,
+        { headers: { "x-apisports-key": key } });
+      return ok(data);
+    }
+
+    // ── Previsão de resultado ────────────────────────────────────
     if (action === "apif-predictions") {
       const key = Deno.env.get("APIF_KEY");
       if (!key) return err("APIF_KEY não configurada", 503);
       const fixtureId = url.searchParams.get("fixtureId") ?? "";
       if (!fixtureId) return err("Parâmetro 'fixtureId' obrigatório", 400);
-      const data = await fetchCached(`${APIF_BASE}/predictions?fixture=${fixtureId}`,
+      const data = await apiFetch(`${APIF_BASE}/predictions?fixture=${fixtureId}`,
         { headers: { "x-apisports-key": key } });
       return ok(data);
     }
 
-    return err(`Ação desconhecida: '${action}'. Use: matches, standings, odds, odds-scores, sdb-team, sdb-table, sdb-events-last, sdb-teams, sdb-players, apif-fixtures, apif-fixture-stats, apif-fixture-events, apif-fixture-lineups, apif-h2h, apif-team-search, apif-team-stats, apif-predictions`, 400);
+    return err(
+      `Ação desconhecida: '${action}'. Ações disponíveis: ` +
+      `matches, standings, fd-scorers, fd-team, ` +
+      `odds, odds-scores, ` +
+      `sdb-team, sdb-table, sdb-events-last, sdb-next-events, sdb-teams, sdb-players, sdb-player, ` +
+      `apif-fixtures, apif-live, apif-fixture-stats, apif-fixture-events, apif-fixture-lineups, ` +
+      `apif-h2h, apif-team-search, apif-team-stats, apif-standings, apif-top-scorers, ` +
+      `apif-squad, apif-injuries, apif-predictions`,
+      400
+    );
 
   } catch (e: unknown) {
     const msg = e instanceof Error ? e.message : String(e);
