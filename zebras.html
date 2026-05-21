@@ -183,26 +183,8 @@
     { id:'MLS', flag:'🇺🇸', name:'MLS',                 country:'EUA',        faved:false },
   ];
 
-  // Gera datas relativas ao dia atual para dados de exemplo
-  (function _fixDemoDatesFn(){
-    const _d = (offset, time) => {
-      const dt = new Date(); dt.setDate(dt.getDate() - offset);
-      return String(dt.getDate()).padStart(2,'0') + '/' + String(dt.getMonth()+1).padStart(2,'0') + ' · ' + time + ' (Demo)';
-    };
-    window._demoDate = _d;
-  })();
-  const ZEBRAS = [
-    { home:'Botafogo',    away:'Flamengo',    hs:3, as:0, league:'Brasileirão', lid:'BRA', date:_demoDate(0,'16h00'), zi:8.2, odds_h:'4.50', odds_a:'1.75' },
-    { home:'Lecce',       away:'Juventus',    hs:2, as:1, league:'Serie A',     lid:'ITA', date:_demoDate(0,'14h00'), zi:7.9, odds_h:'5.20', odds_a:'1.62' },
-    { home:'Luton',       away:'Man City',    hs:1, as:0, league:'Premier Lg',  lid:'ENG', date:_demoDate(1,'13h30'), zi:9.1, odds_h:'7.00', odds_a:'1.43' },
-    { home:'Mallorca',    away:'Real Madrid', hs:1, as:0, league:'La Liga',     lid:'ESP', date:_demoDate(2,'20h00'), zi:6.4, odds_h:'4.10', odds_a:'1.85' },
-    { home:'Empoli',      away:'Inter',       hs:2, as:2, league:'Serie A',     lid:'ITA', date:_demoDate(3,'19h45'), zi:5.1, odds_h:'5.50', odds_a:'1.55' },
-    { home:'Augsburg',    away:'Bayern',      hs:2, as:1, league:'Bundesliga',  lid:'GER', date:_demoDate(4,'15h30'), zi:8.7, odds_h:'6.00', odds_a:'1.50' },
-    { home:'Bragantino',  away:'Palmeiras',   hs:3, as:1, league:'Brasileirão', lid:'BRA', date:_demoDate(5,'20h00'), zi:4.3, odds_h:'3.10', odds_a:'2.15' },
-    { home:'Angers',      away:'PSG',         hs:2, as:0, league:'Ligue 1',     lid:'FRA', date:_demoDate(6,'21h00'), zi:9.4, odds_h:'8.50', odds_a:'1.38' },
-    { home:'Granada',     away:'Barça',       hs:1, as:0, league:'La Liga',     lid:'ESP', date:_demoDate(7,'19h00'), zi:8.0, odds_h:'5.80', odds_a:'1.55' },
-    { home:'Clermont',    away:'Monaco',      hs:3, as:2, league:'Ligue 1',     lid:'FRA', date:_demoDate(8,'17h00'), zi:3.8, odds_h:'2.90', odds_a:'2.30' },
-  ];
+  // Zebras carregadas exclusivamente da API real — sem dados inventados
+  const ZEBRAS = [];
 
   let activeLeague = 'all';
   let activeFilter = 'all';
@@ -296,10 +278,17 @@
     document.getElementById('zebraCount').textContent = `${list.length} resultado${list.length !== 1 ? 's' : ''}`;
 
     if (!list.length) {
+      const isApiConfigured = typeof ZebraAPI !== 'undefined' && ZebraAPI.isConfigured.footballData();
+      const msg = isApiConfigured
+        ? 'Nenhuma zebra encontrada para este filtro'
+        : 'Configure a API do Football-Data.org para ver zebras reais';
+      const sub = isApiConfigured
+        ? 'Tente outro filtro ou liga'
+        : '<a href="perfil.html" style="color:var(--green);">Ir para Perfil → Configurar API</a>';
       container.innerHTML = `<div style="text-align:center;padding:32px;color:var(--gray);">
         <div style="font-size:2rem;margin-bottom:8px;">🦓</div>
-        <div style="font-weight:600;margin-bottom:4px;">Nenhuma zebra encontrada</div>
-        <div style="font-size:0.8125rem;">Tente outro filtro ou liga</div>
+        <div style="font-weight:600;margin-bottom:4px;">${msg}</div>
+        <div style="font-size:0.8125rem;">${sub}</div>
       </div>`;
       return;
     }

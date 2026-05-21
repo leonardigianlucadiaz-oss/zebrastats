@@ -342,148 +342,52 @@ const ALL_TEAMS = [
   { id:'AJX', name:'Ajax',           lid:'HOL', league:'Eredivisie'     },
 ];
 
-// ── STATS POR TIME ────────────────────────────────────────────────────────────
-// ziAvg: ZI médio nos últimos 10 jogos
-// asUnderdog: % vitorias como zebra (0-100)
-// causingUpset: % derrotas como favorito (0-100)
-// goalsFor/goalsAgainst: média por jogo
-// form: últimos 10 ('W','D','L') — índice 0 = jogo mais recente
-// ziHistory: ZI dos últimos 10 jogos (0 = sem zebra envolvida)
-const TEAM_STATS = {
-  FLA: { ziAvg:5.1, asUnderdog:22, causingUpset:14, goalsFor:2.1, goalsAgainst:1.0, form:['W','W','D','W','L','W','W','D','W','L'], ziH:[6.2,0,0,4.1,7.9,0,0,3.2,0,5.5] },
-  PAL: { ziAvg:3.8, asUnderdog:12, causingUpset:8,  goalsFor:1.9, goalsAgainst:0.8, form:['W','W','W','D','W','L','W','W','D','W'], ziH:[0,0,0,3.5,0,5.1,0,0,4.2,0] },
-  BOT: { ziAvg:6.4, asUnderdog:35, causingUpset:18, goalsFor:1.7, goalsAgainst:1.3, form:['W','L','W','W','D','W','L','W','W','D'], ziH:[8.2,5.5,0,0,3.1,0,6.4,0,0,4.8] },
-  FLU: { ziAvg:4.2, asUnderdog:18, causingUpset:20, goalsFor:1.5, goalsAgainst:1.4, form:['D','W','L','W','D','L','W','L','W','W'], ziH:[3.2,0,4.8,0,3.1,5.5,0,6.0,0,0] },
-  COR: { ziAvg:3.5, asUnderdog:15, causingUpset:25, goalsFor:1.3, goalsAgainst:1.5, form:['L','D','W','L','W','L','D','W','L','W'], ziH:[4.5,3.0,0,5.2,0,4.8,3.5,0,4.2,0] },
-  SPO: { ziAvg:3.2, asUnderdog:10, causingUpset:22, goalsFor:1.4, goalsAgainst:1.4, form:['W','D','L','D','W','W','L','D','W','L'], ziH:[0,3.1,4.3,3.5,0,0,5.0,3.2,0,4.1] },
-  GRE: { ziAvg:4.0, asUnderdog:20, causingUpset:15, goalsFor:1.6, goalsAgainst:1.3, form:['W','W','D','L','W','D','W','L','W','D'], ziH:[0,0,3.5,4.8,0,3.2,0,5.5,0,3.8] },
-  INT: { ziAvg:3.7, asUnderdog:16, causingUpset:18, goalsFor:1.5, goalsAgainst:1.4, form:['L','W','W','D','L','W','W','D','L','W'], ziH:[5.0,0,0,3.5,4.2,0,0,3.8,4.5,0] },
-  CAM: { ziAvg:4.5, asUnderdog:25, causingUpset:16, goalsFor:1.8, goalsAgainst:1.2, form:['W','W','L','W','W','D','L','W','D','W'], ziH:[0,0,5.2,0,0,3.5,4.8,0,3.2,0] },
-  BRG: { ziAvg:5.0, asUnderdog:28, causingUpset:12, goalsFor:1.9, goalsAgainst:1.3, form:['W','D','W','L','W','W','D','L','W','W'], ziH:[4.3,3.5,0,5.5,0,0,3.8,4.2,0,0] },
-  // Premier League
-  MCI: { ziAvg:2.8, asUnderdog:5,  causingUpset:28, goalsFor:2.8, goalsAgainst:0.9, form:['W','W','W','D','W','L','W','W','W','D'], ziH:[0,0,0,2.5,0,7.0,0,0,0,3.1] },
-  LIV: { ziAvg:3.2, asUnderdog:8,  causingUpset:22, goalsFor:2.5, goalsAgainst:1.0, form:['W','W','D','W','W','L','W','D','W','W'], ziH:[0,0,3.1,0,0,6.2,0,3.5,0,0] },
-  ARS: { ziAvg:3.5, asUnderdog:10, causingUpset:20, goalsFor:2.3, goalsAgainst:0.9, form:['W','W','W','D','L','W','W','W','D','W'], ziH:[0,0,0,3.2,5.5,0,0,0,3.8,0] },
-  MUN: { ziAvg:5.5, asUnderdog:18, causingUpset:38, goalsFor:1.6, goalsAgainst:1.6, form:['L','W','D','L','W','L','D','W','L','D'], ziH:[5.2,0,3.5,6.0,0,4.8,3.2,0,5.5,4.1] },
-  CHE: { ziAvg:4.8, asUnderdog:14, causingUpset:32, goalsFor:1.7, goalsAgainst:1.5, form:['D','L','W','D','W','L','W','D','L','W'], ziH:[3.5,5.0,0,3.8,0,5.5,0,3.2,4.8,0] },
-  TOT: { ziAvg:4.2, asUnderdog:15, causingUpset:28, goalsFor:2.0, goalsAgainst:1.8, form:['W','L','W','D','L','W','D','L','W','W'], ziH:[0,5.8,0,3.5,4.2,0,3.8,5.5,0,0] },
-  NEW: { ziAvg:3.8, asUnderdog:18, causingUpset:20, goalsFor:1.8, goalsAgainst:1.2, form:['W','W','D','W','L','W','D','W','W','L'], ziH:[0,0,3.5,0,5.2,0,3.8,0,0,4.5] },
-  // La Liga
-  RMA: { ziAvg:2.5, asUnderdog:4,  causingUpset:25, goalsFor:2.9, goalsAgainst:0.8, form:['W','W','W','W','D','W','L','W','W','W'], ziH:[0,0,0,0,2.8,0,6.4,0,0,0] },
-  BAR: { ziAvg:3.1, asUnderdog:6,  causingUpset:30, goalsFor:2.7, goalsAgainst:1.0, form:['W','L','W','W','W','D','W','L','W','W'], ziH:[0,5.8,0,0,0,3.2,0,4.8,0,0] },
-  ATL: { ziAvg:3.5, asUnderdog:12, causingUpset:18, goalsFor:1.9, goalsAgainst:0.9, form:['W','D','W','L','W','W','D','W','W','D'], ziH:[0,3.5,0,5.0,0,0,3.8,0,0,3.2] },
-  SEV: { ziAvg:4.5, asUnderdog:20, causingUpset:22, goalsFor:1.7, goalsAgainst:1.5, form:['L','W','D','W','L','D','W','L','W','W'], ziH:[5.2,0,3.8,0,4.5,3.5,0,5.8,0,0] },
-  // Bundesliga
-  BAY: { ziAvg:2.2, asUnderdog:3,  causingUpset:30, goalsFor:3.2, goalsAgainst:0.9, form:['W','W','W','D','W','W','L','W','W','W'], ziH:[0,0,0,2.5,0,0,8.7,0,0,0] },
-  BVB: { ziAvg:3.8, asUnderdog:10, causingUpset:22, goalsFor:2.4, goalsAgainst:1.4, form:['W','D','L','W','W','W','D','L','W','D'], ziH:[0,3.5,4.8,0,0,0,3.2,5.5,0,3.8] },
-  LEV: { ziAvg:3.0, asUnderdog:8,  causingUpset:12, goalsFor:2.5, goalsAgainst:0.8, form:['W','W','W','W','D','W','W','L','W','W'], ziH:[0,0,0,0,3.0,0,0,5.2,0,0] },
-  AUG: { ziAvg:6.2, asUnderdog:42, causingUpset:10, goalsFor:1.5, goalsAgainst:1.6, form:['W','L','D','W','L','W','D','L','W','L'], ziH:[8.7,4.5,3.5,0,4.8,0,3.2,5.5,0,4.2] },
-  // Serie A
-  ITR: { ziAvg:2.8, asUnderdog:5,  causingUpset:18, goalsFor:2.5, goalsAgainst:0.9, form:['W','W','W','D','W','W','W','D','L','W'], ziH:[0,0,0,2.8,0,0,0,3.1,5.1,0] },
-  JUV: { ziAvg:4.5, asUnderdog:10, causingUpset:35, goalsFor:1.8, goalsAgainst:1.2, form:['D','L','W','D','W','L','D','W','L','W'], ziH:[3.5,7.9,0,4.2,0,6.0,3.8,0,5.2,0] },
-  MIL: { ziAvg:4.0, asUnderdog:12, causingUpset:28, goalsFor:1.9, goalsAgainst:1.3, form:['W','D','L','W','W','D','L','W','D','W'], ziH:[0,3.5,5.2,0,0,3.8,4.5,0,3.2,0] },
-  NAP: { ziAvg:3.5, asUnderdog:8,  causingUpset:22, goalsFor:2.2, goalsAgainst:1.0, form:['W','W','D','W','L','W','W','D','W','L'], ziH:[0,0,3.2,0,5.8,0,0,3.5,0,4.2] },
-  // Ligue 1
-  PSG: { ziAvg:3.0, asUnderdog:4,  causingUpset:35, goalsFor:3.0, goalsAgainst:0.9, form:['W','W','W','L','W','W','D','W','L','W'], ziH:[0,0,0,9.4,0,0,3.2,0,7.7,0] },
-  MRS: { ziAvg:4.2, asUnderdog:15, causingUpset:22, goalsFor:2.0, goalsAgainst:1.4, form:['W','L','W','D','W','L','W','D','L','W'], ziH:[0,5.5,0,3.5,0,4.8,0,3.2,5.0,0] },
-  // Portugal
-  BEN: { ziAvg:3.5, asUnderdog:8,  causingUpset:20, goalsFor:2.4, goalsAgainst:0.9, form:['W','W','D','W','W','L','W','W','D','W'], ziH:[0,0,3.2,0,0,7.2,0,0,3.5,0] },
-};
-
-// ── SEEDED RNG (LCG) — resultados determinísticos por semente ──
-function makeRng(seed) {
-  let s = (seed >>> 0) || 1;
-  return () => { s = Math.imul(1664525, s) + 1013904223 >>> 0; return s / 4294967296; };
-}
-function strHash(str) {
-  let h = 5381;
-  for (let i = 0; i < str.length; i++) h = (Math.imul(33, h) ^ str.charCodeAt(i)) >>> 0;
-  return h;
-}
-
-// Fallback stats para times sem dados específicos
+// ── STATS POR TIME — carregadas da API (sem dados fictícios) ─────────────────
+// Stats são populadas assincronamente por fetchRealTeamStats() via API-Football
+// e por loadSdbForm() via TheSportsDB.
+// getStats() retorna dados reais de _realStats ou objeto vazio enquanto carrega.
 function getStats(id) {
-  if (TEAM_STATS[id]) return TEAM_STATS[id];
-  const r = makeRng(strHash(id));
+  if (_realStats[id]) return _realStats[id];
   return {
-    ziAvg: +(3.5 + r()*2).toFixed(1),
-    asUnderdog: 10 + Math.floor(r()*20),
-    causingUpset: 10 + Math.floor(r()*20),
-    goalsFor: +(1.4 + r()*0.8).toFixed(1),
-    goalsAgainst: +(1.0 + r()*0.7).toFixed(1),
-    form: ['W','D','L','W','W','D','L','W','D','W'],
-    ziH: [0,3.5,4.2,0,0,5.1,3.8,0,4.5,0],
+    ziAvg: 0,
+    asUnderdog: 0,
+    causingUpset: 0,
+    goalsFor: 0,
+    goalsAgainst: 0,
+    form: [],
+    ziH: Array(10).fill(0),
   };
 }
 
-// ── H2H CONFRONTOS HISTÓRICOS ─────────────────────────────────────────────────
-const H2H_MATCHES = [
-  // Flamengo × Botafogo
-  { a:'FLA', b:'BOT', home:'Flamengo',  away:'Botafogo',     hs:3,as:0, league:'Brasileirão', date:'13/05/2024', zi:8.2, winner:'home' },
-  { a:'FLA', b:'BOT', home:'Botafogo',  away:'Flamengo',     hs:1,as:1, league:'Brasileirão', date:'12/10/2023', zi:0,   winner:'draw' },
-  { a:'FLA', b:'BOT', home:'Flamengo',  away:'Botafogo',     hs:2,as:1, league:'Brasileirão', date:'04/06/2023', zi:0,   winner:'home' },
-  { a:'FLA', b:'BOT', home:'Botafogo',  away:'Flamengo',     hs:2,as:0, league:'Brasileirão', date:'02/10/2022', zi:6.5, winner:'home' },
-  { a:'FLA', b:'BOT', home:'Flamengo',  away:'Botafogo',     hs:4,as:1, league:'Brasileirão', date:'18/05/2022', zi:0,   winner:'home' },
-  { a:'FLA', b:'BOT', home:'Botafogo',  away:'Flamengo',     hs:0,as:2, league:'Brasileirão', date:'24/10/2021', zi:0,   winner:'away' },
-  // Real Madrid × Barcelona
-  { a:'RMA', b:'BAR', home:'Real Madrid',away:'Barcelona',    hs:3,as:2, league:'La Liga',     date:'21/04/2024', zi:0,   winner:'home' },
-  { a:'RMA', b:'BAR', home:'Barcelona', away:'Real Madrid',  hs:1,as:2, league:'La Liga',     date:'28/10/2023', zi:0,   winner:'away' },
-  { a:'RMA', b:'BAR', home:'Real Madrid',away:'Barcelona',    hs:2,as:1, league:'La Liga',     date:'02/04/2023', zi:0,   winner:'home' },
-  { a:'RMA', b:'BAR', home:'Barcelona', away:'Real Madrid',  hs:4,as:0, league:'La Liga',     date:'20/03/2022', zi:0,   winner:'home' },
-  { a:'RMA', b:'BAR', home:'Real Madrid',away:'Barcelona',    hs:2,as:1, league:'La Liga',     date:'12/04/2021', zi:0,   winner:'home' },
-  { a:'RMA', b:'BAR', home:'Barcelona', away:'Real Madrid',  hs:3,as:1, league:'La Liga',     date:'18/12/2019', zi:0,   winner:'home' },
-  // Bayern × Dortmund
-  { a:'BAY', b:'BVB', home:'Bayern',    away:'Dortmund',     hs:2,as:2, league:'Bundesliga',  date:'30/03/2024', zi:0,   winner:'draw' },
-  { a:'BAY', b:'BVB', home:'Dortmund',  away:'Bayern',       hs:4,as:2, league:'Bundesliga',  date:'04/11/2023', zi:5.5, winner:'home' },
-  { a:'BAY', b:'BVB', home:'Bayern',    away:'Dortmund',     hs:4,as:0, league:'Bundesliga',  date:'01/04/2023', zi:0,   winner:'home' },
-  { a:'BAY', b:'BVB', home:'Dortmund',  away:'Bayern',       hs:2,as:2, league:'Bundesliga',  date:'08/10/2022', zi:0,   winner:'draw' },
-  { a:'BAY', b:'BVB', home:'Bayern',    away:'Dortmund',     hs:3,as:1, league:'Bundesliga',  date:'23/04/2022', zi:0,   winner:'home' },
-  // Man City × Man United
-  { a:'MCI', b:'MUN', home:'Man City',  away:'Man United',   hs:3,as:1, league:'Premier Lge', date:'03/03/2024', zi:0,   winner:'home' },
-  { a:'MCI', b:'MUN', home:'Man United',away:'Man City',     hs:2,as:1, league:'Premier Lge', date:'29/10/2023', zi:5.8, winner:'home' },
-  { a:'MCI', b:'MUN', home:'Man City',  away:'Man United',   hs:6,as:3, league:'Premier Lge', date:'02/10/2022', zi:0,   winner:'home' },
-  { a:'MCI', b:'MUN', home:'Man United',away:'Man City',     hs:1,as:4, league:'Premier Lge', date:'06/03/2022', zi:0,   winner:'away' },
-  { a:'MCI', b:'MUN', home:'Man City',  away:'Man United',   hs:2,as:0, league:'Premier Lge', date:'07/11/2021', zi:0,   winner:'home' },
-  // PSG × Marseille
-  { a:'PSG', b:'MRS', home:'PSG',       away:'Marseille',    hs:2,as:3, league:'Ligue 1',     date:'24/03/2024', zi:7.5, winner:'away' },
-  { a:'PSG', b:'MRS', home:'Marseille', away:'PSG',          hs:0,as:2, league:'Ligue 1',     date:'29/10/2023', zi:0,   winner:'away' },
-  { a:'PSG', b:'MRS', home:'PSG',       away:'Marseille',    hs:4,as:0, league:'Ligue 1',     date:'16/04/2023', zi:0,   winner:'home' },
-  { a:'PSG', b:'MRS', home:'Marseille', away:'PSG',          hs:0,as:0, league:'Ligue 1',     date:'23/10/2022', zi:0,   winner:'draw' },
-  // Palmeiras × Flamengo
-  { a:'PAL', b:'FLA', home:'Palmeiras', away:'Flamengo',     hs:2,as:1, league:'Brasileirão', date:'07/04/2024', zi:0,   winner:'home' },
-  { a:'PAL', b:'FLA', home:'Flamengo',  away:'Palmeiras',    hs:3,as:2, league:'Brasileirão', date:'05/11/2023', zi:4.2, winner:'home' },
-  { a:'PAL', b:'FLA', home:'Palmeiras', away:'Flamengo',     hs:1,as:1, league:'Brasileirão', date:'19/06/2023', zi:0,   winner:'draw' },
-  { a:'PAL', b:'FLA', home:'Flamengo',  away:'Palmeiras',    hs:0,as:0, league:'Brasileirão', date:'18/09/2022', zi:0,   winner:'draw' },
-];
+// Cache de stats reais (preenchido por fetchRealTeamStats)
+const _realStats = {};
 
-function getH2H(idA, idB) {
-  return H2H_MATCHES.filter(m =>
-    (m.a === idA && m.b === idB) || (m.a === idB && m.b === idA)
-  );
-}
-
-// Gera confrontos dummy para pares sem dados históricos (determinístico por IDs)
-function generateDummyH2H(teamA, teamB) {
-  const seed = strHash(teamA.id + '|' + teamB.id);
-  const rng  = makeRng(seed);
-  const matches = [];
-  for (let i = 0; i < 6; i++) {
-    const r = Math.floor(rng() * 3);
-    const homeTeam = i % 2 === 0 ? teamA : teamB;
-    const awayTeam = i % 2 === 0 ? teamB : teamA;
-    const hs = r === 0 ? 1+Math.floor(rng()*2) : r === 2 ? 0 : Math.floor(rng()*2);
-    const as = r === 2 ? 1+Math.floor(rng()*2) : r === 0 ? 0 : Math.floor(rng()*2);
-    const winner = hs > as ? 'home' : as > hs ? 'away' : 'draw';
-    const yr = 2019 + Math.floor(i/2);
-    const zi = rng() > 0.7 ? +((3 + rng()*5).toFixed(1)) : 0;
-    matches.push({
-      a: teamA.id, b: teamB.id,
-      home: homeTeam.name, away: awayTeam.name,
-      hs, as, league: teamA.league === teamB.league ? teamA.league : 'Amistoso',
-      date: `${10+i*5}/${3+i % 9}/${yr}`, zi, winner,
+// Carrega forma recente do time via SDB (últimos 5 jogos)
+async function loadSdbForm(teamName, slot) {
+  if (!teamName || typeof ZebraAPI === 'undefined') return;
+  try {
+    const res = await ZebraAPI.sportsDb.searchTeam(teamName);
+    const sdbId = res?.teams?.[0]?.idTeam;
+    if (!sdbId) return;
+    const events = await ZebraAPI.sportsDb.getTeamLastEvents(sdbId);
+    if (!events?.results?.length) return;
+    const form = [];
+    events.results.slice(0, 10).forEach(ev => {
+      const hs = parseInt(ev.intHomeScore, 10);
+      const as = parseInt(ev.intAwayScore, 10);
+      if (isNaN(hs) || isNaN(as)) return;
+      const isHome = (ev.strHomeTeam || '').toLowerCase().includes(teamName.toLowerCase().split(' ')[0]);
+      if (hs === as) form.push('D');
+      else if ((isHome && hs > as) || (!isHome && as > hs)) form.push('W');
+      else form.push('L');
     });
-  }
-  return matches;
+    if (!form.length) return;
+    if (!_realStats[slot]) _realStats[slot] = getStats('');
+    _realStats[slot].form = form;
+    if (selectedA && selectedB) {
+      renderForm(_realStats['A'] || getStats(''), _realStats['B'] || getStats(''));
+    }
+  } catch(e) { console.warn('[comparar] loadSdbForm error:', e); }
 }
 
 // ── STATE ─────────────────────────────────────────────────────────────────────
@@ -699,28 +603,20 @@ function drawRadar(teamA, teamB) {
   }
 
   function teamScore(t, label) {
-    const st = TEAM_STATS[t.id];
+    const st = _realStats[t.id];
     if (st) {
-      // Map radar labels to TEAM_STATS fields (normalize 0-1)
+      // Map radar labels to _realStats fields (normalize 0-1)
       const atk  = Math.min(1, (st.goalsFor   || 1.5) / 3.5);
       const def  = Math.min(1, 1 - (st.goalsAgainst || 1.5) / 3.5);
-      const zi   = Math.min(1, (st.ziAvg || 4) / 10);
-      const form = (() => { const f = st.form || []; const w = f.filter(x=>x==='W').length; return f.length ? w/f.length : 0.5; })();
-      // H2H win % — usa confrontos entre os dois times selecionados
-      const h2hMatches = (typeof getH2H === 'function' && selectedA && selectedB)
-        ? getH2H(selectedA.id, selectedB.id) : [];
-      const h2hWins = h2hMatches.filter(m => {
-        const isHome = m.home === t.name;
-        return (m.winner === 'home' && isHome) || (m.winner === 'away' && !isHome);
-      }).length;
-      const h2h = h2hMatches.length ? Math.min(1, h2hWins / h2hMatches.length) : 0.5;
+      const zi   = Math.min(1, (st.ziAvg || 0) / 10);
+      const form = (() => { const f = st.form || []; const w = f.filter(x=>x==='W').length; return f.length ? w/f.length : 0; })();
+      const h2h  = 0.5; // will be updated once real H2H loads
       const home = Math.min(1, atk * 0.6 + def * 0.4);
       const map  = { Ataque:atk, Defesa:def, 'Zebra Index':zi, Forma:form, H2H:h2h, Casa:home };
-      return map[label] !== undefined ? map[label] : 0.5;
+      return map[label] !== undefined ? map[label] : 0;
     }
-    // Fallback: seeded deterministic value
-    const seed = ((t.name||'x').charCodeAt(0) * 1664525 + label.charCodeAt(0) * 22695477) >>> 0;
-    return 0.35 + (seed % 100) / 153;
+    // Sem dados — retorna 0 (gráfico ficará vazio até API responder)
+    return 0;
   }
 
   const safeA = teamA || {};
@@ -746,19 +642,28 @@ function renderComparison() {
   const sA = getStats(selectedA.id);
   const sB = getStats(selectedB.id);
 
-  let h2h = getH2H(selectedA.id, selectedB.id);
-  if (!h2h.length) h2h = generateDummyH2H(selectedA, selectedB);
-  function parseH2HDate(str) {
-    const [d, m, y] = str.split('/');
-    return new Date(`${(y||'2000').padStart(4,'0')}-${(m||'01').padStart(2,'0')}-${(d||'01').padStart(2,'0')}`);
-  }
-  h2h = h2h.sort((a,b) => parseH2HDate(b.date) - parseH2HDate(a.date));
-
+  // H2H starts empty — fetchRealH2H() will populate asynchronously
+  const h2h = [];
   renderH2HRecord(h2h, sA, sB);
   renderStats(sA, sB);
-  renderH2HList(h2h);
+  // Show H2H list skeleton while data loads
+  const h2hListEl = document.getElementById('h2hList');
+  if (h2hListEl) {
+    h2hListEl.innerHTML = Array(3).fill(0).map(() => `
+      <div class="zebra-card" style="pointer-events:none;">
+        <div class="skel" style="height:11px;width:45%;margin-bottom:6px;"></div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <div class="skel" style="height:14px;flex:1;"></div>
+          <div class="skel" style="height:18px;width:36px;border-radius:6px;"></div>
+          <div class="skel" style="height:14px;flex:1;"></div>
+        </div>
+      </div>`).join('');
+  }
   renderForm(sA, sB);
   drawRadar(selectedA, selectedB);
+  // Load form from SDB for both teams
+  loadSdbForm(selectedA.name, 'A');
+  loadSdbForm(selectedB.name, 'B');
 
   if (typeof lucide !== 'undefined') lucide.createIcons();
 
@@ -824,8 +729,17 @@ async function fetchRealH2H(teamA, teamB) {
       document.getElementById('pctB').textContent = `${Math.round(fB*100)}%`;
     }
 
+    // Persiste contagens H2H em _realStats para o radar e _showZebraIndicator
+    _realStats[teamA.id] = Object.assign(_realStats[teamA.id] || {}, { h2hWins: wA, h2hDraws: d });
+    _realStats[teamB.id] = Object.assign(_realStats[teamB.id] || {}, { h2hWins: wB, h2hDraws: d });
+
     // Atualiza lista de confrontos com dados reais
     renderH2HList(h2hReal);
+    // Re-renderiza radar e indicador com dados H2H reais
+    if (selectedA && selectedB) {
+      drawRadar(selectedA, selectedB);
+      _showZebraIndicator(selectedA.id, selectedB.id);
+    }
     if (typeof lucide !== 'undefined') lucide.createIcons();
 
   } catch(e) { console.warn('[comparar] fetchRealH2H error:', e); }
@@ -845,11 +759,11 @@ async function fetchRealTeamStats(teamA, teamB) {
       const gfAvg = parseFloat(statsData.goals?.for?.average?.total) || null;
       const gaAvg = parseFloat(statsData.goals?.against?.average?.total) || null;
       if (!gfAvg && !gaAvg && !form.length) continue;
-      // Patch into TEAM_STATS for this session
-      TEAM_STATS[team.id] = Object.assign(TEAM_STATS[team.id] || {}, {
-        goalsFor:      gfAvg || 1.5,
-        goalsAgainst:  gaAvg || 1.5,
-        form:          form.length ? form : (TEAM_STATS[team.id]?.form || ['W','D','L','W','W','D','L','W','D','W']),
+      // Store into _realStats for this session
+      _realStats[team.id] = Object.assign(_realStats[team.id] || {}, {
+        goalsFor:      gfAvg || 0,
+        goalsAgainst:  gaAvg || 0,
+        form:          form.length ? form : (_realStats[team.id]?.form || []),
         real: true,
       });
       // Re-render stats + radar with real data
@@ -1135,11 +1049,12 @@ function _renderH2HVisual(teamA, teamB) {
   const winsBEl = document.getElementById('h2hWinsB');
   if (!visual || !barsEl) return;
 
-  const statsA = (typeof TEAM_STATS !== 'undefined' && TEAM_STATS[teamA]) ? TEAM_STATS[teamA] : {};
-  const statsB = (typeof TEAM_STATS !== 'undefined' && TEAM_STATS[teamB]) ? TEAM_STATS[teamB] : {};
-  const wA = statsA.h2hWins || Math.floor(Math.random()*4+1);
-  const wB = statsB.h2hWins || Math.floor(Math.random()*4+1);
-  const draws = Math.floor(Math.random()*3+1);
+  // Valores reais são preenchidos por fetchRealH2H — exibe skeleton enquanto aguarda
+  const statsA = _realStats[teamA] || {};
+  const statsB = _realStats[teamB] || {};
+  const wA = statsA.h2hWins || 0;
+  const wB = statsB.h2hWins || 0;
+  const draws = statsA.h2hDraws || 0;
   const total = wA + wB + draws || 1;
 
   barsEl.innerHTML = `
@@ -1177,10 +1092,10 @@ function _showZebraIndicator(teamA, teamB) {
   const textEl    = document.getElementById('zebraIndicatorText');
   if (!indicator || !textEl) return;
 
-  const statsA = (typeof TEAM_STATS !== 'undefined' && TEAM_STATS[teamA]) ? TEAM_STATS[teamA] : {};
-  const statsB = (typeof TEAM_STATS !== 'undefined' && TEAM_STATS[teamB]) ? TEAM_STATS[teamB] : {};
-  const ziA = parseFloat(statsA.ziAvg || statsA.ziH || 0);
-  const ziB = parseFloat(statsB.ziAvg || statsB.ziA || 0);
+  const statsA = _realStats[teamA] || {};
+  const statsB = _realStats[teamB] || {};
+  const ziA = parseFloat(statsA.ziAvg || 0);
+  const ziB = parseFloat(statsB.ziAvg || 0);
 
   let text = '';
   if (ziA >= 6 || ziB >= 6) {

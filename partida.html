@@ -563,84 +563,161 @@
 
   // FIX 3 — dead static EVENTS array removed; dynamic initTimeline() is the only timeline
 
-  // ── ESCALAÇÕES ─────────────────────────────────────────────────
-  const BOT_SQUAD = ['John (GK)','Damián Suárez','Adryelson','Barboza','Marçal','Tchê Tchê','Gregore','Marlon Freitas','Tiquinho','Júnior Santos','Luiz Henrique'];
-  const FLA_SQUAD = ['Rossi (GK)','Wesley','Fabrício Bruno','David Luiz','Ayrton Lucas','Erick Pulgar','Léo Ortiz','Gerson','Arrascaeta','Gabigol','Pedro'];
-
-  ['bot','fla'].forEach(t => {
-    const el = document.getElementById(`squad-${t}`);
-    const squad = t === 'bot' ? BOT_SQUAD : FLA_SQUAD;
-    squad.forEach((p, i) => {
-      const div = document.createElement('div');
-      div.style.cssText = 'display:flex;align-items:center;gap:6px;';
-      div.innerHTML = `<span style="font-size:0.625rem;color:var(--gray);min-width:14px;">${i === 0 ? '' : i}</span><span>${p}</span>`;
-      el.appendChild(div);
+  // ── ESCALAÇÕES — carregadas da API (SDB squad) ─────────────────
+  // As escalações são populadas por renderRealLineups() quando há fixtureId,
+  // ou por loadSdbSquad() usando a busca por nome dos times da URL.
+  function _showSquadSkeleton() {
+    ['bot','fla'].forEach(t => {
+      const el = document.getElementById(`squad-${t}`);
+      if (!el) return;
+      el.innerHTML = Array.from({length:11}, (_,i) =>
+        `<div style="display:flex;align-items:center;gap:8px;padding:3px 0;">
+          <div class="skel" style="width:24px;height:24px;border-radius:50%;flex-shrink:0;"></div>
+          <div class="skel" style="height:11px;width:${80 + (i%3)*20}px;border-radius:6px;"></div>
+        </div>`
+      ).join('');
     });
+  }
+  _showSquadSkeleton();
+
+  // Carrega escalação real do SDB usando nome do time da URL
+  async function loadSdbSquad(teamName, containerId) {
+    if (!teamName || typeof ZebraAPI === 'undefined') return;
+    const el = document.getElementById(containerId);
+    if (!el) return;
+    try {
+      const res = await ZebraAPI.sportsDb.searchTeam(teamName);
+      const team = res?.teams?.[0];
+      if (!team?.idTeam) return;
+      const players = await ZebraAPI.sportsDb.getSquad(team.idTeam);
+      if (!players?.length) return;
+      el.innerHTML = '';
+      players.slice(0, 15).forEach((p, i) => {
+        const num  = p.strNumber || '';
+        const pos  = p.strPosition || '';
+        const photo = p.strCutout || p.strThumb || '';
+        const div = document.createElement('div');
+        div.style.cssText = 'display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid var(--border);';
+        div.innerHTML = `
+          ${photo ? `<img src="${photo}" alt="${p.strPlayer}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;background:var(--card2);flex-shrink:0;" loading="lazy" onerror="this.style.background='var(--card2)';this.style.visibility='hidden';">` : `<span style="width:28px;height:28px;border-radius:50%;background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:0.625rem;font-weight:700;flex-shrink:0;">${(p.strPlayer||'').charAt(0)}</span>`}
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:0.8125rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.strPlayer || '—'}</div>
+            <div style="font-size:0.6875rem;color:var(--gray);">${pos}</div>
+          </div>
+          ${num ? `<span style="font-size:0.75rem;font-weight:700;color:var(--gray);flex-shrink:0;">#${num}</span>` : ''}
+        `;
+        el.appendChild(div);
+      });
+    } catch(e) {
+      console.warn('[partida] squad SDB error:', e);
+      if (el.innerHTML.includes('skel')) el.innerHTML = '<div style="font-size:0.8125rem;color:var(--gray);padding:8px 0;">Escalação indisponível</div>';
+    }
+  }
+
+  // Dispara o carregamento das escalações após initRealData() terminar
+  window.addEventListener('zs:lineups-loaded', () => {
+    // Lineups já foram carregadas por renderRealLineups() — não usar SDB
   });
 
-  // ── MATCH STATS ─────────────────────────────────────────────────
-  const STATS = [
-    { label:'Posse de bola', home:58, away:42, unit:'%' },
-    { label:'Chutes',        home:14, away:9,  unit:'' },
-    { label:'No gol',        home:6,  away:2,  unit:'' },
-    { label:'Escanteios',    home:7,  away:4,  unit:'' },
-    { label:'Faltas',        home:11, away:16, unit:'' },
-    { label:'Amarelos',      home:1,  away:2,  unit:'' },
-    { label:'Vermelhos',     home:0,  away:1,  unit:'' },
-    { label:'xG',            home:2.1,away:0.8,unit:'' },
-  ];
+  // Se não tiver fixtureId, carrega do SDB após um pequeno delay
+  // (deixa renderRealLineups() ter prioridade se carregar primeiro)
+  if (_urlHome) setTimeout(() => {
+    const homeEl = document.getElementById('squad-bot');
+    if (homeEl && homeEl.querySelector('.skel')) {
+      loadSdbSquad(_urlHome, 'squad-bot');
+    }
+  }, 3000);
+  if (_urlAway) setTimeout(() => {
+    const awayEl = document.getElementById('squad-fla');
+    if (awayEl && awayEl.querySelector('.skel')) {
+      loadSdbSquad(_urlAway, 'squad-fla');
+    }
+  }, 3200);
 
+  // ── MATCH STATS — carregadas da API ─────────────────────────────
+  // Estatísticas reais são injetadas por renderRealStats() dentro de initRealData().
+  // Mostra skeleton até que a API responda.
   const statsEl = document.getElementById('matchStats');
-  // FIX 15 — use URL params for team names in stats header
-  const _statsHome = _urlHome || 'Botafogo';
-  const _statsAway = _urlAway || 'Flamengo';
+  const _statsHome = _urlHome || 'Casa';
+  const _statsAway = _urlAway || 'Fora';
   statsEl.innerHTML = `
-    <div id="matchStatsHeader" style="display:flex;justify-content:space-between;margin-bottom:14px;">
-      <span data-team="home" style="font-size:0.875rem;font-weight:700;color:var(--green);">${_statsHome}</span>
-      <span data-team="away" style="font-size:0.875rem;font-weight:700;color:var(--red);">${_statsAway}</span>
-    </div>`;
+    <div style="display:flex;justify-content:space-between;margin-bottom:14px;">
+      <span style="font-size:0.875rem;font-weight:700;color:var(--green);">${_statsHome}</span>
+      <span style="font-size:0.875rem;font-weight:700;color:var(--red);">${_statsAway}</span>
+    </div>
+    ${Array.from({length:6}, () => `
+      <div style="margin-bottom:12px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:5px;">
+          <div class="skel" style="height:12px;width:30px;border-radius:6px;"></div>
+          <div class="skel" style="height:12px;width:80px;border-radius:6px;"></div>
+          <div class="skel" style="height:12px;width:30px;border-radius:6px;"></div>
+        </div>
+        <div class="skel" style="height:5px;border-radius:3px;"></div>
+      </div>`).join('')}
+    <p id="statsUnavailable" style="display:none;text-align:center;font-size:0.8125rem;color:var(--gray);padding:8px 0;">Estatísticas indisponíveis para esta partida</p>`;
 
-  STATS.forEach(s => {
-    const total = s.home + s.away || 1;
-    const homePct = Math.round((s.home / total) * 100);
-    const div = document.createElement('div');
-    div.style.marginBottom = '12px';
-    div.innerHTML = `
-      <div style="display:flex;justify-content:space-between;font-size:0.8125rem;margin-bottom:5px;">
-        <span style="font-weight:600;color:var(--green);">${s.home}${s.unit}</span>
-        <span style="font-size:0.75rem;color:var(--gray);">${s.label}</span>
-        <span style="font-weight:600;color:var(--red);">${s.away}${s.unit}</span>
-      </div>
-      <div style="display:flex;gap:3px;height:5px;">
-        <div style="flex:${homePct};background:var(--green);border-radius:3px 0 0 3px;"></div>
-        <div style="flex:${100-homePct};background:var(--red);border-radius:0 3px 3px 0;"></div>
+  // Render function called by initRealData() when real stats arrive
+  window._renderMatchStats = function(statsArr) {
+    statsEl.innerHTML = `
+      <div style="display:flex;justify-content:space-between;margin-bottom:14px;">
+        <span style="font-size:0.875rem;font-weight:700;color:var(--green);">${_statsHome}</span>
+        <span style="font-size:0.875rem;font-weight:700;color:var(--red);">${_statsAway}</span>
       </div>`;
-    statsEl.appendChild(div);
-  });
+    statsArr.forEach(s => {
+      const total = (s.home + s.away) || 1;
+      const homePct = Math.round((s.home / total) * 100);
+      const div = document.createElement('div');
+      div.style.marginBottom = '12px';
+      div.innerHTML = `
+        <div style="display:flex;justify-content:space-between;font-size:0.8125rem;margin-bottom:5px;">
+          <span style="font-weight:600;color:var(--green);">${s.home}${s.unit||''}</span>
+          <span style="font-size:0.75rem;color:var(--gray);">${s.label}</span>
+          <span style="font-weight:600;color:var(--red);">${s.away}${s.unit||''}</span>
+        </div>
+        <div style="display:flex;gap:3px;height:5px;">
+          <div style="flex:${homePct};background:var(--green);border-radius:3px 0 0 3px;"></div>
+          <div style="flex:${100-homePct};background:var(--red);border-radius:0 3px 3px 0;"></div>
+        </div>`;
+      statsEl.appendChild(div);
+    });
+  };
 
-  // ── H2H ─────────────────────────────────────────────────────────
-  const H2H = [
-    { date:'09/05/2025', home:'Botafogo', away:'Flamengo', hs:3, as:0, zebra:true  },
-    { date:'02/03/2025', home:'Flamengo', away:'Botafogo', hs:2, as:1, zebra:false },
-    { date:'15/09/2024', home:'Botafogo', away:'Flamengo', hs:1, as:1, zebra:false },
-    { date:'22/06/2024', home:'Flamengo', away:'Botafogo', hs:3, as:0, zebra:false },
-    { date:'10/03/2024', home:'Botafogo', away:'Flamengo', hs:0, as:2, zebra:false },
-  ];
-
+  // ── H2H — carregado da API ───────────────────────────────────────
+  // Dados reais são injetados por renderRealH2H() dentro de initRealData().
   const h2hEl = document.getElementById('h2hList');
-  H2H.forEach((g, i) => {
-    const diff = g.hs - g.as;
-    const scoreColor = diff > 0 ? 'var(--green)' : diff < 0 ? 'var(--red)' : 'var(--gray)';
-    const row = document.createElement('div');
-    row.style.cssText = `display:flex;align-items:center;gap:10px;padding:10px 14px;${i < H2H.length-1 ? 'border-bottom:1px solid var(--border);' : ''}`;
-    row.innerHTML = `
-      <span style="font-size:0.6875rem;color:var(--gray);min-width:60px;">${g.date}</span>
-      <span style="font-size:0.8125rem;flex:1;font-weight:500;">${g.home}</span>
-      <span style="font-size:1rem;font-weight:700;min-width:48px;text-align:center;color:${scoreColor};">${g.hs}–${g.as}</span>
-      <span style="font-size:0.8125rem;flex:1;text-align:right;font-weight:500;">${g.away}</span>
-      ${g.zebra ? `<span class="badge badge--zebra" style="font-size:0.5625rem;">🦓</span>` : '<span style="width:28px;"></span>'}`;
-    h2hEl.appendChild(row);
-  });
+  h2hEl.innerHTML = Array.from({length:5}, () => `
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);">
+      <div class="skel" style="height:11px;width:60px;border-radius:6px;flex-shrink:0;"></div>
+      <div class="skel" style="height:11px;flex:1;border-radius:6px;"></div>
+      <div class="skel" style="height:14px;width:40px;border-radius:6px;flex-shrink:0;"></div>
+      <div class="skel" style="height:11px;flex:1;border-radius:6px;"></div>
+    </div>`).join('') +
+    `<p id="h2hUnavailable" style="display:none;text-align:center;font-size:0.8125rem;color:var(--gray);padding:16px;">Histórico de confrontos indisponível</p>`;
+
+  // Render function called by initRealData() when H2H data arrives
+  window._renderH2H = function(matches) {
+    h2hEl.innerHTML = '';
+    if (!matches.length) {
+      h2hEl.innerHTML = '<p style="text-align:center;font-size:0.8125rem;color:var(--gray);padding:16px;">Histórico de confrontos indisponível</p>';
+      if (typeof window._updateH2hPreview === 'function') window._updateH2hPreview([]);
+      return;
+    }
+    // Also update the mini preview cards at the top
+    if (typeof window._updateH2hPreview === 'function') window._updateH2hPreview(matches);
+    matches.forEach((g, i) => {
+      const diff = g.hs - g.as;
+      const scoreColor = diff > 0 ? 'var(--green)' : diff < 0 ? 'var(--red)' : 'var(--gray)';
+      const row = document.createElement('div');
+      row.style.cssText = `display:flex;align-items:center;gap:10px;padding:10px 14px;${i < matches.length-1 ? 'border-bottom:1px solid var(--border);' : ''}`;
+      row.innerHTML = `
+        <span style="font-size:0.6875rem;color:var(--gray);min-width:60px;">${g.date}</span>
+        <span style="font-size:0.8125rem;flex:1;font-weight:500;">${g.home}</span>
+        <span style="font-size:1rem;font-weight:700;min-width:48px;text-align:center;color:${scoreColor};">${g.hs}–${g.as}</span>
+        <span style="font-size:0.8125rem;flex:1;text-align:right;font-weight:500;">${g.away}</span>
+        ${g.zebra ? `<span class="badge badge--zebra" style="font-size:0.5625rem;">🦓</span>` : '<span style="width:28px;"></span>'}`;
+      h2hEl.appendChild(row);
+    });
+  };
 
   // ── API REAL DATA ──────────────────────────────────────────────
   async function initRealData() {
@@ -776,20 +853,52 @@
   }
   initRealData();
 
-  // ── FORMA RECENTE ───────────────────────────────────────────────
-  const BOT_FORM = ['V','V','E','V','D'];
-  const FLA_FORM = ['D','V','V','D','V'];
+  // ── FORMA RECENTE — carregada do SDB ───────────────────────────
+  function _showFormSkeleton(elId) {
+    const el = document.getElementById(elId);
+    if (!el) return;
+    el.innerHTML = Array(5).fill(0).map(() =>
+      `<span class="skel" style="width:28px;height:28px;border-radius:50%;display:inline-block;background:var(--border);"></span>`
+    ).join('');
+  }
+  _showFormSkeleton('botForm');
+  _showFormSkeleton('flaForm');
 
-  ['bot','fla'].forEach(t => {
-    const form = t === 'bot' ? BOT_FORM : FLA_FORM;
-    const el   = document.getElementById(`${t}Form`);
-    form.forEach(r => {
-      const pill = document.createElement('span');
-      pill.className = `result-pill result-pill--${r.toLowerCase()}`;
-      pill.textContent = r;
-      el.appendChild(pill);
-    });
-  });
+  async function loadTeamForm(teamName, elId) {
+    if (!teamName || typeof ZebraAPI === 'undefined') return;
+    const el = document.getElementById(elId);
+    if (!el) return;
+    try {
+      const res = await ZebraAPI.sportsDb.searchTeam(teamName);
+      const sdbId = res?.teams?.[0]?.idTeam;
+      if (!sdbId) { el.innerHTML = ''; return; }
+      const events = await ZebraAPI.sportsDb.getTeamLastEvents(sdbId);
+      if (!events?.results?.length) { el.innerHTML = ''; return; }
+      el.innerHTML = '';
+      events.results.slice(0, 5).forEach(ev => {
+        const hScore = parseInt(ev.intHomeScore, 10);
+        const aScore = parseInt(ev.intAwayScore, 10);
+        const isHome = (ev.strHomeTeam || '').toLowerCase().includes(teamName.toLowerCase().split(' ')[0].toLowerCase());
+        let result;
+        if (isNaN(hScore) || isNaN(aScore)) { result = null; }
+        else if (hScore === aScore) result = 'E';
+        else if ((isHome && hScore > aScore) || (!isHome && aScore > hScore)) result = 'V';
+        else result = 'D';
+        if (!result) return;
+        const pill = document.createElement('span');
+        pill.className = `result-pill result-pill--${result.toLowerCase()}`;
+        pill.textContent = result;
+        el.appendChild(pill);
+      });
+      if (!el.children.length) el.innerHTML = '<span style="font-size:0.75rem;color:var(--gray);">—</span>';
+    } catch(e) {
+      el.innerHTML = '';
+      console.warn('[partida] loadTeamForm error:', e);
+    }
+  }
+
+  if (_urlHome) loadTeamForm(_urlHome, 'botForm');
+  if (_urlAway) loadTeamForm(_urlAway, 'flaForm');
 
   // ── TIMELINE DE EVENTOS ─────────────────────────────────────────
   // Preenche um par de containers (dots + eventos) com o array de eventos
@@ -865,27 +974,34 @@
       </div>`).join('')}`;
   }
 
-  // ── H2H PREVIEW MINI-CARDS ──────────────────────────────────────
+  // ── H2H PREVIEW MINI-CARDS — preenchido por _renderH2H quando a API responde ──
   function initH2hPreview() {
     const el = document.getElementById('h2hPreview');
     if (!el) return;
-    const homeTeam = _urlHome || 'Time A';
-    const awayTeam = _urlAway || 'Time B';
-    const matches = [
-      { date:'Mar 2025', hs:2, as:0, home:homeTeam, away:awayTeam },
-      { date:'Nov 2024', hs:1, as:1, home:awayTeam, away:homeTeam },
-      { date:'Jul 2024', hs:0, as:3, home:homeTeam, away:awayTeam },
-    ];
-    el.innerHTML = matches.map(m => {
-      const diff = m.hs - m.as;
+    // Mostra skeleton enquanto aguarda dados reais
+    el.innerHTML = Array(3).fill(0).map(() =>
+      `<div style="flex:1;background:var(--card2);border:1px solid var(--border);border-radius:var(--radius-md);padding:8px;text-align:center;min-width:0;">
+        <div class="skel" style="height:10px;width:60%;margin:0 auto 6px;"></div>
+        <div class="skel" style="height:20px;width:40%;margin:0 auto 4px;"></div>
+        <div class="skel" style="height:9px;width:70%;margin:0 auto;"></div>
+      </div>`
+    ).join('');
+  }
+
+  // Atualiza os mini-cards quando H2H real chegar (chamado por _renderH2H)
+  window._updateH2hPreview = function(matches) {
+    const el = document.getElementById('h2hPreview');
+    if (!el || !matches?.length) return;
+    el.innerHTML = matches.slice(0,3).map(m => {
+      const diff = (m.hs||0) - (m.as||0);
       const color = diff > 0 ? 'var(--green)' : diff < 0 ? 'var(--red)' : 'var(--gold)';
       return `<div style="flex:1;background:var(--card2);border:1px solid var(--border);border-radius:var(--radius-md);padding:8px;text-align:center;min-width:0;">
-        <div style="font-size:0.625rem;color:var(--gray);margin-bottom:4px;">${m.date}</div>
-        <div style="font-size:1rem;font-weight:800;color:${color};">${m.hs}–${m.as}</div>
-        <div style="font-size:0.5625rem;color:var(--gray);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${m.home}</div>
+        <div style="font-size:0.625rem;color:var(--gray);margin-bottom:4px;">${m.date||''}</div>
+        <div style="font-size:1rem;font-weight:800;color:${color};">${m.hs??'?'}–${m.as??'?'}</div>
+        <div style="font-size:0.5625rem;color:var(--gray);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${m.home||''}</div>
       </div>`;
     }).join('');
-  }
+  };
 
   initTimeline();
   initOdds();
