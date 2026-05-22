@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/main.css?v=12" />
-  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script src="https://unpkg.com/lucide@0.363.0/dist/umd/lucide.min.js"></script>
 </head>
 <body>
 <div class="app-wrapper">
@@ -100,15 +100,15 @@
     <div style="display:flex;gap:0;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;">
       <div style="flex:1;padding:10px;text-align:center;border-right:1px solid var(--border);">
         <div id="homeOddLabel" style="font-size:0.625rem;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Odd Botafogo</div>
-        <div style="font-size:1.125rem;font-weight:700;color:var(--green);">4.50</div>
+        <div id="homeOddsDisplay" style="font-size:1.125rem;font-weight:700;color:var(--green);">4.50</div>
       </div>
       <div style="flex:1;padding:10px;text-align:center;border-right:1px solid var(--border);">
         <div style="font-size:0.625rem;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Empate</div>
-        <div style="font-size:1.125rem;font-weight:700;">3.20</div>
+        <div id="drawOddsDisplay" style="font-size:1.125rem;font-weight:700;">3.20</div>
       </div>
       <div style="flex:1;padding:10px;text-align:center;">
         <div id="awayOddLabel" style="font-size:0.625rem;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Odd Flamengo</div>
-        <div style="font-size:1.125rem;font-weight:700;color:var(--red);">1.75</div>
+        <div id="awayOddsDisplay" style="font-size:1.125rem;font-weight:700;color:var(--red);">1.75</div>
       </div>
     </div>
   </section>
@@ -410,32 +410,17 @@
     }
   }
 
-  // 6. Odds
+  // 6. Odds — use explicit IDs instead of fragile style-string selectors (BUG-12)
   if (_urlOddsH || _urlOddsA) {
-    // Find home/away odd display elements (first and last in odds bar)
-    const oddEls = document.querySelectorAll('[id="homeOdd"],[id="awayOdd"]');
-    if (oddEls.length === 0) {
-      // Target by position: the odds bar has 3 divs (home, draw, away)
-      const oddDivs = document.querySelectorAll('#matchScore').length
-        ? document.querySelectorAll('div[style*="font-size:1.125rem;font-weight:700"]')
-        : [];
-      // Fallback: update via innerText search in odds section
-    }
-    // Update the static odd values displayed in the odds row
-    const allOddVals = document.querySelectorAll('[style*="font-size:1.125rem;font-weight:700;color:var(--green)"]');
-    if (_urlOddsH && allOddVals.length > 0) allOddVals[0].textContent = _urlOddsH;
-    const allOddRed = document.querySelectorAll('[style*="font-size:1.125rem;font-weight:700;color:var(--red)"]');
-    if (_urlOddsA && allOddRed.length > 0) allOddRed[0].textContent = _urlOddsA;
-    // Also update home/away labels that reference team names in odds row
-    const oddLabels = document.querySelectorAll('[style*="font-size:0.625rem;color:var(--gray);text-transform:uppercase"]');
-    if (_urlHome && oddLabels.length > 0) {
-      const homeLabel = oddLabels[0];
-      if (homeLabel && homeLabel.textContent.toLowerCase().includes('odd')) homeLabel.textContent = `Odd ${_urlHome}`;
-    }
-    if (_urlAway && oddLabels.length > 2) {
-      const awayLabel = oddLabels[2];
-      if (awayLabel && awayLabel.textContent.toLowerCase().includes('odd')) awayLabel.textContent = `Odd ${_urlAway}`;
-    }
+    const homeOddsEl = document.getElementById('homeOddsDisplay');
+    const awayOddsEl = document.getElementById('awayOddsDisplay');
+    if (_urlOddsH && homeOddsEl) homeOddsEl.textContent = _urlOddsH;
+    if (_urlOddsA && awayOddsEl) awayOddsEl.textContent = _urlOddsA;
+    // Update home/away labels in odds row
+    const hOddLbl = document.getElementById('homeOddLabel');
+    if (_urlHome && hOddLbl) hOddLbl.textContent = `Odd ${_urlHome}`;
+    const aOddLbl = document.getElementById('awayOddLabel');
+    if (_urlAway && aOddLbl) aOddLbl.textContent = `Odd ${_urlAway}`;
   }
 
   // Atualiza labels de probabilidade, odds e abreviações com os times reais

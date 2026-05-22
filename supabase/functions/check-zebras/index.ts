@@ -154,12 +154,14 @@ serve(async (req) => {
       // Tenta encontrar a partida nas odds pelo nome do time (normalizado)
       const homeNorm = normName(match.homeTeam)
       const awayNorm = normName(match.awayTeam)
-      const oddsEntry = lidOdds.find(o =>
-        o && (normName(o.home).includes(homeNorm.slice(0, 5)) ||
-              homeNorm.includes(normName(o.home).slice(0, 5))) &&
-        (normName(o.away).includes(awayNorm.slice(0, 5)) ||
-              awayNorm.includes(normName(o.away).slice(0, 5)))
-      )
+      const oddsEntry = lidOdds.find(o => {
+        if (!o) return false
+        const oHome = normName(o.home)
+        const oAway = normName(o.away)
+        const homeMatch = oHome.includes(homeNorm.slice(0, 8)) || homeNorm.includes(oHome.slice(0, 8))
+        const awayMatch = oAway.includes(awayNorm.slice(0, 8)) || awayNorm.includes(oAway.slice(0, 8))
+        return homeMatch && awayMatch
+      })
 
       if (!oddsEntry) continue // sem odds = pula
 

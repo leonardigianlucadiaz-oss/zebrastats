@@ -15,8 +15,29 @@ const CORS = {
 serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS })
 
+  // BUG-10 / SEC-1: Verify JWT before processing any request
+  const sb = createClient(
+    Deno.env.get('SUPABASE_URL') || '',
+    Deno.env.get('SUPABASE_ANON_KEY') || ''
+  )
+  const authHeader = req.headers.get('Authorization') || ''
+  const token = authHeader.replace('Bearer ', '')
+  if (!token) {
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+      status: 401, headers: { ...CORS, 'Content-Type': 'application/json' }
+    })
+  }
+  const { data: { user }, error: authError } = await sb.auth.getUser(token)
+  if (authError || !user) {
+    return new Response(JSON.stringify({ error: 'Invalid or expired token' }), {
+      status: 401, headers: { ...CORS, 'Content-Type': 'application/json' }
+    })
+  }
+  // Use verified user.id — do not trust any user_id from request body
+  const authenticatedUserId = user.id
+
   try {
-    const { priceId, userId, successUrl, cancelUrl } = await req.json()
+    const { priceId, successUrl, cancelUrl } = await req.json()
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -24,7 +45,7 @@ serve(async (req) => {
       line_items: [{ price: priceId, quantity: 1 }],
       success_url: successUrl + '?session_id={CHECKOUT_SESSION_ID}',
       cancel_url:  cancelUrl,
-      metadata: { userId },
+      metadata: { userId: authenticatedUserId },
       allow_promotion_codes: true,
       billing_address_collection: 'required',
     })
