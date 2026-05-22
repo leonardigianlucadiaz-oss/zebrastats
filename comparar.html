@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/main.css?v=12" />
-  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script src="https://unpkg.com/lucide@0.363.0/dist/umd/lucide.min.js"></script>
 </head>
 <body>
 <div class="app-wrapper">
@@ -906,7 +906,17 @@ function renderH2HList(h2h) {
 
         <i data-lucide="chevron-right" style="width:14px;height:14px;color:var(--border);flex-shrink:0;"></i>
       </div>`;
-    card.addEventListener('click', () => window.location.href = 'partida.html');
+    card.addEventListener('click', () => {
+      const p = new URLSearchParams({
+        home: m.home,
+        away: m.away,
+        score: `${m.hs||0}–${m.as||0}`,
+        ...(m.league ? { league: m.league } : {}),
+        ...(m.date   ? { date:   m.date   } : {}),
+        ...(m.id     ? { fixtureId: m.id  } : {}),
+      });
+      window.location.href = `partida.html?${p}`;
+    });
     container.appendChild(card);
   });
 }
@@ -1114,9 +1124,12 @@ const _origRenderComp = typeof renderComparison === 'function' ? renderCompariso
 if (_origRenderComp) {
   window.renderComparison = function(a, b) {
     _origRenderComp(a, b);
+    // Fall back to module-level selectedA/selectedB when called with no args
+    const idA = (a !== undefined ? a : (selectedA && selectedA.id));
+    const idB = (b !== undefined ? b : (selectedB && selectedB.id));
     setTimeout(() => {
-      _renderH2HVisual(a, b);
-      _showZebraIndicator(a, b);
+      _renderH2HVisual(idA, idB);
+      _showZebraIndicator(idA, idB);
     }, 300);
   };
 }

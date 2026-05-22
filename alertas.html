@@ -787,10 +787,10 @@ function _alertasUpdateBadge() {
 // ── PRESET ALERT SHORTCUTS ────────────────────────────────────────────────────
 function addPresetAlert(preset) {
   const presets = {
-    'zebra-alta':   { league_id: null, min_zi: 70, label: 'Zebra Alta' },
-    'zebra-media':  { league_id: null, min_zi: 50, label: 'Zebra Média' },
-    'premier':      { league_id: 'ENG', min_zi: 40, label: 'Premier League' },
-    'brasileirao':  { league_id: 'BRA', min_zi: 40, label: 'Brasileirão' },
+    'zebra-alta':   { league_id: null, min_zi: 7, label: 'Zebra Alta' },
+    'zebra-media':  { league_id: null, min_zi: 5, label: 'Zebra Média' },
+    'premier':      { league_id: 'ENG', min_zi: 4, label: 'Premier League' },
+    'brasileirao':  { league_id: 'BRA', min_zi: 4, label: 'Brasileirão' },
   };
   const p = presets[preset];
   if (!p) return;

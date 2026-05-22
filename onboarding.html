@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/main.css?v=12" />
-  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script src="https://unpkg.com/lucide@0.363.0/dist/umd/lucide.min.js"></script>
 </head>
 <body>
 
@@ -734,12 +734,14 @@
 
     // Persiste ligas favoritas no Supabase
     if (typeof ZebraDB !== 'undefined') {
-      const selectedLeagues = Array.from(document.querySelectorAll('.league-card.selected, .league-item.active, [data-lid].selected'))
+      const selectedLeagueEls = Array.from(document.querySelectorAll('.league-card.selected, .league-item.active, [data-lid].selected'))
         .map(el => el.dataset.lid || el.dataset.league || el.getAttribute('data-lid'))
         .filter(Boolean);
+      // Prefer the selectedLeagues Set (authoritative); fall back to DOM query
+      const leagueIds = selectedLeagues.size > 0 ? Array.from(selectedLeagues) : selectedLeagueEls;
       ZebraDB.dbSaveSettings({
         onboarded: true,
-        favorite_leagues: selectedLeagues.length ? selectedLeagues : ['BRA','ENG','ESP']
+        favorite_leagues: leagueIds.length ? leagueIds : ['BRA','ENG','ESP']
       });
     }
     localStorage.setItem('zs_onboarded', '1');

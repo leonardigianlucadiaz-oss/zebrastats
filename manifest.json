@@ -2,7 +2,7 @@
   "name": "ZebraStats",
   "short_name": "ZebraStats",
   "description": "Estatísticas e alertas de zebras no futebol mundial",
-  "start_url": "home.html",
+  "start_url": "index.html",
   "scope": ".",
   "display": "standalone",
   "background_color": "#0D1A2A",

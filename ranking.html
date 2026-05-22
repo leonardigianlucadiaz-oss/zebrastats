@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/main.css?v=12" />
-  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script src="https://unpkg.com/lucide@0.363.0/dist/umd/lucide.min.js"></script>
 </head>
 <body>
 <div class="app-wrapper">
@@ -151,8 +151,28 @@ const RANKING_DATA = [];  // populated by initRealRanking() from real API data
 // ── STATE ─────────────────────────────────────────────────────────────────────
 let activePeriodNew = 'semana';
 
-// Mock ZI multipliers per period so numbers feel different
-const PERIOD_MULT = { semana: 1.0, mes: 1.0, historico: 1.0 };
+// Period date-filter helper — returns true if the zebra's date falls within the given period
+function _inPeriod(z, period) {
+  if (period === 'historico') return true;
+  const dateStr = z.date || '';
+  if (!dateStr) return false;
+  const parts = dateStr.split('/');
+  let dt;
+  if (parts.length >= 3) {
+    dt = new Date(parseInt(parts[2], 10), parseInt(parts[1], 10) - 1, parseInt(parts[0], 10));
+  } else if (parts.length === 2) {
+    dt = new Date(new Date().getFullYear(), parseInt(parts[1], 10) - 1, parseInt(parts[0], 10));
+  } else {
+    // Try ISO format fallback
+    dt = new Date(dateStr);
+  }
+  if (isNaN(dt.getTime())) return false;
+  const now = new Date();
+  const diffDays = (now - dt) / 86400000;
+  if (period === 'semana') return diffDays <= 7;
+  if (period === 'mes')    return diffDays <= 30;
+  return true;
+}
 
 document.querySelectorAll('#rankingPeriodTabs .tab-bar__item').forEach(btn => {
   btn.addEventListener('click', function() {
@@ -215,11 +235,11 @@ const ziLabels = { grande: 'Grande', media: 'Média', leve: 'Leve' };
 function positionBadge(pos) {
   const medals = { 1:'🥇', 2:'🥈', 3:'🥉' };
   if (medals[pos]) {
-    return `<div style="width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:1.375rem;flex-shrink:0;">${medals[pos]}</div>`;
+    return `<div data-pos-badge="${pos}" style="width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:1.375rem;flex-shrink:0;">${medals[pos]}</div>`;
   }
   const bg = pos <= 10 ? 'rgba(46,230,92,0.1)' : 'var(--card2)';
   const color = pos <= 10 ? 'var(--green)' : 'var(--gray)';
-  return `<div style="width:36px;height:36px;border-radius:50%;background:${bg};display:flex;align-items:center;justify-content:center;font-size:0.6875rem;font-weight:800;color:${color};flex-shrink:0;">#${pos}</div>`;
+  return `<div data-pos-badge="${pos}" style="width:36px;height:36px;border-radius:50%;background:${bg};display:flex;align-items:center;justify-content:center;font-size:0.6875rem;font-weight:800;color:${color};flex-shrink:0;">#${pos}</div>`;
 }
 
 function teamCrest(url, name) {
@@ -325,8 +345,6 @@ function makeTrend(zi) {
 
 // ── RENDER RANKING ────────────────────────────────────────────────────────────
 function renderRanking() {
-  const mult = (typeof PERIOD_MULT !== 'undefined' && typeof activePeriodNew !== 'undefined') ? PERIOD_MULT[activePeriodNew] : 1;
-
   const container  = document.getElementById('rankingList');
   const lockBanner = document.getElementById('rankLockBanner');
   container.innerHTML = '';
@@ -343,9 +361,8 @@ function renderRanking() {
 
   let list = data;
 
-  // Period filter
-  if (activePeriodNew === 'semana') list = list.filter(z => z.period === 'week');
-  if (activePeriodNew === 'mes')    list = list.filter(z => z.period === 'week' || z.period === 'month');
+  // Period filter — filter by real match date
+  list = list.filter(z => _inPeriod(z, activePeriodNew));
 
   // Sort by ZI desc
   list.sort((a, b) => b.zi - a.zi);
@@ -354,7 +371,7 @@ function renderRanking() {
   renderPodium(list);
 
   if (!list.length) {
-    if (activePeriodNew === 'semana' && !RANKING_DATA.length) {
+    if (!RANKING_DATA.length) {
       // Show skeleton while data may still be loading
       container.innerHTML = `
         ${[1,2,3,4,5].map(() => `
@@ -381,10 +398,11 @@ function renderRanking() {
         }
       }, 2000);
     } else {
+      const periodLabel = { semana: 'esta semana', mes: 'este mês', historico: 'o período selecionado' }[activePeriodNew] || 'este período';
       container.innerHTML = `<div style="text-align:center;padding:48px 16px;color:var(--gray);">
         <div style="font-size:2.5rem;margin-bottom:12px;">🏆</div>
-        <div style="font-weight:600;margin-bottom:4px;">Nenhuma zebra encontrada</div>
-        <div style="font-size:0.8125rem;">Tente outro período ou liga</div>
+        <div style="font-weight:600;margin-bottom:4px;">Sem dados para este período</div>
+        <div style="font-size:0.8125rem;">Não há zebras registradas para ${periodLabel}. Tente outro período ou liga.</div>
       </div>`;
     }
     lockBanner.style.display = 'none';
@@ -397,7 +415,7 @@ function renderRanking() {
   visible.forEach((z, idx) => {
     const pos  = idx + 1;
     const cls  = ziClass(z.zi);
-    const card = buildRankCard(z, pos, cls, false, mult);
+    const card = buildRankCard(z, pos, cls, false);
     container.appendChild(card);
   });
 
@@ -405,7 +423,7 @@ function renderRanking() {
   if (hasLocked) {
     const preview = list[LIMIT];
     const cls     = ziClass(preview.zi);
-    const ghost   = buildRankCard(preview, LIMIT + 1, cls, true, mult);
+    const ghost   = buildRankCard(preview, LIMIT + 1, cls, true);
     container.appendChild(ghost);
   }
 
@@ -414,7 +432,7 @@ function renderRanking() {
   if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
-function buildRankCard(z, pos, cls, locked = false, mult = 1) {
+function buildRankCard(z, pos, cls, locked = false) {
   const hcUrl  = getCrest(z.home);
   const acUrl  = getCrest(z.away);
   const color  = ziColors[cls];
@@ -468,7 +486,7 @@ function buildRankCard(z, pos, cls, locked = false, mult = 1) {
             <!-- Odds chips -->
             <span style="font-size:0.625rem;background:rgba(46,230,92,0.1);color:var(--green);padding:2px 5px;border-radius:4px;font-weight:700;">${z.odds_h}</span>
             <!-- ZI badge -->
-            <span style="font-size:0.625rem;font-weight:800;padding:2px 6px;border-radius:4px;background:${color}22;color:${color};white-space:nowrap;">ZI ${(Math.round(z.zi * mult * 10) / 10)} · ${label}</span>
+            <span style="font-size:0.625rem;font-weight:800;padding:2px 6px;border-radius:4px;background:${color}22;color:${color};white-space:nowrap;">ZI ${(Math.round(z.zi * 10) / 10)} · ${label}</span>
           </div>
         </div>
       </div>

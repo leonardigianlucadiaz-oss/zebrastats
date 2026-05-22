@@ -64,12 +64,21 @@ async function authSignOut() {
   if (!sb) return;
   await sb.auth.signOut();
   // Fix #18: preserva tema E flag de migração concluída para não perder dados
+  // Read uid and migrated key BEFORE clear() so the key suffix is not empty
+  const uid      = localStorage.getItem('zs_uid') || '';
   const theme    = localStorage.getItem('zs_theme');
-  const migrated = localStorage.getItem(`zs_migrated_${localStorage.getItem('zs_uid') || ''}`);
+  const migrated = localStorage.getItem(`zs_migrated_${uid}`);
   localStorage.clear();
   if (theme)    localStorage.setItem('zs_theme', theme);
-  if (migrated) localStorage.setItem(`zs_migrated_${localStorage.getItem('zs_uid') || ''}`, migrated);
+  if (uid && migrated) localStorage.setItem(`zs_migrated_${uid}`, migrated);
   window.location.href = 'index.html';
+}
+
+async function authUpdatePassword(newPassword) {
+  const sb = getSupabase();
+  if (!sb) return { error: { message: 'Supabase indisponível' } };
+  const { data, error } = await sb.auth.updateUser({ password: newPassword });
+  return { data, error };
 }
 
 async function authResetPassword(email) {
@@ -191,6 +200,7 @@ async function initAuthUI() {
 // Exporta para uso global
 window.ZebraAuth = {
   getSupabase, authSignUp, authSignIn, authSignInGoogle, authSignOut,
+  authUpdatePassword,
   authResetPassword, getSessionUser, getProfile, getUserPlan, isPro,
   isProFromDB,  // Fix #2: versão async consultando profiles table
   initAuthUI

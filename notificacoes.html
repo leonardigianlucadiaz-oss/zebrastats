@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/main.css?v=12" />
-  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script src="https://unpkg.com/lucide@0.363.0/dist/umd/lucide.min.js"></script>
 </head>
 <body>
 <div class="app-wrapper">
@@ -147,6 +147,8 @@
   // ── ZEBRA ALERTS REAIS (API) ─────────────────────────────────
   async function loadRealZebraNotifs() {
     if (typeof ZebraAPI === 'undefined' || !ZebraAPI.isConfigured.footballData() || typeof ZebraEngine === 'undefined') return;
+    // Reset dynamic zebra entries to prevent duplicates on re-runs
+    NOTIFS.splice(0, NOTIFS.length, ...NOTIFS.filter(n => !n.id.startsWith('real-zebra-')));
     try {
       const results = await Promise.allSettled([
         ZebraAPI.fetchRealZebras('ENG', 5),
@@ -360,10 +362,7 @@
     }, 600);
   }
 
-  // Garante renderização mesmo que DOMContentLoaded já tenha disparado
-  document.addEventListener('DOMContentLoaded', () => {
-    if (typeof renderNotifs === 'function') renderNotifs();
-  });
+  // renderNotifs já foi chamado acima no INIT — sem necessidade de DOMContentLoaded
 </script>
 <style>
   .bottom-nav__icon i { width: 20px; height: 20px; display: block; }

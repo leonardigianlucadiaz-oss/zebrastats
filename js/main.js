@@ -125,11 +125,14 @@ function initBellBadge() {
  * @param {string} [fallback='home.html'] URL de destino se não houver histórico
  */
 function goBack(fallback) {
-  if (history.length > 1) {
-    history.back();
-  } else {
-    window.location.href = fallback || 'home.html';
-  }
+  try {
+    const ref = document.referrer;
+    if (ref && new URL(ref).origin === window.location.origin && ref !== window.location.href) {
+      history.back();
+      return;
+    }
+  } catch(e) {}
+  window.location.href = fallback || 'home.html';
 }
 
 // ── TOAST ─────────────────────────────────────────────────────

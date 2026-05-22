@@ -93,6 +93,19 @@ async function dbIsFavorite(teamId) {
   return !!data;
 }
 
+// ── PROFILES ──────────────────────────────────────────────────
+
+async function dbUpdateProfile({ name, email } = {}) {
+  const sb   = ZebraAuth.getSupabase();
+  const user = await _getUser();
+  if (!sb || !user) return { error: { message: 'Sem sessão ativa' } };
+  const updates = { id: user.id, updated_at: new Date().toISOString() };
+  if (name)  updates.full_name = name;
+  if (email) updates.email     = email;
+  const { data, error } = await sb.from('profiles').upsert(updates).eq('id', user.id);
+  return { data, error };
+}
+
 // ── SETTINGS ──────────────────────────────────────────────────
 
 async function dbGetSettings() {
@@ -206,6 +219,7 @@ async function migrateLocalStorageToSupabase() {
 
 window.ZebraDB = {
   dbGetFavorites, dbToggleFavorite, dbIsFavorite,
+  dbUpdateProfile,
   dbGetSettings, dbSaveSettings,
   dbGetAlerts, dbSaveAlert,
   dbLogZebraView,
