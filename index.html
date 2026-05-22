@@ -149,9 +149,31 @@
     });
 
     // Verifica se já está logado → redireciona
+    // Esconde o card durante a verificação para não piscar o formulário
+    const _authCard = document.querySelector('.auth-card');
+    if (_authCard) _authCard.style.visibility = 'hidden';
+
     (async () => {
-      const user = await ZebraAuth.getSessionUser();
-      if (user) { window.location.replace('home.html'); return; }
+      try {
+        const user = await ZebraAuth.getSessionUser();
+        if (user) {
+          // Mostra mensagem de redirecionamento em vez de piscar o formulário
+          if (_authCard) {
+            _authCard.style.visibility = '';
+            _authCard.innerHTML = `
+              <div style="text-align:center;padding:32px 16px;display:flex;flex-direction:column;align-items:center;gap:12px;">
+                <div style="font-size:2rem;animation:spin 1s linear infinite;display:inline-block;">⚽</div>
+                <div style="font-size:0.9375rem;font-weight:600;">Entrando...</div>
+                <div style="font-size:0.8125rem;color:var(--gray);">Você já está conectado. Redirecionando...</div>
+              </div>`;
+          }
+          window.location.replace('home.html');
+          return;
+        }
+      } catch {}
+
+      // Não logado — mostra o formulário normalmente
+      if (_authCard) _authCard.style.visibility = '';
 
       // Verifica redirect após reset de senha
       const params = new URLSearchParams(location.search);
