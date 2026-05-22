@@ -818,8 +818,10 @@
         return;
       }
 
-      // Busca TODAS as ligas em paralelo — renderiza assim que cada uma chega
-      ALL_LIDS.forEach(lid => {
+      // Busca todas as ligas escalonadas (600ms entre cada) para não ultrapassar
+      // o limite de 10 req/min do Football-Data free tier.
+      ALL_LIDS.forEach((lid, idx) => {
+        setTimeout(() => {
         Promise.all([
           ZebraAPI.footballData.getMatches(lid, 'IN_PLAY',    5).catch(() => null),
           ZebraAPI.footballData.getMatches(lid, 'SCHEDULED',  6).catch(() => null),
@@ -853,15 +855,17 @@
             renderUpcoming();
           }
         }).catch(e => console.warn(`[home] games ${lid}:`, e));
+        }, idx * 600); // escalonamento: 600ms entre cada liga
       });
 
-      // Fallback: se nenhuma liga respondeu em 8s, mostra estado vazio
+      // Fallback: se nenhuma liga respondeu após o escalonamento, mostra estado vazio
+      // 8s base + tempo de escalonamento total (ALL_LIDS.length * 600ms)
       setTimeout(() => {
         if (!anyRendered) {
           if (!LIVE_GAMES.length)    emptyState('liveGames',    'Nenhum jogo ao vivo agora.');
           if (!UPCOMING_GAMES.length) emptyState('upcomingGames','Nenhum jogo agendado em breve.');
         }
-      }, 8000);
+      }, 8000 + ALL_LIDS.length * 600);
     }
 
     // ── ZEBRA RANKING + SHARED DATA LOADER ───────────────
@@ -911,25 +915,50 @@
 
     // ── CARREGADOR CENTRAL: busca zebras de TODAS as ligas ───
     // Cada liga resolve independentemente e atualiza todos os widgets.
+    // Requisições são escalonadas (800ms entre cada) para respeitar o limite
+    // de 10 req/min do Football-Data free tier. Timer de fallback (18s) limpa
+    // os skeletons caso nenhuma liga responda (evita carregamento infinito).
     function _loadAllZebras() {
       if (typeof ZebraAPI === 'undefined' || !ZebraAPI.isConfigured.footballData() || typeof ZebraEngine === 'undefined') {
         rankContainer.innerHTML = '<div style="text-align:center;padding:16px;color:var(--gray);font-size:0.8125rem;">Dados indisponíveis — configure a API em Perfil</div>';
+        const hotC = document.getElementById('hotLeagues');
+        if (hotC) hotC.innerHTML = '<div style="text-align:center;padding:16px;color:var(--gray);font-size:0.75rem;grid-column:1/-1;">Sem dados disponíveis</div>';
+        const sparksGrid = document.getElementById('sparklineGrid');
+        if (sparksGrid) sparksGrid.innerHTML = '<div style="text-align:center;padding:16px;color:var(--gray);font-size:0.75rem;grid-column:1/-1;">Sem dados disponíveis</div>';
         return;
       }
-      ALL_LIDS.forEach(lid => {
-        ZebraAPI.fetchRealZebras(lid, 15).then(zebras => {
-          if (!zebras.length) return;
-          _zebrasByLid[lid] = zebras;
-          _zebraLoadedCount++;
-          // Atualiza todos os widgets que dependem de zebras
-          _renderRankingFromCache();
-          _updateHotLeagues();
-          _updateZebrasDoDia(zebras, lid);
-          _updateSparklines();
-          _updateStatsBar();
-          // Dispara evento para o hero banner
-          document.dispatchEvent(new CustomEvent('zebrasLoaded', { detail: Object.values(_zebrasByLid).flat() }));
-        }).catch(() => {});
+
+      // Fallback: após 18s sem nenhuma resposta, limpa os skeletons
+      const _fallbackTimer = setTimeout(() => {
+        if (!_zebraLoadedCount) {
+          rankContainer.innerHTML = '<div style="text-align:center;padding:16px;color:var(--gray);font-size:0.8125rem;">Sem zebras disponíveis agora. <a href="javascript:location.reload()" style="color:var(--green)">Tentar novamente</a></div>';
+          const hotC = document.getElementById('hotLeagues');
+          if (hotC && hotC.querySelector('.skel')) hotC.innerHTML = '<div style="text-align:center;padding:16px;color:var(--gray);font-size:0.75rem;grid-column:1/-1;">Sem dados no momento</div>';
+          const sparksGrid = document.getElementById('sparklineGrid');
+          if (sparksGrid && sparksGrid.querySelector('.skel')) sparksGrid.innerHTML = '<div style="text-align:center;padding:16px;color:var(--gray);font-size:0.75rem;grid-column:1/-1;">Sem dados no momento</div>';
+          // Dispara evento zebrasLoaded vazio para limpar seções que aguardam ele
+          document.dispatchEvent(new CustomEvent('zebrasLoaded', { detail: [] }));
+        }
+      }, 18000);
+
+      // Escalonamento: 800ms entre cada liga para não sobrecarregar a API
+      ALL_LIDS.forEach((lid, idx) => {
+        setTimeout(() => {
+          ZebraAPI.fetchRealZebras(lid, 15).then(zebras => {
+            if (!zebras.length) return;
+            clearTimeout(_fallbackTimer); // pelo menos uma liga respondeu — cancela fallback
+            _zebrasByLid[lid] = zebras;
+            _zebraLoadedCount++;
+            // Atualiza todos os widgets que dependem de zebras
+            _renderRankingFromCache();
+            _updateHotLeagues();
+            _updateZebrasDoDia(zebras, lid);
+            _updateSparklines();
+            _updateStatsBar();
+            // Dispara evento para o hero banner
+            document.dispatchEvent(new CustomEvent('zebrasLoaded', { detail: Object.values(_zebrasByLid).flat() }));
+          }).catch(() => {});
+        }, idx * 800);
       });
     }
 
@@ -991,11 +1020,12 @@
     initFavBar();
     initLeaguePills();
     initSparklines();     // renderiza skeletons de sparklines
-    initGames();          // busca jogos de todas as ligas
+    initGames();          // busca jogos de todas as ligas (escalonado: 600ms/liga)
     initZebrasDoDia();    // configura seção (esconde lock-banner se PRO)
     initBellBadge();
-    _loadAllZebras();     // carregador central: busca zebras de todas as ligas
-                          // e atualiza ranking, hotLeagues, sparklines, zebrasDoDia, statsBar
+    // Delay de 5s antes de iniciar o carregador de zebras para não competir
+    // com initGames pelo limite de 10 req/min do Football-Data free tier.
+    setTimeout(_loadAllZebras, 5000); // carregador central (depois de initGames iniciar)
 
     // Populate hero banner — atualiza sempre que um novo lote de zebras chega
     (function _heroBanner() {
@@ -1004,14 +1034,14 @@
       const elZ = document.getElementById('heroZiValue');
       const elD = document.getElementById('heroMatchDesc');
       if (!el) return;
-      // Fallback após 8s se nenhuma liga respondeu
+      // Fallback após 26s (5s delay + 18s escalonamento + margem)
       const heroFallbackTimer = setTimeout(() => {
         if (el.textContent === 'Carregando...') {
           el.textContent = 'Nenhuma zebra disponível agora';
           elL.textContent = 'Verifique sua conexão ou configure a API em Perfil';
           if (elZ) elZ.textContent = '–';
         }
-      }, 8000);
+      }, 26000);
       let heroBestZi = 0;
       document.addEventListener('zebrasLoaded', function(e) {
         clearTimeout(heroFallbackTimer);
