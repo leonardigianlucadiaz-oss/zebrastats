@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/main.css?v=12" />
-  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script src="https://unpkg.com/lucide@0.363.0/dist/umd/lucide.min.js"></script>
 </head>
 <body>
 <div class="app-wrapper">
@@ -329,7 +329,7 @@
 
     <!-- SAIR -->
     <div style="padding:16px;">
-      <button class="profile-menu-item profile-menu-item--red" style="border-radius:var(--radius-md);border:1px solid var(--border);" onclick="ZebraAuth.authSignOut()">
+      <button class="profile-menu-item profile-menu-item--red" style="border-radius:var(--radius-md);border:1px solid var(--border);" onclick="confirmLogout()">
         <div class="profile-menu-item__icon"><i data-lucide="log-out" style="width:18px;height:18px;"></i></div>
         <div class="profile-menu-item__text">
           <div class="profile-menu-item__label">Sair da Conta</div>
@@ -486,11 +486,19 @@
     showToast('✓ Dados atualizados!');
   }
 
-  function changePassword() {
+  async function changePassword() {
     const np = document.getElementById('newPass').value;
     const cp = document.getElementById('confirmPass').value;
-    if (np.length < 8)    { showToast('⚠️ Senha precisa ter no mínimo 8 caracteres'); return; }
-    if (np !== cp)        { showToast('⚠️ As senhas não coincidem'); return; }
+    if (np.length < 8) { showToast('⚠️ Senha precisa ter no mínimo 8 caracteres'); return; }
+    if (np !== cp)     { showToast('⚠️ As senhas não coincidem'); return; }
+    const btn = document.querySelector('#senhaModal .btn--primary');
+    if (btn) { btn.disabled = true; btn.textContent = 'Atualizando…'; }
+    const { error } = await ZebraAuth.authUpdatePassword(np);
+    if (btn) { btn.disabled = false; btn.textContent = 'Atualizar senha'; }
+    if (error) {
+      showToast('⚠️ ' + (error.message || 'Erro ao alterar senha'));
+      return;
+    }
     closeModal('senhaModal');
     showToast('✓ Senha alterada com sucesso!');
   }
@@ -551,7 +559,7 @@
   function confirmLogout() {
     if (confirm('Tem certeza que deseja sair?')) {
       showToast('👋 Até logo!');
-      setTimeout(() => window.location.href = 'index.html', 1200);
+      setTimeout(() => ZebraAuth.authSignOut(), 800);
     }
   }
 
@@ -611,7 +619,10 @@
           ${crest ? `<img src="${crest}" alt="${name}" style="width:38px;height:38px;object-fit:contain;" onerror="this.parentElement.innerHTML='<span style=font-size:0.5rem;font-weight:700>${initials}</span>'">` : `<span style="font-size:0.5rem;font-weight:700;">${initials}</span>`}
         </div>
         <span style="font-size:0.6875rem;font-weight:500;max-width:56px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${name.split(' ')[0]}</span>`;
-      chip.addEventListener('click', () => window.location.href = 'time.html');
+      chip.addEventListener('click', () => {
+        const params = new URLSearchParams({ id, name });
+        window.location.href = 'time.html?' + params.toString();
+      });
       grid.appendChild(chip);
     });
 
@@ -626,46 +637,17 @@
   }
   renderFavTeamsVisual();
 
-  // ── AVATAR PHOTO UPLOAD (zs_avatar key) ────────────────────────
-  document.getElementById('avatarUpload')?.addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (!file || !file.type.startsWith('image/')) return;
-    const reader = new FileReader();
-    reader.onload = function(ev) {
-      const avatarEl = document.getElementById('avatarEl');
-      if (avatarEl) {
-        avatarEl.style.backgroundImage = `url(${ev.target.result})`;
-        avatarEl.style.backgroundSize = 'cover';
-        avatarEl.style.backgroundPosition = 'center';
-        avatarEl.textContent = '';
-      }
-      try { localStorage.setItem('zs_avatar', ev.target.result); } catch {}
-    };
-    reader.readAsDataURL(file);
-  });
-  // Load saved avatar (zs_avatar key)
-  (function() {
-    const savedAvatar = localStorage.getItem('zs_avatar');
-    if (savedAvatar) {
-      const avatarEl = document.getElementById('avatarEl');
-      if (avatarEl) {
-        avatarEl.style.backgroundImage = `url(${savedAvatar})`;
-        avatarEl.style.backgroundSize = 'cover';
-        avatarEl.style.backgroundPosition = 'center';
-        avatarEl.textContent = '';
-      }
-    }
-  })();
-
-  // ── AVATAR UPLOAD ─────────────────────────────────────────────
+  // ── AVATAR UPLOAD (unified — saves to both zs_avatar and zs_user_avatar) ──
   const avatarUpload = document.getElementById('avatarUpload');
   if (avatarUpload) {
-    avatarUpload.addEventListener('change', function() {
-      const file = this.files[0];
-      if (!file) return;
+    avatarUpload.addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (!file || !file.type.startsWith('image/')) return;
       const reader = new FileReader();
-      reader.onload = function(e) {
-        const img = e.target.result;
+      reader.onload = function(ev) {
+        const img = ev.target.result;
+        // Save to both keys so sidebar and profile stay in sync
+        try { localStorage.setItem('zs_avatar', img); } catch {}
         try { localStorage.setItem('zs_user_avatar', img); } catch {}
         document.querySelectorAll('.profile-avatar, #avatarEl, #profileAvatar, .sidebar__user-avatar, #sidebarAvatar').forEach(el => {
           if (el) { el.style.backgroundImage = `url(${img})`; el.style.backgroundSize = 'cover'; el.style.backgroundPosition = 'center'; el.textContent = ''; }
@@ -674,8 +656,8 @@
       };
       reader.readAsDataURL(file);
     });
-    // Load saved avatar on page load
-    const savedAvatar = localStorage.getItem('zs_user_avatar');
+    // Load saved avatar on page load (prefer zs_user_avatar, fall back to zs_avatar)
+    const savedAvatar = localStorage.getItem('zs_user_avatar') || localStorage.getItem('zs_avatar');
     if (savedAvatar) {
       document.querySelectorAll('.profile-avatar, #avatarEl, #profileAvatar, .sidebar__user-avatar, #sidebarAvatar').forEach(el => {
         if (el) { el.style.backgroundImage = `url(${savedAvatar})`; el.style.backgroundSize = 'cover'; el.style.backgroundPosition = 'center'; el.textContent = ''; }
@@ -684,13 +666,28 @@
   }
 
   // ── STATS DO USUÁRIO ──────────────────────────────────────────
-  function loadUserStats() {
+  async function loadUserStats() {
     const alertsData = JSON.parse(localStorage.getItem('zs_alerts') || '[]');
     const favs       = JSON.parse(localStorage.getItem('zebrastats_favorites') || '[]');
     const ligas      = JSON.parse(localStorage.getItem('zebrastats_fav_leagues') || '[]');
-    const joinDate   = localStorage.getItem('zs_join_date');
-    if (!joinDate) localStorage.setItem('zs_join_date', Date.now().toString());
-    const dias = joinDate ? Math.max(1, Math.floor((Date.now() - parseInt(joinDate)) / 86400000)) : 1;
+
+    // Fix MISS-6: use Supabase created_at as authoritative join date; fall back to Date.now() for guests
+    let joinDateMs = parseInt(localStorage.getItem('zs_join_date') || '0');
+    const isGuest = localStorage.getItem('zs_guest') === '1';
+    if (!joinDateMs) {
+      if (!isGuest) {
+        try {
+          const user = await ZebraAuth.getSessionUser();
+          if (user?.created_at) {
+            joinDateMs = new Date(user.created_at).getTime();
+          }
+        } catch {}
+      }
+      if (!joinDateMs) joinDateMs = Date.now();
+      localStorage.setItem('zs_join_date', joinDateMs.toString());
+    }
+
+    const dias = Math.max(1, Math.floor((Date.now() - joinDateMs) / 86400000));
     const el = (id) => document.getElementById(id);
     if (el('statAlertasCard')) el('statAlertasCard').textContent = alertsData.length;
     if (el('statFavsCard'))    el('statFavsCard').textContent    = favs.length;
@@ -719,16 +716,33 @@
     document.getElementById('editEmail').value       = savedEmail;
   }
 
-  // Atualiza nome ao salvar perfil
-  const origSaveProfile = window.saveProfile;
-  window.saveProfile = function() {
+  // Atualiza nome ao salvar perfil (com sync Supabase — Fix CQ-13)
+  window.saveProfile = async function() {
     const name  = document.getElementById('editName').value.trim();
     const email = document.getElementById('editEmail').value.trim();
+    const btn = document.querySelector('#editDadosModal .btn--primary');
+    if (btn) { btn.disabled = true; btn.textContent = 'Salvando…'; }
+
+    // Persist to localStorage
     if (name)  { localStorage.setItem('zs_user_name', name); }
     if (email) { localStorage.setItem('zs_user_email', email); }
+
+    // Sync to Supabase
+    if (name || email) {
+      const { error } = await ZebraDB.dbUpdateProfile({ name, email });
+      if (error) console.warn('[perfil] dbUpdateProfile error:', error.message);
+    }
+
+    // Update UI
     if (name)  document.getElementById('userName').textContent  = name;
     if (email) document.getElementById('userEmail').textContent = email;
     if (name)  document.getElementById('avatarEl').textContent  = name[0].toUpperCase();
+    const sidebarAvatar = document.querySelector('.sidebar__user-avatar');
+    if (sidebarAvatar && name) sidebarAvatar.textContent = name[0].toUpperCase();
+    const sidebarName = document.querySelector('.sidebar__user-name');
+    if (sidebarName && name) sidebarName.textContent = name.split(' ')[0];
+
+    if (btn) { btn.disabled = false; btn.textContent = 'Salvar alterações'; }
     closeModal('editDadosModal');
     showToast('✓ Dados atualizados!');
   };

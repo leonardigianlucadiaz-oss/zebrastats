@@ -72,6 +72,13 @@ async function authSignOut() {
   window.location.href = 'index.html';
 }
 
+async function authUpdatePassword(newPassword) {
+  const sb = getSupabase();
+  if (!sb) return { error: { message: 'Supabase indisponível' } };
+  const { data, error } = await sb.auth.updateUser({ password: newPassword });
+  return { data, error };
+}
+
 async function authResetPassword(email) {
   const sb = getSupabase();
   if (!sb) return { error: { message: 'Supabase indisponível' } };
@@ -191,6 +198,7 @@ async function initAuthUI() {
 // Exporta para uso global
 window.ZebraAuth = {
   getSupabase, authSignUp, authSignIn, authSignInGoogle, authSignOut,
+  authUpdatePassword,
   authResetPassword, getSessionUser, getProfile, getUserPlan, isPro,
   isProFromDB,  // Fix #2: versão async consultando profiles table
   initAuthUI
