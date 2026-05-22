@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/main.css?v=12" />
-  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script src="https://unpkg.com/lucide@0.363.0/dist/umd/lucide.min.js"></script>
 </head>
 <body>
 <div class="app-wrapper">
@@ -619,6 +619,10 @@ function triggerSearch(val) {
 async function runSearch(query) {
   if (query !== currentQuery) return; // query mudou, ignora
 
+  // Abort any previous in-flight request
+  if (apiAbortCtrl) apiAbortCtrl.abort();
+  apiAbortCtrl = new AbortController();
+
   document.getElementById('searchSpinner').style.display = 'flex';
 
   const teamResults  = [];
@@ -656,6 +660,9 @@ async function runSearch(query) {
   }
 
   document.getElementById('searchSpinner').style.display = 'none';
+
+  // Discard stale results if a newer search was already started
+  if (apiAbortCtrl?.signal?.aborted) return;
 
   if (!teamResults.length && !leagueResults.length) {
     showState('empty', query);

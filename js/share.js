@@ -138,9 +138,10 @@ async function drawShareCard(config) {
   ctx.strokeStyle = 'rgba(255,255,255,0.07)'; ctx.lineWidth = 1; ctx.stroke();
 
   // ── FOOTER ───────────────────────────────────────────
+  const domain = window.location.hostname !== 'localhost' ? window.location.hostname : 'zebrastats.com.br';
   ctx.font = '30px Inter, -apple-system, sans-serif';
   ctx.fillStyle = '#889AAA';
-  ctx.fillText('zebrastats.app', W / 2, 970);
+  ctx.fillText(domain, W / 2, 970);
   // Green dots flanking text
   ctx.fillStyle = '#2EE65C';
   ctx.beginPath(); ctx.arc(W / 2 - 130, 964, 5, 0, Math.PI * 2); ctx.fill();

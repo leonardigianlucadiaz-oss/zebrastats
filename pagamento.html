@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/main.css?v=12" />
-  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script src="https://unpkg.com/lucide@0.363.0/dist/umd/lucide.min.js"></script>
   <style>
     .navbar__icon i { display: block; }
     .payment-method-tab i { vertical-align: middle; }
@@ -315,10 +315,17 @@
     tab.addEventListener('click', function() {
       document.querySelectorAll('.payment-method-tab').forEach(t => t.classList.remove('active'));
       this.classList.add('active');
+      const method = this.dataset.method;
       ['card','pix','boleto'].forEach(m => {
         const el = document.getElementById(`panel-${m}`);
-        el.style.display = m === this.dataset.method ? 'flex' : 'none';
+        el.style.display = m === method ? 'flex' : 'none';
       });
+      // Start Pix timer when switching to Pix; stop it when leaving Pix
+      if (method === 'pix') {
+        startPixTimer();
+      } else {
+        clearInterval(_pixTimerID);
+      }
     });
   });
 
@@ -337,15 +344,20 @@
   });
 
   // ── PIX TIMER ─────────────────────────────────────────────────
+  let _pixTimerID = null;
   let pixSeconds = 899;
-  setInterval(() => {
-    if (pixSeconds <= 0) return;
-    pixSeconds--;
-    const m = Math.floor(pixSeconds / 60);
-    const s = pixSeconds % 60;
-    const el = document.getElementById('pixTimer');
-    if (el) el.textContent = `${m}:${String(s).padStart(2,'0')}`;
-  }, 1000);
+
+  function startPixTimer() {
+    clearInterval(_pixTimerID);
+    _pixTimerID = setInterval(() => {
+      if (pixSeconds <= 0) { clearInterval(_pixTimerID); return; }
+      pixSeconds--;
+      const m = Math.floor(pixSeconds / 60);
+      const s = pixSeconds % 60;
+      const el = document.getElementById('pixTimer');
+      if (el) el.textContent = `${m}:${String(s).padStart(2,'0')}`;
+    }, 1000);
+  }
 
   // ── BOLETO ────────────────────────────────────────────────────
   document.getElementById('generateBoleto').addEventListener('click', function() {
