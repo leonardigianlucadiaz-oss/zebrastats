@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/main.css?v=12" />
-  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script src="https://unpkg.com/lucide@0.363.0/dist/umd/lucide.min.js"></script>
 </head>
 <body>
 <div class="app-wrapper">
@@ -399,6 +399,7 @@
       }
 
       card.classList.add('zebra-card-anim');
+      if (currentView === 'list') card.classList.add('zebra-card--list');
       card.style.animationDelay = (i * 0.05) + 's';
       card.addEventListener('click', function(e) {
         if (e.target.tagName === 'A') return;
@@ -561,21 +562,21 @@
 
   // ── VIEW TOGGLE ───────────────────────────────────────────────────
   let currentView = 'cards';
-  function setView(mode) { // FIX 21 — direct style manipulation instead of CSS class
+  function setView(mode) {
     currentView = mode;
     document.getElementById('viewCards').classList.toggle('active', mode === 'cards');
     document.getElementById('viewList').classList.toggle('active', mode === 'list');
-    const list = document.getElementById('zebraList');
+    const listEl = document.getElementById('zebraList');
     if (mode === 'list') {
-      list.style.gap = '4px';
-      list.querySelectorAll('.zebra-card,.card').forEach(c => {
-        c.style.padding = '8px 12px';
+      listEl.style.gap = '4px';
+      listEl.querySelectorAll('.zebra-card,.card').forEach(c => {
+        c.classList.add('zebra-card--list');
         c.querySelectorAll('[data-hide-list]').forEach(el => { el.style.display = 'none'; });
       });
     } else {
-      list.style.gap = '12px';
-      list.querySelectorAll('.zebra-card,.card').forEach(c => {
-        c.style.padding = '';
+      listEl.style.gap = '12px';
+      listEl.querySelectorAll('.zebra-card,.card').forEach(c => {
+        c.classList.remove('zebra-card--list');
         c.querySelectorAll('[data-hide-list]').forEach(el => { el.style.display = ''; });
       });
     }
@@ -705,6 +706,25 @@
   }
   .zebra-list-mode .zebra-card__teams,
   .zebra-list-mode .gc-team-block span:not(.gc-team-name) { display: none; }
+
+  /* ── ZEBRA CARD LIST VARIANT ── */
+  .zebra-card--list {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px !important;
+    gap: 12px;
+  }
+  .zebra-card--list > :not(:first-child):not(:last-child) {
+    flex: 1;
+  }
+  /* Hide the large crest blocks and probability bar in list mode */
+  .zebra-card--list [style*="grid-template-columns:1fr auto 1fr"] {
+    display: none !important;
+  }
+  .zebra-card--list [style*="flex:${probH}"],
+  .zebra-card--list [style*="justify-content:space-between"][style*="Empate"] {
+    display: none !important;
+  }
 
   /* ── STAGGER ANIMATION ── */
   @keyframes fadeSlideIn {
