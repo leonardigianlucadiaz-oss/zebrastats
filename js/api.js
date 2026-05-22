@@ -105,7 +105,14 @@ const ZebraAPI = (() => {
   const FD = {
     BASE : 'https://api.football-data.org/v4',
     COMPS: { BRA:'BSA', ENG:'PL', ESP:'PD', ITA:'SA', GER:'BL1', FRA:'FL1', UCL:'CL', POR:'PPL' },
-    SEASON(lid) { return lid === 'BRA' ? '2025' : '2024'; },
+    SEASON(lid) {
+      const now = new Date();
+      const yr  = now.getFullYear();
+      const mo  = now.getMonth(); // 0-indexed; July = 6
+      if (lid === 'BRA') return String(yr);
+      // European leagues: season starts in July — use current year from July onwards, else year-1
+      return String(mo >= 6 ? yr : yr - 1);
+    },
 
     key() {
       return (typeof ZEBRA_CONFIG !== 'undefined' ? ZEBRA_CONFIG.FOOTBALL_DATA_KEY : '') || '';
@@ -317,16 +324,20 @@ const ZebraAPI = (() => {
       }
       if (!Array.isArray(games)) return {};
       const map = {};
-      games.forEach(g => {
-        if (!g.bookmakers?.length) return;
-        const bk = g.bookmakers[0];
-        const h2h = bk.markets?.find(m => m.key === 'h2h');
-        if (!h2h?.outcomes?.length) return;
-        const homeOut = h2h.outcomes.find(o => o.name === g.home_team);
-        const awayOut = h2h.outcomes.find(o => o.name === g.away_team);
-        if (homeOut && awayOut) {
-          map[`${g.home_team}|${g.away_team}`] = { homeOdd: homeOut.price, awayOdd: awayOut.price };
+      games.forEach(ev => {
+        if (!ev.bookmakers?.length) return;
+        let homeSum = 0, awaySum = 0, count = 0;
+        for (const bm of (ev.bookmakers || [])) {
+          const h2h = bm.markets?.find(mk => mk.key === 'h2h');
+          if (!h2h) continue;
+          const homeOut = h2h.outcomes?.find(o => o.name === ev.home_team);
+          const awayOut = h2h.outcomes?.find(o => o.name === ev.away_team);
+          if (homeOut && awayOut) { homeSum += homeOut.price; awaySum += awayOut.price; count++; }
         }
+        if (!count) return;
+        const homeOdd = Math.round((homeSum / count) * 100) / 100;
+        const awayOdd = Math.round((awaySum / count) * 100) / 100;
+        map[`${ev.home_team}|${ev.away_team}`] = { homeOdd, awayOdd };
       });
       _cache.set(oddsMapKey, map); // guarda com chave própria (TTL aplicado no get)
       return map;
@@ -600,7 +611,8 @@ const ZebraAPI = (() => {
     /* TheSportsDB: event object → match format */
     sdbEvent(e) {
       const d = e.dateEvent ? new Date(`${e.dateEvent}T${e.strTime || '00:00:00'}Z`) : null;
-      const isFinished = !!(e.intHomeScore && e.intAwayScore !== null && e.strStatus === 'Match Finished');
+      const FINISHED_STATUSES = ['Match Finished', 'Full Time', 'FT', 'After Extra Time', 'After Penalties', 'Finished'];
+      const isFinished = !!(e.intHomeScore && e.intAwayScore !== null && FINISHED_STATUSES.includes(e.strStatus));
       return {
         id         : e.idEvent,
         home       : e.strHomeTeam,
@@ -740,7 +752,13 @@ const ZebraAPI = (() => {
           homeCrest: t.homeCrest || '',
           awayCrest: t.awayCrest || '',
           realOdds: !!realOdds,
-          period: 'week',
+          period: (() => {
+            const matchDate = new Date(m.utcDate);
+            const age = Date.now() - matchDate.getTime();
+            if (age <= 7 * 24 * 60 * 60 * 1000)  return 'week';
+            if (age <= 30 * 24 * 60 * 60 * 1000) return 'month';
+            return 'history';
+          })(),
         });
       }
 
