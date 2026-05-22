@@ -242,46 +242,27 @@
         <div id="oddsComparator"></div>
       </div>
 
-      <!-- FATORES DA ZEBRA -->
-      <div class="card card--gold-border">
+      <!-- FATORES DA ZEBRA — gerados dinamicamente pelo ZI real -->
+      <div class="card card--gold-border" id="zebraFactorsCard">
         <div style="font-size:0.875rem;font-weight:600;margin-bottom:12px;display:flex;align-items:center;gap:6px;">
           <i data-lucide="search" style="width:16px;height:16px;color:var(--gold);"></i>
-          <span style="color:var(--gold);">Fatores que contribuíram</span>
+          <span style="color:var(--gold);">Por que é uma zebra?</span>
         </div>
-        <div style="display:flex;flex-direction:column;gap:8px;">
-          <div class="factor-card factor-card--gold">
-            <div class="factor-card__icon"><i data-lucide="calendar-clock" style="width:16px;height:16px;color:var(--gold);"></i></div>
-            <div>
-              <div class="factor-card__title">Flamengo no 3º jogo em 7 dias</div>
-              <div class="factor-card__sub">Desgaste físico elevado identificado no histórico</div>
-            </div>
-          </div>
-          <div class="factor-card factor-card--green">
-            <div class="factor-card__icon"><i data-lucide="home" style="width:16px;height:16px;color:var(--green);"></i></div>
-            <div>
-              <div class="factor-card__title">Botafogo em casa — fator mando forte</div>
-              <div class="factor-card__sub">72% de aproveitamento em casa nesta temporada</div>
-            </div>
-          </div>
-          <div class="factor-card factor-card--blue">
-            <div class="factor-card__icon"><i data-lucide="bar-chart-2" style="width:16px;height:16px;color:#60a5fa;"></i></div>
-            <div>
-              <div class="factor-card__title">xG favorável ao Botafogo nos últimos 3 jogos</div>
-              <div class="factor-card__sub">Expected Goals indicavam oportunidades reais de gol</div>
-            </div>
-          </div>
+        <div id="zebraFactorsList" style="display:flex;flex-direction:column;gap:8px;">
+          <div class="skel" style="height:48px;border-radius:var(--radius-sm);"></div>
+          <div class="skel" style="height:48px;border-radius:var(--radius-sm);"></div>
         </div>
       </div>
 
-      <!-- HISTÓRICO PROBABILIDADE -->
-      <div class="card" style="margin-top:12px;display:flex;align-items:center;gap:12px;background:rgba(46,230,92,0.05);border-color:rgba(46,230,92,0.2);">
+      <!-- HISTÓRICO PROBABILIDADE — calculado do H2H real -->
+      <div class="card" id="zebraHistorico" style="margin-top:12px;display:flex;align-items:center;gap:12px;background:rgba(46,230,92,0.05);border-color:rgba(46,230,92,0.2);">
         <div style="width:48px;height:48px;border-radius:var(--radius-md);background:var(--green-dim);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
           <i data-lucide="history" style="width:22px;height:22px;color:var(--green);"></i>
         </div>
-        <div>
-          <div style="font-size:0.8125rem;color:var(--gray);margin-bottom:2px;">Histórico com ZI acima de 7</div>
-          <div style="font-size:1rem;font-weight:700;">Azarão venceu em <span style="color:var(--green);">61%</span> dos casos</div>
-          <div style="font-size:0.6875rem;color:var(--gray);margin-top:2px;">Em 23 jogos similares nos últimos 3 anos</div>
+        <div id="zebraHistoricoText">
+          <div class="skel" style="height:12px;width:160px;border-radius:6px;margin-bottom:6px;"></div>
+          <div class="skel" style="height:18px;width:200px;border-radius:6px;margin-bottom:4px;"></div>
+          <div class="skel" style="height:10px;width:140px;border-radius:6px;"></div>
         </div>
       </div>
     </div>
@@ -933,45 +914,152 @@
   }
 
   function initTimeline() {
-    const home = _urlHome || 'Casa';
-    const away = _urlAway || 'Fora';
-    const EVENTS = [
-      { min:14, type:'goal',   team:'home', player:home, color:'var(--green)' },
-      { min:27, type:'yellow', team:'away', player:away, color:'var(--gold)'  },
-      { min:41, type:'goal',   team:'away', player:away, color:'var(--green)' },
-      { min:57, type:'red',    team:'home', player:home, color:'var(--red)'   },
-      { min:73, type:'goal',   team:'home', player:home, color:'var(--green)' },
-      { min:88, type:'goal',   team:'away', player:away, color:'var(--green)' },
-    ];
-    // Popula aba Zebra e aba Resumo com os mesmos eventos
-    _fillTimeline('timelineDots',  'timelineEvents',  EVENTS);
-    _fillTimeline('timelineDotsR', 'timelineEventsR', EVENTS);
+    // Linha do tempo será populada por renderRealTimeline() quando a API responder.
+    // Enquanto aguarda, mostra estado vazio (não exibe eventos fictícios).
+    const empty = `<div style="text-align:center;padding:20px 8px;color:var(--gray);font-size:0.8125rem;">
+      <i data-lucide="clock" style="width:20px;height:20px;margin:0 auto 8px;display:block;opacity:0.35;"></i>
+      Linha do tempo disponível após o início da partida
+    </div>`;
+    ['timelineDots','timelineDotsR'].forEach(id => {
+      const el = document.getElementById(id); if (el) el.innerHTML = '';
+    });
+    ['timelineEvents','timelineEventsR'].forEach(id => {
+      const el = document.getElementById(id); if (el) el.innerHTML = empty;
+    });
   }
 
-  // ── ODDS COMPARATIVO ────────────────────────────────────────────
-  function initOdds() {
+  // ── ODDS COMPARATIVO — dados reais da The Odds API ──────────────
+  async function initOdds() {
     const el = document.getElementById('oddsComparator');
     if (!el) return;
-    const BOOKMAKERS = [
-      { name:'Bet365',    h:2.20, d:3.10, a:3.40 },
-      { name:'Betano',    h:2.15, d:3.20, a:3.50 },
-      { name:'Superbet',  h:2.25, d:3.05, a:3.35 },
-    ];
-    const best = { h: Math.max(...BOOKMAKERS.map(b=>b.h)), d: Math.max(...BOOKMAKERS.map(b=>b.d)), a: Math.max(...BOOKMAKERS.map(b=>b.a)) };
-    el.innerHTML = `
-      <div style="display:grid;grid-template-columns:80px 1fr 1fr 1fr;gap:4px;font-size:0.75rem;margin-bottom:6px;">
-        <div style="color:var(--gray);">Casa</div>
-        <div style="text-align:center;color:var(--gray);">Casa</div>
-        <div style="text-align:center;color:var(--gray);">Empate</div>
-        <div style="text-align:center;color:var(--gray);">Fora</div>
-      </div>
-      ${BOOKMAKERS.map(b => `
-      <div style="display:grid;grid-template-columns:80px 1fr 1fr 1fr;gap:4px;padding:6px 0;border-top:1px solid var(--border);">
-        <div style="font-weight:600;font-size:0.8125rem;">${b.name}</div>
-        <div style="text-align:center;"><span style="font-size:0.9375rem;font-weight:700;color:${b.h===best.h?'var(--green)':'var(--white)'};">${b.h.toFixed(2)}</span>${b.h===best.h?' <span style="font-size:0.5625rem;color:var(--green);">BEST</span>':''}</div>
-        <div style="text-align:center;"><span style="font-size:0.9375rem;font-weight:700;color:${b.d===best.d?'var(--green)':'var(--white)'};">${b.d.toFixed(2)}</span>${b.d===best.d?' <span style="font-size:0.5625rem;color:var(--green);">BEST</span>':''}</div>
-        <div style="text-align:center;"><span style="font-size:0.9375rem;font-weight:700;color:${b.a===best.a?'var(--green)':'var(--white)'};">${b.a.toFixed(2)}</span>${b.a===best.a?' <span style="font-size:0.5625rem;color:var(--green);">BEST</span>':''}</div>
-      </div>`).join('')}`;
+
+    // Skeleton enquanto carrega
+    el.innerHTML = Array(2).fill(0).map(() =>
+      `<div style="display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-top:1px solid var(--border);">
+        <div class="skel" style="height:12px;width:60px;border-radius:6px;"></div>
+        <div class="skel" style="height:18px;width:44px;border-radius:6px;"></div>
+        <div class="skel" style="height:18px;width:44px;border-radius:6px;"></div>
+        <div class="skel" style="height:18px;width:44px;border-radius:6px;"></div>
+      </div>`
+    ).join('');
+
+    if (typeof ZebraAPI === 'undefined') { el.innerHTML = ''; return; }
+
+    // Liga: tenta URL param → localStorage → fallback
+    const storedLid = localStorage.getItem('zs_current_match_lid');
+    const urlLeague  = _urlLeague || '';
+    const LID_FROM_NAME = { 'Premier League':'ENG', 'La Liga':'ESP', 'Serie A':'ITA',
+      'Bundesliga':'GER', 'Ligue 1':'FRA', 'Brasileirão':'BRA', 'Champions':'UCL', 'Liga Portugal':'POR' };
+    const lid = storedLid
+      || Object.keys(LID_FROM_NAME).find(k => urlLeague.includes(k)) && LID_FROM_NAME[Object.keys(LID_FROM_NAME).find(k => urlLeague.includes(k))]
+      || null;
+
+    if (!lid) { el.innerHTML = '<p style="text-align:center;font-size:0.8125rem;color:var(--gray);padding:8px;">Liga não identificada</p>'; return; }
+
+    try {
+      const oddsMap = await ZebraAPI.oddsApi.getOddsMap(lid, 3);
+      const keys    = Object.keys(oddsMap);
+      if (!keys.length) { el.innerHTML = '<p style="text-align:center;font-size:0.8125rem;color:var(--gray);padding:8px;">Odds indisponíveis para esta liga</p>'; return; }
+
+      // Tenta encontrar a partida por nome (parcial, 4+ chars)
+      const home = (_urlHome || '').toLowerCase();
+      const away = (_urlAway || '').toLowerCase();
+      const matchKey = keys.find(k => {
+        const [h, a] = k.split('|').map(s => s.toLowerCase());
+        const sl = (s, n=4) => s.slice(0, n);
+        return (home.length >= 4 && (h.includes(sl(home)) || sl(home,5) && h.includes(sl(home,5)))) ||
+               (away.length  >= 4 && (a.includes(sl(away))  || sl(away,5)  && a.includes(sl(away,5))));
+      });
+
+      const odds = matchKey ? oddsMap[matchKey] : null;
+      if (!odds) {
+        el.innerHTML = `<p style="text-align:center;font-size:0.8125rem;color:var(--gray);padding:8px;">Odds pré-jogo não encontradas para este confronto</p>`;
+        return;
+      }
+
+      const { homeOdd, awayOdd } = odds;
+      // Odd empate estimada via margem de mercado
+      const drawOdd = parseFloat(Math.max(2.5, Math.min(5.0,
+        (1 / Math.max(0.01, 1 - 1/homeOdd - 1/awayOdd)) * 1.05
+      )).toFixed(2));
+
+      // Atualiza barras de probabilidade no hero e na aba Zebra
+      const homeProb = Math.round((1/homeOdd) / (1/homeOdd + 1/drawOdd + 1/awayOdd) * 100);
+      const drawProb = Math.round((1/drawOdd) / (1/homeOdd + 1/drawOdd + 1/awayOdd) * 100);
+      const awayProb = 100 - homeProb - drawProb;
+      _applyProbBars(homeProb, drawProb, awayProb);
+
+      // Atualiza odds no hero
+      const greenOdds = document.querySelectorAll('[style*="font-size:1.125rem;font-weight:700;color:var(--green)"]');
+      if (greenOdds[0]) greenOdds[0].textContent = homeOdd.toFixed(2);
+      const redOdds = document.querySelectorAll('[style*="font-size:1.125rem;font-weight:700;color:var(--red)"]');
+      if (redOdds[0]) redOdds[0].textContent = awayOdd.toFixed(2);
+
+      const homeName = _urlHome || 'Casa';
+      const awayName = _urlAway || 'Fora';
+      el.innerHTML = `
+        <div style="font-size:0.625rem;color:var(--green);font-weight:600;text-align:center;margin-bottom:8px;">
+          ✓ Odds reais · The Odds API
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+          <div style="text-align:center;padding:10px 6px;background:var(--card2);border-radius:var(--radius-sm);border:1px solid rgba(46,230,92,0.2);">
+            <div style="font-size:0.625rem;color:var(--gray);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${homeName}</div>
+            <div style="font-size:1.25rem;font-weight:800;color:var(--green);">${homeOdd.toFixed(2)}</div>
+            <div style="font-size:0.5625rem;color:var(--gray);margin-top:2px;">${homeProb}%</div>
+          </div>
+          <div style="text-align:center;padding:10px 6px;background:var(--card2);border-radius:var(--radius-sm);border:1px solid var(--border);">
+            <div style="font-size:0.625rem;color:var(--gray);margin-bottom:4px;">Empate</div>
+            <div style="font-size:1.25rem;font-weight:800;">${drawOdd.toFixed(2)}</div>
+            <div style="font-size:0.5625rem;color:var(--gray);margin-top:2px;">${drawProb}%</div>
+          </div>
+          <div style="text-align:center;padding:10px 6px;background:var(--card2);border-radius:var(--radius-sm);border:1px solid rgba(238,68,68,0.2);">
+            <div style="font-size:0.625rem;color:var(--gray);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${awayName}</div>
+            <div style="font-size:1.25rem;font-weight:800;color:var(--red);">${awayOdd.toFixed(2)}</div>
+            <div style="font-size:0.5625rem;color:var(--gray);margin-top:2px;">${awayProb}%</div>
+          </div>
+        </div>`;
+
+    } catch(e) {
+      console.warn('[partida] initOdds error:', e);
+      el.innerHTML = '<p style="text-align:center;font-size:0.8125rem;color:var(--gray);padding:8px;">Odds indisponíveis</p>';
+    }
+  }
+
+  // Aplica probabilidades nas barras (hero + tab Zebra)
+  function _applyProbBars(homeProb, drawProb, awayProb) {
+    const pbH = document.getElementById('probBarHome');
+    const pbD = document.getElementById('probBarDraw');
+    const pbA = document.getElementById('probBarAway');
+    const hPL = document.getElementById('homeProb');
+    const aPL = document.getElementById('awayProb');
+    if (pbH) pbH.style.flex = homeProb;
+    if (pbD) pbD.style.flex = drawProb;
+    if (pbA) pbA.style.flex = awayProb;
+    if (hPL) hPL.textContent = `${homeProb}% ${_urlHome||'Casa'}`;
+    if (aPL) aPL.textContent = `${awayProb}% ${_urlAway||'Fora'}`;
+
+    // Tab Zebra — barras de probabilidade (3 barras de 6px)
+    const probBars = document.querySelectorAll('#tab-zebra .card div[style*="height:6px"]');
+    if (probBars.length >= 3) {
+      const fills = [
+        probBars[0]?.querySelector('div'),
+        probBars[1]?.querySelector('div'),
+        probBars[2]?.querySelector('div'),
+      ];
+      if (fills[0]) fills[0].style.width = homeProb + '%';
+      if (fills[1]) fills[1].style.width = drawProb + '%';
+      if (fills[2]) fills[2].style.width = awayProb + '%';
+    }
+
+    // Texto das labels na tab Zebra
+    const home = _urlHome || 'Casa';
+    const away = _urlAway || 'Fora';
+    document.querySelectorAll('#tab-zebra .card span').forEach(el => {
+      if (el.children.length === 0) {
+        if (el.textContent.includes('%') && el.textContent.includes('Botafogo')) el.textContent = `${homeProb}%`;
+        if (el.textContent.includes('%') && el.textContent.includes('Flamengo')) el.textContent = `${awayProb}%`;
+      }
+    });
   }
 
   // ── H2H PREVIEW MINI-CARDS — preenchido por _renderH2H quando a API responde ──
@@ -1195,6 +1283,9 @@
       el.appendChild(row);
     });
 
+    // Atualiza histórico na aba Zebra com dados reais
+    if (typeof window._updateZebraHistorico === 'function') window._updateZebraHistorico(fixtures);
+
     // Também atualiza preview de H2H
     const previewEl = document.getElementById('h2hPreview');
     if (previewEl) {
@@ -1237,6 +1328,71 @@
       section.style.display = 'block';
     }
   })();
+
+  // ── FATORES E HISTÓRICO — baseados em ZI real + H2H ─────────────
+  (function _zebraFactors() {
+    const zi   = parseFloat(_urlZi || 0);
+    const home = _urlHome || 'Time da casa';
+    const away = _urlAway || 'Favorito';
+    const list = document.getElementById('zebraFactorsList');
+    const hist = document.getElementById('zebraHistoricoText');
+    if (!list) return;
+
+    // Fatores baseados no ZI real
+    const factors = [];
+    if (zi >= 6) {
+      factors.push({ icon:'zap',       cls:'gold',  title:`Zebra de alto impacto (ZI ${zi})`, sub:`Odds favoreciam amplamente ${away} pré-jogo` });
+      factors.push({ icon:'bar-chart-2', cls:'green', title:`${home} superou as expectativas`, sub:'Resultado estatisticamente improvável segundo os modelos' });
+    } else if (zi >= 3.5) {
+      factors.push({ icon:'trending-up', cls:'gold', title:`Zebra moderada (ZI ${zi})`,        sub:`${away} era o favorito, mas ${home} conseguiu o resultado` });
+      factors.push({ icon:'bar-chart-2', cls:'blue', title:'Disparidade de odds elevada',       sub:'Diferença significativa entre as probabilidades pré-jogo' });
+    } else if (zi > 0) {
+      factors.push({ icon:'activity',  cls:'blue',  title:`Zebra leve (ZI ${zi})`,             sub:`Resultado ligeiramente contrário às expectativas das odds` });
+    } else {
+      factors.push({ icon:'info',      cls:'gray',  title:'Análise indisponível',              sub:'Dados de odds insuficientes para calcular os fatores' });
+    }
+
+    const colorsMap = { gold:'var(--gold)', green:'var(--green)', blue:'#60a5fa', gray:'var(--gray)' };
+    const bgMap     = { gold:'rgba(255,200,50,0.07)', green:'rgba(46,230,92,0.07)', blue:'rgba(96,165,250,0.07)', gray:'rgba(255,255,255,0.04)' };
+    list.innerHTML = factors.map(f => `
+      <div class="factor-card" style="background:${bgMap[f.cls]};border-left:3px solid ${colorsMap[f.cls]};border-radius:var(--radius-sm);padding:10px 12px;display:flex;gap:10px;align-items:flex-start;">
+        <div style="width:32px;height:32px;border-radius:8px;background:${bgMap[f.cls]};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <i data-lucide="${f.icon}" style="width:16px;height:16px;color:${colorsMap[f.cls]};"></i>
+        </div>
+        <div>
+          <div style="font-size:0.8125rem;font-weight:600;margin-bottom:2px;">${f.title}</div>
+          <div style="font-size:0.75rem;color:var(--gray);line-height:1.4;">${f.sub}</div>
+        </div>
+      </div>`).join('');
+
+    // Histórico — será atualizado pelo renderRealH2H quando os dados chegarem
+    if (hist && zi <= 0) {
+      hist.innerHTML = `<div style="font-size:0.8125rem;color:var(--gray);">H2H disponível após carregar dados da API</div>`;
+    }
+  })();
+
+  // Atualiza a seção "Histórico" quando H2H real carregar
+  window._updateZebraHistorico = function(fixtures) {
+    const hist = document.getElementById('zebraHistoricoText');
+    if (!hist || !fixtures?.length) return;
+    const zi = parseFloat(_urlZi || 0);
+    const home = _urlHome || 'Casa';
+    const total = fixtures.length;
+    let homeWins = 0, draws = 0, awayWins = 0;
+    fixtures.forEach(f => {
+      const m = ZebraAPI.apiFootball?.transformFixture?.(f);
+      if (!m) return;
+      if (m.homeWinner === true)       homeWins++;
+      else if (m.awayWinner === true)  awayWins++;
+      else                             draws++;
+    });
+    const homePct = Math.round((homeWins / total) * 100);
+    hist.innerHTML = `
+      <div style="font-size:0.8125rem;color:var(--gray);margin-bottom:2px;">Histórico de confrontos diretos (${total} jogos)</div>
+      <div style="font-size:1rem;font-weight:700;">${home} venceu em <span style="color:var(--green);">${homePct}%</span> dos casos</div>
+      <div style="font-size:0.6875rem;color:var(--gray);margin-top:2px;">${homeWins}V ${draws}E ${awayWins}D nos últimos ${total} confrontos</div>`;
+    lucide.createIcons();
+  };
 
   initApifData();
   lucide.createIcons();
