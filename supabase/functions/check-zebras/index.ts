@@ -1,6 +1,12 @@
 // ZebraStats — Cron job: verifica partidas de hoje e dispara alertas de zebra
 // Executado diariamente via Supabase Cron (Dashboard → Database → Cron Jobs)
 // Configuração sugerida: todos os dias às 08:00 UTC ("0 8 * * *")
+//
+// SECRETS necessários no Supabase Edge Functions:
+//   FOOTBALL_DATA_KEY  — chave da Football-Data.org
+//   ODDS_API_KEY       — chave da The Odds API
+//   CRON_SECRET        — segredo compartilhado com o cron dispatcher
+//                        (adicione em Dashboard → Edge Functions → Secrets)
 
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
@@ -47,14 +53,29 @@ function calcZI(homeOdd: number, awayOdd: number): { zi: number; favOdd: number;
 }
 
 // Normaliza nome de time para comparação (remove acentos, caixa baixa)
+// Fix 7.4: usa escape Unicode explícito ̀-ͯ para evitar fragilidade
+// de encoding de caracteres combinadores literais no source.
 function normName(s: string): string {
   return s.toLowerCase()
-    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '') // combining diacritical marks Unicode range
     .replace(/[^a-z0-9]/g, '')
 }
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS })
+
+  // Fix 7.2: verifica CRON_SECRET para impedir invocações não autorizadas.
+  // Configure CRON_SECRET como Supabase Edge Function Secret e passe-o
+  // no header "Authorization: Bearer <secret>" do seu dispatcher de cron.
+  const cronSecret = Deno.env.get('CRON_SECRET') || ''
+  const authHeader = req.headers.get('Authorization') || ''
+  const providedSecret = authHeader.replace('Bearer ', '')
+  if (cronSecret && providedSecret !== cronSecret) {
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+      status: 401, headers: { ...CORS, 'Content-Type': 'application/json' }
+    })
+  }
 
   const sb = createClient(
     Deno.env.get('SUPABASE_URL') || '',
@@ -77,6 +98,9 @@ serve(async (req) => {
     const tomorrow = new Date(Date.now() + 86_400_000).toISOString().split('T')[0]
 
     // ── 1. Busca partidas de hoje em todas as ligas ──────────────
+    // Fix 10.2: aguarda 6.5s entre cada chamada à Football-Data.org (free tier:
+    // 10 req/min). Com 8 ligas a função leva ~52s total — dentro do limite de
+    // 150s do Supabase Edge Function.
     const todayMatches: Array<{ lid: string; homeTeam: string; awayTeam: string; matchId: number; kickoff: string }> = []
 
     for (const [fdId, lid] of Object.entries(LEAGUES)) {
@@ -100,6 +124,8 @@ serve(async (req) => {
       } catch (e: any) {
         console.error(`[check-zebras] Erro FD liga ${lid}:`, e.message)
       }
+      // Aguarda 6.5s entre chamadas para respeitar o limite de 10 req/min da FD free tier
+      await new Promise(r => setTimeout(r, 6500))
     }
 
     if (!todayMatches.length) {
@@ -109,41 +135,50 @@ serve(async (req) => {
     }
 
     // ── 2. Busca odds por liga (The Odds API) ────────────────────
-    // Agrupa partidas por liga para minimizar chamadas à Odds API
+    // Fix 4.3: busca odds de todas as ligas em paralelo (Promise.all) em vez de
+    // sequencial, reduzindo o tempo de espera de N×latência para 1×latência.
     const lidSet = [...new Set(todayMatches.map(m => m.lid))]
     const oddsMap: Record<string, { home: string; away: string; homeOdd: number; awayOdd: number }[]> = {}
 
     if (ODDS_KEY) {
-      for (const lid of lidSet) {
-        const sport = ODDS_SPORTS[lid]
-        if (!sport) continue
-        try {
-          const res = await fetch(
-            `https://api.the-odds-api.com/v4/sports/${sport}/odds/?apiKey=${ODDS_KEY}&regions=eu&markets=h2h&oddsFormat=decimal`
-          )
-          if (!res.ok) continue
-          const events = await res.json()
-          oddsMap[lid] = (Array.isArray(events) ? events : []).map((ev: any) => {
-            // Pega a melhor odd média entre os bookmakers disponíveis
-            let homeSum = 0, awaySum = 0, count = 0
-            for (const bm of (ev.bookmakers || [])) {
-              const h2h = bm.markets?.find((mk: any) => mk.key === 'h2h')
-              if (!h2h) continue
-              const home = h2h.outcomes?.find((o: any) => o.name === ev.home_team)
-              const away = h2h.outcomes?.find((o: any) => o.name === ev.away_team)
-              if (home && away) { homeSum += home.price; awaySum += away.price; count++ }
-            }
-            if (!count) return null
-            return {
-              home:    ev.home_team,
-              away:    ev.away_team,
-              homeOdd: Math.round((homeSum / count) * 100) / 100,
-              awayOdd: Math.round((awaySum / count) * 100) / 100,
-            }
-          }).filter(Boolean)
-        } catch (e: any) {
-          console.error(`[check-zebras] Odds API erro (${lid}):`, e.message)
-        }
+      const oddsResults = await Promise.all(
+        lidSet.map(async (lid) => {
+          const sport = ODDS_SPORTS[lid]
+          if (!sport) return [lid, []] as [string, any[]]
+          try {
+            const res = await fetch(
+              `https://api.the-odds-api.com/v4/sports/${sport}/odds/?apiKey=${ODDS_KEY}&regions=eu&markets=h2h&oddsFormat=decimal`
+            )
+            if (!res.ok) return [lid, []] as [string, any[]]
+            const events = await res.json()
+            const mapped = (Array.isArray(events) ? events : []).map((ev: any) => {
+              // Pega a melhor odd média entre os bookmakers disponíveis
+              let homeSum = 0, awaySum = 0, count = 0
+              for (const bm of (ev.bookmakers || [])) {
+                const h2h = bm.markets?.find((mk: any) => mk.key === 'h2h')
+                if (!h2h) continue
+                const home = h2h.outcomes?.find((o: any) => o.name === ev.home_team)
+                const away = h2h.outcomes?.find((o: any) => o.name === ev.away_team)
+                if (home && away) { homeSum += home.price; awaySum += away.price; count++ }
+              }
+              if (!count) return null
+              return {
+                home:    ev.home_team,
+                away:    ev.away_team,
+                homeOdd: Math.round((homeSum / count) * 100) / 100,
+                awayOdd: Math.round((awaySum / count) * 100) / 100,
+              }
+            }).filter(Boolean)
+            return [lid, mapped] as [string, any[]]
+          } catch (e: any) {
+            console.error(`[check-zebras] Odds API erro (${lid}):`, e.message)
+            return [lid, []] as [string, any[]]
+          }
+        })
+      )
+      // Constrói o mapa de odds a partir dos resultados paralelos
+      for (const [lid, odds] of oddsResults) {
+        oddsMap[lid as string] = odds as any[]
       }
     }
 

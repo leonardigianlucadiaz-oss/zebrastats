@@ -31,7 +31,7 @@
     </nav>
     <div class="sidebar__footer">
       <div class="sidebar__user">
-        <div class="sidebar__user-avatar">·</div>
+        <div class="sidebar__user-avatar" style="opacity:0.3;"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
         <div class="sidebar__user-info">
           <div class="sidebar__user-name">·</div>
           <div class="sidebar__user-plan">Plano Free</div>
@@ -785,6 +785,8 @@ function _alertasUpdateBadge() {
 }
 
 // ── PRESET ALERT SHORTCUTS ────────────────────────────────────────────────────
+// Fix 5.8: exposto em window para que botões com onclick="addPresetAlert(...)"
+// (gerados dinamicamente ou em outras partes do HTML) possam chamar a função.
 function addPresetAlert(preset) {
   const presets = {
     'zebra-alta':   { league_id: null, min_zi: 7, label: 'Zebra Alta' },
@@ -794,12 +796,35 @@ function addPresetAlert(preset) {
   };
   const p = presets[preset];
   if (!p) return;
+
+  // Adiciona como alerta local (localStorage) além de salvar no DB, para garantir
+  // que o usuário veja o alerta imediatamente mesmo sem banco configurado.
+  const isPro = getUserPlan() !== 'free';
+  if (!isPro && alerts.length >= FREE_LIMIT) {
+    document.getElementById('proModal').classList.add('show'); return;
+  }
+  const newAlert = {
+    id: `preset-${preset}`, type: 'zi_league',
+    label: p.label, sub: `ZI ≥ ${p.min_zi}${p.league_id ? ' · ' + p.league_id : ' · Todas as ligas'}`,
+    lid: p.league_id || 'all', team: null, threshold: p.min_zi,
+    tw: 'any', advance: 0, active: true,
+    icon: 'zap', iconBg: p.min_zi >= 7 ? 'var(--red)' : 'var(--green)',
+    createdAt: Date.now(), triggeredCount: 0, triggeredToday: 0, lastTriggered: null,
+  };
+  // Evita duplicata
+  if (!alerts.find(a => a.id === newAlert.id)) {
+    alerts.unshift(newAlert);
+    saveAlerts(alerts);
+    renderAll();
+  }
+
   if (typeof ZebraDB !== 'undefined') {
     ZebraDB.dbSaveAlert({ id: `preset-${preset}`, ...p, active: true });
   }
   showToast(`Alerta "${p.label}" ativado!`);
-  loadAlerts && loadAlerts();
 }
+// Expõe globalmente para uso em onclick inline e chamadas externas
+window.addPresetAlert = addPresetAlert;
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
 _alertasUpdateBadge();
