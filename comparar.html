@@ -31,7 +31,7 @@
     </nav>
     <div class="sidebar__footer">
       <div class="sidebar__user">
-        <div class="sidebar__user-avatar">·</div>
+        <div class="sidebar__user-avatar" style="opacity:0.3;"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
         <div class="sidebar__user-info">
           <div class="sidebar__user-name">·</div>
           <div class="sidebar__user-plan">Plano Free</div>
@@ -134,10 +134,10 @@
     <div id="comparSuggestions">
       <p style="font-size:0.75rem;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;text-align:center;">Comparações populares</p>
       <div style="display:flex;flex-direction:column;gap:8px;">
-        <button class="compar-suggest-btn" data-a="FLA" data-b="FLU" data-lid="BRA"><img src="" class="popular-comp-league" data-lid="BRA" onerror="this.style.display='none'" style="width:16px;height:16px;border-radius:2px;object-fit:contain;margin-right:8px;flex-shrink:0;" alt="BRA">Flamengo vs Fluminense</button>
-        <button class="compar-suggest-btn" data-a="RMA" data-b="BAR" data-lid="ESP"><img src="" class="popular-comp-league" data-lid="ESP" onerror="this.style.display='none'" style="width:16px;height:16px;border-radius:2px;object-fit:contain;margin-right:8px;flex-shrink:0;" alt="ESP">Real Madrid vs Barcelona</button>
-        <button class="compar-suggest-btn" data-a="MCI" data-b="ARS" data-lid="ENG"><img src="" class="popular-comp-league" data-lid="ENG" onerror="this.style.display='none'" style="width:16px;height:16px;border-radius:2px;object-fit:contain;margin-right:8px;flex-shrink:0;" alt="ENG">Man City vs Arsenal</button>
-        <button class="compar-suggest-btn" data-a="JUV" data-b="ITR" data-lid="ITA"><img src="" class="popular-comp-league" data-lid="ITA" onerror="this.style.display='none'" style="width:16px;height:16px;border-radius:2px;object-fit:contain;margin-right:8px;flex-shrink:0;" alt="ITA">Juventus vs Inter</button>
+        <button class="compar-suggest-btn" data-a="FLA" data-b="FLU" data-lid="BRA"><img class="popular-comp-league" data-lid="BRA" onerror="this.style.display='none'" style="width:16px;height:16px;border-radius:2px;object-fit:contain;margin-right:8px;flex-shrink:0;" alt="BRA">Flamengo vs Fluminense</button>
+        <button class="compar-suggest-btn" data-a="RMA" data-b="BAR" data-lid="ESP"><img class="popular-comp-league" data-lid="ESP" onerror="this.style.display='none'" style="width:16px;height:16px;border-radius:2px;object-fit:contain;margin-right:8px;flex-shrink:0;" alt="ESP">Real Madrid vs Barcelona</button>
+        <button class="compar-suggest-btn" data-a="MCI" data-b="ARS" data-lid="ENG"><img class="popular-comp-league" data-lid="ENG" onerror="this.style.display='none'" style="width:16px;height:16px;border-radius:2px;object-fit:contain;margin-right:8px;flex-shrink:0;" alt="ENG">Man City vs Arsenal</button>
+        <button class="compar-suggest-btn" data-a="JUV" data-b="ITR" data-lid="ITA"><img class="popular-comp-league" data-lid="ITA" onerror="this.style.display='none'" style="width:16px;height:16px;border-radius:2px;object-fit:contain;margin-right:8px;flex-shrink:0;" alt="ITA">Juventus vs Inter</button>
       </div>
     </div>
   </div>
@@ -1039,8 +1039,22 @@ drawRadar({name:'Flamengo'},{name:'Liverpool'});
 // Check URL params for pre-selection
 const params = new URLSearchParams(window.location.search);
 const ta = params.get('a'), tb = params.get('b');
-if (ta) { const t = ALL_TEAMS.find(t=>t.id===ta); if(t) selectTeam('A',t); }
-if (tb) { const t = ALL_TEAMS.find(t=>t.id===tb); if(t) selectTeam('B',t); }
+const taName = params.get('aName'), tbName = params.get('bName');
+function _findTeamByIdOrName(idOrName, displayName) {
+  if (!idOrName) return null;
+  // Try exact ID match first
+  let t = ALL_TEAMS.find(t => t.id === idOrName);
+  if (t) return t;
+  // Try name match (case-insensitive)
+  const q = (displayName || idOrName).toLowerCase();
+  t = ALL_TEAMS.find(t => t.name.toLowerCase() === q || t.name.toLowerCase().includes(q.split(' ')[0]));
+  if (t) return t;
+  // Fallback: create a temporary entry with the display name
+  const fallbackName = displayName || idOrName;
+  return { id: idOrName, name: fallbackName, lid: 'BRA', league: '' };
+}
+if (ta) { const t = _findTeamByIdOrName(ta, taName); if(t) selectTeam('A',t); }
+if (tb) { const t = _findTeamByIdOrName(tb, tbName); if(t) selectTeam('B',t); }
 
 // FIX 12 — applyComparParams: delegate to selectTeam() using URL params already read above
 (function applyComparParams() {

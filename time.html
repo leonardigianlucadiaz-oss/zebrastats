@@ -31,7 +31,7 @@
     </nav>
     <div class="sidebar__footer">
       <div class="sidebar__user">
-        <div class="sidebar__user-avatar">·</div>
+        <div class="sidebar__user-avatar" style="opacity:0.3;"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
         <div class="sidebar__user-info">
           <div class="sidebar__user-name">·</div>
           <div class="sidebar__user-plan">Plano Free</div>
@@ -114,7 +114,7 @@
         <!-- Score grande + barra degradê -->
         <div style="display:flex;align-items:center;gap:16px;margin-bottom:14px;">
           <div style="text-align:center;flex-shrink:0;">
-            <div style="font-size:3rem;font-weight:800;line-height:1;" id="starScore">3.5</div>
+            <div style="font-size:3rem;font-weight:800;line-height:1;" id="starScore">—</div>
             <div style="font-size:0.6875rem;color:var(--gray);margin-top:2px;">/ 5.0</div>
           </div>
           <div style="flex:1;">
@@ -139,16 +139,16 @@
           <div style="display:flex;align-items:center;gap:8px;">
             <span style="font-size:0.75rem;color:var(--gray);min-width:78px;">Como zebra</span>
             <div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;">
-              <div id="barAsUnderdog" style="width:65%;height:100%;background:var(--green);border-radius:3px;transition:width 0.6s ease;"></div>
+              <div id="barAsUnderdog" style="width:0%;height:100%;background:var(--green);border-radius:3px;transition:width 0.6s ease;"></div>
             </div>
-            <span style="font-size:0.75rem;color:var(--green);min-width:34px;" id="barAsUnderdogLabel">65%</span>
+            <span style="font-size:0.75rem;color:var(--gray);min-width:34px;" id="barAsUnderdogLabel">—</span>
           </div>
           <div style="display:flex;align-items:center;gap:8px;">
             <span style="font-size:0.75rem;color:var(--gray);min-width:78px;">Causou zebra</span>
             <div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;">
-              <div id="barCaused" style="width:42%;height:100%;background:var(--gold);border-radius:3px;transition:width 0.6s ease;"></div>
+              <div id="barCaused" style="width:0%;height:100%;background:var(--gold);border-radius:3px;transition:width 0.6s ease;"></div>
             </div>
-            <span style="font-size:0.75rem;color:var(--gold);min-width:34px;" id="barCausedLabel">42%</span>
+            <span style="font-size:0.75rem;color:var(--gray);min-width:34px;" id="barCausedLabel">—</span>
           </div>
         </div>
       </div>
@@ -625,9 +625,12 @@
         b.style.color       = isActive ? 'var(--white)'     : 'var(--gray)';
       });
 
-      // Wire comparar button
+      // Wire comparar button — pass team name so comparar.html can pre-select
       const cBtn = document.getElementById('compararBtn');
-      if (cBtn) cBtn.href = `comparar.html?a=${encodeURIComponent(name)}`;
+      if (cBtn) {
+        const _cTeamId = currentTeamSdbId ? encodeURIComponent(name) : encodeURIComponent(name);
+        cBtn.href = `comparar.html?a=${_cTeamId}&aName=${encodeURIComponent(name)}`;
+      }
 
       // Reset stars to neutral until real data loads
       document.getElementById('starScore').textContent = '—';
