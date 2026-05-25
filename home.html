@@ -31,7 +31,7 @@
     </nav>
     <div class="sidebar__footer">
       <div class="sidebar__user">
-        <div class="sidebar__user-avatar">·</div>
+        <div class="sidebar__user-avatar" style="opacity:0.3;"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
         <div class="sidebar__user-info">
           <div class="sidebar__user-name">·</div>
           <div class="sidebar__user-plan">Plano Free</div>
@@ -163,7 +163,7 @@
           <a href="assinatura.html" class="section-link text-gold"><i data-lucide="lock" style="width:12px;height:12px;vertical-align:middle;margin-right:3px;"></i>Pro</a>
         </div>
 
-        <div class="lock-banner" onclick="window.location.href='assinatura.html'">
+        <div class="lock-banner" style="display:none;" onclick="window.location.href='assinatura.html'">
           <i data-lucide="lock" style="width:20px;height:20px;color:var(--gold);flex-shrink:0;"></i>
           <div>
             <div style="font-size:0.875rem;font-weight:600;">Análise de zebras exclusiva</div>
@@ -175,9 +175,9 @@
         <!-- ZEBRA DO DIA DESTAQUE -->
         <div id="zebraDestaqueCard" style="display:none;background:linear-gradient(135deg,rgba(46,230,92,0.1),rgba(255,200,50,0.07));border:1px solid rgba(46,230,92,0.35);border-radius:var(--radius-md);padding:14px;cursor:pointer;"></div>
 
-        <!-- PRÓXIMAS ZEBRAS POTENCIAIS -->
+        <!-- MAIORES ZEBRAS RECENTES -->
         <div class="section-header" style="margin-top:8px;">
-          <span class="section-title"><i data-lucide="trending-up" class="sec-ic" style="color:var(--gold);"></i>Próximas Zebras</span>
+          <span class="section-title"><i data-lucide="trending-up" class="sec-ic" style="color:var(--gold);"></i>Maiores Zebras Recentes</span>
         </div>
         <div id="proximasZebrasWrap" style="display:flex;flex-direction:column;gap:6px;">
           <div class="shimmer-line" style="width:90%;"></div>
@@ -941,7 +941,7 @@
         }
       }, 18000);
 
-      // Escalonamento: 800ms entre cada liga para não sobrecarregar a API
+      // Escalonamento: 300ms entre cada liga para não sobrecarregar a API
       ALL_LIDS.forEach((lid, idx) => {
         setTimeout(() => {
           ZebraAPI.fetchRealZebras(lid, 15).then(zebras => {
@@ -958,7 +958,7 @@
             // Dispara evento para o hero banner
             document.dispatchEvent(new CustomEvent('zebrasLoaded', { detail: Object.values(_zebrasByLid).flat() }));
           }).catch(() => {});
-        }, idx * 800);
+        }, idx * 300);
       });
     }
 
@@ -979,8 +979,15 @@
       const container = document.getElementById('zebrasDoDiaList');
       if (!container) return;
       const isPro = getUserPlan() === 'pro';
+      const lockBanner = document.querySelector('.lock-banner');
       const all = Object.values(_zebrasByLid).flat().sort((a,b) => b.zi - a.zi);
-      if (!all.length) return;
+      // Only show the lock banner after data has loaded — not while the list is still empty
+      if (!all.length) {
+        if (lockBanner && !_zebraLoadedCount) lockBanner.style.display = 'none'; // still loading, show neither
+        return;
+      }
+      // Data is available — show lock banner for free users (unless already hidden by initZebrasDoDia for PRO)
+      if (lockBanner && !isPro) lockBanner.style.display = 'flex';
       const shown = all.slice(0, isPro ? 8 : 3);
       container.innerHTML = '';
       shown.forEach(z => {
@@ -1023,9 +1030,9 @@
     initGames();          // busca jogos de todas as ligas (escalonado: 600ms/liga)
     initZebrasDoDia();    // configura seção (esconde lock-banner se PRO)
     initBellBadge();
-    // Delay de 5s antes de iniciar o carregador de zebras para não competir
+    // Delay de 500ms antes de iniciar o carregador de zebras para não competir
     // com initGames pelo limite de 10 req/min do Football-Data free tier.
-    setTimeout(_loadAllZebras, 5000); // carregador central (depois de initGames iniciar)
+    setTimeout(_loadAllZebras, 500); // carregador central (depois de initGames iniciar)
 
     // Populate hero banner — atualiza sempre que um novo lote de zebras chega
     (function _heroBanner() {
@@ -1122,7 +1129,7 @@
       const wrap = document.getElementById('proximasZebrasWrap');
       if (!wrap) return;
       const sorted = (e.detail || []).sort((a,b) => (b.zi||0)-(a.zi||0)).slice(0,3);
-      if (!sorted.length) { wrap.innerHTML = '<p style="font-size:0.75rem;color:var(--gray);padding:4px 0;">Nenhuma zebra potencial no momento.</p>'; return; }
+      if (!sorted.length) { wrap.innerHTML = '<p style="font-size:0.75rem;color:var(--gray);padding:4px 0;">Nenhuma zebra recente no momento.</p>'; return; }
       wrap.innerHTML = sorted.map(z => `
         <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);cursor:pointer;"
           onclick="(function(){${z.id ? `try{localStorage.setItem('zs_current_match_id','${z.id}');localStorage.setItem('zs_current_match_lid','${z.lid||''}');}catch(e){}` : ''}window.location.href='partida.html?home=${encodeURIComponent(z.home||'')}&away=${encodeURIComponent(z.away||'')}&zi=${z.zi}&league=${encodeURIComponent(z.league||'')}${z.id ? `&fixtureId=${z.id}` : ''}'})()">

@@ -154,23 +154,30 @@ let activePeriodNew = 'semana';
 // Period date-filter helper — returns true if the zebra's date falls within the given period
 function _inPeriod(z, period) {
   if (period === 'historico') return true;
-  const dateStr = z.date || '';
-  if (!dateStr) return false;
-  const parts = dateStr.split('/');
-  let dt;
-  if (parts.length >= 3) {
-    dt = new Date(parseInt(parts[2], 10), parseInt(parts[1], 10) - 1, parseInt(parts[0], 10));
-  } else if (parts.length === 2) {
-    dt = new Date(new Date().getFullYear(), parseInt(parts[1], 10) - 1, parseInt(parts[0], 10));
+  const raw = z.date || z.utcDate || '';
+  if (!raw) return false;
+  let d;
+  if (raw.includes('T') || raw.includes('-')) {
+    d = new Date(raw);
   } else {
-    // Try ISO format fallback
-    dt = new Date(dateStr);
+    // DD/MM/YYYY or DD/MM
+    const parts = raw.split('/');
+    if (parts.length >= 3) {
+      d = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+    } else if (parts.length === 2) {
+      d = new Date(`${new Date().getFullYear()}-${parts[1]}-${parts[0]}`);
+      // If date is more than 90 days in the future, it's from last year
+      if (d > new Date(Date.now() + 90 * 86400000)) {
+        d.setFullYear(d.getFullYear() - 1);
+      }
+    } else {
+      d = new Date(raw);
+    }
   }
-  if (isNaN(dt.getTime())) return false;
-  const now = new Date();
-  const diffDays = (now - dt) / 86400000;
-  if (period === 'semana') return diffDays <= 7;
-  if (period === 'mes')    return diffDays <= 30;
+  if (!d || isNaN(d)) return period === 'historico';
+  const diffDays = (Date.now() - d.getTime()) / 86400000;
+  if (period === 'semana') return diffDays >= 0 && diffDays <= 7;
+  if (period === 'mes')    return diffDays >= 0 && diffDays <= 30;
   return true;
 }
 
