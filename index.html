@@ -242,10 +242,12 @@
         document.getElementById('emailError').style.display = 'block';
         return;
       }
+      const originalText = 'Esqueci minha senha';
       this.textContent = 'Enviando...';
       const { error } = await ZebraAuth.authResetPassword(email);
       this.textContent = error ? 'Erro ao enviar' : 'E-mail enviado!';
       if (!error) showToast('Verifique sua caixa de entrada para redefinir a senha.');
+      setTimeout(() => { this.textContent = originalText; }, 4000);
     });
 
     // Login com Google
@@ -274,7 +276,7 @@
     document.getElementById('guestBtn')?.addEventListener('click', function() {
       localStorage.setItem('zs_guest', '1');
       localStorage.setItem('zs_user_name', 'Convidado');
-      localStorage.setItem('zs_user_plan', 'free');
+      localStorage.setItem('zebrastats_plan', 'free');
       const params = new URLSearchParams(location.search);
       const next = params.get('next');
       window.location.href = next ? decodeURIComponent(next) : 'home.html';
