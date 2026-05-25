@@ -382,7 +382,7 @@
       </div>
       <div class="form-group">
         <label class="form-label">Telefone (opcional)</label>
-        <input class="form-input" type="tel" placeholder="+55 (11) 99999-9999" />
+        <input class="form-input" type="tel" id="phone" placeholder="+55 (11) 99999-9999" />
       </div>
       <button class="btn btn--primary" onclick="saveProfile()">Salvar alterações</button>
     </div>
@@ -465,26 +465,6 @@
   document.querySelectorAll('.modal-overlay').forEach(overlay => {
     overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.remove('show'); });
   });
-
-  function saveProfile() {
-    const name  = document.getElementById('editName').value.trim();
-    const email = document.getElementById('editEmail').value.trim();
-    if (name) {
-      document.getElementById('userName').textContent = name;
-      document.getElementById('avatarEl').textContent = name[0].toUpperCase();
-      localStorage.setItem('zs_user_name', name);
-      const sidebarAvatar = document.querySelector('.sidebar__user-avatar');
-      if (sidebarAvatar) sidebarAvatar.textContent = name[0].toUpperCase();
-      const sidebarName = document.querySelector('.sidebar__user-name');
-      if (sidebarName) sidebarName.textContent = name.split(' ')[0];
-    }
-    if (email) {
-      document.getElementById('userEmail').textContent = email;
-      localStorage.setItem('zs_user_email', email);
-    }
-    closeModal('editDadosModal');
-    showToast('✓ Dados atualizados!');
-  }
 
   async function changePassword() {
     const np = document.getElementById('newPass').value;
@@ -645,14 +625,26 @@
       if (!file || !file.type.startsWith('image/')) return;
       const reader = new FileReader();
       reader.onload = function(ev) {
-        const img = ev.target.result;
-        // Save to both keys so sidebar and profile stay in sync
-        try { localStorage.setItem('zs_avatar', img); } catch {}
-        try { localStorage.setItem('zs_user_avatar', img); } catch {}
-        document.querySelectorAll('.profile-avatar, #avatarEl, #profileAvatar, .sidebar__user-avatar, #sidebarAvatar').forEach(el => {
-          if (el) { el.style.backgroundImage = `url(${img})`; el.style.backgroundSize = 'cover'; el.style.backgroundPosition = 'center'; el.textContent = ''; }
-        });
-        showToast('✓ Foto atualizada!');
+        const rawDataUrl = ev.target.result;
+        // Compress/resize to max 128×128 before storing to avoid 5MB localStorage overflow
+        const imgEl = new Image();
+        imgEl.onload = function() {
+          const canvas = document.createElement('canvas');
+          const MAX = 128;
+          const ratio = Math.min(MAX / imgEl.width, MAX / imgEl.height);
+          canvas.width  = Math.round(imgEl.width  * ratio);
+          canvas.height = Math.round(imgEl.height * ratio);
+          canvas.getContext('2d').drawImage(imgEl, 0, 0, canvas.width, canvas.height);
+          const compressed = canvas.toDataURL('image/jpeg', 0.7); // ~5-15KB max
+          // Save to both keys so sidebar and profile stay in sync
+          try { localStorage.setItem('zs_avatar', compressed); } catch {}
+          try { localStorage.setItem('zs_user_avatar', compressed); } catch {}
+          document.querySelectorAll('.profile-avatar, #avatarEl, #profileAvatar, .sidebar__user-avatar, #sidebarAvatar').forEach(el => {
+            if (el) { el.style.backgroundImage = `url(${compressed})`; el.style.backgroundSize = 'cover'; el.style.backgroundPosition = 'center'; el.textContent = ''; }
+          });
+          showToast('✓ Foto atualizada!');
+        };
+        imgEl.src = rawDataUrl;
       };
       reader.readAsDataURL(file);
     });
@@ -697,9 +689,9 @@
     if (el('statAlertas'))  el('statAlertas').textContent  = alertsData.length;
     if (el('statFavTimes')) el('statFavTimes').textContent = favs.length;
     if (el('statFavLigas')) el('statFavLigas').textContent = ligas.length;
-    // statZebras: approximate from number of days × small constant (no real tracking yet)
-    const zebrasSeen = parseInt(localStorage.getItem('zs_zebras_seen') || '0') || Math.max(0, dias * 2 + alertsData.length * 3);
-    if (el('statZebras')) el('statZebras').textContent = zebrasSeen;
+    // statZebras: only show real tracked value; hide with "—" if not yet tracked
+    const zebrasSeen = parseInt(localStorage.getItem('zs_zebras_seen') || '0');
+    if (el('statZebras')) el('statZebras').textContent = zebrasSeen > 0 ? zebrasSeen : '—';
   }
   loadUserStats();
 
@@ -751,36 +743,23 @@
   ZebraAuth.initAuthUI();
   if (typeof lucide !== 'undefined') lucide.createIcons();
 
-  // ── Profile Stats ──────────────────────────────────────────────
-  function _profileStats() {
-    const zebrasSeen = parseInt(localStorage.getItem('zs_zebras_seen') || 0);
-    const favCount   = JSON.parse(localStorage.getItem('zebrastats_favorites') || '[]').length;
-    const createdAt  = localStorage.getItem('zs_created_at');
-    let diasAtivo = 1;
-    if (createdAt) {
-      const diff = Date.now() - new Date(createdAt).getTime();
-      diasAtivo = Math.max(1, Math.floor(diff / 86400000));
-    }
-    // Populate existing stat elements if they exist
-    const szEl = document.getElementById('statZebras');
-    const sfEl = document.getElementById('statFavTimes');
-    if (szEl) szEl.textContent = zebrasSeen || '–';
-    if (sfEl) sfEl.textContent = favCount || 0;
-  }
-  _profileStats();
-
   // ── Activity Heatmap ───────────────────────────────────────────
   function _activityHeatmap() {
     const grid = document.getElementById('activityGrid');
     if (!grid) return;
     const days = 56; // 8 weeks × 7 days
     const actData = JSON.parse(localStorage.getItem('zs_activity_days') || '{}');
+    const hasRealData = Object.keys(actData).length > 0;
+    if (!hasRealData) {
+      grid.innerHTML = '<div style="text-align:center;padding:16px;color:var(--gray);font-size:0.75rem;grid-column:1/-1;">Comece a explorar zebras para ver sua atividade aqui</div>';
+      return;
+    }
     const now = Date.now();
     const cells = [];
     for (let i = days - 1; i >= 0; i--) {
       const d = new Date(now - i * 86400000);
       const key = d.toISOString().slice(0,10);
-      const count = actData[key] || (Math.random() < 0.35 ? Math.floor(Math.random()*4+1) : 0);
+      const count = actData[key] || 0;
       let bg = 'var(--card2)';
       if      (count >= 4) bg = 'var(--green)';
       else if (count >= 2) bg = 'rgba(46,230,92,0.5)';
