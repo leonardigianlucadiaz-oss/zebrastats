@@ -6,7 +6,7 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
 const CORS = {
   "Access-Control-Allow-Origin":  "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-zs-guest",
   "Access-Control-Allow-Methods": "GET, OPTIONS",
 };
 
@@ -60,6 +60,19 @@ function err(msg: string, status = 400) {
 // ── Handler principal ──────────────────────────────────────────
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: CORS });
+
+  // Fix 7.1: bloqueia bots que não enviam nenhum contexto de autenticação.
+  // Permite: (1) usuários autenticados com JWT Bearer, (2) guests com header x-zs-guest: 1.
+  // O frontend envia x-zs-guest: 1 para visitantes; o Supabase client envia Bearer para
+  // usuários logados. Requisições sem nenhum dos dois são de bots/scrapers.
+  const authHeader  = req.headers.get("Authorization") || "";
+  const guestHeader = req.headers.get("x-zs-guest") || "";
+  const hasAuth = authHeader.startsWith("Bearer ") || guestHeader === "1";
+  if (!hasAuth) {
+    return new Response(JSON.stringify({ error: "Auth required" }), {
+      status: 401, headers: { ...CORS, "Content-Type": "application/json" }
+    });
+  }
 
   const url    = new URL(req.url);
   const action = url.searchParams.get("action") ?? "";

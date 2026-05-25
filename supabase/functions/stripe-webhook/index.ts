@@ -28,8 +28,11 @@ serve(async (req) => {
     const session = event.data.object as Stripe.CheckoutSession
     const userId  = session.metadata?.userId
     if (userId) {
+      // Fix 5.10: usa +13 meses como padrão seguro para não expirar antes de assinantes
+      // anuais. TODO: detectar intervalo real via session.subscription → price.recurring.interval
+      // quando create-checkout passar metadata.plan = 'annual' | 'monthly'.
       const expires = new Date()
-      expires.setMonth(expires.getMonth() + 1)
+      expires.setMonth(expires.getMonth() + 13) // safe default for up to annual plans
       await sb.from('profiles').update({
         plan: 'pro',
         plan_expires_at: expires.toISOString(),
@@ -40,6 +43,24 @@ serve(async (req) => {
       await sb.auth.admin.updateUserById(userId, {
         user_metadata: { plan: 'pro' }
       })
+    }
+  }
+
+  // Fix 5.9: renova plan_expires_at em +1 mês a cada pagamento de invoice mensal.
+  // Sem este handler, assinaturas mensais expiram após o primeiro mês.
+  if (event.type === 'invoice.payment_succeeded') {
+    const invoice = event.data.object as Stripe.Invoice
+    const customerId = invoice.customer as string
+    // Estende o plano com base na data atual de expiração para evitar perda de dias
+    const { data: profile } = await sb.from('profiles')
+      .select('id, plan_expires_at').eq('stripe_customer_id', customerId).single()
+    if (profile && profile.plan_expires_at) {
+      const newExpiry = new Date(profile.plan_expires_at)
+      newExpiry.setMonth(newExpiry.getMonth() + 1)
+      await sb.from('profiles').update({
+        plan: 'pro',
+        plan_expires_at: newExpiry.toISOString(),
+      }).eq('stripe_customer_id', customerId)
     }
   }
 

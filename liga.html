@@ -31,7 +31,7 @@
     </nav>
     <div class="sidebar__footer">
       <div class="sidebar__user">
-        <div class="sidebar__user-avatar">·</div>
+        <div class="sidebar__user-avatar" style="opacity:0.3;"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
         <div class="sidebar__user-info">
           <div class="sidebar__user-name">·</div>
           <div class="sidebar__user-plan">Plano Free</div>
@@ -56,14 +56,14 @@
   <!-- SELETOR DE LIGA (acima do hero) -->
   <section class="section-padded" style="background:var(--card2);padding:10px 16px;border-bottom:1px solid var(--border);">
     <div class="scroll-x" style="gap:8px;" id="leaguePicker">
-      <button class="filter-chip active" data-lid="BRA" data-name="Brasileirão Série A" data-sub="Brasil · Temporada 2025" data-lider="FLA" data-zebras="14" data-rodada="12ª"><span class="picker-logo" id="pl-BRA"></span> Brasileirão</button>
-      <button class="filter-chip" data-lid="ENG" data-name="Premier League" data-sub="Inglaterra · Temporada 2024/25" data-lider="LFC" data-zebras="21" data-rodada="37ª"><span class="picker-logo" id="pl-ENG"></span> Premier Lge</button>
-      <button class="filter-chip" data-lid="ESP" data-name="La Liga" data-sub="Espanha · Temporada 2024/25" data-lider="BAR" data-zebras="18" data-rodada="36ª"><span class="picker-logo" id="pl-ESP"></span> La Liga</button>
-      <button class="filter-chip" data-lid="ITA" data-name="Serie A" data-sub="Itália · Temporada 2024/25" data-lider="INT" data-zebras="16" data-rodada="37ª"><span class="picker-logo" id="pl-ITA"></span> Serie A</button>
-      <button class="filter-chip" data-lid="GER" data-name="Bundesliga" data-sub="Alemanha · Temporada 2024/25" data-lider="BAY" data-zebras="12" data-rodada="34ª"><span class="picker-logo" id="pl-GER"></span> Bundesliga</button>
-      <button class="filter-chip" data-lid="FRA" data-name="Ligue 1" data-sub="França · Temporada 2024/25" data-lider="PSG" data-zebras="11" data-rodada="34ª"><span class="picker-logo" id="pl-FRA"></span> Ligue 1</button>
-      <button class="filter-chip" data-lid="POR" data-name="Liga Portugal" data-sub="Portugal · Temporada 2024/25" data-lider="BEN" data-zebras="9" data-rodada="34ª"><span class="picker-logo" id="pl-POR"></span> Liga PT</button>
-      <button class="filter-chip" data-lid="UCL" data-name="Champions League" data-sub="Europa · Temporada 2024/25" data-lider="RMA" data-zebras="7" data-rodada="SF"><span class="picker-logo" id="pl-UCL"></span> Champions</button>
+      <button class="filter-chip active" data-lid="BRA" data-name="Brasileirão Série A" data-sub="Brasil · Temporada 2025" data-lider="—" data-zebras="—" data-rodada="—"><span class="picker-logo" id="pl-BRA"></span> Brasileirão</button>
+      <button class="filter-chip" data-lid="ENG" data-name="Premier League" data-sub="Inglaterra · Temporada 2024/25" data-lider="—" data-zebras="—" data-rodada="—"><span class="picker-logo" id="pl-ENG"></span> Premier Lge</button>
+      <button class="filter-chip" data-lid="ESP" data-name="La Liga" data-sub="Espanha · Temporada 2024/25" data-lider="—" data-zebras="—" data-rodada="—"><span class="picker-logo" id="pl-ESP"></span> La Liga</button>
+      <button class="filter-chip" data-lid="ITA" data-name="Serie A" data-sub="Itália · Temporada 2024/25" data-lider="—" data-zebras="—" data-rodada="—"><span class="picker-logo" id="pl-ITA"></span> Serie A</button>
+      <button class="filter-chip" data-lid="GER" data-name="Bundesliga" data-sub="Alemanha · Temporada 2024/25" data-lider="—" data-zebras="—" data-rodada="—"><span class="picker-logo" id="pl-GER"></span> Bundesliga</button>
+      <button class="filter-chip" data-lid="FRA" data-name="Ligue 1" data-sub="França · Temporada 2024/25" data-lider="—" data-zebras="—" data-rodada="—"><span class="picker-logo" id="pl-FRA"></span> Ligue 1</button>
+      <button class="filter-chip" data-lid="POR" data-name="Liga Portugal" data-sub="Portugal · Temporada 2024/25" data-lider="—" data-zebras="—" data-rodada="—"><span class="picker-logo" id="pl-POR"></span> Liga PT</button>
+      <button class="filter-chip" data-lid="UCL" data-name="Champions League" data-sub="Europa · Temporada 2024/25" data-lider="—" data-zebras="—" data-rodada="—"><span class="picker-logo" id="pl-UCL"></span> Champions</button>
     </div>
   </section>
 
@@ -89,15 +89,15 @@
         <div style="font-size:0.625rem;color:var(--gray);margin-top:2px;">Times</div>
       </div>
       <div style="flex:1;padding:10px 8px;text-align:center;border-right:1px solid var(--border);">
-        <div style="font-size:1rem;font-weight:700;" id="statRodada">12ª</div>
+        <div style="font-size:1rem;font-weight:700;" id="statRodada">—</div>
         <div style="font-size:0.625rem;color:var(--gray);margin-top:2px;">Rodada</div>
       </div>
       <div style="flex:1;padding:10px 8px;text-align:center;border-right:1px solid var(--border);">
-        <div style="font-size:1rem;font-weight:700;color:var(--green);" id="statLider">FLA</div>
+        <div style="font-size:1rem;font-weight:700;color:var(--green);" id="statLider">—</div>
         <div style="font-size:0.625rem;color:var(--gray);margin-top:2px;">Líder</div>
       </div>
       <div style="flex:1;padding:10px 8px;text-align:center;">
-        <div style="font-size:1rem;font-weight:700;color:var(--gold);" id="statZebras">14</div>
+        <div style="font-size:1rem;font-weight:700;color:var(--gold);" id="statZebras">—</div>
         <div style="font-size:0.625rem;color:var(--gray);margin-top:2px;">Zebras 🦓</div>
       </div>
     </div>
@@ -122,11 +122,8 @@
         <button class="filter-chip" data-jfilter="encerrados"><i data-lucide="check-circle" class="chip-ic"></i>Encerrados</button>
       </div>
 
-      <div class="scroll-x" style="gap:6px;margin-top:8px;" id="rodadaFilter">
+      <div class="scroll-x" style="gap:6px;margin-top:8px;display:none;" id="rodadaFilter">
         <button class="filter-chip active" data-rodada="todas">Todas as rodadas</button>
-        <button class="filter-chip" data-rodada="13">Rodada 13</button>
-        <button class="filter-chip" data-rodada="12">Rodada 12</button>
-        <button class="filter-chip" data-rodada="11">Rodada 11</button>
       </div>
 
       <div id="jogosList" style="display:flex;flex-direction:column;gap:10px;margin-top:4px;"></div>
@@ -276,11 +273,6 @@
       { from:1,  to:7,  cls:'cl',       color:'#2EE65C', label:'Playoffs (East/West)' },
     ],
     NED: [
-      { from:1,  to:2,  cls:'cl',       color:'#2EE65C', label:'Champions League' },
-      { from:3,  to:4,  cls:'eur',      color:'#4D9FFF', label:'Europa League' },
-      { from:16, to:18, cls:'rel',      color:'#EE4444', label:'Rebaixamento' },
-    ],
-    HOL: [
       { from:1,  to:2,  cls:'cl',       color:'#2EE65C', label:'Champions League' },
       { from:3,  to:4,  cls:'eur',      color:'#4D9FFF', label:'Europa League' },
       { from:16, to:18, cls:'rel',      color:'#EE4444', label:'Rebaixamento' },
@@ -911,6 +903,37 @@
             const maxRound = rounds.sort().pop();
             const statRodadaEl = document.getElementById('statRodada');
             if (statRodadaEl) statRodadaEl.textContent = maxRound;
+            // Build dynamic round filter buttons from actual rounds in data
+            const uniqueRounds = [...new Set(rounds)].sort((a, b) => {
+              const na = parseInt(a), nb = parseInt(b);
+              if (!isNaN(na) && !isNaN(nb)) return nb - na;
+              return b.localeCompare(a);
+            });
+            const rodadaFilterEl = document.getElementById('rodadaFilter');
+            if (rodadaFilterEl && uniqueRounds.length > 0) {
+              rodadaFilterEl.innerHTML = `<button class="filter-chip active" data-rodada="todas">Todas as rodadas</button>`;
+              uniqueRounds.slice(0, 6).forEach(r => {
+                const btn = document.createElement('button');
+                btn.className = 'filter-chip';
+                btn.dataset.rodada = r;
+                btn.textContent = isNaN(parseInt(r)) ? r : `Rodada ${r}`;
+                btn.addEventListener('click', function() {
+                  document.querySelectorAll('#rodadaFilter .filter-chip').forEach(b => b.classList.remove('active'));
+                  this.classList.add('active');
+                  activeRodada = this.dataset.rodada;
+                  renderJogos();
+                });
+                rodadaFilterEl.appendChild(btn);
+              });
+              rodadaFilterEl.style.display = '';
+              // Re-wire the "Todas" button
+              rodadaFilterEl.querySelector('[data-rodada="todas"]').addEventListener('click', function() {
+                document.querySelectorAll('#rodadaFilter .filter-chip').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                activeRodada = 'todas';
+                renderJogos();
+              });
+            }
           }
           if (activeTab === 'jogos') renderJogos();
         }

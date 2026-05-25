@@ -142,10 +142,13 @@ async function drawShareCard(config) {
   ctx.font = '30px Inter, -apple-system, sans-serif';
   ctx.fillStyle = '#889AAA';
   ctx.fillText(domain, W / 2, 970);
-  // Green dots flanking text
+  // Green dots flanking text — positioned relative to actual text width
+  const dotY = 964;
+  const textWidth = ctx.measureText(domain).width;
+  const dotOffset = textWidth / 2 + 12;
   ctx.fillStyle = '#2EE65C';
-  ctx.beginPath(); ctx.arc(W / 2 - 130, 964, 5, 0, Math.PI * 2); ctx.fill();
-  ctx.beginPath(); ctx.arc(W / 2 + 130, 964, 5, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(W / 2 - dotOffset, dotY, 3, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(W / 2 + dotOffset, dotY, 3, 0, Math.PI * 2); ctx.fill();
 
   return new Promise(resolve => canvas.toBlob(blob => resolve(blob), 'image/png', 0.95));
 }

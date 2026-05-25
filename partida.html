@@ -31,7 +31,7 @@
     </nav>
     <div class="sidebar__footer">
       <div class="sidebar__user">
-        <div class="sidebar__user-avatar">·</div>
+        <div class="sidebar__user-avatar" style="opacity:0.3;"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
         <div class="sidebar__user-info">
           <div class="sidebar__user-name">·</div>
           <div class="sidebar__user-plan">Plano Free</div>
@@ -930,6 +930,13 @@
 
     if (typeof ZebraAPI === 'undefined') { el.innerHTML = ''; return; }
 
+    // Normalise team names for robust matching (handles accents, Manchester City vs Manchester United, etc.)
+    function normName(s) {
+      return (s || '').toLowerCase()
+        .normalize('NFD').replace(/[̀-ͯ]/g, '')
+        .replace(/[^a-z0-9]/g, '');
+    }
+
     // Liga: tenta URL param → localStorage → fallback
     const storedLid = localStorage.getItem('zs_current_match_lid');
     const urlLeague  = _urlLeague || '';
@@ -946,15 +953,21 @@
       const keys    = Object.keys(oddsMap);
       if (!keys.length) { el.innerHTML = '<p style="text-align:center;font-size:0.8125rem;color:var(--gray);padding:8px;">Odds indisponíveis para esta liga</p>'; return; }
 
-      // Tenta encontrar a partida por nome (parcial, 4+ chars)
-      const home = (_urlHome || '').toLowerCase();
-      const away = (_urlAway || '').toLowerCase();
-      const matchKey = keys.find(k => {
-        const [h, a] = k.split('|').map(s => s.toLowerCase());
-        const sl = (s, n=4) => s.slice(0, n);
-        return (home.length >= 4 && (h.includes(sl(home)) || sl(home,5) && h.includes(sl(home,5)))) ||
-               (away.length  >= 4 && (a.includes(sl(away))  || sl(away,5)  && a.includes(sl(away,5))));
+      // Tenta encontrar a partida usando normName 8-char bidirectional (handles e.g. Manchester City vs Manchester United)
+      const homeNorm = normName(_urlHome);
+      const awayNorm = normName(_urlAway);
+      const oddsData = keys.map(k => {
+        const [home_team, away_team] = k.split('|');
+        return { key: k, home_team, away_team };
       });
+      const oddsEntry = oddsData.find(o => {
+        const oHome = normName(o.home_team);
+        const oAway = normName(o.away_team);
+        const homeMatch = oHome.includes(homeNorm.slice(0, 8)) || homeNorm.includes(oHome.slice(0, 8));
+        const awayMatch = oAway.includes(awayNorm.slice(0, 8)) || awayNorm.includes(oAway.slice(0, 8));
+        return homeMatch && awayMatch;
+      });
+      const matchKey = oddsEntry ? oddsEntry.key : null;
 
       const odds = matchKey ? oddsMap[matchKey] : null;
       if (!odds) {
@@ -1201,8 +1214,9 @@
       dot.appendChild(minLbl);
       dotsEl.appendChild(dot);
 
-      // Row
+      // Row — .timeline-event class triggers CSS animation (fix 8.6)
       const row = document.createElement('div');
+      row.className = 'timeline-event';
       row.style.cssText = `display:flex;align-items:center;gap:10px;padding:6px 0;${i < filtered.length-1 ? 'border-bottom:1px solid var(--border);' : ''}`;
       const player = ev.player?.name || ev.assist?.name || '';
       row.innerHTML = `

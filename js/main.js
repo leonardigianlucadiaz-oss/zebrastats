@@ -679,16 +679,16 @@ function injectFavoritosNav() {
 function initBottomNav() {
   const nav = document.querySelector('.bottom-nav');
   if (!nav) return;
-  const current = window.location.pathname.split('/').pop() || 'home.html';
+  const href = window.location.href;
   const items = [
-    { href: 'home.html',    icon: 'home',        label: 'Home' },
-    { href: 'zebras.html',  icon: 'activity',    label: 'Zebras' },
-    { href: 'comparar.html',icon: 'git-compare', label: 'Comparar' },
-    { href: 'time.html',    icon: 'star',        label: 'Times' },
-    { href: 'perfil.html',  icon: 'user',        label: 'Perfil' },
+    { href: 'home.html',    icon: 'home',      label: 'Home' },
+    { href: 'zebras.html',  icon: 'activity',  label: 'Zebras' },
+    { href: 'ranking.html', icon: 'medal',     label: 'Ranking' },
+    { href: 'alertas.html', icon: 'bell-ring', label: 'Alertas' },
+    { href: 'perfil.html',  icon: 'user',      label: 'Perfil' },
   ];
   nav.innerHTML = items.map(item => {
-    const active = current === item.href || current.startsWith(item.href.replace('.html',''));
+    const active = href.includes(item.href);
     return `<a href="${item.href}" class="bottom-nav__item${active ? ' active' : ''}">
       <span class="bottom-nav__icon"><i data-lucide="${item.icon}" style="width:20px;height:20px;display:block;"></i></span>
       ${item.label}
@@ -766,7 +766,7 @@ function initPlanBadge() {
   // Dedup: skip if any plan indicator already present
   if (actions.querySelector('.plan-badge, #planBadge, .badge--free')) return;
 
-  const plan = localStorage.getItem('zs_user_plan') || 'free';
+  const plan = localStorage.getItem('zebrastats_plan') || 'free';
   if (plan === 'pro') return; // PRO users don't see FREE badge
 
   // FREE badge (subtle pill)
