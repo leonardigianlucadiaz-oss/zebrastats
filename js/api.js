@@ -17,7 +17,11 @@ const ZebraAPI = (() => {
 
   /* ── CACHE sessionStorage ────────────────────────────────────
    * TTL padrão: 10 min. Odds: 24h (fix #9 — The Odds API tem 500 req/mês)
+   * Fix 4.2: failed API calls are cached for 30s (ERR_MARKER) to prevent
+   * retry storms when the API is down and the user switches tabs rapidly.
    */
+  const ERR_MARKER = '__ERR__';
+  const ERR_TTL    = 30_000; // 30 seconds
   const _cache = {
     get(k, customTTL) {
       try {
@@ -25,12 +29,22 @@ const ZebraAPI = (() => {
         if (!raw) return null;
         const { ts, d } = JSON.parse(raw);
         const ttl = customTTL || 600_000; // 10 min padrão
+        // Error marker: suppress retries for 30s, then allow a fresh attempt
+        if (typeof d === 'string' && d.startsWith(ERR_MARKER)) {
+          if (Date.now() - ts < ERR_TTL) return null; // still within error cooldown → suppress
+          sessionStorage.removeItem(`zs_${k}`);       // cooldown expired → allow retry
+          return null;
+        }
         if (Date.now() - ts > ttl) { sessionStorage.removeItem(`zs_${k}`); return null; }
         return d;
       } catch { return null; }
     },
     set(k, d) {
       try { sessionStorage.setItem(`zs_${k}`, JSON.stringify({ ts: Date.now(), d })); } catch {}
+    },
+    // Cache a failed fetch so rapid retries are suppressed for ERR_TTL (30s)
+    setError(k) {
+      try { sessionStorage.setItem(`zs_${k}`, JSON.stringify({ ts: Date.now(), d: ERR_MARKER + k })); } catch {}
     },
   };
   const ODDS_CACHE_TTL = 86_400_000; // 24 horas — preserva quota da Odds API
@@ -76,26 +90,32 @@ const ZebraAPI = (() => {
       if (hit) return hit;
       try {
         const anon = (typeof ZEBRA_CONFIG !== 'undefined') ? ZEBRA_CONFIG.SUPABASE_ANON : '';
-        const r = await fetch(`${base}?${qs}`, {
-          headers: {
-            'apikey': anon,
-            'Authorization': `Bearer ${anon}`,
-          }
-        });
+        // Fix 7.1: envia x-zs-guest: 1 para visitantes não autenticados para que o
+        // zebra-proxy possa distingui-los de bots (que não enviam nenhum header de auth).
+        // Usuários logados recebem um JWT válido via Supabase client — aqui usamos o
+        // anon key como fallback; o JWT real é injetado pelo cliente Supabase nos
+        // contextos autenticados.
+        const isGuest = !!(typeof localStorage !== 'undefined' && localStorage.getItem('zs_guest'));
+        const reqHeaders = { 'apikey': anon, 'Authorization': `Bearer ${anon}` };
+        if (isGuest) reqHeaders['x-zs-guest'] = '1';
+        const r = await fetch(`${base}?${qs}`, { headers: reqHeaders });
         if (!r.ok) {
           // Fix #4: log descritivo — ajuda debug quando Edge Function não está deployada
           console.warn(`[Proxy] ${r.status} para "${action}" — verifique se a Edge Function zebra-proxy está deployada no Supabase.`);
+          _cache.setError(ck); // Fix 4.2: cache error to suppress retry storm for 30s
           return null; // dispara fallback na função chamadora
         }
         const data = await r.json();
         if (data?.error) {
           console.warn(`[Proxy] erro da função "${action}": ${data.error}`);
+          _cache.setError(ck); // Fix 4.2: cache error to suppress retry storm for 30s
           return null;
         }
         _cache.set(ck, data);
         return data;
       } catch(e) {
         console.warn(`[Proxy] falha de rede para "${action}": ${e.message} — tentando fallback direto.`);
+        _cache.setError(ck); // Fix 4.2: cache network failure for 30s
         return null;
       }
     },
@@ -151,11 +171,11 @@ const ZebraAPI = (() => {
       try {
         const sep = path.includes('?') ? '&' : '?';
         const r = await fetch(`${this.BASE}${path}`, { headers: { 'X-Auth-Token': k } });
-        if (!r.ok) { console.warn(`[FD] ${r.status} — ${path}`); return null; }
+        if (!r.ok) { console.warn(`[FD] ${r.status} — ${path}`); _cache.setError(ck); return null; }
         const data = await r.json();
         _cache.set(ck, data);
         return data;
-      } catch(e) { console.warn('[FD] Erro de rede:', e.message); return null; }
+      } catch(e) { console.warn('[FD] Erro de rede:', e.message); _cache.setError(ck); return null; }
     },
 
     async getStandings(lid) {
@@ -776,7 +796,12 @@ const ZebraAPI = (() => {
     footballData : () => !!_proxy.base() || !!FD.key(),
     rapidApi     : () => !!RAPID.key(),
     sportsDb     : () => true,
+    // NOTE: oddsApi() only checks proxy availability, NOT whether ODDS_API_KEY is set.
+    // A true proxy-up result does NOT guarantee odds calls will succeed — the key must
+    // also be configured as a Supabase Secret. Do not use this to gate odds-only UI.
     oddsApi      : () => !!_proxy.base(),
+    // isProxyAvailable is the semantically accurate name for the check above:
+    isProxyAvailable: () => !!_proxy.base(),
     apiFootball  : () => !!_proxy.base(), // chave APIF_KEY no Supabase Secret
   };
 

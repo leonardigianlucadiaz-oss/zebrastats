@@ -31,7 +31,7 @@
     </nav>
     <div class="sidebar__footer">
       <div class="sidebar__user">
-        <div class="sidebar__user-avatar">·</div>
+        <div class="sidebar__user-avatar" style="opacity:0.3;"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
         <div class="sidebar__user-info">
           <div class="sidebar__user-name">·</div>
           <div class="sidebar__user-plan">Plano Free</div>
@@ -353,6 +353,16 @@
             <a href="assinatura.html" style="font-size:0.8125rem;color:var(--green);font-weight:700;text-decoration:none;background:var(--green-dim);border:1px solid rgba(46,230,92,0.3);padding:8px 20px;border-radius:var(--radius-pill);">🔒 Ver com Pro</a>
           </div>`;
       } else {
+        // Determine which team is the underdog (azarão) based on z.azarao field
+        const dogIsHome = z.azarao && z.home && (
+          z.azarao === z.home || z.home.includes(z.azarao) || z.azarao.includes(z.home)
+        );
+        const homeRoleHtml = dogIsHome
+          ? `<span style="font-size:0.625rem;color:var(--green);font-weight:700;">Azarão</span>`
+          : `<span style="font-size:0.625rem;color:var(--gray);">Favorito</span>`;
+        const awayRoleHtml = dogIsHome
+          ? `<span style="font-size:0.625rem;color:var(--gray);">Favorito</span>`
+          : `<span style="font-size:0.625rem;color:var(--green);font-weight:700;">Azarão</span>`;
         card.innerHTML = `
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
             <span class="text-xs text-gray">${leagueLogoHtml}${z.league} · ${z.date}</span>
@@ -362,7 +372,7 @@
             <div style="display:flex;flex-direction:column;align-items:center;gap:5px;">
               ${zbCrest(hcUrl, z.home)}
               <span style="font-size:0.8125rem;font-weight:600;text-align:center;">${z.home}</span>
-              <span style="font-size:0.625rem;color:var(--green);font-weight:700;">Azarão</span>
+              ${homeRoleHtml}
             </div>
             <div style="text-align:center;">
               <div style="font-size:1.75rem;font-weight:800;letter-spacing:-1px;">${z.hs} – ${z.as}</div>
@@ -370,7 +380,7 @@
             <div style="display:flex;flex-direction:column;align-items:center;gap:5px;">
               ${zbCrest(acUrl, z.away)}
               <span style="font-size:0.8125rem;font-weight:600;text-align:center;">${z.away}</span>
-              <span style="font-size:0.625rem;color:var(--gray);">Favorito</span>
+              ${awayRoleHtml}
             </div>
           </div>
           <div style="margin-bottom:12px;">
@@ -583,9 +593,16 @@
     lucide.createIcons();
   }
 
+  // ── HEATMAP SKELETON — shows loading state before real data arrives ──
+  function initHeatmapSkeleton() {
+    const grid = document.getElementById('weekHeatmap');
+    if (!grid) return;
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:16px;color:var(--gray);font-size:0.75rem;">Carregando atividade...</div>';
+  }
+
   // ── INIT ─────────────────────────────────────────────────────
   updatePlanBadge();
-  buildHeatmap();
+  initHeatmapSkeleton();
   renderLeagueBar();
   renderZebras();
 
