@@ -39,6 +39,15 @@ serve(async (req) => {
   try {
     const { priceId, successUrl, cancelUrl } = await req.json()
 
+    // Valida que priceId está na allowlist configurada como secret STRIPE_PRICE_IDS
+    // Formato do secret: "price_xxx,price_yyy" (comma-separated)
+    const allowedPrices = (Deno.env.get('STRIPE_PRICE_IDS') || '').split(',').filter(Boolean)
+    if (allowedPrices.length > 0 && !allowedPrices.includes(priceId)) {
+      return new Response(JSON.stringify({ error: 'Invalid price' }), {
+        status: 400, headers: { ...CORS, 'Content-Type': 'application/json' }
+      })
+    }
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       mode: 'subscription',

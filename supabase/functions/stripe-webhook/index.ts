@@ -9,6 +9,10 @@ const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
 const WEBHOOK_SECRET = Deno.env.get('STRIPE_WEBHOOK_SECRET') || ''
 
 serve(async (req) => {
+  if (!WEBHOOK_SECRET) {
+    return new Response('Webhook secret not configured', { status: 500 })
+  }
+
   const sig  = req.headers.get('stripe-signature') || ''
   const body = await req.text()
 
@@ -55,11 +59,11 @@ serve(async (req) => {
     const { data: profile } = await sb.from('profiles')
       .select('id, plan_expires_at').eq('stripe_customer_id', customerId).single()
     if (profile && profile.plan_expires_at) {
-      const newExpiry = new Date(profile.plan_expires_at)
-      newExpiry.setMonth(newExpiry.getMonth() + 1)
+      const base = new Date(Math.max(Date.now(), new Date(profile.plan_expires_at).getTime()))
+      base.setMonth(base.getMonth() + 1)
       await sb.from('profiles').update({
         plan: 'pro',
-        plan_expires_at: newExpiry.toISOString(),
+        plan_expires_at: base.toISOString(),
       }).eq('stripe_customer_id', customerId)
     }
   }
