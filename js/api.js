@@ -197,7 +197,17 @@ const ZebraAPI = (() => {
       const c = this.COMPS[lid]; if (!c) return null;
       return this._fetch(`/competitions/${c}/scorers?season=${this.SEASON(lid)}&limit=${limit}`, lid);
     },
-    async getMatch(id) { return this._fetch(`/matches/${id}`, null); },
+    // Fix [16]: /matches/${id} não era detectado pelo pattern matching de _fetch (lid=null).
+    // Passa explicitamente action 'matches' e matchId para o proxy processar corretamente.
+    async getMatch(id) {
+      const ck = `fd_/matches/${id}`;
+      const hit = _cache.get(ck); if (hit) return hit;
+      if (_proxy.base()) {
+        const data = await _proxy.fetch('matches', { matchId: String(id) });
+        if (data) { _cache.set(ck, data); return data; }
+      }
+      return this._fetch(`/matches/${id}`, null);
+    },
   };
 
   /* ── THESPORTSDB ────────────────────────────────────────────── */
@@ -205,6 +215,23 @@ const ZebraAPI = (() => {
     BASE    : 'https://www.thesportsdb.com/api/v1/json',
     LEAGUES : { BRA:4351, ENG:4328, ESP:4335, ITA:4332, GER:4331, FRA:4334, POR:4344, UCL:4480, HOL:4337, NED:4337, ARG:4406, MLS:4346, MEX:4350, UEL:4481 },
     SEASONS : { BRA:'2025', ENG:'2024-2025', ESP:'2024-2025', ITA:'2024-2025', GER:'2024-2025', FRA:'2024-2025' },
+
+    // Fix [35]: temporada dinâmica — ligas europeias mudam em julho, Brasileirão em janeiro
+    get CURRENT_SEASON() {
+      const now = new Date()
+      const yr = now.getFullYear()
+      const mo = now.getMonth() // 0=jan
+      return {
+        BRA: String(yr),
+        ENG: mo >= 6 ? `${yr}-${yr+1}` : `${yr-1}-${yr}`,
+        ESP: mo >= 6 ? `${yr}-${yr+1}` : `${yr-1}-${yr}`,
+        ITA: mo >= 6 ? `${yr}-${yr+1}` : `${yr-1}-${yr}`,
+        GER: mo >= 6 ? `${yr}-${yr+1}` : `${yr-1}-${yr}`,
+        FRA: mo >= 6 ? `${yr}-${yr+1}` : `${yr-1}-${yr}`,
+        POR: mo >= 6 ? `${yr}-${yr+1}` : `${yr-1}-${yr}`,
+        UCL: mo >= 6 ? `${yr}-${yr+1}` : `${yr-1}-${yr}`,
+      }
+    },
 
     key() {
       return (typeof ZEBRA_CONFIG !== 'undefined' ? ZEBRA_CONFIG.THESPORTSDB_KEY : '') || '123';
@@ -236,7 +263,8 @@ const ZebraAPI = (() => {
     },
     async getLeagueTable(lid) {
       const id = this.LEAGUES[lid]; if (!id) return null;
-      const s  = this.SEASONS[lid] || '2024-2025';
+      // Fix [35]: usa temporada dinâmica; SEASONS é fallback estático se lid não estiver em CURRENT_SEASON
+      const s  = this.CURRENT_SEASON[lid] || this.SEASONS[lid] || '2024-2025';
       return this._fetch(`lookuptable.php?l=${id}&s=${s}`, 'sdb-table', { lid, season: s });
     },
     async getAllTeams(lid) {
@@ -310,18 +338,16 @@ const ZebraAPI = (() => {
     key() { return (typeof ZEBRA_CONFIG !== 'undefined' ? ZEBRA_CONFIG.ODDS_API_KEY : '') || ''; },
 
     async getRecentScores(lid, daysFrom = 3) {
-      const k = this.key(); if (!k) return [];
-      const sport = this.SPORTS[lid]; if (!sport) return [];
+      if (!this.SPORTS[lid]) return [];
       const ck = `odds_${lid}_${daysFrom}`;
       // Fix #9: TTL de 24h para economizar os 500 req/mês da tier gratuita
       const hit = _cache.get(ck, ODDS_CACHE_TTL); if (hit) return hit;
+      // Fix [07]: redireciona para proxy — chave ODDS_API_KEY fica nos Secrets do Supabase,
+      // nunca exposta no frontend via apiKey=${k} na URL.
       try {
-        const url = `${this.BASE}/sports/${sport}/scores/?apiKey=${k}&daysFrom=${daysFrom}`;
-        const r = await fetch(url);
-        if (!r.ok) { console.warn(`[OddsAPI] ${r.status}`); return []; }
-        const data = await r.json();
-        _cache.set(ck, data || []);
-        return data || [];
+        const data = await _proxy.fetch('odds-scores', { lid, days: daysFrom });
+        if (data) { _cache.set(ck, data); return data; }
+        return [];
       } catch(e) { console.warn('[OddsAPI] erro:', e.message); return []; }
     },
 
@@ -632,7 +658,10 @@ const ZebraAPI = (() => {
     sdbEvent(e) {
       const d = e.dateEvent ? new Date(`${e.dateEvent}T${e.strTime || '00:00:00'}Z`) : null;
       const FINISHED_STATUSES = ['Match Finished', 'Full Time', 'FT', 'After Extra Time', 'After Penalties', 'Finished'];
-      const isFinished = !!(e.intHomeScore && e.intAwayScore !== null && FINISHED_STATUSES.includes(e.strStatus));
+      // Fix [12]: intHomeScore é string "0" quando placar é 0, que é falsy em JS.
+      // Usa verificação explícita para não falhar em jogos 0-X ou 0-0.
+      const hasScore = e.intHomeScore !== null && e.intHomeScore !== undefined && e.intHomeScore !== ''
+      const isFinished = hasScore && FINISHED_STATUSES.includes(e.strStatus);
       return {
         id         : e.idEvent,
         home       : e.strHomeTeam,
@@ -653,7 +682,7 @@ const ZebraAPI = (() => {
   const zebra = {
     fromOdds(winnerOdd) {
       if (typeof ZebraEngine !== 'undefined') {
-        const r = ZebraEngine.calc({ homeScore:1, awayScore:0, homeOdd:winnerOdd, awayOdd:1.3 });
+        const r = ZebraEngine.calc({ homeScore:1, awayScore:0, homeOdd:winnerOdd, awayOdd:1.5 /* estimativa neutra quando só a odd do vencedor está disponível */ });
         return r.zi;
       }
       const o = parseFloat(winnerOdd);

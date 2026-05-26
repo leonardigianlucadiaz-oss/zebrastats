@@ -777,6 +777,25 @@
       });
     });
 
+    // Rate limiter global para Football-Data (free tier: 10 req/min)
+    window._FD_QUEUE = window._FD_QUEUE || []
+    window._FD_RUNNING = window._FD_RUNNING || false
+    window._fdEnqueue = function(fn) {
+      return new Promise(resolve => {
+        window._FD_QUEUE.push(() => fn().then(resolve).catch(resolve))
+        if (!window._FD_RUNNING) window._fdFlush()
+      })
+    }
+    window._fdFlush = async function() {
+      window._FD_RUNNING = true
+      while (window._FD_QUEUE.length) {
+        const task = window._FD_QUEUE.shift()
+        await task()
+        if (window._FD_QUEUE.length) await new Promise(r => setTimeout(r, 6500))
+      }
+      window._FD_RUNNING = false
+    }
+
     // ── INIT GAMES FROM API ───────────────────────────────
     // Busca todas as ligas em paralelo e renderiza progressivamente
     // à medida que cada liga responde — sem esperar por todas.
@@ -859,13 +878,13 @@
       });
 
       // Fallback: se nenhuma liga respondeu após o escalonamento, mostra estado vazio
-      // 8s base + tempo de escalonamento total (ALL_LIDS.length * 600ms)
+      // Limitado a 5000ms máximo para não manter skeleton por muito tempo
       setTimeout(() => {
         if (!anyRendered) {
           if (!LIVE_GAMES.length)    emptyState('liveGames',    'Nenhum jogo ao vivo agora.');
           if (!UPCOMING_GAMES.length) emptyState('upcomingGames','Nenhum jogo agendado em breve.');
         }
-      }, 8000 + ALL_LIDS.length * 600);
+      }, 5000);
     }
 
     // ── ZEBRA RANKING + SHARED DATA LOADER ───────────────

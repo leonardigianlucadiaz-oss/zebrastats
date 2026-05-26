@@ -113,7 +113,8 @@
     </div>
 
     <!-- PAINEL CARTÃO -->
-    <div id="panel-card" class="card" style="display:flex;flex-direction:column;gap:14px;">
+    <!-- Nota: o pagamento é processado pelo Stripe Checkout (redirecionamento) -->
+    <div id="panel-card" class="card" style="display:none;flex-direction:column;gap:14px;">
       <div class="form-group">
         <label class="form-label">Nome impresso no cartão</label>
         <input class="form-input" type="text" placeholder="Ex: GIANLUCA L DIAZ" id="cardName" autocomplete="cc-name" required minlength="3" />
@@ -434,14 +435,43 @@
     }
   }
 
-  document.getElementById('confirmBtn').addEventListener('click', function() {
-    const method = document.querySelector('.payment-method-tab.active').dataset.method;
-    if (method === 'card') {
-      processPayment();
-    } else {
-      // Pix/Boleto: demo mode (awaiting Stripe integration for these methods)
-      showToast('Método disponível em breve');
+  // ── CHECKOUT REAL VIA STRIPE (Fix [17]) ───────────────────────
+  async function _startCheckout() {
+    const btn = document.querySelector('#confirmBtn, .pay-btn, [data-pay-btn]')
+    if (btn) { btn.disabled = true; btn.textContent = 'Redirecionando...' }
+
+    try {
+      const session = await supabase.auth.getSession()
+      const token = session?.data?.session?.access_token
+      if (!token) { window.location.href = 'index.html'; return }
+
+      // Pega o priceId da URL ou do plano selecionado
+      const urlParams = new URLSearchParams(window.location.search)
+      const priceId = urlParams.get('priceId') || localStorage.getItem('zs_selected_price') || ''
+
+      const res = await fetch('https://wjiicdzpjxacqjwxmtqy.supabase.co/functions/v1/create-checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          priceId,
+          successUrl: window.location.origin + '/perfil.html',
+          cancelUrl:  window.location.origin + '/assinatura.html'
+        })
+      })
+      const { url, error } = await res.json()
+      if (error) throw new Error(error)
+      window.location.href = url // redireciona para Stripe Checkout
+    } catch(e) {
+      alert('Erro ao iniciar pagamento: ' + e.message)
+      if (btn) { btn.disabled = false; btn.textContent = 'Confirmar Pagamento' }
     }
+  }
+
+  document.getElementById('confirmBtn').addEventListener('click', function() {
+    _startCheckout();
   });
 
   // ── TELA DE SUCESSO ───────────────────────────────────────────

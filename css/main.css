@@ -78,7 +78,7 @@ body, .app-wrapper, .app-sidebar, .app-main,
 .filter-chip, .tab-bar, .tab-bar__item,
 .modal, .modal-overlay, .lock-banner,
 .search-bar, input, textarea, select,
-.btn, .badge { transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease; }
+.btn, .badge { transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease; }
 
 html { font-size: 16px; }
 
@@ -981,6 +981,17 @@ p  { font-size: 0.875rem; line-height: 1.5; color: var(--gray); }
 }
 
 /* ── RESPONSIVE: desktop layout ── */
+@media (min-width: 768px) and (max-width: 1023px) {
+  /* Fix [31]: sidebar-overlay e hambúrguer sempre acessíveis em tablets */
+  .sidebar-overlay {
+    display: block; /* garante que overlay funciona em tablets */
+  }
+  /* botão hambúrguer sempre visível em tablets */
+  .hamburger-btn {
+    display: flex !important;
+  }
+}
+
 @media (min-width: 768px) {
 
   /* Hambúrguer visível no desktop */
@@ -1551,6 +1562,13 @@ input:checked + .toggle-slider::before { transform: translateX(20px); }
   .navbar__brand { display: none; }
   /* Hide mobile back-button on desktop — but NOT the hamburger button */
   .navbar > button.navbar__icon:not(.hamburger-btn) { display: none !important; }
+  /* Fix [40]: mantém botão de voltar visível no desktop */
+  .navbar__back,
+  .navbar__icon--back,
+  button.navbar__icon[onclick*="goBack"],
+  button.navbar__icon[aria-label*="oltar"] {
+    display: flex !important;
+  }
   /* Desktop page title in navbar — also applied to repurposed inline spans */
   .navbar__page-title {
     display: block;

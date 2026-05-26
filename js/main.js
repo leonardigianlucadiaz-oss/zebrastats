@@ -68,33 +68,35 @@ function initThemeToggle() {
 
 // ── BELL BADGE (contador de notificações não lidas) ───────────
 /**
- * Injeta/atualiza o badge de contagem no ícone de sino em qualquer página.
- * Lê zs_notifs_read do localStorage e subtrai das notificações não lidas
- * conhecidas (3 por padrão no mock — ids n1, n2, n3).
- * Chamado em cada página que inclui main.js.
+ * Busca o count real de notificações não lidas no Supabase (se logado).
+ * Atualiza todos os elementos .zs-bell-badge na página.
  */
-const _MOCK_NOTIF_IDS = ['n1','n2','n3']; // IDs das notifs fixas do mock
-
-function _getNotifUnreadCount() {
+async function _updateNotifBadge() {
+  const uid = localStorage.getItem('zs_uid');
+  if (!uid) {
+    // Usuário não logado: esconde badge
+    document.querySelectorAll('.zs-bell-badge').forEach(b => {
+      b.textContent = '';
+      b.style.display = 'none';
+    });
+    return;
+  }
   try {
-    const read = new Set(JSON.parse(localStorage.getItem('zs_notifs_read') || '[]'));
-    // IDs fixas do mock
-    const staticIds = _MOCK_NOTIF_IDS;
-    // IDs dinâmicas geradas por alertas (armazenadas em zs_alert_notifs)
-    const alertNotifs = JSON.parse(localStorage.getItem('zs_alert_notifs') || '[]');
-    const dynamicIds  = alertNotifs.map(n => n.id).filter(Boolean);
-    // Combina e deduplica
-    const allIds = [...new Set([...staticIds, ...dynamicIds])];
-    return allIds.filter(id => !read.has(id)).length;
-  } catch { return 0; }
+    const sb = window._sbClient || (window._sbClient = window.supabase.createClient(
+      window.ZEBRA_CONFIG.SUPABASE_URL, window.ZEBRA_CONFIG.SUPABASE_ANON
+    ));
+    const { count } = await sb.from('notifications')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', uid).eq('read', false);
+    document.querySelectorAll('.zs-bell-badge').forEach(b => {
+      b.textContent = count > 9 ? '9+' : (count || '');
+      b.style.display = count ? 'flex' : 'none';
+    });
+  } catch(e) { /* silencia erros de rede */ }
 }
 
 function updateBellBadge() {
-  const count = _getNotifUnreadCount();
-  document.querySelectorAll('.zs-bell-badge').forEach(b => {
-    b.textContent = count > 9 ? '9+' : count;
-    b.style.display = count > 0 ? 'flex' : 'none';
-  });
+  _updateNotifBadge();
 }
 
 function initBellBadge() {
@@ -115,7 +117,7 @@ function initBellBadge() {
     ].join(';');
     link.appendChild(badge);
   });
-  updateBellBadge();
+  _updateNotifBadge();
 }
 
 // ── NAVIGATION ────────────────────────────────────────────────
@@ -422,12 +424,11 @@ function formatBRL(value) {
 
 // ── NAVEGAÇÃO ATIVA (bottom nav + sidebar) ────────────────────
 function setActiveNavItem() {
-  const current = window.location.pathname.split('/').pop() || 'index.html';
-  document.querySelectorAll('.bottom-nav__item, .sidebar__nav-item').forEach(item => {
-    const href = item.getAttribute('href') || '';
-    if (href && current.includes(href.replace('.html',''))) {
-      item.classList.add('active');
-    }
+  const current = window.location.pathname.split('/').pop() || 'home.html';
+  document.querySelectorAll('.bottom-nav__item, .sidebar__nav-link').forEach(el => {
+    const href = el.getAttribute('href') || '';
+    const hrefPage = href.split('/').pop() || '';
+    el.classList.toggle('active', hrefPage !== '' && hrefPage === current);
   });
 }
 

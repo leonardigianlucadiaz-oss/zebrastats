@@ -65,13 +65,18 @@ Deno.serve(async (req: Request) => {
   // Permite: (1) usuários autenticados com JWT Bearer, (2) guests com header x-zs-guest: 1.
   // O frontend envia x-zs-guest: 1 para visitantes; o Supabase client envia Bearer para
   // usuários logados. Requisições sem nenhum dos dois são de bots/scrapers.
+  //
+  // LIMITAÇÃO: o header x-zs-guest: 1 é de fácil falsificação por qualquer cliente HTTP.
+  // A próxima evolução desta proteção seria rate limiting por IP (ex: via Upstash Redis),
+  // que permitiria bloquear abuso mesmo de clientes que conhecem o header.
   const authHeader  = req.headers.get("Authorization") || "";
   const guestHeader = req.headers.get("x-zs-guest") || "";
   const hasAuth = authHeader.startsWith("Bearer ") || guestHeader === "1";
   if (!hasAuth) {
-    return new Response(JSON.stringify({ error: "Auth required" }), {
-      status: 401, headers: { ...CORS, "Content-Type": "application/json" }
-    });
+    console.warn('[zebra-proxy] Request sem auth de origem desconhecida')
+    return new Response(JSON.stringify({ error: 'Auth required' }), {
+      status: 401, headers: { ...CORS, 'Content-Type': 'application/json' }
+    })
   }
 
   const url    = new URL(req.url);

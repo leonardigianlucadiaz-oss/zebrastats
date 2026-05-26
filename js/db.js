@@ -88,8 +88,9 @@ async function dbIsFavorite(teamId) {
   const sb   = ZebraAuth.getSupabase();
   const user = await _getUser(); // fix #16: usa cache em memória
   if (!sb || !user) return getFavorites().includes(teamId);
+  // Fix [27]: maybeSingle() evita erro quando há 0 linhas (single() lança erro nesse caso)
   const { data } = await sb.from('user_favorites')
-    .select('id').eq('user_id', user.id).eq('team_id', teamId).single();
+    .select('id').eq('user_id', user.id).eq('team_id', teamId).maybeSingle();
   return !!data;
 }
 
@@ -102,7 +103,9 @@ async function dbUpdateProfile({ name, email } = {}) {
   const updates = { id: user.id, updated_at: new Date().toISOString() };
   if (name)  updates.full_name = name;
   if (email) updates.email     = email;
-  const { data, error } = await sb.from('profiles').upsert(updates).eq('id', user.id);
+  // Fix [05]: removido .eq('id', user.id) — é ignorado silenciosamente pelo Supabase JS v2
+  // no contexto de upsert; o campo id no objeto já é a chave de conflito do schema.
+  const { data, error } = await sb.from('profiles').upsert(updates);
   return { data, error };
 }
 

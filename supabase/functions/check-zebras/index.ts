@@ -8,7 +8,6 @@
 //   CRON_SECRET        — segredo compartilhado com o cron dispatcher
 //                        (adicione em Dashboard → Edge Functions → Secrets)
 
-import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const CORS = {
@@ -53,16 +52,16 @@ function calcZI(homeOdd: number, awayOdd: number): { zi: number; favOdd: number;
 }
 
 // Normaliza nome de time para comparação (remove acentos, caixa baixa)
-// Fix 7.4: usa escape Unicode explícito ̀-ͯ para evitar fragilidade
-// de encoding de caracteres combinadores literais no source.
+// Fix [14]: usa \p{Mn} (Unicode property) para cobrir todos os combining marks
+// sem depender de ranges de caracteres literais que são frágeis a encoding.
 function normName(s: string): string {
   return s.toLowerCase()
     .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '') // combining diacritical marks Unicode range
+    .replace(/\p{Mn}/gu, '') // remove todos os combining diacritical marks (Unicode property)
     .replace(/[^a-z0-9]/g, '')
 }
 
-serve(async (req) => {
+Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS })
 
   // Fix 7.2: verifica CRON_SECRET para impedir invocações não autorizadas.
@@ -193,8 +192,8 @@ serve(async (req) => {
         if (!o) return false
         const oHome = normName(o.home)
         const oAway = normName(o.away)
-        const homeMatch = oHome.includes(homeNorm.slice(0, 8)) || homeNorm.includes(oHome.slice(0, 8))
-        const awayMatch = oAway.includes(awayNorm.slice(0, 8)) || awayNorm.includes(oAway.slice(0, 8))
+        const homeMatch = oHome.includes(homeNorm.slice(0, 10)) || homeNorm.includes(oHome.slice(0, 10))
+        const awayMatch = oAway.includes(awayNorm.slice(0, 10)) || awayNorm.includes(oAway.slice(0, 10))
         return homeMatch && awayMatch
       })
 

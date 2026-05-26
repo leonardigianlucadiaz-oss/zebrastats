@@ -428,6 +428,7 @@ function addFromTemplate(tpl) {
   alerts.unshift(alert);
   saveAlerts(alerts);
   renderAll();
+  _updateAlertLimit();
   showToast(`✓ Alerta criado: ${tpl.label}`);
 }
 
@@ -557,6 +558,7 @@ function deleteAlert(id) {
   alerts = alerts.filter(a => a.id !== id);
   saveAlerts(alerts);
   renderAll();
+  _updateAlertLimit();
   showToast('Alerta removido');
 }
 
@@ -566,6 +568,7 @@ document.getElementById('clearAllBtn').addEventListener('click', () => {
   alerts = [];
   saveAlerts(alerts);
   renderAll();
+  _updateAlertLimit();
   showToast('Todos os alertas removidos');
 });
 
@@ -757,12 +760,23 @@ document.getElementById('saveAlertBtn').addEventListener('click', () => {
   saveAlerts(alerts);
   closeModal();
   renderAll();
+  _updateAlertLimit();
   showToast(`✓ Alerta criado!`);
 });
+
+// ── ALERT LIMIT — dinâmico por plano (Fix [28]) ──────────────────────────────
+function _updateAlertLimit() {
+  const plan = localStorage.getItem('zebrastats_plan') || 'free'
+  const maxAlerts = plan === 'pro' ? 20 : 3
+  const currentCount = (window.alerts || []).length
+  const el = document.getElementById('limitCount') || document.querySelector('[data-limit-count]')
+  if (el) el.textContent = `${currentCount}/${maxAlerts}`
+}
 
 // ── RENDER ALL ────────────────────────────────────────────────────────────────
 function renderAll() {
   updateCounts();
+  _updateAlertLimit();
   renderTemplates();
   renderAlertsList();
 }
@@ -830,6 +844,7 @@ window.addPresetAlert = addPresetAlert;
 _alertasUpdateBadge();
 renderLeagueChips();
 renderAll();
+_updateAlertLimit();
 initBellBadge();
 
 // ── WEB PUSH ──────────────────────────────────────────────────
