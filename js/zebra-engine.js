@@ -86,9 +86,10 @@ const ZebraEngine = (() => {
       // Empate: zebra se havia favorito claro (diff de odds > 0.4)
       const oddsGap = Math.abs((1/homeOdd) - (1/awayOdd));
       if (oddsGap >= 0.15) {
-        // "azarao" = o que não deveria empatar (o favorito perdeu pontos)
-        const favSide = homeIsFav ? 'home' : 'away';
-        return { azarao: favSide, winnerOdd: homeIsFav ? awayOdd : homeOdd, loserOdd: homeIsFav ? homeOdd : awayOdd, isDraw: true };
+        // "azarao" = o mais fraco que segurou o empate (oposto do favorito)
+        // Fix [15]: homeIsFav → azarão é o away (mais fraco que empatou)
+        //           !homeIsFav → azarão é o home
+        return { azarao: homeIsFav ? 'away' : 'home', winnerOdd: homeIsFav ? awayOdd : homeOdd, loserOdd: homeIsFav ? homeOdd : awayOdd, isDraw: true };
       }
       return null; // jogo equilibrado, empate não surpreende
     }
@@ -103,8 +104,8 @@ const ZebraEngine = (() => {
       }
       // Empate: zebra apenas se diferença de posição for grande (≥7)
       if (Math.abs(homePosn - awayPosn) >= 7) {
-        const favSide = homeIsFav ? 'home' : 'away';
-        return { azarao: favSide, winnerOdd: null, loserOdd: null, isDraw: true };
+        // Fix [15]: azarão = o mais fraco (oposto do favorito) que segurou o empate
+        return { azarao: homeIsFav ? 'away' : 'home', winnerOdd: null, loserOdd: null, isDraw: true };
       }
       return null;
     }

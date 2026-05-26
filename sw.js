@@ -7,6 +7,9 @@ const CACHE_NAME    = `zebrastats-v${CACHE_VERSION}`;
 const IMMUTABLE_EXT = ['.png','.jpg','.jpeg','.svg','.webp','.woff','.woff2','.ico'];
 
 // Fix #14: adicionados teams-data.js e share.js que estavam faltando
+// AVISO: não use query strings (ex: css/main.css?v=12) neste array —
+// query strings criam entradas duplicadas no cache e nunca fazem hit.
+// Para versionar, mude o nome do arquivo (ex: main.v12.css) ou incremente CACHE_VERSION.
 const STATIC_ASSETS = [
   'home.html','zebras.html','ranking.html','partida.html',
   'time.html','liga.html','alertas.html','perfil.html',
@@ -109,7 +112,8 @@ self.addEventListener('fetch', e => {
 
 // ── PUSH NOTIFICATIONS ────────────────────────────────────────
 self.addEventListener('push', e => {
-  let data = { title: 'ZebraStats 🦓', body: 'Nova zebra detectada!', icon: 'icons/icon-192.svg', badge: 'icons/icon-192.svg', tag: 'zebra-alert' };
+  // TODO: criar icons/badge-72.png monocromático (72x72px)
+  let data = { title: 'ZebraStats 🦓', body: 'Nova zebra detectada!', icon: 'icons/icon-192.svg', badge: 'icons/badge-72.png', tag: 'zebra-alert' };
   try {
     if (e.data) {
       const json = e.data.json();
@@ -123,7 +127,7 @@ self.addEventListener('push', e => {
     self.registration.showNotification(data.title, {
       body:    data.body,
       icon:    data.icon    || 'icons/icon-192.svg',
-      badge:   data.badge   || 'icons/icon-192.svg',
+      badge:   data.badge   || 'icons/badge-72.png',
       tag:     data.tag     || 'zebra-alert',
       data:    { url: data.url || 'partida.html' },
       actions: [

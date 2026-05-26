@@ -23,5 +23,29 @@
       "purpose": "any maskable"
     }
   ],
+  "shortcuts": [
+    {
+      "name": "Ver Zebras",
+      "short_name": "Zebras",
+      "description": "Ver as maiores zebras do dia",
+      "url": "zebras.html",
+      "icons": [{ "src": "icons/icon-192.svg", "sizes": "192x192" }]
+    },
+    {
+      "name": "Meus Alertas",
+      "short_name": "Alertas",
+      "description": "Gerenciar alertas de zebra",
+      "url": "alertas.html",
+      "icons": [{ "src": "icons/icon-192.svg", "sizes": "192x192" }]
+    },
+    {
+      "name": "Ranking",
+      "short_name": "Ranking",
+      "description": "Ranking de zebras por liga",
+      "url": "ranking.html",
+      "icons": [{ "src": "icons/icon-192.svg", "sizes": "192x192" }]
+    }
+  ],
+  "display_override": ["window-controls-overlay", "standalone"],
   "categories": ["sports", "news"]
 }
