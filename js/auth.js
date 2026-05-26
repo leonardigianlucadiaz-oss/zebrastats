@@ -68,9 +68,12 @@ async function authSignOut() {
   const uid      = localStorage.getItem('zs_uid') || '';
   const theme    = localStorage.getItem('zs_theme');
   const migrated = localStorage.getItem(`zs_migrated_${uid}`);
+  // Fix [09]: preserva flag de visitante para não perder o header x-zs-guest: 1 após logout
+  const wasGuest = localStorage.getItem('zs_guest') === '1'
   localStorage.clear();
   if (theme)    localStorage.setItem('zs_theme', theme);
   if (uid && migrated) localStorage.setItem(`zs_migrated_${uid}`, migrated);
+  if (wasGuest) localStorage.setItem('zs_guest', '1')
   window.location.href = 'index.html';
 }
 
@@ -192,7 +195,14 @@ async function initAuthUI() {
   // Listener de mudança de estado (login/logout em outra aba)
   sb.auth.onAuthStateChange((event, session) => {
     if (event === 'SIGNED_OUT') {
-      window.location.href = 'index.html';
+      // Fix [11]: evita loop de redirecionamento se já estiver em página de login/cadastro
+      const onLoginPage = window.location.pathname.includes('index.html') ||
+                          window.location.pathname.includes('cadastro.html') ||
+                          window.location.pathname === '/' ||
+                          window.location.pathname.endsWith('/')
+      if (!onLoginPage) {
+        window.location.href = 'index.html'
+      }
     }
   });
 }
