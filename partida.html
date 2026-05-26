@@ -9,6 +9,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/main.css?v=12" />
   <script src="https://unpkg.com/lucide@0.363.0/dist/umd/lucide.min.js"></script>
+  <style>
+    .match-hero { opacity: 0; transition: opacity 0.4s ease; }
+    .match-hero.loaded { opacity: 1; }
+  </style>
 </head>
 <body>
 <div class="app-wrapper">
@@ -52,7 +56,7 @@
   </nav>
 
   <!-- PLACAR HERO -->
-  <section style="background:linear-gradient(180deg,rgba(46,230,92,0.06) 0%,var(--card2) 40%,var(--bg) 100%);padding:28px 16px 24px;border-bottom:1px solid var(--border);">
+  <section class="match-hero" style="background:linear-gradient(180deg,rgba(46,230,92,0.06) 0%,var(--card2) 40%,var(--bg) 100%);padding:28px 16px 24px;border-bottom:1px solid var(--border);">
     <!-- Liga e status -->
     <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px;">
       <span id="matchCompetition" style="font-size:0.75rem;color:var(--gray);">🇧🇷 Brasileirão Série A · Rodada 12</span>
@@ -815,9 +819,18 @@
         }
       }
 
-    } catch(e) { console.warn('[partida] initRealData error:', e); }
+      // Revela o hero após dados reais serem inseridos (Fix [20])
+      document.querySelector('.match-hero')?.classList.add('loaded');
+
+    } catch(e) {
+      // Mesmo em erro, revela o hero para não manter tela em branco
+      document.querySelector('.match-hero')?.classList.add('loaded');
+      console.warn('[partida] initRealData error:', e);
+    }
   }
   initRealData();
+  // Fallback: revela hero após 3s caso initRealData não o tenha revelado (Fix [20])
+  setTimeout(() => { document.querySelector('.match-hero')?.classList.add('loaded'); }, 3000);
 
   // ── FORMA RECENTE — carregada do SDB ───────────────────────────
   function _showFormSkeleton(elId) {

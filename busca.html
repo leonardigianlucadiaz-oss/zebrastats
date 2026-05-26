@@ -68,6 +68,7 @@
       <button class="filter-chip active" data-cat="all">Tudo</button>
       <button class="filter-chip" data-cat="times"><i data-lucide="star" style="width:12px;height:12px;vertical-align:middle;margin-right:4px;"></i>Times</button>
       <button class="filter-chip" data-cat="ligas"><i data-lucide="trophy" style="width:12px;height:12px;vertical-align:middle;margin-right:4px;"></i>Ligas</button>
+      <button class="filter-chip" data-cat="matches" data-filter="matches" onclick="setFilter('matches')"><i data-lucide="calendar" style="width:12px;height:12px;vertical-align:middle;margin-right:4px;"></i>Partidas</button>
     </div>
   </section>
 
@@ -632,11 +633,30 @@ async function runSearch(query) {
   const q = query.toLowerCase();
   LOCAL_LEAGUES.forEach(l => {
     if (l.name.toLowerCase().includes(q) || l.country.toLowerCase().includes(q) || l.id.toLowerCase().includes(q)) {
-      if (activeCategory === 'all' || activeCategory === 'ligas') {
+      if (activeCategory === 'all' || activeCategory === 'ligas' || activeCategory === 'matches') {
         leagueResults.push(l);
       }
     }
   });
+
+  // ── 1b. Filtro "Partidas" — em breve (Fix [38]) ───────────────
+  if (activeCategory === 'matches') {
+    document.getElementById('searchSpinner').style.display = 'none';
+    const container = document.getElementById('resultsList');
+    document.getElementById('resultsCount').textContent = 'Busca por partidas';
+    container.innerHTML = `
+      <div style="text-align:center;padding:48px 24px;color:var(--gray);">
+        <div style="font-size:2rem;margin-bottom:12px;">⚽</div>
+        <div style="font-size:0.9375rem;font-weight:600;margin-bottom:6px;">Busca por Partidas</div>
+        <div style="font-size:0.8125rem;color:var(--gray);line-height:1.5;">
+          Esta funcionalidade estará disponível em breve.<br>
+          Use os filtros <strong style="color:var(--white);">Times</strong> ou <strong style="color:var(--white);">Ligas</strong> para encontrar o que procura.
+        </div>
+      </div>`;
+    showState('results');
+    addToHistory(query);
+    return;
+  }
 
   // ── 2. Busca de times via SDB API ──────────────────────────
   if ((activeCategory === 'all' || activeCategory === 'times') && window.ZebraAPI) {
@@ -896,6 +916,15 @@ document.querySelectorAll('[data-cat]').forEach(btn => {
     if (currentQuery) triggerSearch(currentQuery);
   });
 });
+
+// Função exposta globalmente para o botão "Partidas" (Fix [38])
+function setFilter(filter) {
+  document.querySelectorAll('[data-cat]').forEach(b => b.classList.remove('active'));
+  const btn = document.querySelector(`[data-cat="${filter}"]`);
+  if (btn) btn.classList.add('active');
+  activeCategory = filter;
+  if (currentQuery) triggerSearch(currentQuery);
+}
 
 // ═══════════════════════════════════════════════════════════════
 //  INIT
