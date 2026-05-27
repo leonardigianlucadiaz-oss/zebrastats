@@ -156,20 +156,47 @@
     <!-- TAB: STATS -->
     <div id="tab-stats" style="display:none;">
 
-      <div class="section-header"><span class="section-title"><i data-lucide="circle-dot" class="sec-ic"></i>Artilheiros</span></div>
-      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;margin-bottom:16px;" id="artilheiros"></div>
+      <!-- Seção 1: Rankings de Jogadores -->
+      <div style="font-size:0.6875rem;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--gray);padding:4px 0 6px;">Rankings da Liga</div>
 
-      <div class="section-header"><span class="section-title"><i data-lucide="corner-up-right" class="sec-ic"></i>Assistências</span></div>
-      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;margin-bottom:16px;" id="assistencias"></div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;margin-bottom:12px;">
+        <div style="padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px;">
+          <i data-lucide="circle-dot" style="width:14px;height:14px;color:var(--green);flex-shrink:0;"></i>
+          <span style="font-size:0.875rem;font-weight:700;">Artilheiros</span>
+        </div>
+        <div id="artilheiros"></div>
+      </div>
 
-      <div class="section-header"><span class="section-title" style="color:var(--gold);">🟨 Cartões Amarelos</span></div>
-      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;margin-bottom:16px;" id="cartaoAmarelo"></div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;margin-bottom:12px;">
+        <div style="padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px;">
+          <i data-lucide="corner-up-right" style="width:14px;height:14px;color:var(--gold);flex-shrink:0;"></i>
+          <span style="font-size:0.875rem;font-weight:700;">Assistências</span>
+        </div>
+        <div id="assistencias"></div>
+      </div>
 
-      <div class="section-header"><span class="section-title" style="color:var(--red);">🟥 Cartões Vermelhos</span></div>
-      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;margin-bottom:16px;" id="cartaoVermelho"></div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;margin-bottom:12px;">
+        <div style="padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px;">
+          <span style="font-size:0.875rem;">🟨</span>
+          <span style="font-size:0.875rem;font-weight:700;color:var(--gold);">Cartões Amarelos</span>
+        </div>
+        <div id="cartaoAmarelo"></div>
+      </div>
 
-      <div class="section-header"><span class="section-title"><i data-lucide="bar-chart-2" class="sec-ic"></i>Clubes — Zebra Index</span></div>
-      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;" id="clubeStats"></div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;margin-bottom:16px;">
+        <div style="padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px;">
+          <span style="font-size:0.875rem;">🟥</span>
+          <span style="font-size:0.875rem;font-weight:700;color:var(--red);">Cartões Vermelhos</span>
+        </div>
+        <div id="cartaoVermelho"></div>
+      </div>
+
+      <!-- Seção 2: Stats da Liga -->
+      <div style="font-size:0.6875rem;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--gray);padding:4px 0 6px;">Destaques da Liga</div>
+
+      <div id="ligaStatsGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;"></div>
+
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;" id="clubeStats" style="display:none;"></div>
     </div>
 
     <!-- TAB: ZEBRAS -->
@@ -453,70 +480,101 @@
     const list = JOGOS[activeJfilt] || [];
     let filteredList = list;
     if (typeof activeRodada !== 'undefined' && activeRodada !== 'todas') {
-      filteredList = list.filter(g => (g.league || g.rodada || '').includes(activeRodada));
+      filteredList = list.filter(g => (g.round || g.league || g.rodada || '').includes(activeRodada));
     }
 
     if (!filteredList.length) {
-      container.innerHTML = `<p class="text-gray text-sm" style="text-align:center;padding:24px;">Nenhum jogo</p>`;
+      let emptyIcon = 'calendar';
+      let emptyMsg = 'Nenhum jogo próximo';
+      if (activeJfilt === 'aovivo') { emptyIcon = 'radio'; emptyMsg = 'Nenhum jogo ao vivo agora'; }
+      if (activeJfilt === 'encerrados') { emptyIcon = 'check-circle'; emptyMsg = 'Nenhum jogo encerrado'; }
+      container.innerHTML = `<div style="padding:40px 16px;text-align:center;color:var(--gray);">
+        <i data-lucide="${emptyIcon}" style="width:32px;height:32px;margin:0 auto 10px;display:block;opacity:0.4;"></i>
+        <div style="font-size:0.875rem;">${emptyMsg}</div>
+      </div>`;
+      lucide.createIcons({ nodes: [container] });
       return;
     }
 
     filteredList.forEach(g => {
       const card = document.createElement('div');
       card.className = `game-card${g.zebra ? ' game-card--zebra' : ''}`;
+      card.style.cursor = 'pointer';
 
-      const hc = crestImg(g.home, 18);
-      const ac = crestImg(g.away, 18);
+      // Use API logos when available (homeLogo/awayLogo from APIF)
+      const hLogoHtml = g.homeLogo
+        ? `<img src="${g.homeLogo}" style="width:22px;height:22px;object-fit:contain;flex-shrink:0;" onerror="this.style.display='none'">`
+        : crestImg(g.home, 22);
+      const aLogoHtml = g.awayLogo
+        ? `<img src="${g.awayLogo}" style="width:22px;height:22px;object-fit:contain;flex-shrink:0;" onerror="this.style.display='none'">`
+        : crestImg(g.away, 22);
+
       const leagueBadge = LEAGUE_LOGOS[activeLid] || '';
       const leagueIcon = leagueBadge ? `<img src="${leagueBadge}" style="width:13px;height:13px;object-fit:contain;margin-right:4px;vertical-align:middle;" onerror="this.remove();">` : '';
+      const roundLabel = g.round ? g.round.replace(/Regular Season - /, 'R').replace(/Group Stage - /, 'Grupo ') : (g.league || activeLid);
 
       if (activeJfilt === 'proximos') {
+        const dateStr = g.date ? `<span style="color:var(--gray);font-size:0.6875rem;">${g.date}</span>` : '';
         card.innerHTML = `
-          <div class="game-card__league" style="display:flex;justify-content:space-between;">
-            <span>${leagueIcon}${g.league}</span>
-            <span style="color:var(--gold);font-weight:600;">${g.time}</span>
+          <div class="game-card__league" style="display:flex;justify-content:space-between;align-items:center;">
+            <span style="display:flex;align-items:center;gap:3px;">${leagueIcon}<span style="color:var(--gray);font-size:0.6875rem;">${roundLabel}</span></span>
+            <span style="color:var(--gold);font-weight:700;font-size:0.875rem;">${g.time || '–'} ${dateStr}</span>
           </div>
-          <div class="game-card__match">
-            <span class="game-card__team" style="display:flex;align-items:center;gap:5px;">${hc}${g.home}</span>
-            <span class="game-card__score" style="font-size:0.875rem;color:var(--gray);">vs</span>
-            <span class="game-card__team game-card__team--away" style="display:flex;align-items:center;justify-content:flex-end;gap:5px;">${g.away}${ac}</span>
+          <div class="game-card__match" style="padding:10px 0 2px;">
+            <span class="game-card__team" style="display:flex;align-items:center;gap:7px;flex:1;">${hLogoHtml}<span style="font-size:0.9375rem;font-weight:600;">${g.home}</span></span>
+            <span class="game-card__score" style="font-size:0.9375rem;color:var(--gray);font-weight:600;min-width:44px;text-align:center;">vs</span>
+            <span class="game-card__team game-card__team--away" style="display:flex;align-items:center;justify-content:flex-end;gap:7px;flex:1;"><span style="font-size:0.9375rem;font-weight:600;">${g.away}</span>${aLogoHtml}</span>
           </div>`;
       } else if (activeJfilt === 'aovivo') {
+        const minBadge = `<span class="badge badge--live" style="display:inline-flex;align-items:center;gap:3px;">
+          <span style="width:6px;height:6px;border-radius:50%;background:#fff;animation:pulse 1s infinite;display:inline-block;"></span>
+          ${g.min || 'AO VIVO'}
+        </span>`;
         card.innerHTML = `
-          <div class="game-card__league" style="display:flex;justify-content:space-between;">
-            <span>${leagueIcon}${g.round ? 'Rodada ' + g.round : g.league || activeLid}</span>
-            <span class="badge badge--live">${g.min}</span>
+          <div class="game-card__league" style="display:flex;justify-content:space-between;align-items:center;">
+            <span style="display:flex;align-items:center;gap:3px;">${leagueIcon}<span style="font-size:0.6875rem;color:var(--gray);">${roundLabel}</span></span>
+            ${minBadge}
           </div>
-          <div class="game-card__match">
-            <span class="game-card__team" style="display:flex;align-items:center;gap:5px;">${hc}${g.home}</span>
-            <span class="game-card__score">${g.hs} – ${g.as}</span>
-            <span class="game-card__team game-card__team--away" style="display:flex;align-items:center;justify-content:flex-end;gap:5px;">${g.away}${ac}</span>
+          <div class="game-card__match" style="padding:10px 0 2px;">
+            <span class="game-card__team" style="display:flex;align-items:center;gap:7px;flex:1;">${hLogoHtml}<span style="font-size:0.9375rem;font-weight:700;">${g.home}</span></span>
+            <span class="game-card__score" style="font-size:1.375rem;font-weight:800;color:var(--white);min-width:60px;text-align:center;">${g.hs ?? '–'} – ${g.as ?? '–'}</span>
+            <span class="game-card__team game-card__team--away" style="display:flex;align-items:center;justify-content:flex-end;gap:7px;flex:1;"><span style="font-size:0.9375rem;font-weight:700;">${g.away}</span>${aLogoHtml}</span>
           </div>
           ${g.zebra ? `<div class="game-card__footer"><span class="badge badge--zebra">🦓 ZEBRA ALERT</span></div>` : ''}`;
       } else {
-        const diff = g.hs - g.as;
-        const color = diff > 0 ? 'var(--green)' : diff < 0 ? 'var(--red)' : 'var(--gray)';
+        // Encerrados
+        const hs = g.hs ?? null, as2 = g.as ?? null;
+        const hasScore = hs !== null && as2 !== null;
+        let scoreColor = 'var(--gray)';
+        let homeWeight = '600', awayWeight = '600';
+        let homeFade = '', awayFade = 'opacity:0.7;';
+        if (hasScore) {
+          if (hs > as2) { scoreColor = 'var(--green)'; awayFade = 'opacity:0.6;'; }
+          else if (hs < as2) { scoreColor = 'var(--red)'; homeFade = 'opacity:0.6;'; awayFade = ''; homeWeight = '400'; awayWeight = '700'; }
+          else { scoreColor = 'var(--gray)'; homeFade = ''; awayFade = ''; }
+        }
+        const zebraZi = g.zi && g.zi >= 3 ? `<span class="badge badge--zebra" style="font-size:0.625rem;padding:2px 6px;">🦓 ZI ${parseFloat(g.zi).toFixed(1)}</span>` : '';
         card.innerHTML = `
-          <div class="game-card__league" style="display:flex;justify-content:space-between;">
-            <span>${leagueIcon}${g.round ? 'Rodada ' + g.round : g.league || activeLid}</span>
-            <span style="font-size:0.75rem;color:var(--gray);">${g.date}</span>
+          <div class="game-card__league" style="display:flex;justify-content:space-between;align-items:center;">
+            <span style="display:flex;align-items:center;gap:3px;">${leagueIcon}<span style="font-size:0.6875rem;color:var(--gray);">${roundLabel}</span></span>
+            <span style="display:flex;align-items:center;gap:5px;">${zebraZi}<span style="font-size:0.6875rem;color:var(--gray);">${g.date || ''}</span></span>
           </div>
-          <div class="game-card__match">
-            <span class="game-card__team" style="display:flex;align-items:center;gap:5px;">${hc}${g.home}</span>
-            <span class="game-card__score" style="color:${color};">${g.hs} – ${g.as}</span>
-            <span class="game-card__team game-card__team--away" style="display:flex;align-items:center;justify-content:flex-end;gap:5px;">${g.away}${ac}</span>
-          </div>
-          ${g.zebra ? `<div class="game-card__footer"><span class="badge badge--zebra">🦓 ZEBRA</span></div>` : ''}`;
+          <div class="game-card__match" style="padding:10px 0 2px;">
+            <span class="game-card__team" style="display:flex;align-items:center;gap:7px;flex:1;${homeFade}">${hLogoHtml}<span style="font-size:0.9375rem;font-weight:${homeWeight};">${g.home}</span></span>
+            <span class="game-card__score" style="font-size:1.25rem;font-weight:800;color:${scoreColor};min-width:56px;text-align:center;">${hasScore ? `${hs} – ${as2}` : '– – –'}</span>
+            <span class="game-card__team game-card__team--away" style="display:flex;align-items:center;justify-content:flex-end;gap:7px;flex:1;${awayFade}"><span style="font-size:0.9375rem;font-weight:${awayWeight};">${g.away}</span>${aLogoHtml}</span>
+          </div>`;
       }
 
       card.addEventListener('click', () => {
-        const zi = g.zi !== undefined ? g.zi : ((g.home || '').charCodeAt(0) % 50 / 10 + 2).toFixed(1);
+        const zi = g.zi !== undefined ? g.zi : '';
         const navParams = new URLSearchParams({
           home:   g.home || '',
           away:   g.away || '',
           score:  (g.hs !== undefined && g.as !== undefined) ? `${g.hs} – ${g.as}` : '',
           league: document.getElementById('leagueName')?.textContent || activeLid,
-          zi,
+          ...(zi ? { zi } : {}),
+          ...(g.fixtureId ? { fixtureId: g.fixtureId } : {}),
         });
         window.location.href = `partida.html?${navParams.toString()}`;
       });
@@ -561,14 +619,35 @@
   }
 
   // ── TABELA ────────────────────────────────────────────────────────
+  // _apifStandingsMap: { teamName → { form: 'WWDLL', homeW, homeD, homeL, awayW, awayD, awayL } }
+  window._apifStandingsMap = window._apifStandingsMap || {};
+
+  function _formaFromString(formStr) {
+    // formStr: 'W','D','L' chars from APIF — up to last 5
+    if (!formStr) return '';
+    const chars = formStr.replace(/[^WDL]/gi,'').toUpperCase().split('');
+    return chars.slice(-5).map(r => {
+      const color = r==='W'?'var(--green)':r==='D'?'var(--gold)':'var(--red)';
+      return `<span style="display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;background:${color};font-size:0.5rem;font-weight:800;color:#000;margin-right:1px;">${r}</span>`;
+    }).join('');
+  }
+
   function renderTabela() {
     // Atualiza legenda e regras para a liga ativa
     renderLeagueLegendAndRules(activeLid);
 
     const table = document.getElementById('standingsTable');
     const thead = `<thead><tr>
-        <th>Pos</th><th style="width:28px;"></th><th>Time</th><th style="width:44px;"></th><th>P</th><th>J</th>
-        <th>V</th><th>E</th><th>D</th><th>SG</th><th>Forma</th><th>🦓</th>
+        <th style="width:28px;">Pos</th>
+        <th style="width:26px;"></th>
+        <th>Time</th>
+        <th style="min-width:32px;">P</th>
+        <th style="min-width:24px;">J</th>
+        <th style="min-width:24px;">V</th>
+        <th style="min-width:24px;">E</th>
+        <th style="min-width:24px;">D</th>
+        <th style="min-width:36px;">SG</th>
+        <th style="min-width:72px;">Forma</th>
       </tr></thead>`;
 
     if (!sdbStandingsLoaded) {
@@ -590,12 +669,7 @@
     const tbody = table.querySelector('tbody');
     STANDINGS.forEach(t => {
       const tr = document.createElement('tr');
-      const ziNum = parseFloat(t.zi) || 0;
-      const isZebraRow = ziNum >= 4.5;
-      if ([1,2,3,4].includes(t.pos)) tr.className = 'highlight-row';
-      if (isZebraRow) {
-        tr.style.cssText = 'border-left:2px solid var(--gold);background:rgba(255,200,50,0.04);';
-      }
+      tr.style.cursor = 'pointer';
       // Highlight favorited team
       const favTeams = typeof getFavorites === 'function' ? getFavorites() : [];
       const teamKey = (t.name || '').toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'');
@@ -610,27 +684,26 @@
       const crestHtml = t.crest
         ? `<img src="${t.crest}" alt="${t.name}" style="width:22px;height:22px;object-fit:contain;display:block;margin:0 auto;" loading="lazy" onerror="this.style.opacity=0;">`
         : `<span style="font-size:0.5rem;font-weight:700;color:var(--gray);display:block;text-align:center;">${(t.abbr||t.name.substring(0,3)).toUpperCase()}</span>`;
-      const ziColor = ziNum >= 6 ? 'var(--gold)' : ziNum >= 4 ? 'var(--gold)' : 'var(--gray)';
-      const ziDisplay = isZebraRow ? `🦓 ${t.zi}` : t.zi;
-      const sSeed = (t.name||'').split('').reduce((a,c)=>a+c.charCodeAt(0),0);
-      const sTrend2 = Array.from({length:6},(_,i)=>((sSeed*(i+3)*1664525+1013904223)>>>0)%40+10);
-      const spark = sparkline(sTrend2, 40, 16);
+
+      // Forma: usa dados reais do APIF se disponível, senão fallback calculado
+      const apifEntry = window._apifStandingsMap[t.name] || window._apifStandingsMap[(t.name||'').toLowerCase()] || null;
+      const formaHtml = apifEntry?.form
+        ? _formaFromString(apifEntry.form)
+        : _formaBadges(t);
+
       tr.innerHTML = `
         <td><span class="pos-badge ${badgeClass}">${t.pos}</span></td>
         <td>${crestHtml}</td>
-        <td style="font-weight:${isZebraRow ? '600' : '400'};">${t.name}</td>
-        <td style="padding:0 2px;">${spark}</td>
-        <td style="font-weight:700;">${t.p}</td>
-        <td>${t.j}</td>
-        <td style="color:var(--green);">${t.v}</td>
-        <td>${t.e}</td>
-        <td style="color:var(--red);">${t.d}</td>
+        <td style="font-weight:500;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${t.name}</td>
+        <td style="font-weight:800;color:var(--white);">${t.p}</td>
+        <td style="color:var(--gray);">${t.j}</td>
+        <td style="color:var(--green);font-weight:600;">${t.v}</td>
+        <td style="color:var(--gray);">${t.e}</td>
+        <td style="color:var(--red);font-weight:600;">${t.d}</td>
         <td style="color:${t.sg > 0 ? 'var(--green)' : t.sg < 0 ? 'var(--red)' : 'var(--gray)'};">${t.sg > 0 ? '+' : ''}${t.sg}</td>
-        <td style="white-space:nowrap;">${_formaBadges(t)}</td>
-        <td style="color:${ziColor};font-size:0.75rem;font-weight:600;">${ziDisplay}</td>`;
+        <td style="white-space:nowrap;">${formaHtml}</td>`;
       tr.addEventListener('click', () => {
-        const teamId = (t.name || '').toLowerCase().replace(/[\s\.]+/g,'-').replace(/[^a-z0-9-]/g,'');
-        window.location.href = `time.html?team=${encodeURIComponent(teamId)}`;
+        window.location.href = `time.html?team=${encodeURIComponent(t.name)}&lid=${activeLid}`;
       });
       tbody.appendChild(tr);
     });
@@ -654,7 +727,7 @@
       const border = i < total-1 ? 'border-bottom:1px solid var(--border);' : '';
       const clickable = p.id ? `cursor:pointer;` : '';
       return `<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;${border}${clickable}"
-          ${p.id ? `onclick="window.location.href='jogador.html?playerId=${p.id}&name=${encodeURIComponent(p.name)}&team=${encodeURIComponent(p.team)}&season=${encodeURIComponent(ZebraAPI.apiFootball.SEASONS[activeLid]||'2024')}&lid=${activeLid}'"` : ''}>
+          ${p.id ? `onclick="window.location.href='jogador.html?playerId=${p.id}&name=${encodeURIComponent(p.name)}&team=${encodeURIComponent(p.team)}&season=${encodeURIComponent(ZebraAPI.apiFootball.SEASONS[activeLid]||String(new Date().getFullYear()))}&lid=${activeLid}'"` : ''}>
         <span style="font-size:1.125rem;min-width:28px;text-align:center;">${medal}</span>
         ${playerAvatar(p)}
         <div style="flex:1;min-width:0;">
@@ -674,11 +747,24 @@
       </div>`;
     }
 
+    function skelRows(n) {
+      return Array.from({length:n}, (_,i) => `
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;${i<n-1?'border-bottom:1px solid var(--border);':''}pointer-events:none;">
+          <div class="skel" style="width:28px;height:28px;border-radius:50%;flex-shrink:0;"></div>
+          <div class="skel" style="width:38px;height:38px;border-radius:50%;flex-shrink:0;"></div>
+          <div style="flex:1;display:flex;flex-direction:column;gap:5px;">
+            <div class="skel" style="height:11px;width:70%;border-radius:5px;"></div>
+            <div class="skel" style="height:9px;width:45%;border-radius:5px;"></div>
+          </div>
+          <div class="skel" style="width:36px;height:20px;border-radius:6px;"></div>
+        </div>`).join('');
+    }
+
     // ── Artilheiros ──────────────────────────────────────────
     const artEl = document.getElementById('artilheiros');
     if (artEl) {
       if (!ARTILHEIROS.length) {
-        artEl.innerHTML = '<div style="padding:16px;text-align:center;color:var(--gray);font-size:0.8125rem;">Carregando...</div>';
+        artEl.innerHTML = skelRows(5);
       } else {
         artEl.innerHTML = ARTILHEIROS.slice(0,10).map((p,i) =>
           playerRow(p, i, Math.min(ARTILHEIROS.length,10), p.gols, 'gols', 'var(--green)', p.ast, 'ast', 'var(--gold)')
@@ -690,7 +776,7 @@
     const astEl = document.getElementById('assistencias');
     if (astEl) {
       if (!ASSISTENCIAS.length) {
-        astEl.innerHTML = '<div style="padding:16px;text-align:center;color:var(--gray);font-size:0.8125rem;">Carregando...</div>';
+        astEl.innerHTML = skelRows(5);
       } else {
         astEl.innerHTML = ASSISTENCIAS.slice(0,10).map((p,i) =>
           playerRow(p, i, Math.min(ASSISTENCIAS.length,10), p.ast, 'ast', 'var(--gold)', p.gols, 'gols', 'var(--green)')
@@ -703,7 +789,7 @@
     if (yelEl) {
       const yc = window._yellowCards || [];
       if (!yc.length) {
-        yelEl.innerHTML = '<div style="padding:16px;text-align:center;color:var(--gray);font-size:0.8125rem;">Carregando...</div>';
+        yelEl.innerHTML = skelRows(4);
       } else {
         yelEl.innerHTML = yc.map((p,i) =>
           playerRow(p, i, yc.length, p.yellow, '🟨', 'var(--gold)', p.red || 0, '🟥', 'var(--red)')
@@ -716,7 +802,7 @@
     if (redEl) {
       const rc = window._redCards || [];
       if (!rc.length) {
-        redEl.innerHTML = '<div style="padding:16px;text-align:center;color:var(--gray);font-size:0.8125rem;">Carregando...</div>';
+        redEl.innerHTML = skelRows(4);
       } else {
         redEl.innerHTML = rc.map((p,i) =>
           playerRow(p, i, rc.length, p.red, '🟥', 'var(--red)', p.yellow, '🟨', 'var(--gold)')
@@ -724,32 +810,65 @@
       }
     }
 
-    // Clube stats — Zebra Index ranking com barra de progresso
-    const csEl = document.getElementById('clubeStats');
-    csEl.innerHTML = '';
-    const maxZi = Math.max(...CLUBE_STATS.map(c => parseFloat(c.zi) || 0), 1);
-    CLUBE_STATS.forEach((c, i) => {
-      const zi = parseFloat(c.zi) || 0;
-      const pct = Math.round((zi / maxZi) * 100);
-      const ziColor = zi >= 5 ? 'var(--red)' : zi >= 3 ? 'var(--gold)' : 'var(--gray)';
-      const row = document.createElement('div');
-      row.style.cssText = 'padding:10px 14px;' + (i < CLUBE_STATS.length-1 ? 'border-bottom:1px solid var(--border);' : '');
-      const crest = crestImg ? crestImg(c.name, 20) : '';
-      row.innerHTML = `
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:5px;">
-          <span style="font-size:0.75rem;font-weight:700;color:var(--gray);min-width:18px;">#${i+1}</span>
-          ${crest}
-          <span style="font-size:0.9rem;font-weight:600;flex:1;">${c.name}</span>
-          <span style="font-size:0.9rem;font-weight:700;color:${ziColor};">🦓 ${c.zi}</span>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <div style="flex:1;height:4px;background:var(--border);border-radius:2px;overflow:hidden;">
-            <div style="height:100%;width:${pct}%;background:${ziColor};border-radius:2px;transition:width 0.5s;"></div>
+    // Liga stats grid
+    const ligaGridEl = document.getElementById('ligaStatsGrid');
+    if (ligaGridEl) {
+      // Calcula stats da liga com os dados disponíveis
+      const totalTeams = STANDINGS.length || 20;
+      const topScorer = ARTILHEIROS[0];
+      const topAssist = ASSISTENCIAS[0];
+      const totalGoals = STANDINGS.reduce((s,t) => s + (t.gp||0), 0);
+      const totalGames = STANDINGS.reduce((s,t) => s + (t.j||0), 0) / 2;
+      const avgGoals = totalGames > 0 ? (totalGoals / totalGames).toFixed(2) : '—';
+      const topTeam = STANDINGS.reduce((best,t) => t.gp > (best?.gp||0) ? t : best, null);
+      const topZebra = ZEBRAS_LIGA[0];
+
+      const statCards = [
+        {
+          label: 'Gols/jogo',
+          value: avgGoals,
+          icon: 'target',
+          color: 'var(--green)',
+          sub: totalGames > 0 ? `${totalGoals} gols em ${Math.round(totalGames)} jogos` : 'Calculando...',
+        },
+        {
+          label: 'Maior ataque',
+          value: topTeam ? (topTeam.abbr || topTeam.name.split(' ')[0]) : '—',
+          icon: 'trending-up',
+          color: 'var(--gold)',
+          sub: topTeam ? `${topTeam.gp} gols marcados` : 'Aguardando dados',
+        },
+        {
+          label: 'Artilheiro',
+          value: topScorer ? topScorer.gols : '—',
+          icon: 'circle-dot',
+          color: 'var(--green)',
+          sub: topScorer ? `${topScorer.name.split(' ').pop()}` : 'Carregando...',
+        },
+        {
+          label: 'Maior zebra',
+          value: topZebra ? `ZI ${topZebra.zi}` : '—',
+          icon: 'zap',
+          color: 'var(--gold)',
+          sub: topZebra ? `${topZebra.home} vs ${topZebra.away}`.substring(0,28) : 'Calculando...',
+        },
+      ];
+
+      ligaGridEl.innerHTML = statCards.map(sc => `
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:12px 14px;">
+          <div style="display:flex;align-items:center;gap:5px;margin-bottom:6px;">
+            <i data-lucide="${sc.icon}" style="width:12px;height:12px;color:${sc.color};flex-shrink:0;"></i>
+            <span style="font-size:0.625rem;color:var(--gray);text-transform:uppercase;letter-spacing:0.3px;">${sc.label}</span>
           </div>
-          <span style="font-size:0.7rem;color:var(--gray);white-space:nowrap;">C:${c.won || 0} S:${c.suffered || 0}</span>
-        </div>`;
-      csEl.appendChild(row);
-    });
+          <div style="font-size:1.375rem;font-weight:800;color:${sc.color};line-height:1;">${sc.value}</div>
+          <div style="font-size:0.625rem;color:var(--gray);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${sc.sub}</div>
+        </div>`).join('');
+      lucide.createIcons({ nodes: [ligaGridEl] });
+    }
+
+    // Clube stats — hidden (replaced by ligaStatsGrid)
+    const csEl = document.getElementById('clubeStats');
+    if (csEl) csEl.style.display = 'none';
   }
 
   // ── ZEBRAS DA LIGA ────────────────────────────────────────────────
@@ -1146,9 +1265,35 @@
       } catch(e) { console.warn('[liga] apif matches error:', e); }
     }
 
+    // ── APIF Standings (forma real + stats casa/fora) ───────────
+    async function loadApifStandings() {
+      if (!ZebraAPI.isConfigured.apiFootball()) return;
+      try {
+        const raw = await ZebraAPI.apiFootball.getStandings(lid);
+        if (!raw || !raw.length) return;
+        // raw[0] = array de grupos/total; flatten
+        const groups = Array.isArray(raw[0]) ? raw[0] : raw;
+        window._apifStandingsMap = {};
+        groups.forEach(t => {
+          const name = t.team?.name;
+          if (!name) return;
+          const allForm = t.all || {};
+          window._apifStandingsMap[name] = {
+            form: t.form || '',
+            homeW: t.home?.win || 0, homeD: t.home?.draw || 0, homeL: t.home?.lose || 0,
+            awayW: t.away?.win || 0, awayD: t.away?.draw || 0, awayL: t.away?.lose || 0,
+            gf: allForm.goals?.for || 0, ga: allForm.goals?.against || 0,
+          };
+          window._apifStandingsMap[name.toLowerCase()] = window._apifStandingsMap[name];
+        });
+        if (activeTab === 'tabela' && sdbStandingsLoaded) renderTabela();
+      } catch(e) { console.warn('[liga] apif standings error:', e); }
+    }
+
     loadStandings();
     loadFDMatches();
     loadApifMatches();
+    loadApifStandings();
     loadFDScorers();
     loadApifScorers();
     loadApifAssists();
