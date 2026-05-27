@@ -154,8 +154,9 @@ function renderTeams() {
 
     // ZI badge
     const zi = m.zi !== undefined ? m.zi : '—';
-    const ziColor = zi !== '—' ? (parseFloat(zi) >= 7 ? 'var(--red)' : parseFloat(zi) >= 4 ? 'var(--gold)' : 'var(--gray)') : 'var(--gray)';
-    const ziBadge = `<span style="font-size:0.6875rem;font-weight:700;color:${ziColor};background:rgba(255,255,255,0.06);border-radius:4px;padding:2px 6px;margin-top:4px;display:inline-block;">🦓 ${zi}</span>`;
+    function ziClass(v) { return v >= 7 ? 'zi--grande' : v >= 4 ? 'zi--media' : 'zi--leve'; }
+    const ziCls = zi !== '—' ? ziClass(parseFloat(zi)) : 'zi--leve';
+    const ziBadge = `<span class="zi-badge ${ziCls}" style="margin-top:4px;">🦓 ${zi !== '—' ? parseFloat(zi).toFixed(1) : '—'}</span>`;
 
     const card = document.createElement('div');
     card.className = 'fav-team-card';
@@ -310,6 +311,12 @@ lucide.createIcons();
 </script>
 
 <style>
+  /* ── ZI BADGE ────────────────────────────────────────────── */
+  .zi-badge { font-size:0.6875rem; font-weight:700; border-radius:6px; padding:2px 6px; display:inline-flex; align-items:center; gap:3px; }
+  .zi-badge.zi--grande { color:#EE4444; background:rgba(238,68,68,0.12); }
+  .zi-badge.zi--media  { color:#FF8C00; background:rgba(255,140,0,0.12);  }
+  .zi-badge.zi--leve   { color:var(--green); background:rgba(46,230,92,0.10); }
+
   /* ── SHIMMER SKELETON ─────────────────────────────────────── */
   @keyframes shimmer {
     0%   { background-position: -400px 0; }
@@ -362,6 +369,7 @@ lucide.createIcons();
   }
   .btn--primary:hover { opacity:.9; }
 </style>
+<script src="js/admin.js"></script>
 </body>
 </html>
 
