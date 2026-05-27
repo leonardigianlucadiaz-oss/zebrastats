@@ -784,6 +784,38 @@
   .navbar__icon i { display: block; }
   .profile-menu-item__icon i { display: block; }
 </style>
+<script src="js/admin.js"></script>
+<script>
+  // Injetar botão Admin na seção "Minha Conta" se for o admin
+  (function() {
+    function _maybeShowAdminBtnPerfil() {
+      const email = localStorage.getItem('zs_email') || ''
+      if (email !== 'leonardi.gianluca.diaz@gmail.com') return
+      // Usa o container da seção "Minha Conta"
+      const container = document.querySelector('#editarDados')?.closest('div[style*="background:var(--card)"]')
+      if (!container) return
+      const adminItem = document.createElement('a')
+      adminItem.href = '#'
+      adminItem.className = 'profile-menu-item'
+      adminItem.innerHTML = `
+        <div class="profile-menu-item__icon"><span style="font-size:18px;line-height:1.2">🛠️</span></div>
+        <div class="profile-menu-item__text">
+          <div class="profile-menu-item__label" style="color:var(--green);font-weight:700">Painel Admin</div>
+          <div class="profile-menu-item__sub">Simular plano PRO / FREE</div>
+        </div>
+        <span class="profile-menu-item__arrow">›</span>
+      `
+      adminItem.style.borderTop = '1px solid var(--border)'
+      adminItem.onclick = (e) => { e.preventDefault(); window.zsAdmin?.open() }
+      container.appendChild(adminItem)
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', _maybeShowAdminBtnPerfil)
+    } else {
+      _maybeShowAdminBtnPerfil()
+    }
+  })()
+</script>
 </body>
 </html>
 
