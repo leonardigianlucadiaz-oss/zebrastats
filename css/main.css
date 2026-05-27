@@ -18,7 +18,7 @@
   --red:        #EE4444;
   --red-dim:    rgba(238, 68, 68, 0.12);
   --white:      #FFFFFF;
-  --gray:       #889AAA;
+  --gray:       #9AAABB;
   --gray-dim:   rgba(136, 154, 170, 0.15);
   --input-bg:   #0A1825;
   --border:     #152A3E;
@@ -39,6 +39,7 @@
   --text-lg:    1.125rem;
   --text-xl:    1.25rem;
   --transition: 0.2s ease;
+  --text-muted: var(--gray); /* alias semântico para texto desabilitado/secundário */
 }
 
 /* ── LIGHT THEME ─────────────────────────────────────────────── */
@@ -54,12 +55,13 @@
   --red:        #C41E1E;
   --red-dim:    rgba(196, 30, 30, 0.12);
   --white:      #0D1A2A;
-  --gray:       #5A6E82;
+  --gray:       #4A5E72;
   --gray-dim:   rgba(90, 110, 130, 0.12);
   --input-bg:   #EDF2F7;
   --border:     rgba(0,0,0,0.1);
   --dark-text:  #0D1A2A;
   --shadow:     0 4px 24px rgba(0, 0, 0, 0.10);
+  --text-muted: var(--gray); /* alias semântico para texto desabilitado/secundário */
 }
 /* Light mode: sidebar nav text readable on white */
 [data-theme="light"] .sidebar__nav-item { color: var(--gray); }
@@ -434,6 +436,39 @@ p  { font-size: 0.875rem; line-height: 1.5; color: var(--gray); }
   color: var(--green);
   border: 1px solid rgba(46,230,92,0.3);
 }
+
+/* ── FAB BUTTON (Fix COMP04) ── */
+.fab-btn {
+  position: fixed;
+  bottom: calc(64px + env(safe-area-inset-bottom) + 12px);
+  right: 16px;
+  z-index: 150;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 20px;
+  border-radius: var(--radius-pill, 999px);
+  background: var(--green);
+  color: var(--dark-text, #0D1A2A);
+  font-weight: 700;
+  font-size: 0.875rem;
+  box-shadow: 0 4px 20px rgba(46,230,92,0.35);
+  border: none;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.fab-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(46,230,92,0.45);
+}
+.fab-btn:active {
+  transform: translateY(0);
+}
+
+/* ── RANK MEDAL COLORS (Fix BRAND02) ── */
+.rank-gold   { color: var(--gold, #FFD700); }
+.rank-silver { color: #C0C8D4; }
+.rank-bronze { color: #CD7F32; }
 
 /* ── FORM INPUTS ── */
 .form-group { display: flex; flex-direction: column; gap: 6px; }
@@ -1032,11 +1067,27 @@ p  { font-size: 0.875rem; line-height: 1.5; color: var(--gray); }
   .cards-grid   { grid-template-columns: repeat(3, 1fr); }
 }
 
-/* ── DESKTOP: sidebar stays as hamburger drawer ── */
+/* ── DESKTOP ≥1024px: sidebar fixa permanente (não drawer) ── */
 @media (min-width: 1024px) {
-  /* Sidebar remains a fixed drawer (position:fixed from base styles).
-     Hamburger button stays visible (display:flex from 768px rule).
-     Content takes full viewport width since sidebar is an overlay. */
+  .app-sidebar {
+    transform: none !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 200;
+  }
+  .app-main {
+    margin-left: 300px; /* largura definida no bloco ≥1024px abaixo */
+  }
+  .sidebar-backdrop {
+    display: none !important;
+  }
+  .hamburger-btn {
+    display: none !important;
+  }
   .app-main { min-width: 0; flex: 1; max-width: none; }
   /* Guest banner redundant on desktop — sidebar already shows Convidado.
      Also removes the padding-bottom that causes the page-jump bug. */
@@ -1100,7 +1151,7 @@ p  { font-size: 0.875rem; line-height: 1.5; color: var(--gray); }
 /* ── FILTER CHIP ── */
 .filter-chip {
   padding: 8px 16px;
-  min-height: 36px;
+  min-height: 44px;
   border-radius: var(--radius-pill);
   font-size: 0.75rem;
   font-weight: 500;
@@ -1170,6 +1221,12 @@ p  { font-size: 0.875rem; line-height: 1.5; color: var(--gray); }
 .zi--leve  { background: rgba(255,200,50,0.12); border: 1px solid rgba(255,200,50,0.3); color: var(--gold); }
 .zi--media { background: rgba(255,140,0,0.12);  border: 1px solid rgba(255,140,0,0.4);  color: #FF8C00; }
 .zi--grande{ background: var(--red-dim);          border: 1px solid rgba(238,68,68,0.3);  color: var(--red); }
+
+/* Fix HIER04 — borda dourada para Grande Zebra (oportunidade, não perigo) */
+.zi--grande.zebra-card, .zebra-card[data-zi-level="grande"] {
+  border-color: rgba(255, 180, 0, 0.6);
+  box-shadow: 0 0 0 1px rgba(255, 180, 0, 0.2), 0 4px 20px rgba(255, 180, 0, 0.15);
+}
 
 /* ── ZEBRA CARD ── */
 .zebra-card {
@@ -1419,6 +1476,10 @@ p  { font-size: 0.875rem; line-height: 1.5; color: var(--gray); }
 }
 
 /* ── TOGGLE SWITCH ── */
+.toggle-label, label:has(.toggle-switch) {
+  padding: 10px 0;
+  cursor: pointer;
+}
 .toggle-switch { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
 .toggle-switch input { opacity: 0; width: 0; height: 0; position: absolute; }
 .toggle-slider {
@@ -1540,6 +1601,28 @@ input:checked + .toggle-slider::before { transform: translateX(20px); }
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   padding: 12px 14px;
+}
+
+/* ── SKELETON LOADING — light mode override ── */
+[data-theme="light"] .skel,
+[data-theme="light"] [class*="skeleton"],
+[data-theme="light"] [class*="-skel"] {
+  background: linear-gradient(90deg, #E8EEF5 25%, #D8E2ED 50%, #E8EEF5 75%);
+  background-size: 400% 100%;
+  animation: shimmer 1.5s infinite;
+}
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ── MAX-WIDTH em ultrawide ── */
+@media (min-width: 1440px) {
+  .content-container, .home-two-col, .app-main > main {
+    max-width: 1440px;
+    margin-left: auto;
+    margin-right: auto;
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════════════
