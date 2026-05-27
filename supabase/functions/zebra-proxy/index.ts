@@ -275,11 +275,20 @@ Deno.serve(async (req: Request) => {
       const next   = url.searchParams.get("next");
       const date   = url.searchParams.get("date");
       const status = url.searchParams.get("status");
-      let qs = `league=${league}&season=${season}`;
-      if (last)   qs += `&last=${last}`;
-      if (next)   qs += `&next=${next}`;
-      if (date)   qs += `&date=${date}`;
-      if (status) qs += `&status=${status}`;
+      // Fix: quando next ou last são fornecidos, omite season para buscar
+      // as próximas/últimas partidas independentemente da temporada ativa.
+      // Incluir season=2024 em maio/2026 retornaria 0 resultados pois a
+      // temporada 2024-25 já terminou.
+      let qs: string;
+      if (next) {
+        qs = `league=${league}&next=${next}`;
+      } else if (last) {
+        qs = `league=${league}&last=${last}`;
+      } else {
+        qs = `league=${league}&season=${season}`;
+        if (date)   qs += `&date=${date}`;
+        if (status) qs += `&status=${status}`;
+      }
       const data = await apiFetch(`${APIF_BASE}/fixtures?${qs}`,
         { headers: { "x-apisports-key": key } });
       return ok(data);

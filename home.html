@@ -789,114 +789,137 @@
       });
     });
 
-    // Rate limiter global para Football-Data (free tier: 10 req/min)
-    window._FD_QUEUE = window._FD_QUEUE || []
-    window._FD_RUNNING = window._FD_RUNNING || false
-    window._fdEnqueue = function(fn) {
-      return new Promise(resolve => {
-        window._FD_QUEUE.push(() => fn().then(resolve).catch(resolve))
-        if (!window._FD_RUNNING) window._fdFlush()
-      })
-    }
-    window._fdFlush = async function() {
-      window._FD_RUNNING = true
-      while (window._FD_QUEUE.length) {
-        const task = window._FD_QUEUE.shift()
-        await task()
-        if (window._FD_QUEUE.length) await new Promise(r => setTimeout(r, 6500))
-      }
-      window._FD_RUNNING = false
-    }
+    // Mapa reverso APIF league.id → lid para live games
+    const APIF_ID_TO_LID = { 39:'ENG', 140:'ESP', 135:'ITA', 78:'GER', 61:'FRA', 71:'BRA', 94:'POR', 2:'UCL' };
 
     // ── INIT GAMES FROM API ───────────────────────────────
-    // Busca todas as ligas em paralelo e renderiza progressivamente
-    // à medida que cada liga responde — sem esperar por todas.
+    // Prioridade:
+    //   Live     → API-Football (suporta tempo real) → RapidAPI → vazio
+    //   Upcoming → API-Football next=N (sem season)  → FD SCHEDULED (fallback)
+    // Nota: Football-Data free tier NÃO suporta status=IN_PLAY (403).
+    //       API-Football (APIF_KEY no Supabase) suporta partidas ao vivo.
     async function initGames() {
       showSkeletonGames('liveGames', 2);
       showSkeletonGames('upcomingGames', 3);
 
-      let anyRendered = false;
+      const canApif = ZebraAPI.isConfigured.apiFootball();
+      const canFd   = ZebraAPI.isConfigured.footballData();
 
-      // RapidAPI — jogos ao vivo (se configurado)
-      if (ZebraAPI.isConfigured.rapidApi()) {
+      // ── 1. AO VIVO: API-Football (tempo real) ────────────────────
+      if (canApif) {
+        ZebraAPI.apiFootball.getLiveFixtures('ALL').then(liveRes => {
+          if (Array.isArray(liveRes) && liveRes.length) {
+            liveRes.forEach(f => {
+              const t = ZebraAPI.apiFootball.transformFixture(f);
+              if (!t || !t.isLive) return;
+              const lid = APIF_ID_TO_LID[f.league?.id] || 'all';
+              if (!LIVE_GAMES.find(x => x.id === t.fixtureId)) {
+                LIVE_GAMES.push({
+                  id: t.fixtureId,
+                  home: t.home, away: t.away,
+                  hs: t.hs ?? '?', as: t.as ?? '?',
+                  min: t.elapsed ? `${t.elapsed}'` : '🔴',
+                  league: f.league?.name || LID_LABEL[lid] || '—',
+                  league_id: lid,
+                  homeCrest: t.homeLogo, awayCrest: t.awayLogo,
+                  zebra: false, odds_h: 2.5, odds_a: 2.5,
+                });
+              }
+            });
+          }
+          renderLive();
+        }).catch(() => renderLive());
+
+      } else if (ZebraAPI.isConfigured.rapidApi()) {
+        // Fallback: RapidAPI live (se configurado e sem APIF)
         ZebraAPI.rapidApi.getLiveMatches().then(rapid => {
           const matches = rapid?.response || rapid?.data || [];
-          if (!Array.isArray(matches) || !matches.length) return;
+          if (!Array.isArray(matches) || !matches.length) { renderLive(); return; }
           matches.slice(0,12).forEach(m => {
             LIVE_GAMES.push({
               home: m.homeTeam?.name || m.home_name || '—',
               away: m.awayTeam?.name || m.away_name || '—',
-              hs:   m.score?.home ?? m.homeScore ?? '?',
-              as:   m.score?.away ?? m.awayScore ?? '?',
-              min:  m.elapsed ? `${m.elapsed}'` : '🔴',
+              hs: m.score?.home ?? m.homeScore ?? '?',
+              as: m.score?.away ?? m.awayScore ?? '?',
+              min: m.elapsed ? `${m.elapsed}'` : '🔴',
               league: m.league?.name || m.competition || '—',
               league_id: 'all', homeCrest: m.homeTeam?.logo || '',
               awayCrest: m.awayTeam?.logo || '', zebra: false,
             });
           });
           renderLive();
-        }).catch(() => {});
+        }).catch(() => renderLive());
+
+      } else {
+        // Nenhuma fonte de live disponível
+        setTimeout(() => { if (!LIVE_GAMES.length) renderLive(); }, 3000);
       }
 
-      if (!ZebraAPI.isConfigured.footballData()) {
-        setTimeout(() => {
-          if (!anyRendered) {
-            emptyState('liveGames',    'Nenhum jogo ao vivo.');
-            emptyState('upcomingGames','Configure a API para ver os próximos jogos.',
-              '<a href="perfil.html" style="color:var(--green)">Configurar →</a>');
-          }
-        }, 3000);
-        return;
+      // ── 2. EM BREVE: API-Football next=N (sem season, temporada atual) ──
+      // Paralelo: todas as ligas simultaneamente (rate limit mais flexível).
+      // A proxy corrige automaticamente omitindo season quando next é fornecido.
+      if (canApif) {
+        try {
+          await Promise.all(ALL_LIDS.map(async lid => {
+            try {
+              const data = await ZebraAPI.apiFootball.getFixtures(lid, { next: 6 });
+              if (!Array.isArray(data) || !data.length) return;
+              let added = false;
+              data.forEach(f => {
+                const t = ZebraAPI.apiFootball.transformFixture(f);
+                if (!t || !t.isScheduled) return;
+                if (!UPCOMING_GAMES.find(x => x.id === t.fixtureId)) {
+                  UPCOMING_GAMES.push({
+                    id: t.fixtureId,
+                    home: t.home, away: t.away,
+                    hs: null, as: null,
+                    time: t.time,
+                    utcDate: f.fixture?.date || '',
+                    league: LID_LABEL[lid] || lid,
+                    league_id: lid,
+                    homeCrest: t.homeLogo, awayCrest: t.awayLogo,
+                  });
+                  added = true;
+                }
+              });
+              if (added) {
+                UPCOMING_GAMES.sort((a,b) => new Date(a.utcDate||'9999') - new Date(b.utcDate||'9999'));
+                renderUpcoming();
+              }
+            } catch {}
+          }));
+        } catch {}
       }
 
-      // Busca todas as ligas escalonadas (600ms entre cada) para não ultrapassar
-      // o limite de 10 req/min do Football-Data free tier.
-      ALL_LIDS.forEach((lid, idx) => {
-        setTimeout(() => {
-        Promise.all([
-          ZebraAPI.footballData.getMatches(lid, 'IN_PLAY',    5).catch(() => null),
-          ZebraAPI.footballData.getMatches(lid, 'SCHEDULED',  6).catch(() => null),
-        ]).then(([liveR, schedR]) => {
-          let added = false;
+      // ── 3. FALLBACK FD SCHEDULED (se APIF não retornou upcoming) ──
+      // Football-Data free tier suporta SCHEDULED (mas não IN_PLAY).
+      if (!UPCOMING_GAMES.length && canFd) {
+        ALL_LIDS.forEach((lid, idx) => {
+          setTimeout(() => {
+            ZebraAPI.footballData.getMatches(lid, 'SCHEDULED', 6).then(schedR => {
+              let added = false;
+              (schedR?.matches || []).forEach(m => {
+                const t = ZebraAPI.transform.fdMatch(m);
+                if (!t) return;
+                if (!UPCOMING_GAMES.find(x => x.id === t.id)) {
+                  UPCOMING_GAMES.push({ ...t, league: LID_LABEL[lid]||lid, league_id: lid });
+                  added = true;
+                }
+              });
+              if (added) {
+                UPCOMING_GAMES.sort((a,b) => new Date(a.utcDate||'9999') - new Date(b.utcDate||'9999'));
+                renderUpcoming();
+              }
+            }).catch(() => {});
+          }, idx * 600); // escalonamento: respeita 10 req/min do FD free tier
+        });
+      }
 
-          (liveR?.matches || []).forEach(m => {
-            const t = ZebraAPI.transform.fdMatch(m);
-            if (!t) return;
-            // Evita duplicatas (mesmo id)
-            if (!LIVE_GAMES.find(x => x.id === t.id)) {
-              LIVE_GAMES.push({ ...t, league: LID_LABEL[lid]||lid, league_id: lid });
-              added = true;
-            }
-          });
-
-          (schedR?.matches || []).forEach(m => {
-            const t = ZebraAPI.transform.fdMatch(m);
-            if (!t) return;
-            if (!UPCOMING_GAMES.find(x => x.id === t.id)) {
-              UPCOMING_GAMES.push({ ...t, league: LID_LABEL[lid]||lid, league_id: lid });
-              added = true;
-            }
-          });
-
-          if (added) {
-            anyRendered = true;
-            // Ordena "Em Breve" por horário (mais próximo primeiro)
-            UPCOMING_GAMES.sort((a, b) => new Date(a.utcDate || '9999') - new Date(b.utcDate || '9999'));
-            renderLive();
-            renderUpcoming();
-          }
-        }).catch(e => console.warn(`[home] games ${lid}:`, e));
-        }, idx * 600); // escalonamento: 600ms entre cada liga
-      });
-
-      // Fallback: se nenhuma liga respondeu após o escalonamento, mostra estado vazio
-      // Limitado a 5000ms máximo para não manter skeleton por muito tempo
+      // ── 4. Fallback timeout final ──────────────────────────────────
       setTimeout(() => {
-        if (!anyRendered) {
-          if (!LIVE_GAMES.length)    emptyState('liveGames',    'Nenhum jogo ao vivo agora.');
-          if (!UPCOMING_GAMES.length) emptyState('upcomingGames','Nenhum jogo agendado em breve.');
-        }
-      }, 5000);
+        if (!LIVE_GAMES.length)     emptyState('liveGames',    'Nenhum jogo ao vivo agora.');
+        if (!UPCOMING_GAMES.length) emptyState('upcomingGames','Nenhum jogo agendado em breve.');
+      }, 10000);
     }
 
     // ── ZEBRA RANKING + SHARED DATA LOADER ───────────────
