@@ -1809,3 +1809,78 @@ input:checked + .toggle-slider::before { transform: translateX(20px); }
   #zebraList     { grid-template-columns: repeat(3, 1fr) !important; }
   #hotLeagues    { grid-template-columns: repeat(6, 1fr) !important; }
 }
+
+/* ── FIXES GLOBAIS ─────────────────────────────────── */
+
+/* Fonte mínima 11px em labels */
+.stat-label, .pill-label, .bottom-nav__item { font-size: 0.6875rem !important; }
+
+/* Área de toque mínima 44px */
+.filter-chip, .tab-bar__item, .bottom-nav__item, .navbar__icon { min-height: 44px; }
+.filter-chip { padding: 0 14px; display: inline-flex; align-items: center; }
+
+/* Hover states */
+.game-card:hover, .zebra-card:hover, .card:hover { background: var(--card2); transition: background 0.15s; }
+.standings-table tbody tr:hover { background: rgba(255,255,255,0.03); cursor: pointer; }
+
+/* Fade lateral em scroll horizontal */
+.scroll-x-fade { position: relative; }
+.scroll-x-fade::after { content:''; position:absolute; right:0; top:0; bottom:0; width:32px; background:linear-gradient(to right, transparent, var(--bg)); pointer-events:none; }
+
+/* Empty state padrão */
+.empty-state { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:32px 16px; gap:10px; text-align:center; color:var(--gray); }
+.empty-state svg { opacity:0.4; }
+.empty-state__title { font-size:0.9375rem; font-weight:600; color:var(--white); }
+.empty-state__sub { font-size:0.8125rem; }
+
+/* Desktop 2 colunas */
+@media (min-width: 900px) {
+  .desktop-grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  .desktop-grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; }
+  .content { max-width:1100px; margin:0 auto; }
+}
+
+/* Pull to refresh indicador */
+.ptr-indicator { display:none; justify-content:center; padding:8px; color:var(--gray); font-size:0.75rem; gap:6px; align-items:center; }
+.ptr-indicator.visible { display:flex; }
+
+/* Tab scroll com fade */
+.tab-bar { overflow-x:auto; scrollbar-width:none; }
+.tab-bar::-webkit-scrollbar { display:none; }
+
+/* Tooltip "última atualização" */
+.last-updated { font-size:0.6875rem; color:var(--gray); display:flex; align-items:center; gap:4px; padding:0 16px 8px; }
+
+/* Tabela mobile simplificada */
+@media (max-width: 640px) {
+  .standings-table th:nth-child(6),
+  .standings-table td:nth-child(6),
+  .standings-table th:nth-child(8),
+  .standings-table td:nth-child(8),
+  .standings-table th:nth-child(9),
+  .standings-table td:nth-child(9),
+  .standings-table th:nth-child(10),
+  .standings-table td:nth-child(10),
+  .standings-table th:nth-child(11),
+  .standings-table td:nth-child(11),
+  .standings-table th:nth-child(12),
+  .standings-table td:nth-child(12) { display: none; }
+}
+
+/* Elenco grid */
+#elencoGrid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
+@media (min-width:640px) { #elencoGrid { grid-template-columns:repeat(3,1fr); } }
+@media (min-width:900px) { #elencoGrid { grid-template-columns:repeat(4,1fr); } }
+
+/* Hero nome longo */
+#teamName { font-size:clamp(1rem, 4vw, 1.5rem); word-break:break-word; }
+
+/* Stat pills mobile */
+@media (max-width: 480px) {
+  #statPills { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* Stat pill label tamanho */
+#statPills .bottom-nav__item,
+#statPills [style*="0.5625rem"] { font-size: 0.6875rem !important; }
+}

@@ -57,6 +57,22 @@
     </div>
   </nav>
 
+  <!-- PERMISSÃO DE NOTIFICAÇÕES (BLOCO 9.1) -->
+  <div id="permInstructCard" style="margin:16px 16px 0;padding:14px;background:var(--card2);border:1px solid var(--gold);border-radius:var(--radius-md);display:none;">
+    <div style="display:flex;align-items:flex-start;gap:10px;">
+      <i data-lucide="bell-off" style="width:20px;height:20px;color:var(--gold);flex-shrink:0;margin-top:1px;"></i>
+      <div>
+        <div style="font-size:0.875rem;font-weight:700;color:var(--gold);margin-bottom:4px;">Como ativar notificações</div>
+        <ol style="font-size:0.75rem;color:var(--gray);line-height:1.6;margin:0;padding-left:16px;">
+          <li>Clique no ícone de cadeado/info na barra de endereço</li>
+          <li>Localize "Notificações" nas permissões do site</li>
+          <li>Selecione <strong style="color:var(--white);">Permitir</strong></li>
+          <li>Recarregue a página e clique em <strong style="color:var(--white);">Ativar</strong></li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
   <!-- WEB PUSH CARD -->
   <div style="padding:16px 16px 0;">
     <div id="pushCard" style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px;margin-bottom:16px;">
@@ -126,12 +142,12 @@
 
   <!-- BOTTOM NAV -->
   <nav class="bottom-nav">
-    <a href="home.html"    class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="home"></i></span>Home</a>
-    <a href="zebras.html"  class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="activity"></i></span>Zebras</a>
-    <a href="ranking.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="medal"></i></span>Ranking</a>
-    <a href="alertas.html" class="bottom-nav__item active"><span class="bottom-nav__icon"><i data-lucide="bell-ring"></i></span>Alertas</a>
-    <a href="perfil.html"  class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="user"></i></span>Perfil</a>
-  </nav>
+      <a href="home.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="home"></i></span>Home</a>
+      <a href="zebras.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="zap"></i></span>Zebras</a>
+      <a href="liga.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="trophy"></i></span>Ligas</a>
+      <a href="busca.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="search"></i></span>Busca</a>
+      <a href="perfil.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="user"></i></span>Perfil</a>
+    </nav>
 
   </div><!-- /app-main -->
 </div><!-- /app-wrapper -->
@@ -971,6 +987,90 @@ document.getElementById('pushToggleBtn')?.addEventListener('click', async functi
 });
 
 lucide.createIcons();
+
+// ── BLOCO 9.1: Permissão card — mostra se negada ───────────────
+(function() {
+  const card = document.getElementById('permInstructCard');
+  if (!card) return;
+  if (!('Notification' in window)) return;
+  if (Notification.permission === 'denied') {
+    card.style.display = 'block';
+    if (typeof lucide !== 'undefined') lucide.createIcons({ nodes: [card] });
+  }
+})();
+
+// ── BLOCO 9.2: Alertas configurados do localStorage ────────────
+(function() {
+  const ALERTS_KEY = 'zs_alerts';
+  const listEl = document.getElementById('alertsList');
+  const skelEl = document.getElementById('alertListSkel');
+  const clearBtn = document.getElementById('clearAllBtn');
+  if (!listEl) return;
+
+  function loadSavedAlerts() {
+    if (skelEl) skelEl.style.display = 'none';
+    let alerts = [];
+    try { alerts = JSON.parse(localStorage.getItem(ALERTS_KEY) || '[]'); } catch {}
+    const countEl = document.getElementById('activeCount');
+    if (countEl) countEl.textContent = alerts.length;
+    const limitEl = document.getElementById('limitCount');
+    if (limitEl) limitEl.textContent = alerts.length + '/3';
+
+    if (!alerts.length) {
+      listEl.innerHTML = '<div class="empty-state" style="padding:24px 0;"><i data-lucide="bell-off" style="width:32px;height:32px;display:block;margin:0 auto 8px;opacity:0.4;"></i><div class="empty-state__title">Nenhum alerta configurado</div><div class="empty-state__sub">Crie um alerta para ser notificado de zebras</div></div>';
+      if (typeof lucide !== 'undefined') lucide.createIcons({ nodes: [listEl] });
+      if (clearBtn) clearBtn.style.display = 'none';
+      return;
+    }
+    if (clearBtn) clearBtn.style.display = 'inline-block';
+
+    const TYPE_LABELS = {
+      zi_league: { icon: 'zap', color: 'var(--green)', label: 'Zebra por Liga' },
+      zi_team:   { icon: 'shield', color: '#60a5fa', label: 'Zebra por Time' },
+      odd_alert: { icon: 'trending-up', color: 'var(--gold)', label: 'Alerta de Odd' },
+      live:      { icon: 'radio', color: 'var(--red)', label: 'Ao Vivo' },
+    };
+
+    listEl.innerHTML = '';
+    alerts.forEach((alert, idx) => {
+      const meta = TYPE_LABELS[alert.type] || { icon: 'bell', color: 'var(--gray)', label: 'Alerta' };
+      const card = document.createElement('div');
+      card.style.cssText = 'background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;';
+      card.innerHTML = `
+        <div style="width:36px;height:36px;border-radius:var(--radius-md);background:${meta.color}15;border:1px solid ${meta.color}40;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <i data-lucide="${meta.icon}" style="width:16px;height:16px;color:${meta.color};"></i>
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:0.875rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${alert.label || meta.label}</div>
+          <div style="font-size:0.75rem;color:var(--gray);margin-top:2px;">${alert.description || (alert.league ? alert.league + (alert.ziMin ? ' · ZI ≥ ' + alert.ziMin : '') : '')}</div>
+        </div>
+        <button data-del="${idx}" style="background:none;border:none;cursor:pointer;color:var(--gray);padding:4px;display:flex;align-items:center;" title="Remover alerta">
+          <i data-lucide="x" style="width:16px;height:16px;"></i>
+        </button>`;
+      card.querySelector('[data-del]').addEventListener('click', function() {
+        const i = parseInt(this.dataset.del);
+        let a = [];
+        try { a = JSON.parse(localStorage.getItem(ALERTS_KEY) || '[]'); } catch {}
+        a.splice(i, 1);
+        try { localStorage.setItem(ALERTS_KEY, JSON.stringify(a)); } catch {}
+        loadSavedAlerts();
+        if (typeof showToast === 'function') showToast('Alerta removido');
+      });
+      listEl.appendChild(card);
+    });
+    if (typeof lucide !== 'undefined') lucide.createIcons({ nodes: [listEl] });
+  }
+
+  if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+      try { localStorage.removeItem(ALERTS_KEY); } catch {}
+      loadSavedAlerts();
+      if (typeof showToast === 'function') showToast('🗑️ Todos os alertas removidos');
+    });
+  }
+
+  loadSavedAlerts();
+})();
 </script>
 
 <style>

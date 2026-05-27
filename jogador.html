@@ -36,11 +36,15 @@
 
     <!-- NAVBAR -->
     <nav class="navbar">
-      <button onclick="goBack('busca.html')" class="navbar__icon" style="background:none;border:none;cursor:pointer;color:var(--white);display:flex;align-items:center;justify-content:center;">
+      <button id="backBtn" class="navbar__icon" style="background:none;border:none;cursor:pointer;color:var(--white);display:flex;align-items:center;justify-content:center;">
         <i data-lucide="arrow-left" style="width:20px;height:20px;"></i>
       </button>
       <span style="font-size:1rem;font-weight:600;flex:1;" id="navTitle">Perfil do Jogador</span>
-      <div class="navbar__actions"></div>
+      <div class="navbar__actions">
+        <button id="favPlayerBtn" class="navbar__icon" title="Favoritar jogador" style="background:none;border:none;cursor:pointer;color:var(--white);display:flex;align-items:center;justify-content:center;">
+          <i data-lucide="heart" style="width:18px;height:18px;"></i>
+        </button>
+      </div>
     </nav>
 
     <!-- HERO SKELETON -->
@@ -162,11 +166,11 @@
 
     <!-- BOTTOM NAV -->
     <nav class="bottom-nav">
-      <a href="home.html"    class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="home"></i></span>Home</a>
-      <a href="zebras.html"  class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="activity"></i></span>Zebras</a>
-      <a href="ranking.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="medal"></i></span>Ranking</a>
-      <a href="alertas.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="bell-ring"></i></span>Alertas</a>
-      <a href="perfil.html"  class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="user"></i></span>Perfil</a>
+      <a href="home.html"   class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="home"></i></span>Home</a>
+      <a href="zebras.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="zap"></i></span>Zebras</a>
+      <a href="liga.html"   class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="trophy"></i></span>Ligas</a>
+      <a href="busca.html"  class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="search"></i></span>Busca</a>
+      <a href="perfil.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="user"></i></span>Perfil</a>
     </nav>
   </div>
 </div>
@@ -206,32 +210,26 @@
   });
 
   // ── STAT ROW ────────────────────────────────────────────────
-  function statRow(label, value, unit, color, i, total, max) {
+  function statRow(label, value, unit, color, i, total) {
     if (value === null || value === undefined) return '';
     const border = i < total - 1 ? 'border-bottom:1px solid var(--border);' : '';
     const v = typeof value === 'number' && !Number.isInteger(value) ? value.toFixed(1) : value;
-    const showBar = max && max > 0 && typeof value === 'number';
-    const pct = showBar ? Math.min(100, Math.round((value / max) * 100)) : 0;
-    const barHtml = showBar ? `<div style="margin-top:4px;height:3px;background:var(--border);border-radius:2px;overflow:hidden;">
-      <div style="height:100%;width:${pct}%;background:${color||'var(--green)'};border-radius:2px;"></div>
-    </div>` : '';
     return `<div style="padding:8px 0;${border}">
       <div style="display:flex;justify-content:space-between;align-items:center;">
         <span style="font-size:0.8125rem;color:var(--gray);">${label}</span>
         <span style="font-size:0.9375rem;font-weight:700;color:${color || 'var(--white)'};">${v}${unit ? `<span style="font-size:0.6875rem;color:var(--gray);"> ${unit}</span>` : ''}</span>
       </div>
-      ${barHtml}
     </div>`;
   }
 
   function renderStatBlock(blockId, contentId, rows) {
-    const hasData = rows.some(r => r[1] !== null && r[1] !== undefined && r[1] !== 0);
-    if (!hasData) return;
+    // Include rows where value is not null/undefined (include 0 values)
+    const validRows = rows.filter(r => r[1] !== null && r[1] !== undefined);
+    if (!validRows.length) return;
     // compute max per-block for mini bar
-    const nums = rows.filter(r => typeof r[1] === 'number').map(r => r[1]);
+    const nums = validRows.filter(r => typeof r[1] === 'number').map(r => r[1]);
     const blockMax = nums.length ? Math.max(...nums) : 0;
-    const html = rows
-      .filter(r => r[1] !== null && r[1] !== undefined)
+    const html = validRows
       .map((r, i, arr) => statRow(r[0], r[1], r[2], r[3], i, arr.length, blockMax))
       .join('');
     document.getElementById(contentId).innerHTML = html;
@@ -353,6 +351,7 @@
       document.getElementById('heroSkel').style.display = 'none';
       const hero = document.getElementById('playerHero');
       hero.style.display = 'block';
+      syncFavPlayerBtn(playerId);
 
       document.getElementById('navTitle').textContent = pl.name || playerName;
       document.getElementById('playerName').textContent = pl.name || playerName;
@@ -388,21 +387,24 @@
       }
 
       // Stat pills
-      const goals = st.goals?.total ?? '—';
-      const assists = st.goals?.assists ?? '—';
-      const rating = st.games?.rating ? parseFloat(st.games.rating).toFixed(1) : '—';
-      const minutes = st.games?.minutes ?? '—';
+      const goals = st.goals?.total ?? 0;
+      const assists = st.goals?.assists ?? 0;
+      const ratingRaw = st.games?.rating ? parseFloat(st.games.rating) : null;
+      const rating = ratingRaw !== null ? ratingRaw.toFixed(1) : 'N/D';
+      const minutes = st.games?.minutes ?? 0;
       document.getElementById('statGoals').textContent   = goals;
       document.getElementById('statAssists').textContent = assists;
-      document.getElementById('statRating').textContent  = rating;
-      document.getElementById('statMinutes').textContent = minutes;
-
-      // Rating color
-      if (rating !== '—') {
-        const r = parseFloat(rating);
-        const rColor = r >= 7.5 ? 'var(--green)' : r >= 6.5 ? 'var(--gold)' : 'var(--red)';
-        document.getElementById('statRating').style.color = rColor;
+      const ratingEl = document.getElementById('statRating');
+      ratingEl.textContent = rating;
+      if (rating === 'N/D') {
+        ratingEl.style.color = 'var(--gray)';
+        ratingEl.style.fontSize = '0.875rem';
+        ratingEl.title = 'Nota não disponível para esta temporada';
+      } else {
+        const rv = parseFloat(rating);
+        ratingEl.style.color = rv >= 7.5 ? 'var(--green)' : rv >= 6.5 ? 'var(--gold)' : 'var(--red)';
       }
+      document.getElementById('statMinutes').textContent = minutes;
 
       // ── Stats Blocks ─────────────────────────────────────
       document.getElementById('statsLoading').style.display = 'none';
@@ -483,22 +485,33 @@
       document.getElementById('bioContent').innerHTML = bioRows.map((r,i) => bioRow(r[0], r[1], i)).join('');
       if (typeof lucide !== 'undefined') lucide.createIcons({ nodes: [document.getElementById('bioCard')] });
 
-      // ── Carreira Tab (transfers) ─────────────────────────
-      // Busca transfers pelo APIF usando player.id
-      ZebraAPI.apiFootball.getTransfers(null).catch(() => null); // no-op, carregado abaixo
-      try {
-        // Usa endpoint de transfers por jogador se disponível
-        const rawTr = await _proxy_direct_fetch('apif-transfers-player', pl.id);
-        if (rawTr?.response?.length) {
-          renderCareer(rawTr.response);
-        } else {
-          document.getElementById('carreiraContent').innerHTML =
-            `<div style="padding:16px;text-align:center;color:var(--gray);font-size:0.8125rem;">Histórico de transferências não disponível no plano atual.</div>`;
-        }
-      } catch {
-        document.getElementById('carreiraContent').innerHTML =
-          `<div style="padding:16px;text-align:center;color:var(--gray);font-size:0.8125rem;">Histórico de transferências não disponível no plano atual.</div>`;
-      }
+      // ── Carreira Tab ─────────────────────────────────────
+      // Exibe clube atual com nota sobre histórico completo em breve
+      const carreiraEl = document.getElementById('carreiraContent');
+      const currentClub = st.team?.name || playerTeam || '—';
+      const currentLeague = st.league?.name ? `${st.league.name}${st.league.country ? ' · ' + st.league.country : ''}` : null;
+      const clubLogoUrl = st.team?.logo || '';
+      const clubLogoHtml = clubLogoUrl ? `<img src="${clubLogoUrl}" style="width:32px;height:32px;object-fit:contain;flex-shrink:0;" onerror="this.style.display='none'">` : `<div style="width:32px;height:32px;border-radius:50%;background:var(--card2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;flex-shrink:0;">${currentClub.substring(0,2).toUpperCase()}</div>`;
+      carreiraEl.innerHTML = `
+        <div style="position:relative;padding-left:28px;">
+          <div style="position:absolute;left:9px;top:0;bottom:0;width:2px;background:var(--border);border-radius:1px;"></div>
+          <div style="position:relative;padding:12px 0;">
+            <div style="position:absolute;left:-20px;top:16px;width:10px;height:10px;border-radius:50%;background:var(--green);border:2px solid var(--bg);"></div>
+            <div style="font-size:0.6875rem;color:var(--green);font-weight:600;margin-bottom:4px;">CLUBE ATUAL</div>
+            <div style="display:flex;align-items:center;gap:10px;">
+              ${clubLogoHtml}
+              <div>
+                <div style="font-size:0.9375rem;font-weight:700;">${currentClub}</div>
+                ${currentLeague ? `<div style="font-size:0.75rem;color:var(--gray);">${currentLeague}</div>` : ''}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:16px;padding:12px;background:var(--card2);border-radius:var(--radius-md);border:1px dashed var(--border);display:flex;align-items:center;gap:8px;">
+          <i data-lucide="clock" style="width:16px;height:16px;flex-shrink:0;color:var(--gray);"></i>
+          <span style="font-size:0.8125rem;color:var(--gray);line-height:1.4;">Histórico completo de transferências em breve.</span>
+        </div>`;
+      if (typeof lucide !== 'undefined') lucide.createIcons();
 
       if (typeof lucide !== 'undefined') lucide.createIcons();
 
@@ -508,19 +521,51 @@
     }
   }
 
-  // Proxy direct helper para endpoints não expostos no ZebraAPI
-  async function _proxy_direct_fetch(action, id) {
-    try {
-      const base = (typeof ZEBRA_CONFIG !== 'undefined') ? ZEBRA_CONFIG.PROXY_BASE : null;
-      if (!base) return null;
-      const anon = ZEBRA_CONFIG.SUPABASE_ANON || '';
-      const r = await fetch(`${base}?action=${action}&playerId=${id}`, {
-        headers: { 'apikey': anon }
-      });
-      if (!r.ok) return null;
-      return r.json();
-    } catch { return null; }
+  // ── SMART GO BACK (6.7) ─────────────────────────────────────
+  document.getElementById('backBtn').addEventListener('click', function() {
+    const ref = document.referrer;
+    if (ref && !ref.includes('jogador.html') && ref.includes(location.hostname)) {
+      history.back();
+    } else if (ref && ref.includes('time.html')) {
+      history.back();
+    } else {
+      window.location.href = 'busca.html';
+    }
+  });
+
+  // ── FAVORITE PLAYER (6.6) ────────────────────────────────────
+  const FAV_PLAYERS_KEY = 'zs_fav_players';
+  function getFavPlayers() {
+    try { return JSON.parse(localStorage.getItem(FAV_PLAYERS_KEY) || '[]'); } catch { return []; }
   }
+  function isFavPlayer(id) { return getFavPlayers().some(p => String(p.id) === String(id)); }
+  function toggleFavPlayer(id, name, photo) {
+    let favs = getFavPlayers();
+    const idx = favs.findIndex(p => String(p.id) === String(id));
+    if (idx >= 0) { favs.splice(idx, 1); }
+    else { favs.unshift({ id: String(id), name, photo: photo || '', ts: Date.now() }); }
+    try { localStorage.setItem(FAV_PLAYERS_KEY, JSON.stringify(favs.slice(0, 50))); } catch {}
+    return idx < 0; // true = now favorited
+  }
+  function syncFavPlayerBtn(pid) {
+    const btn = document.getElementById('favPlayerBtn');
+    if (!btn) return;
+    const fav = isFavPlayer(pid);
+    btn.innerHTML = fav
+      ? '<i data-lucide="heart" style="width:18px;height:18px;fill:var(--red);color:var(--red);"></i>'
+      : '<i data-lucide="heart" style="width:18px;height:18px;"></i>';
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+  document.getElementById('favPlayerBtn').addEventListener('click', function() {
+    if (!playerId) return;
+    const name = document.getElementById('playerName')?.textContent || playerName;
+    const photo = document.getElementById('playerPhoto')?.src || '';
+    const nowFav = toggleFavPlayer(playerId, name, photo);
+    syncFavPlayerBtn(playerId);
+    if (typeof showToast === 'function') showToast(nowFav ? '❤️ Jogador favoritado' : 'Jogador removido dos favoritos');
+  });
+  // Sync btn state after playerId is set
+  if (playerId) syncFavPlayerBtn(playerId);
 
   loadPlayer();
   lucide.createIcons();
@@ -531,6 +576,16 @@
   #playerTabBar { overflow-x: auto; scrollbar-width: none; flex-wrap: nowrap; }
   #playerTabBar::-webkit-scrollbar { display: none; }
   .tab-bar__item { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+
+  /* Stat pills: 2-col on small mobile, 4-col on larger screens */
+  @media (max-width: 400px) {
+    #statPills { grid-template-columns: repeat(2, 1fr) !important; }
+  }
+
+  /* Pill label font size bump */
+  #statPills > div > div:last-child {
+    font-size: 0.6875rem !important;
+  }
 </style>
 <script src="js/admin.js"></script>
 </body>
