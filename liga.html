@@ -159,36 +159,40 @@
       <!-- Seção 1: Rankings de Jogadores -->
       <div style="font-size:0.6875rem;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--gray);padding:4px 0 6px;">Rankings da Liga</div>
 
-      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;margin-bottom:12px;">
-        <div style="padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px;">
-          <i data-lucide="circle-dot" style="width:14px;height:14px;color:var(--green);flex-shrink:0;"></i>
-          <span style="font-size:0.875rem;font-weight:700;">Artilheiros</span>
+      <div class="desktop-grid-2">
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;margin-bottom:12px;">
+          <div style="padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px;">
+            <i data-lucide="circle-dot" style="width:14px;height:14px;color:var(--green);flex-shrink:0;"></i>
+            <span style="font-size:0.875rem;font-weight:700;">Artilheiros</span>
+          </div>
+          <div id="artilheiros"></div>
         </div>
-        <div id="artilheiros"></div>
+
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;margin-bottom:12px;">
+          <div style="padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px;">
+            <i data-lucide="corner-up-right" style="width:14px;height:14px;color:var(--gold);flex-shrink:0;"></i>
+            <span style="font-size:0.875rem;font-weight:700;">Assistências</span>
+          </div>
+          <div id="assistencias"></div>
+        </div>
       </div>
 
-      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;margin-bottom:12px;">
-        <div style="padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px;">
-          <i data-lucide="corner-up-right" style="width:14px;height:14px;color:var(--gold);flex-shrink:0;"></i>
-          <span style="font-size:0.875rem;font-weight:700;">Assistências</span>
+      <div class="desktop-grid-2">
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;margin-bottom:12px;">
+          <div style="padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px;">
+            <span style="font-size:0.875rem;">🟨</span>
+            <span style="font-size:0.875rem;font-weight:700;color:var(--gold);">Cartões Amarelos</span>
+          </div>
+          <div id="cartaoAmarelo"></div>
         </div>
-        <div id="assistencias"></div>
-      </div>
 
-      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;margin-bottom:12px;">
-        <div style="padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px;">
-          <span style="font-size:0.875rem;">🟨</span>
-          <span style="font-size:0.875rem;font-weight:700;color:var(--gold);">Cartões Amarelos</span>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;margin-bottom:16px;">
+          <div style="padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px;">
+            <span style="font-size:0.875rem;">🟥</span>
+            <span style="font-size:0.875rem;font-weight:700;color:var(--red);">Cartões Vermelhos</span>
+          </div>
+          <div id="cartaoVermelho"></div>
         </div>
-        <div id="cartaoAmarelo"></div>
-      </div>
-
-      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;margin-bottom:16px;">
-        <div style="padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px;">
-          <span style="font-size:0.875rem;">🟥</span>
-          <span style="font-size:0.875rem;font-weight:700;color:var(--red);">Cartões Vermelhos</span>
-        </div>
-        <div id="cartaoVermelho"></div>
       </div>
 
       <!-- Seção 2: Stats da Liga -->
@@ -212,11 +216,11 @@
 
   <!-- BOTTOM NAV (mobile only) -->
   <nav class="bottom-nav">
-    <a href="home.html"    class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="home"></i></span>Home</a>
-    <a href="zebras.html"  class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="activity"></i></span>Zebras</a>
-    <a href="ranking.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="medal"></i></span>Ranking</a>
-    <a href="alertas.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="bell-ring"></i></span>Alertas</a>
-    <a href="perfil.html"  class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="user"></i></span>Perfil</a>
+    <a href="home.html"   class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="home"></i></span>Home</a>
+    <a href="zebras.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="zap"></i></span>Zebras</a>
+    <a href="liga.html"   class="bottom-nav__item active"><span class="bottom-nav__icon"><i data-lucide="trophy"></i></span>Ligas</a>
+    <a href="busca.html"  class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="search"></i></span>Busca</a>
+    <a href="perfil.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="user"></i></span>Perfil</a>
   </nav>
 
   </div><!-- /app-main -->
@@ -484,14 +488,24 @@
     }
 
     if (!filteredList.length) {
-      let emptyIcon = 'calendar';
-      let emptyMsg = 'Nenhum jogo próximo';
-      if (activeJfilt === 'aovivo') { emptyIcon = 'radio'; emptyMsg = 'Nenhum jogo ao vivo agora'; }
-      if (activeJfilt === 'encerrados') { emptyIcon = 'check-circle'; emptyMsg = 'Nenhum jogo encerrado'; }
-      container.innerHTML = `<div style="padding:40px 16px;text-align:center;color:var(--gray);">
-        <i data-lucide="${emptyIcon}" style="width:32px;height:32px;margin:0 auto 10px;display:block;opacity:0.4;"></i>
-        <div style="font-size:0.875rem;">${emptyMsg}</div>
-      </div>`;
+      if (activeJfilt === 'proximos') {
+        container.innerHTML = `<div class="empty-state">
+          <i data-lucide="calendar-x" style="width:32px;height:32px;"></i>
+          <div class="empty-state__title">Temporada encerrada</div>
+          <div class="empty-state__sub">A próxima temporada começa em agosto. Veja os resultados encerrados.</div>
+          <button class="filter-chip" onclick="document.querySelector('[data-jfilter=encerrados]').click()" style="margin-top:4px;">Ver encerrados</button>
+        </div>`;
+      } else if (activeJfilt === 'aovivo') {
+        container.innerHTML = `<div class="empty-state">
+          <i data-lucide="radio" style="width:32px;height:32px;"></i>
+          <div class="empty-state__title">Nenhum jogo ao vivo agora</div>
+        </div>`;
+      } else {
+        container.innerHTML = `<div class="empty-state">
+          <i data-lucide="check-circle" style="width:32px;height:32px;"></i>
+          <div class="empty-state__title">Nenhum jogo encerrado</div>
+        </div>`;
+      }
       lucide.createIcons({ nodes: [container] });
       return;
     }
@@ -1320,6 +1334,20 @@
   })();
   loadLeagueCrests(activeLid);
   initRealData();
+
+  // 4.7 — Pull-to-refresh
+  if (typeof initPullToRefresh === 'function') initPullToRefresh(() => initRealData());
+
+  // 4.5 — Stats tab: timeout de 8s
+  setTimeout(() => {
+    ['artilheiros','assistencias','cartaoAmarelo','cartaoVermelho'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el && (el.innerHTML.includes('Carregando') || el.innerHTML.includes('skel'))) {
+        el.innerHTML = '<div class="empty-state"><i data-lucide="database" style="width:24px;height:24px;"></i><div class="empty-state__sub">Dados indisponíveis para esta temporada</div></div>';
+      }
+    });
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }, 8000);
 
   // ── ZONE FILTER ──────────────────────────────────────────────
   document.querySelectorAll('#zoneFilter .filter-chip').forEach(btn => {

@@ -66,7 +66,8 @@
   <section style="padding:10px 16px;border-bottom:1px solid var(--border);background:var(--card2);">
     <div class="scroll-x" style="gap:8px;">
       <button class="filter-chip active" data-cat="all">Tudo</button>
-      <button class="filter-chip" data-cat="times"><i data-lucide="star" style="width:12px;height:12px;vertical-align:middle;margin-right:4px;"></i>Times</button>
+      <button class="filter-chip" data-cat="times"><i data-lucide="shield" style="width:12px;height:12px;vertical-align:middle;margin-right:4px;"></i>Times</button>
+      <button class="filter-chip" data-cat="jogadores"><i data-lucide="user" style="width:12px;height:12px;vertical-align:middle;margin-right:4px;"></i>Jogadores</button>
       <button class="filter-chip" data-cat="ligas"><i data-lucide="trophy" style="width:12px;height:12px;vertical-align:middle;margin-right:4px;"></i>Ligas</button>
       <button class="filter-chip" data-cat="matches" data-filter="matches" onclick="setFilter('matches')"><i data-lucide="calendar" style="width:12px;height:12px;vertical-align:middle;margin-right:4px;"></i>Partidas</button>
     </div>
@@ -149,11 +150,11 @@
 
   <!-- BOTTOM NAV (mobile only) -->
   <nav class="bottom-nav">
-    <a href="home.html"    class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="home"></i></span>Home</a>
-    <a href="zebras.html"  class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="activity"></i></span>Zebras</a>
-    <a href="ranking.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="medal"></i></span>Ranking</a>
-    <a href="alertas.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="bell-ring"></i></span>Alertas</a>
-    <a href="perfil.html"  class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="user"></i></span>Perfil</a>
+    <a href="home.html"   class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="home"></i></span>Home</a>
+    <a href="zebras.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="zap"></i></span>Zebras</a>
+    <a href="liga.html"   class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="trophy"></i></span>Ligas</a>
+    <a href="busca.html"  class="bottom-nav__item active"><span class="bottom-nav__icon"><i data-lucide="search"></i></span>Busca</a>
+    <a href="perfil.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="user"></i></span>Perfil</a>
   </nav>
 
   </div><!-- /app-main -->
@@ -612,9 +613,9 @@ function triggerSearch(val) {
   showState('loading');
   renderSkeletons(4);
 
-  // Debounce 300ms para a busca real
+  // Debounce 400ms para a busca real
   clearTimeout(debounceTimer);
-  debounceTimer = setTimeout(() => runSearch(currentQuery), 300);
+  debounceTimer = setTimeout(() => runSearch(currentQuery), 400);
 }
 
 async function runSearch(query) {
@@ -626,8 +627,9 @@ async function runSearch(query) {
 
   document.getElementById('searchSpinner').style.display = 'flex';
 
-  const teamResults  = [];
+  const teamResults   = [];
   const leagueResults = [];
+  const playerResults = [];
 
   // ── 1. Busca de ligas (local — instantânea) ────────────────
   const q = query.toLowerCase();
@@ -662,20 +664,44 @@ async function runSearch(query) {
   if ((activeCategory === 'all' || activeCategory === 'times') && window.ZebraAPI) {
     try {
       const data = await ZebraAPI.sportsDb.searchTeam(query);
-      if (query !== currentQuery) return; // query mudou durante o await
+      if (query !== currentQuery) return;
 
-      (data?.teams || []).slice(0, 10).forEach(t => {
+      (data?.teams || []).slice(0, 8).forEach(t => {
         teamResults.push({
           id:      `sdb-${t.idTeam}`,
           name:    t.strTeam    || '—',
           league:  t.strLeague  || '',
           country: t.strCountry || '',
           crest:   t.strTeamBadge || t.strBadge || '',
+          sdbId:   t.idTeam || '',
         });
       });
     } catch(e) {
       if (query !== currentQuery) return;
-      console.warn('[busca] API error:', e.message);
+      console.warn('[busca] team API error:', e.message);
+    }
+  }
+
+  // ── 3. Busca de jogadores via SDB API ──────────────────────
+  if ((activeCategory === 'all' || activeCategory === 'jogadores') && window.ZebraAPI) {
+    try {
+      const data = await ZebraAPI.sportsDb.searchPlayer(query);
+      if (query !== currentQuery) return;
+
+      (data?.player || []).slice(0, 8).forEach(pl => {
+        playerResults.push({
+          id:      pl.idPlayer || '',
+          name:    pl.strPlayer || '—',
+          team:    pl.strTeam || '',
+          position: pl.strPosition || '',
+          nationality: pl.strNationality || '',
+          photo:   pl.strCutout || pl.strThumb || '',
+          sdbId:   pl.idPlayer || '',
+        });
+      });
+    } catch(e) {
+      if (query !== currentQuery) return;
+      console.warn('[busca] player API error:', e.message);
     }
   }
 
@@ -684,31 +710,73 @@ async function runSearch(query) {
   // Discard stale results if a newer search was already started
   if (apiAbortCtrl?.signal?.aborted) return;
 
-  if (!teamResults.length && !leagueResults.length) {
+  if (!teamResults.length && !leagueResults.length && !playerResults.length) {
     showState('empty', query);
     return;
   }
 
-  renderResults(teamResults, leagueResults, query);
+  renderResults(teamResults, leagueResults, playerResults, query);
   showState('results');
 
   // Adiciona ao histórico
   addToHistory(query);
 }
 
+// ── NAVEGAR PARA JOGADOR (resolve APIF ID via squad) ─────────
+async function navigateToPlayer(sdbPlayer) {
+  const { name, team, sdbId } = sdbPlayer;
+  addToHistory(name);
+
+  // Try to resolve APIF player ID via squad search
+  let apifPlayerId = sdbId; // fallback: use SDB id
+  if (team && window.ZebraAPI && ZebraAPI.isConfigured?.apiFootball?.()) {
+    try {
+      const teamRes = await ZebraAPI.apiFootball.searchTeam(team);
+      const teamId = teamRes?.[0]?.team?.id;
+      if (teamId) {
+        const squad = await ZebraAPI.apiFootball.getSquad(teamId);
+        const match = (squad || []).find(p => {
+          const pn = (p.name || '').toLowerCase();
+          const sn = (name || '').toLowerCase();
+          return pn.includes(sn.split(' ')[0]) || sn.includes(pn.split(' ')[0]);
+        });
+        if (match?.id) apifPlayerId = match.id;
+      }
+    } catch {}
+  }
+
+  const params = new URLSearchParams({
+    playerId: apifPlayerId || '',
+    name: name || '',
+    team: team || '',
+    season: String(new Date().getFullYear()),
+    lid: 'ENG',
+  });
+  window.location.href = `jogador.html?${params.toString()}`;
+}
+
 // ── RENDERIZAR RESULTADOS ─────────────────────────────────────
-function renderResults(teams, leagues, query) {
+function renderResults(teams, leagues, players, query) {
   const container = document.getElementById('resultsList');
   container.innerHTML = '';
-  let total = teams.length + leagues.length;
+  let total = teams.length + leagues.length + (players?.length || 0);
   document.getElementById('resultsCount').textContent =
     `${total} resultado${total !== 1 ? 's' : ''} para "${query}"`;
 
   // Seção Times
   if (teams.length) {
     const section = buildSection(
-      '<i data-lucide="star" style="width:13px;height:13px;"></i> Times',
+      '<i data-lucide="shield" style="width:13px;height:13px;"></i> Times',
       teams.map(t => buildTeamItem(t, query))
+    );
+    container.appendChild(section);
+  }
+
+  // Seção Jogadores
+  if (players && players.length) {
+    const section = buildSection(
+      '<i data-lucide="user" style="width:13px;height:13px;"></i> Jogadores',
+      players.map(p => buildPlayerItem(p, query))
     );
     container.appendChild(section);
   }
@@ -723,6 +791,29 @@ function renderResults(teams, leagues, query) {
   }
 
   lucide.createIcons();
+}
+
+function buildPlayerItem(pl, query) {
+  const row = document.createElement('div');
+  row.className = 'result-item';
+
+  const photoHtml = pl.photo
+    ? `<img src="${pl.photo}" alt="${pl.name}" onerror="this.style.display='none'">`
+    : `<span style="font-size:0.75rem;font-weight:700;color:var(--gray);">${(pl.name||'?').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase()}</span>`;
+  const subParts = [pl.position, pl.team, pl.nationality].filter(Boolean);
+
+  row.innerHTML = `
+    <div class="result-item__crest">
+      ${photoHtml}
+    </div>
+    <div class="result-item__body">
+      <div class="result-item__label">${highlight(pl.name, query)}</div>
+      <div class="result-item__sub">${subParts.join(' · ') || 'Jogador'}</div>
+    </div>
+    <span class="result-item__badge" style="background:rgba(96,165,250,0.12);color:#60a5fa;border:1px solid rgba(96,165,250,0.3);">Jogador</span>`;
+
+  row.addEventListener('click', () => navigateToPlayer(pl));
+  return row;
 }
 
 function buildSection(headerHtml, items) {

@@ -356,11 +356,11 @@
 
     <!-- BOTTOM NAV (mobile only) -->
     <nav class="bottom-nav">
-      <a href="home.html"    class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="home"></i></span>Home</a>
-      <a href="zebras.html"  class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="activity"></i></span>Zebras</a>
-      <a href="ranking.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="medal"></i></span>Ranking</a>
-      <a href="alertas.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="bell-ring"></i></span>Alertas</a>
-      <a href="perfil.html"  class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="user"></i></span>Perfil</a>
+      <a href="home.html"   class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="home"></i></span>Home</a>
+      <a href="zebras.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="zap"></i></span>Zebras</a>
+      <a href="liga.html"   class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="trophy"></i></span>Ligas</a>
+      <a href="busca.html"  class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="search"></i></span>Busca</a>
+      <a href="perfil.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="user"></i></span>Perfil</a>
     </nav>
 
   </div><!-- /app-main -->
@@ -532,7 +532,8 @@
       if (!el) return;
       el.innerHTML = '';
       if (!matches || !matches.length) {
-        el.innerHTML = `<div style="padding:16px;text-align:center;color:var(--gray);font-size:0.8125rem;">Nenhuma partida programada</div>`;
+        el.innerHTML = `<div class="empty-state"><i data-lucide="calendar" style="width:32px;height:32px;display:block;margin:0 auto 8px;opacity:0.4;"></i><div class="empty-state__title">Nenhuma partida programada</div><div class="empty-state__sub">Temporada encerrada ou sem partidas cadastradas</div></div>`;
+        if (typeof lucide !== 'undefined') lucide.createIcons();
         return;
       }
       matches.forEach(m => {
@@ -732,7 +733,8 @@
       if (!el) return;
       el.innerHTML = '';
       if (!matches || !matches.length) {
-        el.innerHTML = `<div style="padding:16px;text-align:center;color:var(--gray);font-size:0.8125rem;">Nenhuma partida encontrada</div>`;
+        el.innerHTML = `<div class="empty-state"><i data-lucide="calendar-x" style="width:32px;height:32px;display:block;margin:0 auto 8px;opacity:0.4;"></i><div class="empty-state__title">Nenhuma partida encontrada</div><div class="empty-state__sub">Dados históricos indisponíveis para este time</div></div>`;
+        if (typeof lucide !== 'undefined') lucide.createIcons();
         return;
       }
       matches.forEach(m => {
@@ -885,9 +887,8 @@
               const wins   = mapped.filter(m => m.result === 'W').length;
               const draws  = mapped.filter(m => m.result === 'E').length;
               const losses = mapped.filter(m => m.result === 'L').length;
-              document.getElementById('statW').textContent = wins;
-              document.getElementById('statD').textContent = draws;
-              document.getElementById('statL').textContent = losses;
+              const vedEl2 = document.getElementById('statVED');
+              if (vedEl2 && vedEl2.textContent === '—') vedEl2.textContent = `${wins}/${draws}/${losses}`;
               renderLastMatches(mapped);
             } else {
               if (lmEl) lmEl.innerHTML = `<div style="padding:16px;text-align:center;color:var(--gray);font-size:0.8125rem;">Nenhuma partida encontrada</div>`;
@@ -958,16 +959,47 @@
       // else: show empty hero — user picks a team from selector
     }
 
+    // ── RESOLVE APIF TEAM ID (robusta, com variantes de nome) ────
+    async function resolveApifTeamId(name) {
+      if (window._apifTeamId) return window._apifTeamId;
+      if (!ZebraAPI.isConfigured.apiFootball() || !name) return null;
+
+      // Normaliza: remove acentos e converte para ASCII
+      function deaccent(s) {
+        return s.normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^\w\s]/g,'');
+      }
+      // Variantes a tentar em ordem
+      const variants = [];
+      const cleaned = name.trim();
+      variants.push(cleaned);                                        // nome original
+      variants.push(deaccent(cleaned));                             // sem acentos
+      variants.push(cleaned.split(' ')[0]);                         // primeira palavra
+      variants.push(deaccent(cleaned.split(' ')[0]));               // primeira palavra sem acentos
+      // Sem sufixos comuns (FC, SC, AC, CF, SD, UD, EC, SE, CR, SL, CD)
+      const noSuffix = cleaned.replace(/\b(fc|sc|ac|cf|sd|ud|ec|se|cr|sl|cd)\b/gi,'').trim();
+      if (noSuffix && noSuffix !== cleaned) variants.push(noSuffix);
+      // Só os dois primeiros termos
+      const twoWords = cleaned.split(' ').slice(0,2).join(' ');
+      if (twoWords !== cleaned) variants.push(twoWords);
+
+      const tried = new Set();
+      for (const v of variants) {
+        if (!v || tried.has(v.toLowerCase())) continue;
+        tried.add(v.toLowerCase());
+        try {
+          const res = await ZebraAPI.apiFootball.searchTeam(v);
+          const id = res?.[0]?.team?.id || null;
+          if (id) { window._apifTeamId = id; return id; }
+        } catch {}
+      }
+      return null;
+    }
+
     // ── CARREGAR TREINADOR (APIF) ─────────────────────────────────
     async function loadCoach(teamName) {
       if (!ZebraAPI.isConfigured.apiFootball()) return;
       try {
-        let apifTeamId = window._apifTeamId || null;
-        if (!apifTeamId) {
-          const results = await ZebraAPI.apiFootball.searchTeam(teamName);
-          apifTeamId = results?.[0]?.team?.id || null;
-          if (apifTeamId) window._apifTeamId = apifTeamId;
-        }
+        const apifTeamId = await resolveApifTeamId(teamName);
         if (!apifTeamId) return;
         const coach = await ZebraAPI.apiFootball.getCoach(apifTeamId);
         if (!coach) return;
@@ -1000,12 +1032,7 @@
     async function loadApifSquadForTeam(teamName) {
       if (!ZebraAPI.isConfigured.apiFootball() || !teamName) return;
       try {
-        let apifTeamId = window._apifTeamId;
-        if (!apifTeamId) {
-          const results = await ZebraAPI.apiFootball.searchTeam(teamName);
-          apifTeamId = results?.[0]?.team?.id || null;
-          if (apifTeamId) window._apifTeamId = apifTeamId;
-        }
+        const apifTeamId = await resolveApifTeamId(teamName);
         if (!apifTeamId) return;
 
         const [squad, injuries] = await Promise.all([
@@ -1100,6 +1127,14 @@
     initApifTeamStats();
     initProContent();
 
+    // Pull-to-refresh
+    if (typeof initPullToRefresh === 'function') {
+      initPullToRefresh(() => {
+        window._apifTeamId = null; // force re-resolve
+        if (currentTeam) loadTeam(currentTeam, currentTeamSdbId || undefined);
+      });
+    }
+
     // ── API-FOOTBALL: estatísticas reais da temporada ─────────
     async function initApifTeamStats() {
       if (typeof ZebraAPI === 'undefined' || !ZebraAPI.isConfigured.apiFootball()) return;
@@ -1107,14 +1142,12 @@
       if (!teamName) return;
 
       try {
-        const results = await ZebraAPI.apiFootball.searchTeam(teamName);
-        if (!results?.length) return;
-        const apifTeam = results[0]?.team;
-        if (!apifTeam?.id) return;
+        const apifTeamId2 = await resolveApifTeamId(teamName);
+        if (!apifTeamId2) return;
 
         // Determina liga a partir do time atual
         const lid  = currentTeamData?.lid || selectorLid || 'ENG';
-        const statsRes = await ZebraAPI.apiFootball.getTeamStats(apifTeam.id, lid);
+        const statsRes = await ZebraAPI.apiFootball.getTeamStats(apifTeamId2, lid);
         if (!statsRes) return;
 
         const s  = statsRes.response || statsRes;
@@ -1464,14 +1497,7 @@
       outEl.innerHTML = `<div style="padding:16px;text-align:center;color:var(--gray);font-size:0.8125rem;"></div>`;
 
       // Busca APIF team ID se ainda não temos
-      let apifTeamId = window._apifTeamId || null;
-      if (!apifTeamId && currentTeam) {
-        try {
-          const results = await ZebraAPI.apiFootball.searchTeam(currentTeam);
-          apifTeamId = results?.[0]?.team?.id || null;
-          if (apifTeamId) window._apifTeamId = apifTeamId;
-        } catch {}
-      }
+      const apifTeamId = await resolveApifTeamId(currentTeam).catch(() => null);
 
       if (!apifTeamId) {
         const tname = currentTeamData?.name || currentTeam || '';
@@ -1669,6 +1695,29 @@
       background: linear-gradient(to left, var(--card2, #0d1a2a), transparent);
       pointer-events: none;
       z-index: 1;
+    }
+
+    /* ── DESKTOP: overview 2-col layout ── */
+    @media (min-width: 900px) {
+      #tab-overview {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        align-items: start;
+      }
+      #tab-overview > * { margin-bottom: 0; }
+      /* Índice Zebra + sparklines span full width */
+      #tab-overview > .card:first-child,
+      #statsSparklines {
+        grid-column: 1 / -1;
+      }
+    }
+
+    /* ── ELENCO: 2 cols on small mobile ── */
+    @media (max-width: 480px) {
+      #elencoContent [style*="grid-template-columns:repeat(3,1fr)"] {
+        grid-template-columns: repeat(2, 1fr) !important;
+      }
     }
   </style>
 <script src="js/admin.js"></script>

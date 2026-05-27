@@ -72,6 +72,22 @@
     </div>
   </section>
 
+  <!-- FILTROS DE PERÍODO -->
+  <section style="padding:8px 16px;border-bottom:1px solid var(--border);background:var(--bg);">
+    <div class="scroll-x" style="gap:8px;" id="periodFilterRow">
+      <button class="filter-chip active" data-period="all"><i data-lucide="calendar" class="chip-ic"></i>Tudo</button>
+      <button class="filter-chip" data-period="week"><i data-lucide="calendar-days" class="chip-ic"></i>Semana</button>
+      <button class="filter-chip" data-period="month"><i data-lucide="calendar-range" class="chip-ic"></i>Mês</button>
+      <button class="filter-chip" data-period="season"><i data-lucide="trophy" class="chip-ic"></i>Temporada</button>
+    </div>
+  </section>
+
+  <!-- LIGAS MONITORADAS -->
+  <div id="monitoredBar" style="padding:8px 16px;background:var(--card2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--gray);">
+    <i data-lucide="radio" style="width:13px;height:13px;color:var(--green);flex-shrink:0;"></i>
+    <span id="monitoredText">Monitorando todas as ligas</span>
+  </div>
+
   <!-- ZI SLIDER -->
   <div id="ziSliderWrap">
     <label>
@@ -119,6 +135,13 @@
 
     <div id="zebraList" style="display:flex;flex-direction:column;gap:12px;"></div>
 
+    <!-- LOAD MORE -->
+    <div id="loadMoreWrap" style="display:none;text-align:center;padding:16px 0;">
+      <button id="loadMoreBtn" onclick="loadMoreZebras()" style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-pill);padding:10px 24px;font-size:0.875rem;font-weight:600;color:var(--white);cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:6px;">
+        <i data-lucide="chevron-down" style="width:16px;height:16px;"></i>Carregar mais
+      </button>
+    </div>
+
     <!-- LOCK BANNER PRO -->
     <div class="lock-banner" onclick="window.location.href='assinatura.html'">
       <i data-lucide="lock" style="width:20px;height:20px;color:var(--gold);flex-shrink:0;"></i>
@@ -132,11 +155,11 @@
 
   <!-- BOTTOM NAV (mobile only) -->
   <nav class="bottom-nav">
-    <a href="home.html"    class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="home"></i></span>Home</a>
-    <a href="zebras.html"  class="bottom-nav__item active"><span class="bottom-nav__icon"><i data-lucide="activity"></i></span>Zebras</a>
-    <a href="ranking.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="medal"></i></span>Ranking</a>
-    <a href="alertas.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="bell-ring"></i></span>Alertas</a>
-    <a href="perfil.html"  class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="user"></i></span>Perfil</a>
+    <a href="home.html"   class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="home"></i></span>Home</a>
+    <a href="zebras.html" class="bottom-nav__item active"><span class="bottom-nav__icon"><i data-lucide="zap"></i></span>Zebras</a>
+    <a href="liga.html"   class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="trophy"></i></span>Ligas</a>
+    <a href="busca.html"  class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="search"></i></span>Busca</a>
+    <a href="perfil.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="user"></i></span>Perfil</a>
   </nav>
 
   </div><!-- /app-main -->
@@ -188,9 +211,27 @@
 
   let activeLeague = 'all';
   let activeFilter = 'all';
+  let activePeriod = 'all';
+  let _zebraPage   = 1;
+  const PAGE_SIZE  = 20;
   // Carrega ligas extras persitidas (adicionadas pelo modal)
   const _extraFaved = new Set(JSON.parse(localStorage.getItem('zs_faved_leagues_extra') || '[]'));
   LEAGUES.forEach(l => { if (_extraFaved.has(l.id)) l.faved = true; });
+
+  // ── MONITORED LEAGUES BAR ─────────────────────────────────────
+  function updateMonitoredBar() {
+    const faved = LEAGUES.filter(l => l.faved);
+    const el = document.getElementById('monitoredText');
+    if (!el) return;
+    if (faved.length === 0) {
+      el.textContent = 'Nenhuma liga favorita — mostrando todas';
+    } else if (activeLeague !== 'all') {
+      const lg = LEAGUES.find(l => l.id === activeLeague);
+      el.textContent = `Filtrando: ${lg?.name || activeLeague}`;
+    } else {
+      el.textContent = `Monitorando ${faved.length} liga${faved.length !== 1 ? 's' : ''}`;
+    }
+  }
 
   function ziClass(z) {
     if (z.zi >= 7) return 'grande';
@@ -298,11 +339,32 @@
     if (typeof lucide !== 'undefined') lucide.createIcons();
   }
 
+  // ── PERIOD FILTER ─────────────────────────────────────────────
+  function filterByPeriod(zebras) {
+    if (activePeriod === 'all') return zebras;
+    const now = new Date();
+    return zebras.filter(z => {
+      if (!z.date) return true;
+      // date format: "DD/MM" or "DD/MM/YYYY"
+      const parts = z.date.split('/');
+      if (parts.length < 2) return true;
+      const d = parseInt(parts[0]), m = parseInt(parts[1]);
+      const yr = parts[2] ? parseInt(parts[2]) : now.getFullYear();
+      const dt = new Date(yr, m - 1, d);
+      const diffDays = (now - dt) / (1000 * 60 * 60 * 24);
+      if (activePeriod === 'week')   return diffDays <= 7;
+      if (activePeriod === 'month')  return diffDays <= 30;
+      if (activePeriod === 'season') return diffDays <= 365;
+      return true;
+    });
+  }
+
   // ── ZEBRA LIST ───────────────────────────────────────────────
-  function renderZebras() {
+  function renderZebras(resetPage) {
+    if (resetPage !== false) { _zebraPage = 1; }
     window._zebraShowAll = false;
     const container = document.getElementById('zebraList');
-    container.innerHTML = '';
+    if (resetPage !== false) container.innerHTML = '';
     const isPro = getUserPlan() !== 'free';
 
     let data = [...ZEBRAS];
@@ -310,11 +372,18 @@
     if (activeLeague !== 'all') list = list.filter(z => z.lid === activeLeague);
     if (activeFilter !== 'all') list = list.filter(z => ziClass(z) === activeFilter);
     if (_ziMinFilter > 0) list = list.filter(z => (parseFloat(z.zi)||0) >= _ziMinFilter);
+    list = filterByPeriod(list);
 
-    document.getElementById('zebraCount').textContent = `${list.length} resultado${list.length !== 1 ? 's' : ''}`;
+    window._zebraFiltered = list;
+    const total = list.length;
+    const pageList = list.slice(0, _zebraPage * PAGE_SIZE);
 
-    if (!list.length) {
+    document.getElementById('zebraCount').textContent = `${total} resultado${total !== 1 ? 's' : ''}`;
+    updateMonitoredBar();
+
+    if (!pageList.length) {
       container.innerHTML = renderEmptyState();
+      document.getElementById('loadMoreWrap').style.display = 'none';
       return;
     }
 
@@ -326,7 +395,7 @@
       return `<div style="width:40px;height:40px;border-radius:50%;background:var(--card2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;">${inner}</div>`;
     }
 
-    list.forEach((z, i) => {
+    pageList.forEach((z, i) => {
       const cls   = ziClass(z);
       const label = ziLabel(cls);
       const locked = i >= 4 && !isPro;
@@ -470,30 +539,19 @@
       });
       container.appendChild(card);
     });
-    // Remove previous "ver mais" button
-    const oldBtn = document.getElementById('zebraLoadMore');
-    if (oldBtn) oldBtn.remove();
-
-    if (list.length > 6 && !window._zebraShowAll) {
-      // Only show first 6
-      const cards = container.querySelectorAll('.zebra-card');
-      cards.forEach((c, i) => { if (i >= 6) c.style.display = 'none'; });
-      const moreBtn = document.createElement('button');
-      moreBtn.id = 'zebraLoadMore';
-      moreBtn.className = 'btn btn--secondary';
-      moreBtn.style.cssText = 'width:100%;margin-top:12px;';
-      moreBtn.innerHTML = `<i data-lucide="chevrons-down" style="width:16px;height:16px;margin-right:6px;"></i>Ver mais ${list.length - 6} zebras`;
-      moreBtn.addEventListener('click', () => {
-        window._zebraShowAll = true;
-        cards.forEach(c => { c.style.display = ''; });
-        moreBtn.remove();
-        lucide.createIcons();
-      });
-      container.appendChild(moreBtn);
-      lucide.createIcons();
-    }
+    // Show/hide "Carregar mais" button
+    const hasMore = total > _zebraPage * PAGE_SIZE;
+    const loadMoreWrap = document.getElementById('loadMoreWrap');
+    if (loadMoreWrap) loadMoreWrap.style.display = hasMore ? 'block' : 'none';
 
     // Re-render lucide icons for arrow-right inside cards
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+
+  // ── LOAD MORE PAGINATION ──────────────────────────────────────
+  function loadMoreZebras() {
+    _zebraPage++;
+    renderZebras(false);
     if (typeof lucide !== 'undefined') lucide.createIcons();
   }
 
@@ -504,6 +562,17 @@
       this.classList.add('active');
       activeFilter = this.dataset.filter;
       renderZebras();
+    });
+  });
+
+  // ── FILTROS DE PERÍODO ────────────────────────────────────────
+  document.querySelectorAll('#periodFilterRow .filter-chip').forEach(chip => {
+    chip.addEventListener('click', function() {
+      document.querySelectorAll('#periodFilterRow .filter-chip').forEach(c => c.classList.remove('active'));
+      this.classList.add('active');
+      activePeriod = this.dataset.period;
+      renderZebras();
+      if (typeof lucide !== 'undefined') lucide.createIcons();
     });
   });
 
@@ -629,6 +698,7 @@
   updatePlanBadge();
   initHeatmapSkeleton();
   renderLeagueBar();
+  updateMonitoredBar();
   renderZebras();
 
   // Pré-carrega logos de ligas e escudos das ligas padrão

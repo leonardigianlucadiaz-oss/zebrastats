@@ -696,22 +696,68 @@ function injectFavoritosNav() {
 function initBottomNav() {
   const nav = document.querySelector('.bottom-nav');
   if (!nav) return;
-  const href = window.location.href;
+  const current = window.location.pathname.split('/').pop() || 'home.html';
   const items = [
-    { href: 'home.html',    icon: 'home',      label: 'Home' },
-    { href: 'zebras.html',  icon: 'activity',  label: 'Zebras' },
-    { href: 'ranking.html', icon: 'medal',     label: 'Ranking' },
-    { href: 'alertas.html', icon: 'bell-ring', label: 'Alertas' },
-    { href: 'perfil.html',  icon: 'user',      label: 'Perfil' },
+    { href: 'home.html',    icon: 'home',    label: 'Home' },
+    { href: 'zebras.html',  icon: 'zap',     label: 'Zebras' },
+    { href: 'liga.html',    icon: 'trophy',  label: 'Ligas' },
+    { href: 'busca.html',   icon: 'search',  label: 'Busca' },
+    { href: 'perfil.html',  icon: 'user',    label: 'Perfil' },
   ];
   nav.innerHTML = items.map(item => {
-    const active = href.includes(item.href);
+    const active = item.href === current || (current === '' && item.href === 'home.html');
     return `<a href="${item.href}" class="bottom-nav__item${active ? ' active' : ''}">
       <span class="bottom-nav__icon"><i data-lucide="${item.icon}" style="width:20px;height:20px;display:block;"></i></span>
       ${item.label}
     </a>`;
   }).join('');
   if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+// ── SIDEBAR ATIVA POR PÁGINA ──────────────────────────────────
+function initSidebarActive() {
+  const path = window.location.pathname.split('/').pop() || 'home.html';
+  document.querySelectorAll('.sidebar__nav-item').forEach(a => {
+    a.classList.toggle('active', a.getAttribute('href') === path);
+  });
+  document.querySelectorAll('.bottom-nav__item').forEach(a => {
+    a.classList.toggle('active', a.getAttribute('href') === path);
+  });
+}
+
+// ── PULL-TO-REFRESH ───────────────────────────────────────────
+function initPullToRefresh(callback) {
+  let startY = 0;
+  let pulling = false;
+  const indicator = document.querySelector('.ptr-indicator');
+
+  document.addEventListener('touchstart', e => {
+    startY = e.touches[0].clientY;
+    pulling = window.scrollY === 0;
+  }, { passive: true });
+
+  document.addEventListener('touchend', e => {
+    if (!pulling) return;
+    const deltaY = e.changedTouches[0].clientY - startY;
+    if (deltaY >= 60) {
+      if (indicator) indicator.classList.add('visible');
+      if (typeof callback === 'function') callback();
+      setTimeout(() => {
+        if (indicator) indicator.classList.remove('visible');
+      }, 1500);
+    }
+    pulling = false;
+  }, { passive: true });
+}
+
+// ── EMPTY STATE HTML ──────────────────────────────────────────
+function emptyStateHTML(icon, title, sub, actionLabel, actionHref) {
+  return `<div class="empty-state">
+    <i data-lucide="${icon}" style="width:32px;height:32px;"></i>
+    <div class="empty-state__title">${title}</div>
+    ${sub ? `<div class="empty-state__sub">${sub}</div>` : ''}
+    ${actionLabel ? `<a href="${actionHref}" class="filter-chip" style="margin-top:8px;">${actionLabel}</a>` : ''}
+  </div>`;
 }
 
 // ── HAMBURGER MENU (desktop + mobile) ────────────────────────
@@ -816,6 +862,7 @@ document.addEventListener('DOMContentLoaded', () => {
   addRippleEffect();
   injectFavoritosNav(); // must run BEFORE setActiveNavItem so the Favoritos link exists when active-state is assigned
   setActiveNavItem();
+  initSidebarActive();
   initThemeToggle();
   initPlanBadge();
   initDesktopNavTitle(); // no-op — desativado

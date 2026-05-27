@@ -110,6 +110,9 @@
       <!-- ── COLUNA PRINCIPAL (partidas) ── -->
       <div class="home-col-main">
 
+        <!-- Pull-to-refresh indicator -->
+        <div class="ptr-indicator" id="ptrIndicator"><i data-lucide="refresh-cw" style="width:14px;height:14px;"></i>Atualizando...</div>
+
         <!-- AO VIVO -->
         <div class="section-header">
           <span class="section-title">
@@ -136,6 +139,9 @@
           <button class="league-pill" data-league="FRA" data-lid="FRA"><span class="pill-logo" id="hpl-FRA"></span> Ligue 1</button>
           <button class="league-pill" data-league="UCL" data-lid="UCL"><span class="pill-logo" id="hpl-UCL"></span> Champions</button>
         </div>
+
+        <!-- ÚLTIMA ATUALIZAÇÃO -->
+        <div class="last-updated" id="lastUpdatedBar"></div>
 
         <!-- EM BREVE -->
         <div class="section-header" style="margin-top:4px;">
@@ -212,13 +218,13 @@
 
     </main>
 
-    <!-- BOTTOM NAV (mobile only) -->
+    <!-- BOTTOM NAV (mobile only) — populated by initBottomNav() in main.js -->
     <nav class="bottom-nav">
-      <a href="home.html"    class="bottom-nav__item active"><span class="bottom-nav__icon"><i data-lucide="home"></i></span>Home</a>
-      <a href="zebras.html"  class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="activity"></i></span>Zebras</a>
-      <a href="ranking.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="medal"></i></span>Ranking</a>
-      <a href="alertas.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="bell-ring"></i></span>Alertas</a>
-      <a href="perfil.html"  class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="user"></i></span>Perfil</a>
+      <a href="home.html"   class="bottom-nav__item active"><span class="bottom-nav__icon"><i data-lucide="home"></i></span>Home</a>
+      <a href="zebras.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="zap"></i></span>Zebras</a>
+      <a href="liga.html"   class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="trophy"></i></span>Ligas</a>
+      <a href="busca.html"  class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="search"></i></span>Busca</a>
+      <a href="perfil.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="user"></i></span>Perfil</a>
     </nav>
 
   </div><!-- /app-main -->
@@ -505,7 +511,11 @@
         ? LIVE_GAMES
         : LIVE_GAMES.filter(g => g.league_id === activeLeagueFilter);
 
-      if (!games.length) { emptyState('liveGames', 'Nenhum jogo ao vivo agora.'); return; }
+      if (!games.length) {
+        document.getElementById('liveGames').innerHTML = '<div class="empty-state"><i data-lucide="radio" style="width:28px;height:28px;"></i><div class="empty-state__title">Nenhum jogo ao vivo</div><div class="empty-state__sub">Os jogos ao vivo aparecerão aqui</div></div>';
+        if (typeof lucide !== 'undefined') lucide.createIcons({ nodes: [document.getElementById('liveGames')] });
+        return;
+      }
 
       games.forEach(g => {
         const card = document.createElement('div');
@@ -574,7 +584,11 @@
         ? UPCOMING_GAMES
         : UPCOMING_GAMES.filter(g => g.league_id === activeLeagueFilter);
 
-      if (!games.length) { emptyState('upcomingGames', 'Nenhum jogo agendado.'); return; }
+      if (!games.length) {
+        document.getElementById('upcomingGames').innerHTML = '<div class="empty-state"><i data-lucide="clock" style="width:28px;height:28px;"></i><div class="empty-state__title">Nenhum jogo em breve</div><div class="empty-state__sub">Os próximos jogos aparecerão aqui</div></div>';
+        if (typeof lucide !== 'undefined') lucide.createIcons({ nodes: [document.getElementById('upcomingGames')] });
+        return;
+      }
 
       games.forEach(g => {
         const card = document.createElement('div');
@@ -652,7 +666,11 @@
         .filter(l => l.count > 0)
         .sort((a,b) => b.count - a.count)
         .slice(0, 3);
-      if (!sorted.length) return;
+      if (!sorted.length) {
+        container.innerHTML = '<div class="empty-state"><i data-lucide="trending-up" style="width:28px;height:28px;"></i><div class="empty-state__sub">Sem destaques no momento</div></div>';
+        if (typeof lucide !== 'undefined') lucide.createIcons({ nodes: [container] });
+        return;
+      }
       const maxCount = sorted[0].count || 1;
       container.innerHTML = '';
       sorted.forEach(l => {
@@ -919,9 +937,24 @@
 
       // ── 4. Fallback timeout final ──────────────────────────────────
       setTimeout(() => {
-        if (!LIVE_GAMES.length)     emptyState('liveGames',    'Nenhum jogo ao vivo agora.');
-        if (!UPCOMING_GAMES.length) emptyState('upcomingGames','Nenhum jogo agendado em breve.');
+        const liveEl = document.getElementById('liveGames');
+        const upEl = document.getElementById('upcomingGames');
+        if (!LIVE_GAMES.length && liveEl && !liveEl.querySelector('.game-card')) {
+          liveEl.innerHTML = '<div class="empty-state"><i data-lucide="radio" style="width:28px;height:28px;"></i><div class="empty-state__title">Nenhum jogo ao vivo</div><div class="empty-state__sub">Os jogos ao vivo aparecerão aqui</div></div>';
+          if (typeof lucide !== 'undefined') lucide.createIcons({ nodes: [liveEl] });
+        }
+        if (!UPCOMING_GAMES.length && upEl && !upEl.querySelector('.game-card')) {
+          upEl.innerHTML = '<div class="empty-state"><i data-lucide="clock" style="width:28px;height:28px;"></i><div class="empty-state__title">Nenhum jogo em breve</div><div class="empty-state__sub">Os próximos jogos aparecerão aqui</div></div>';
+          if (typeof lucide !== 'undefined') lucide.createIcons({ nodes: [upEl] });
+        }
       }, 10000);
+
+      // ── 5. Última atualização ──────────────────────────────────────
+      const lastUpdEl = document.getElementById('lastUpdatedBar');
+      if (lastUpdEl) {
+        lastUpdEl.innerHTML = `<i data-lucide="refresh-cw" style="width:10px;height:10px;"></i>Atualizado às ${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`;
+        if (typeof lucide !== 'undefined') lucide.createIcons({ nodes: [lastUpdEl] });
+      }
     }
 
     // ── ZEBRA RANKING + SHARED DATA LOADER ───────────────
@@ -1083,6 +1116,7 @@
     initFavBar();
     initLeaguePills();
     initSparklines();     // renderiza skeletons de sparklines
+    initPullToRefresh(() => { initGames(); }); // pull-to-refresh
     initGames();          // busca jogos de todas as ligas (escalonado: 600ms/liga)
     initZebrasDoDia();    // configura seção (esconde lock-banner se PRO)
     initBellBadge();
