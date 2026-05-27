@@ -1331,6 +1331,21 @@ lucide.createIcons();
     cursor: default;
   }
   .form-spark-wrap { width: 100%; }
+
+  /* ── LAYOUT03 — 375px narrow phones ──────── */
+  @media (max-width: 375px) {
+    .slots-grid,
+    .compare-slots,
+    [class*="team-slots"] {
+      grid-template-columns: 1fr !important;
+      grid-template-rows: auto auto auto !important;
+    }
+    .vs-divider,
+    .slot-vs {
+      text-align: center;
+      padding: 8px 0;
+    }
+  }
 </style>
 </body>
 </html>
