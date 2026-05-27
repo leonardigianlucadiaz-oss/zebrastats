@@ -607,38 +607,54 @@ window.openModal  = openModal;
 window.closeModal = closeModal;
 
 // ── DESKTOP NAVBAR PAGE TITLE ────────────────────────────────
+// Desativado: telas não mostram o próprio nome na barra superior.
+// O hambúrguer + brand na sidebar já identificam o contexto.
+function initDesktopNavTitle() { /* desativado por design */ }
+
+// ── NAVBAR CONSISTENCY — garante PRO badge + tema + busca + sino ──
 /**
- * On desktop (≥1024px) the .navbar__brand is hidden (brand lives in sidebar).
- * This injects a page-title span on the left side of the navbar so it
- * doesn't feel empty. Title comes from <title> "ZebraStats — PageName".
+ * Injeta os elementos padrão da navbar em TODAS as telas, mesmo as que
+ * não têm .navbar__actions (ex: telas com back-button).
+ * Ordem: [hamburger] [brand/back] ... [FREE] [crown] [theme] [search] [bell]
  */
-function initDesktopNavTitle() {
-  if (window.innerWidth < 1024) return;
+function ensureNavbarConsistency() {
   const navbar = document.querySelector('.navbar');
   if (!navbar) return;
-  if (navbar.querySelector('.navbar__page-title')) return; // already injected
 
-  // On mobile back-navbar pages there's already an inline <span> title
-  // as a DIRECT child of the navbar. Repurpose it instead of injecting a duplicate.
-  // Use :scope > to avoid matching nested spans inside brand/icons.
-  const inlineTitle = navbar.querySelector(':scope > span:not([class])');
-  if (inlineTitle) {
-    inlineTitle.classList.add('navbar__page-title');
-    // Clear inline text-align so CSS takes over (left-align on desktop)
-    inlineTitle.style.removeProperty('text-align');
-    return;
+  // Garante que .navbar__actions existe
+  let actions = navbar.querySelector('.navbar__actions');
+  if (!actions) {
+    actions = document.createElement('div');
+    actions.className = 'navbar__actions';
+    actions.style.cssText = 'display:flex;align-items:center;gap:4px;margin-left:auto;flex-shrink:0;';
+    navbar.appendChild(actions);
   }
 
-  // Standard navbar: inject title (brand hidden on desktop, sidebar shows it)
-  const rawTitle = document.title || '';
-  const pageName = rawTitle.replace(/ZebraStats\s*[—–-]\s*/i, '').trim() || 'ZebraStats';
-  const el = document.createElement('span');
-  el.className = 'navbar__page-title';
-  el.textContent = pageName;
-  // Insert before .navbar__actions so it sits on the left
-  const actions = navbar.querySelector('.navbar__actions');
-  if (actions) navbar.insertBefore(el, actions);
-  else navbar.appendChild(el);
+  // Ícone de busca (se ainda não existir)
+  if (!actions.querySelector('a[href*="busca"]')) {
+    const search = document.createElement('a');
+    search.href = 'busca.html';
+    search.className = 'navbar__icon';
+    search.title = 'Buscar';
+    search.setAttribute('aria-label', 'Buscar');
+    search.innerHTML = '<i data-lucide="search" style="width:18px;height:18px;"></i>';
+    actions.appendChild(search);
+  }
+
+  // Ícone de notificações + badge (se ainda não existir)
+  if (!actions.querySelector('a[href*="notificacoes"]')) {
+    const bell = document.createElement('a');
+    bell.href = 'notificacoes.html';
+    bell.className = 'navbar__icon';
+    bell.id = 'notifBtn';
+    bell.title = 'Notificações';
+    bell.setAttribute('aria-label', 'Notificações');
+    bell.innerHTML = '<i data-lucide="bell" style="width:18px;height:18px;"></i>';
+    bell.style.position = 'relative';
+    actions.appendChild(bell);
+  }
+
+  if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
 // ── SIDEBAR SECTION LABEL ─────────────────────────────────────
@@ -698,17 +714,17 @@ function initBottomNav() {
   if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
-// ── HAMBURGER MENU (desktop) ──────────────────────────────────
+// ── HAMBURGER MENU (desktop + mobile) ────────────────────────
 function initHamburger() {
   const navbar = document.querySelector('.navbar');
   const sidebar = document.querySelector('.app-sidebar');
   if (!navbar || !sidebar) return;
 
-  // Botão hambúrguer
+  // Botão hambúrguer — display controlado pelo CSS (flex em ≥768px, none em mobile)
   const btn = document.createElement('button');
   btn.className = 'hamburger-btn navbar__icon';
   btn.setAttribute('aria-label', 'Menu');
-  btn.style.cssText = 'background:none;border:none;cursor:pointer;color:var(--white);display:none;align-items:center;justify-content:center;width:36px;height:36px;border-radius:8px;flex-shrink:0;';
+  btn.style.cssText = 'background:none;border:none;cursor:pointer;color:var(--white);align-items:center;justify-content:center;width:36px;height:36px;border-radius:8px;flex-shrink:0;';
   btn.innerHTML = '<i data-lucide="menu" style="width:20px;height:20px;"></i>';
   navbar.insertBefore(btn, navbar.firstChild);
 
@@ -795,13 +811,14 @@ function initPlanBadge() {
 
 // ── INIT GLOBAL ───────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
+  ensureNavbarConsistency(); // garante search + bell em TODAS as telas (antes dos outros inits)
   updatePlanBadge();
   addRippleEffect();
   injectFavoritosNav(); // must run BEFORE setActiveNavItem so the Favoritos link exists when active-state is assigned
   setActiveNavItem();
   initThemeToggle();
   initPlanBadge();
-  initDesktopNavTitle();
+  initDesktopNavTitle(); // no-op — desativado
   initSidebarLabel();
   updateSidebarUser();
   initBottomNav();

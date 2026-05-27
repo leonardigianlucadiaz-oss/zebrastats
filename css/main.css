@@ -1067,37 +1067,27 @@ p  { font-size: 0.875rem; line-height: 1.5; color: var(--gray); }
   .cards-grid   { grid-template-columns: repeat(3, 1fr); }
 }
 
-/* ── DESKTOP ≥1024px: sidebar fixa permanente (não drawer) ── */
+/* ── DESKTOP ≥1024px: sidebar drawer (hambúrguer) ── */
+/* Sidebar permanece como drawer em todos os tamanhos de tela.
+   O hambúrguer é visível no desktop e abre/fecha a sidebar com overlay. */
 @media (min-width: 1024px) {
-  .app-sidebar {
-    transform: none !important;
-    visibility: visible !important;
-    pointer-events: auto !important;
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 100vh;
-    z-index: 200;
-  }
-  .app-main {
-    margin-left: 300px; /* largura definida no bloco ≥1024px abaixo */
-  }
-  .sidebar-backdrop {
-    display: none !important;
-  }
-  .hamburger-btn {
-    display: none !important;
-  }
-  .app-main { min-width: 0; flex: 1; max-width: none; }
-  /* Guest banner redundant on desktop — sidebar already shows Convidado.
-     Also removes the padding-bottom that causes the page-jump bug. */
+  /* Hambúrguer sempre visível no desktop */
+  .hamburger-btn { display: flex !important; }
+
+  /* app-main sem offset — sidebar sobrepõe o conteúdo quando aberta */
+  .app-main { min-width: 0; flex: 1; max-width: none; margin-left: 0; }
+
+  /* Backdrop permitido no desktop (cobre o conteúdo ao abrir a sidebar) */
+  /* sidebar-backdrop: mantém comportamento padrão (block quando .active) */
+
+  /* Guest banner desnecessário no desktop */
   #guestBanner                  { display: none !important; }
   .has-guest-banner .app-main   { padding-bottom: 0 !important; }
   .has-guest-banner main        { padding-bottom: 0 !important; }
 }
 
-/* ── NAVBAR page-title: hidden by default, shown only on desktop ── */
-.navbar__page-title { display: none; }
+/* ── NAVBAR page-title: desativado — telas não mostram o próprio nome ── */
+.navbar__page-title { display: none !important; }
 
 /* ── NAVBAR on desktop (inside app-main) ── */
 @media (min-width: 768px) {
@@ -1652,19 +1642,8 @@ input:checked + .toggle-slider::before { transform: translateX(20px); }
   button.navbar__icon[aria-label*="oltar"] {
     display: flex !important;
   }
-  /* Desktop page title in navbar — also applied to repurposed inline spans */
-  .navbar__page-title {
-    display: block;
-    font-size: 1rem !important;
-    font-weight: 700 !important;
-    color: var(--white) !important;
-    flex: 1 !important;
-    min-width: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    text-align: left !important;
-  }
+  /* Desktop page title: desativado — telas não mostram o próprio nome */
+  .navbar__page-title { display: none !important; }
 
   /* ── 3. TAB BAR: offset for taller navbar ── */
   .tab-bar { top: 64px; }

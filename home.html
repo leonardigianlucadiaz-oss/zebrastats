@@ -758,17 +758,18 @@
       bar.appendChild(addPill);
     }
 
-    // ── LEAGUE PILLS COM LOGOS SDB ────────────────────────
-    // 1) Bandeira do país via flagcdn (imediata, sem emoji regional)
-    // 2) Logo oficial SDB quando carregar
-    async function initLeaguePills() {
+    // ── LEAGUE PILLS COM LOGOS OFICIAIS ──────────────────
+    // Usa LEAGUE_LOGOS (pre-baked URLs do CDN TheSportsDB) diretamente,
+    // sem etapa de bandeira de baixa qualidade.
+    function initLeaguePills() {
       const lids = ['BRA','ENG','ESP','ITA','GER','FRA','UCL'];
-      lids.forEach(async lid => {
+      lids.forEach(lid => {
         const span = document.getElementById(`hpl-${lid}`);
         if (!span) return;
-        span.innerHTML = flagImg(lid, 13);          // bandeira imediata
-        const logo = await loadLeagueLogo(lid);     // global main.js
-        if (logo) span.innerHTML = `<img src="${logo}" style="width:15px;height:15px;object-fit:contain;" onerror="this.style.display='none'">`;
+        const logo = (typeof LEAGUE_LOGOS !== 'undefined') ? LEAGUE_LOGOS[lid] : '';
+        if (logo) {
+          span.innerHTML = `<img src="${logo}" alt="${lid}" style="width:16px;height:16px;object-fit:contain;border-radius:2px;" onerror="this.style.display='none'">`;
+        }
       });
     }
 
