@@ -448,8 +448,9 @@
   <script src="js/main.js?v=9"></script>
   <script>
     // ── CONSTANTS ─────────────────────────────────────────
-    const ALL_LIDS  = ['BRA','ENG','ESP','ITA','GER','FRA','UCL','POR'];
-    const LID_LABEL = { BRA:'Brasileirão', ENG:'Premier League', ESP:'La Liga', ITA:'Serie A', GER:'Bundesliga', FRA:'Ligue 1', UCL:'Champions League', POR:'Liga Portugal' };
+    const ALL_LIDS   = ['BRA','ENG','ESP','ITA','GER','FRA','UCL','POR'];
+    const LID_LABEL  = { BRA:'Brasileirão', ENG:'Premier League', ESP:'La Liga', ITA:'Serie A', GER:'Bundesliga', FRA:'Ligue 1', UCL:'Champions League', POR:'Liga Portugal' };
+    const SPARK_LIDS = ['BRA','ENG','ESP','UCL']; // declarado aqui para evitar TDZ em initSparklines()
 
     // ── STATE ──────────────────────────────────────────────
     let LIVE_GAMES     = [];
@@ -1198,7 +1199,7 @@
     _proximasZebras();
 
     // ── Sparklines por Liga — dados reais ────────────────────────
-    const SPARK_LIDS = ['BRA','ENG','ESP','UCL'];
+    // SPARK_LIDS declarado no topo do script (junto com ALL_LIDS) para evitar TDZ
 
     function initSparklines() {
       const grid = document.getElementById('sparklineGrid');
