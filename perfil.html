@@ -77,6 +77,12 @@
     </div>
 
     <!-- STATS DINÂMICOS DO localStorage -->
+    <div id="profileStatsSkel" style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;margin-bottom:16px">
+      <div class="skel" style="height:56px;border-radius:8px"></div>
+      <div class="skel" style="height:56px;border-radius:8px"></div>
+      <div class="skel" style="height:56px;border-radius:8px"></div>
+      <div class="skel" style="height:56px;border-radius:8px"></div>
+    </div>
     <div style="display:flex;gap:0;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;">
       <div class="profile-stat" style="padding:12px 8px;border-right:1px solid var(--border);">
         <div class="profile-stat__value" id="statZebras">–</div>
@@ -424,12 +430,12 @@
     <div style="display:flex;flex-direction:column;gap:14px;">
       <div>
         <div style="font-size:0.75rem;color:var(--gray);margin-bottom:8px;">O que você achou do ZebraStats?</div>
-        <div style="display:flex;gap:8px;justify-content:center;font-size:2rem;" id="ratingStars">
-          <span class="rating-star" data-v="1">⭐</span>
-          <span class="rating-star" data-v="2">⭐</span>
-          <span class="rating-star" data-v="3">⭐</span>
-          <span class="rating-star" data-v="4">⭐</span>
-          <span class="rating-star" data-v="5">⭐</span>
+        <div style="display:flex;gap:8px;justify-content:center;" id="ratingStars">
+          <span class="rating-star" data-v="1" style="cursor:pointer;"><i data-lucide="star" style="width:28px;height:28px;color:var(--gold);"></i></span>
+          <span class="rating-star" data-v="2" style="cursor:pointer;"><i data-lucide="star" style="width:28px;height:28px;color:var(--gold);"></i></span>
+          <span class="rating-star" data-v="3" style="cursor:pointer;"><i data-lucide="star" style="width:28px;height:28px;color:var(--gold);"></i></span>
+          <span class="rating-star" data-v="4" style="cursor:pointer;"><i data-lucide="star" style="width:28px;height:28px;color:var(--gold);"></i></span>
+          <span class="rating-star" data-v="5" style="cursor:pointer;"><i data-lucide="star" style="width:28px;height:28px;color:var(--gold);"></i></span>
         </div>
       </div>
       <div class="form-group">
@@ -659,6 +665,7 @@
 
   // ── STATS DO USUÁRIO ──────────────────────────────────────────
   async function loadUserStats() {
+    document.getElementById('profileStatsSkel')?.remove();
     const alertsData = JSON.parse(localStorage.getItem('zs_alerts') || '[]');
     const favs       = JSON.parse(localStorage.getItem('zebrastats_favorites') || '[]');
     const ligas      = JSON.parse(localStorage.getItem('zebrastats_fav_leagues') || '[]');

@@ -116,6 +116,11 @@
       <span class="section-title"><i data-lucide="bell-ring" class="sec-ic"></i>Meus Alertas</span>
       <button id="clearAllBtn" style="background:none;border:none;color:var(--gray);font-size:0.75rem;font-weight:600;cursor:pointer;font-family:inherit;display:none;">Limpar todos</button>
     </div>
+    <div id="alertListSkel">
+      <div class="skel" style="height:76px;border-radius:12px;margin-bottom:10px"></div>
+      <div class="skel" style="height:76px;border-radius:12px;margin-bottom:10px"></div>
+      <div class="skel" style="height:76px;border-radius:12px"></div>
+    </div>
     <div id="alertsList"></div>
   </section>
 
@@ -455,6 +460,7 @@ function buildMatchPreview(alert) {
 
 // ── MY ALERTS LIST ────────────────────────────────────────────────────────────
 function renderAlertsList() {
+  document.getElementById('alertListSkel')?.remove();
   const container = document.getElementById('alertsList');
   const clearBtn  = document.getElementById('clearAllBtn');
   container.innerHTML = '';

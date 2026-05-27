@@ -79,6 +79,7 @@
         <p class="plan-card__label plan-card__label--pro">Pro</p>
 
         <div id="priceDisplay">
+          <div id="priceSkel" class="skel" style="height:32px;width:120px;border-radius:8px;margin:8px auto"></div>
           <div class="plan-card__price text-green" id="priceValue">R$ 50</div>
           <p class="plan-card__price-note" id="priceNote">/ mês · cobrado mensalmente</p>
         </div>
@@ -402,6 +403,9 @@
   <script src="js/auth-guard.js?v=4"></script>
   <script src="js/main.js?v=9"></script>
   <script>
+    // ── PRICE SKELETON ────────────────────────────────────
+    setTimeout(() => document.getElementById('priceSkel')?.remove(), 500);
+
     // ── TOGGLE MENSAL / ANUAL ─────────────────────────────
     const toggleBtns = document.querySelectorAll('.toggle-btn');
     let currentPlan = 'monthly';

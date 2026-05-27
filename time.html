@@ -54,6 +54,11 @@
     </nav>
 
     <!-- HERO DO TIME -->
+    <div id="teamHeroSkel" style="display:flex;flex-direction:column;align-items:center;gap:12px;padding:24px">
+      <div class="skel" style="width:80px;height:80px;border-radius:50%"></div>
+      <div class="skel" style="width:140px;height:20px;border-radius:8px"></div>
+      <div class="skel" style="width:200px;height:14px;border-radius:6px"></div>
+    </div>
     <div class="team-hero" id="teamHero" style="background:linear-gradient(160deg,#851414 0%,#3a0808 100%);">
       <div class="team-hero__shield" id="heroShield">TOR</div>
       <div class="team-hero__name"  id="heroName">Torino FC</div>
@@ -721,6 +726,7 @@
         console.warn('[time] loadTeam SDB error:', e);
         document.getElementById('heroLeague').textContent = 'Erro ao carregar dados';
       }
+      document.getElementById('teamHeroSkel')?.remove();
     }
 
     // ── FAVORITE BUTTON ───────────────────────────────────

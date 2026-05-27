@@ -113,13 +113,21 @@
       <button class="filter-chip" data-filter="europa">🌍 Europa</button>
     </div>
 
+    <!-- SKELETON EXPLORAR -->
+    <div id="exploreSkel" style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:16px">
+      <div class="skel" style="height:100px;border-radius:12px"></div>
+      <div class="skel" style="height:100px;border-radius:12px"></div>
+      <div class="skel" style="height:100px;border-radius:12px"></div>
+      <div class="skel" style="height:100px;border-radius:12px"></div>
+    </div>
+
     <!-- TODAS AS LIGAS GRID -->
     <div id="allLeaguesSection" style="margin-bottom:16px;">
       <div style="font-size:0.875rem;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
         <i data-lucide="globe" style="width:15px;height:15px;color:var(--gray);"></i> Todas as Ligas
       </div>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;" id="allLeaguesGrid">
-        <div class="league-card-explore" onclick="location.href='liga.html?id=UCL'"><span class="league-card-explore__flag">🏆</span><div class="league-card-explore__name">Champions</div></div>
+        <div class="league-card-explore" onclick="location.href='liga.html?id=UCL'"><span class="league-card-explore__flag"><i data-lucide="trophy" style="width:28px;height:28px;color:var(--gold);"></i></span><div class="league-card-explore__name">Champions</div></div>
         <div class="league-card-explore" onclick="location.href='liga.html?id=BRA'"><span class="league-card-explore__flag">🇧🇷</span><div class="league-card-explore__name">Brasileirão</div></div>
         <div class="league-card-explore" onclick="location.href='liga.html?id=ENG'"><span class="league-card-explore__flag">🏴󠁧󠁢󠁥󠁮󠁧󠁿</span><div class="league-card-explore__name">Premier League</div></div>
         <div class="league-card-explore" onclick="location.href='liga.html?id=ESP'"><span class="league-card-explore__flag">🇪🇸</span><div class="league-card-explore__name">La Liga</div></div>
@@ -485,6 +493,7 @@ function isBrasilTeam(league) { // FIX 27 — added 'brasilei' to catch all Bras
 
 // ── RENDER ────────────────────────────────────────────────────────────────────
 function renderExplorar() {
+  document.getElementById('exploreSkel')?.remove();
   const container = document.getElementById('explorarResults');
   const q = searchQuery.toLowerCase();
 
@@ -539,8 +548,7 @@ function renderExplorar() {
       const heartIcon = faved
         ? `<i data-lucide="heart" style="width:14px;height:14px;fill:var(--red);color:var(--red);"></i>`
         : `<i data-lucide="heart" style="width:14px;height:14px;color:var(--gray);"></i>`;
-      const ziCls = t.zi >= 7 ? 'grande' : t.zi >= 4 ? 'media' : 'leve';
-      const ziColor = t.zi >= 7 ? 'var(--red)' : t.zi >= 4 ? 'var(--gold)' : 'var(--gray)';
+      const ziCls = t.zi >= 7 ? 'zi--grande' : t.zi >= 4 ? 'zi--media' : 'zi--leve';
       html += `
         <div class="expl-team-card" data-id="${id}" style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:12px;cursor:pointer;position:relative;">
           <button class="expl-fav-btn" data-id="${id}" data-name="${t.name}" style="position:absolute;top:8px;right:8px;background:none;border:none;cursor:pointer;padding:4px;display:flex;align-items:center;justify-content:center;border-radius:6px;transition:background 0.15s;">${heartIcon}</button>
@@ -549,7 +557,7 @@ function renderExplorar() {
             <div style="font-weight:600;font-size:0.875rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${t.name}</div>
           </div>
           <div style="font-size:0.75rem;color:var(--gray);margin-bottom:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${t.league}</div>
-          <div style="font-size:0.6875rem;color:${ziColor};font-weight:700;">🦓 ZI ${t.zi.toFixed(1)}</div>
+          <div class="zi-badge ${ziCls}">🦓 ZI ${t.zi.toFixed(1)}</div>
         </div>`;
     });
 
@@ -688,6 +696,11 @@ if (typeof lucide !== 'undefined') lucide.createIcons();
 </script>
 
 <style>
+  .zi-badge { font-size:0.6875rem; font-weight:700; border-radius:6px; padding:2px 6px; display:inline-flex; align-items:center; gap:3px; }
+  .zi-badge.zi--grande { color:#EE4444; background:rgba(238,68,68,0.12); }
+  .zi-badge.zi--media  { color:#FF8C00; background:rgba(255,140,0,0.12);  }
+  .zi-badge.zi--leve   { color:var(--green); background:rgba(46,230,92,0.10); }
+
   .sec-ic { width:14px; height:14px; display:inline-block; vertical-align:middle; margin-right:5px; flex-shrink:0; }
   .section-title { display:inline-flex; align-items:center; }
   .bottom-nav__icon i { width:20px; height:20px; display:block; }
