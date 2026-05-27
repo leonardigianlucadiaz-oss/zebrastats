@@ -177,54 +177,54 @@
             <tr style="background:var(--card2);">
               <th style="padding:10px 12px;text-align:left;font-weight:600;color:var(--gray);">Recurso</th>
               <th style="padding:10px 8px;text-align:center;font-weight:600;color:var(--gray);">Free</th>
-              <th style="padding:10px 8px;text-align:center;font-weight:700;color:var(--green);">Pro</th>
+              <th class="compare-col-pro compare-header" style="padding:10px 8px;text-align:center;font-weight:700;color:var(--green);">Pro</th>
             </tr>
           </thead>
           <tbody>
             <tr style="border-top:1px solid var(--border);">
               <td style="padding:9px 12px;">Jogos ao vivo</td>
               <td style="text-align:center;color:var(--green);">✓</td>
-              <td style="text-align:center;color:var(--green);">✓</td>
+              <td class="compare-col-pro" style="text-align:center;color:var(--green);">✓</td>
             </tr>
             <tr style="border-top:1px solid var(--border);background:rgba(255,255,255,0.02);">
               <td style="padding:9px 12px;">Times favoritos</td>
               <td style="text-align:center;color:var(--green);">✓</td>
-              <td style="text-align:center;color:var(--green);">✓</td>
+              <td class="compare-col-pro" style="text-align:center;color:var(--green);">✓</td>
             </tr>
             <tr style="border-top:1px solid var(--border);">
               <td style="padding:9px 12px;">Ranking de zebras</td>
               <td style="text-align:center;color:var(--red);">✗</td>
-              <td style="text-align:center;color:var(--green);">✓</td>
+              <td class="compare-col-pro" style="text-align:center;color:var(--green);">✓</td>
             </tr>
             <tr style="border-top:1px solid var(--border);background:rgba(255,255,255,0.02);">
               <td style="padding:9px 12px;">Alertas em tempo real</td>
               <td style="text-align:center;color:var(--red);">✗</td>
-              <td style="text-align:center;color:var(--green);">✓</td>
+              <td class="compare-col-pro" style="text-align:center;color:var(--green);">✓</td>
             </tr>
             <tr style="border-top:1px solid var(--border);">
               <td style="padding:9px 12px;">Zebra Index por partida</td>
               <td style="text-align:center;color:var(--red);">✗</td>
-              <td style="text-align:center;color:var(--green);">✓</td>
+              <td class="compare-col-pro" style="text-align:center;color:var(--green);">✓</td>
             </tr>
             <tr style="border-top:1px solid var(--border);background:rgba(255,255,255,0.02);">
               <td style="padding:9px 12px;">Histórico completo</td>
               <td style="text-align:center;color:var(--red);">✗</td>
-              <td style="text-align:center;color:var(--green);">✓</td>
+              <td class="compare-col-pro" style="text-align:center;color:var(--green);">✓</td>
             </tr>
             <tr style="border-top:1px solid var(--border);">
               <td style="padding:9px 12px;">Padrões sazonais</td>
               <td style="text-align:center;color:var(--red);">✗</td>
-              <td style="text-align:center;color:var(--green);">✓</td>
+              <td class="compare-col-pro" style="text-align:center;color:var(--green);">✓</td>
             </tr>
             <tr style="border-top:1px solid var(--border);background:rgba(255,255,255,0.02);">
               <td style="padding:9px 12px;">Comparativo de times</td>
               <td style="text-align:center;color:var(--red);">✗</td>
-              <td style="text-align:center;color:var(--green);">✓</td>
+              <td class="compare-col-pro" style="text-align:center;color:var(--green);">✓</td>
             </tr>
             <tr style="border-top:1px solid var(--border);">
               <td style="padding:9px 12px;">Suporte prioritário</td>
               <td style="text-align:center;color:var(--red);">✗</td>
-              <td style="text-align:center;color:var(--green);">✓</td>
+              <td class="compare-col-pro compare-footer" style="text-align:center;color:var(--green);">✓</td>
             </tr>
           </tbody>
         </table>
@@ -336,6 +336,21 @@
     @keyframes goldPulse {
       0%,100% { box-shadow: 0 4px 20px rgba(255,200,50,0.35); }
       50%     { box-shadow: 0 6px 28px rgba(255,200,50,0.55); }
+    }
+
+    /* ── Compare table PRO column highlight (HIER03) ─────── */
+    .compare-col-pro {
+      background: rgba(46,230,92,0.05);
+      border-left: 2px solid rgba(46,230,92,0.25);
+      border-right: 2px solid rgba(46,230,92,0.25);
+    }
+    .compare-col-pro.compare-header {
+      border-top: 2px solid rgba(46,230,92,0.4);
+      border-radius: 8px 8px 0 0;
+    }
+    .compare-col-pro.compare-footer {
+      border-bottom: 2px solid rgba(46,230,92,0.4);
+      border-radius: 0 0 8px 8px;
     }
 
     /* ── FAQ ──────────────────────────────────────────────── */

@@ -240,13 +240,19 @@ const ziColors = { grande: 'var(--red)', media: 'var(--gold)', leve: 'var(--gray
 const ziLabels = { grande: 'Grande', media: 'Média', leve: 'Leve' };
 
 function positionBadge(pos) {
-  const medals = { 1:'🥇', 2:'🥈', 3:'🥉' };
-  if (medals[pos]) {
-    return `<div data-pos-badge="${pos}" style="width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:1.375rem;flex-shrink:0;">${medals[pos]}</div>`;
+  // Fix BRAND02 — substituir emojis de medalha por spans com classes CSS
+  const medalHtml = pos === 1
+    ? '<span class="rank-gold"   style="font-size:1.1rem;font-weight:900">#1</span>'
+    : pos === 2
+    ? '<span class="rank-silver" style="font-size:1.1rem;font-weight:900">#2</span>'
+    : pos === 3
+    ? '<span class="rank-bronze" style="font-size:1.1rem;font-weight:900">#3</span>'
+    : `<span style="color:var(--gray);font-weight:700">#${pos}</span>`;
+  if (pos <= 3) {
+    return `<div data-pos-badge="${pos}" style="width:36px;height:36px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${medalHtml}</div>`;
   }
   const bg = pos <= 10 ? 'rgba(46,230,92,0.1)' : 'var(--card2)';
-  const color = pos <= 10 ? 'var(--green)' : 'var(--gray)';
-  return `<div data-pos-badge="${pos}" style="width:36px;height:36px;border-radius:50%;background:${bg};display:flex;align-items:center;justify-content:center;font-size:0.6875rem;font-weight:800;color:${color};flex-shrink:0;">#${pos}</div>`;
+  return `<div data-pos-badge="${pos}" style="width:36px;height:36px;border-radius:50%;background:${bg};display:flex;align-items:center;justify-content:center;font-size:0.6875rem;font-weight:800;flex-shrink:0;">${medalHtml}</div>`;
 }
 
 function teamCrest(url, name) {
@@ -270,11 +276,16 @@ function renderPodium(data) {
   order.forEach((z, i) => {
     if (!z) return;
     const pos = posMap[i];
-    const medals = {1:'🥇', 2:'🥈', 3:'🥉'};
+    // Fix BRAND02 — usar classes CSS em vez de emojis
+    const podiumMedalHtml = pos === 1
+      ? '<span class="rank-gold"   style="font-size:1.5rem;font-weight:900">#1</span>'
+      : pos === 2
+      ? '<span class="rank-silver" style="font-size:1.3rem;font-weight:900">#2</span>'
+      : '<span class="rank-bronze" style="font-size:1.2rem;font-weight:900">#3</span>';
     const card = document.createElement('div');
     card.className = `podium-card ${clsMap[i]}`;
     card.innerHTML = `
-      <div class="podium-medal">${medals[pos]}</div>
+      <div class="podium-medal">${podiumMedalHtml}</div>
       <div class="podium-teams">${z.home}<br><span style="color:var(--gray);font-weight:400;">vs</span><br>${z.away}</div>
       <div class="podium-league">${z.league}</div>
       <div class="podium-zi">ZI ${z.zi}</div>
@@ -701,20 +712,24 @@ lucide.createIcons();
   .filter-chip { display: inline-flex; align-items: center; gap: 5px; }
   .tab-bar__item { display: inline-flex; align-items: center; gap: 5px; }
 
-  /* Skeleton loader */
+  /* Skeleton loader (Fix STATE04) */
   .rank-skeleton {
-    width: 100%;
-    height: 96px;
-    border-radius: var(--radius);
-    background: linear-gradient(90deg, var(--card2) 25%, var(--border) 50%, var(--card2) 75%);
-    background-size: 200% 100%;
-    animation: skeleton-shimmer 1.4s infinite;
-    margin-bottom: 10px;
+    background: linear-gradient(90deg, var(--card2) 25%, rgba(255,255,255,0.04) 50%, var(--card2) 75%);
+    background-size: 400% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 12px;
+    height: 68px;
+    margin-bottom: 8px;
   }
-  @keyframes skeleton-shimmer {
-    0%   { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
+  @keyframes shimmer {
+    0%   { background-position: 100% 0; }
+    100% { background-position: -100% 0; }
   }
+
+  /* Rank position colors (Fix BRAND02) */
+  .rank-gold   { color: #FFD700; text-shadow: 0 0 8px rgba(255,215,0,0.5); }
+  .rank-silver { color: #C0C8D4; }
+  .rank-bronze { color: #CD7F32; }
 
   /* Share button hover */
   .share-btn:hover { color: var(--green) !important; }
