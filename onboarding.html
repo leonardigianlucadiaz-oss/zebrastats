@@ -53,6 +53,12 @@
       <!-- Grid de ligas -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;" id="leagueGrid">
         <!-- Renderizado por JS -->
+        <div id="leaguesSkel" style="display:contents">
+          <div class="skel" style="height:44px;border-radius:10px"></div>
+          <div class="skel" style="height:44px;border-radius:10px"></div>
+          <div class="skel" style="height:44px;border-radius:10px"></div>
+          <div class="skel" style="height:44px;border-radius:10px"></div>
+        </div>
       </div>
     </div>
 
@@ -396,6 +402,8 @@
 
   // ── PASSO 1: LIGAS ────────────────────────────────────────────
   function renderLeagues() {
+    const skel = document.getElementById('leaguesSkel');
+    setTimeout(() => skel?.remove(), 300);
     const grid = document.getElementById('leagueGrid');
     grid.innerHTML = '';
     LEAGUES.forEach(l => {
@@ -769,6 +777,7 @@
   updateProgressUI();
   lucide.createIcons();
 </script>
+<script src="js/admin.js"></script>
 </body>
 </html>
 

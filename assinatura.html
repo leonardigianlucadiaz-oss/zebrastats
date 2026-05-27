@@ -79,6 +79,7 @@
         <p class="plan-card__label plan-card__label--pro">Pro</p>
 
         <div id="priceDisplay">
+          <div id="priceSkel" class="skel" style="height:32px;width:120px;border-radius:8px;margin:8px auto"></div>
           <div class="plan-card__price text-green" id="priceValue">R$ 50</div>
           <p class="plan-card__price-note" id="priceNote">/ mês · cobrado mensalmente</p>
         </div>
@@ -118,7 +119,7 @@
           Assinar Pro — R$ 50/mês
         </button>
         <div style="text-align:center;margin-top:6px;display:flex;flex-direction:column;align-items:center;gap:4px;">
-          <span style="font-size:0.75rem;color:var(--gray);">🔒 Cancele quando quiser · 7 dias grátis</span>
+          <span style="font-size:0.75rem;color:var(--gray);display:inline-flex;align-items:center;gap:4px;"><i data-lucide="lock" style="width:12px;height:12px;vertical-align:middle;"></i>Cancele quando quiser · 7 dias grátis</span>
         </div>
       </div>
 
@@ -177,54 +178,54 @@
             <tr style="background:var(--card2);">
               <th style="padding:10px 12px;text-align:left;font-weight:600;color:var(--gray);">Recurso</th>
               <th style="padding:10px 8px;text-align:center;font-weight:600;color:var(--gray);">Free</th>
-              <th style="padding:10px 8px;text-align:center;font-weight:700;color:var(--green);">Pro</th>
+              <th class="compare-col-pro compare-header" style="padding:10px 8px;text-align:center;font-weight:700;color:var(--green);">Pro</th>
             </tr>
           </thead>
           <tbody>
             <tr style="border-top:1px solid var(--border);">
               <td style="padding:9px 12px;">Jogos ao vivo</td>
               <td style="text-align:center;color:var(--green);">✓</td>
-              <td style="text-align:center;color:var(--green);">✓</td>
+              <td class="compare-col-pro" style="text-align:center;color:var(--green);">✓</td>
             </tr>
             <tr style="border-top:1px solid var(--border);background:rgba(255,255,255,0.02);">
               <td style="padding:9px 12px;">Times favoritos</td>
               <td style="text-align:center;color:var(--green);">✓</td>
-              <td style="text-align:center;color:var(--green);">✓</td>
+              <td class="compare-col-pro" style="text-align:center;color:var(--green);">✓</td>
             </tr>
             <tr style="border-top:1px solid var(--border);">
               <td style="padding:9px 12px;">Ranking de zebras</td>
               <td style="text-align:center;color:var(--red);">✗</td>
-              <td style="text-align:center;color:var(--green);">✓</td>
+              <td class="compare-col-pro" style="text-align:center;color:var(--green);">✓</td>
             </tr>
             <tr style="border-top:1px solid var(--border);background:rgba(255,255,255,0.02);">
               <td style="padding:9px 12px;">Alertas em tempo real</td>
               <td style="text-align:center;color:var(--red);">✗</td>
-              <td style="text-align:center;color:var(--green);">✓</td>
+              <td class="compare-col-pro" style="text-align:center;color:var(--green);">✓</td>
             </tr>
             <tr style="border-top:1px solid var(--border);">
               <td style="padding:9px 12px;">Zebra Index por partida</td>
               <td style="text-align:center;color:var(--red);">✗</td>
-              <td style="text-align:center;color:var(--green);">✓</td>
+              <td class="compare-col-pro" style="text-align:center;color:var(--green);">✓</td>
             </tr>
             <tr style="border-top:1px solid var(--border);background:rgba(255,255,255,0.02);">
               <td style="padding:9px 12px;">Histórico completo</td>
               <td style="text-align:center;color:var(--red);">✗</td>
-              <td style="text-align:center;color:var(--green);">✓</td>
+              <td class="compare-col-pro" style="text-align:center;color:var(--green);">✓</td>
             </tr>
             <tr style="border-top:1px solid var(--border);">
               <td style="padding:9px 12px;">Padrões sazonais</td>
               <td style="text-align:center;color:var(--red);">✗</td>
-              <td style="text-align:center;color:var(--green);">✓</td>
+              <td class="compare-col-pro" style="text-align:center;color:var(--green);">✓</td>
             </tr>
             <tr style="border-top:1px solid var(--border);background:rgba(255,255,255,0.02);">
               <td style="padding:9px 12px;">Comparativo de times</td>
               <td style="text-align:center;color:var(--red);">✗</td>
-              <td style="text-align:center;color:var(--green);">✓</td>
+              <td class="compare-col-pro" style="text-align:center;color:var(--green);">✓</td>
             </tr>
             <tr style="border-top:1px solid var(--border);">
               <td style="padding:9px 12px;">Suporte prioritário</td>
               <td style="text-align:center;color:var(--red);">✗</td>
-              <td style="text-align:center;color:var(--green);">✓</td>
+              <td class="compare-col-pro compare-footer" style="text-align:center;color:var(--green);">✓</td>
             </tr>
           </tbody>
         </table>
@@ -338,6 +339,21 @@
       50%     { box-shadow: 0 6px 28px rgba(255,200,50,0.55); }
     }
 
+    /* ── Compare table PRO column highlight (HIER03) ─────── */
+    .compare-col-pro {
+      background: rgba(46,230,92,0.05);
+      border-left: 2px solid rgba(46,230,92,0.25);
+      border-right: 2px solid rgba(46,230,92,0.25);
+    }
+    .compare-col-pro.compare-header {
+      border-top: 2px solid rgba(46,230,92,0.4);
+      border-radius: 8px 8px 0 0;
+    }
+    .compare-col-pro.compare-footer {
+      border-bottom: 2px solid rgba(46,230,92,0.4);
+      border-radius: 0 0 8px 8px;
+    }
+
     /* ── FAQ ──────────────────────────────────────────────── */
     .faq-item {
       background: var(--card);
@@ -387,6 +403,9 @@
   <script src="js/auth-guard.js?v=4"></script>
   <script src="js/main.js?v=9"></script>
   <script>
+    // ── PRICE SKELETON ────────────────────────────────────
+    setTimeout(() => document.getElementById('priceSkel')?.remove(), 500);
+
     // ── TOGGLE MENSAL / ANUAL ─────────────────────────────
     const toggleBtns = document.querySelectorAll('.toggle-btn');
     let currentPlan = 'monthly';
@@ -495,6 +514,7 @@
       } catch {}
     })();
   </script>
+<script src="js/admin.js"></script>
 </body>
 </html>
 

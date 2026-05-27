@@ -62,7 +62,14 @@
   </section>
 
   <!-- LISTA DE NOTIFICAÇÕES -->
-  <main style="padding-bottom:80px;" id="notifMain"></main>
+  <main style="padding-bottom:80px;" id="notifMain">
+    <div id="notifListSkel">
+      <div class="skel" style="height:72px;border-radius:12px;margin-bottom:8px"></div>
+      <div class="skel" style="height:72px;border-radius:12px;margin-bottom:8px"></div>
+      <div class="skel" style="height:72px;border-radius:12px;margin-bottom:8px"></div>
+      <div class="skel" style="height:72px;border-radius:12px"></div>
+    </div>
+  </main>
 
   <!-- BOTTOM NAV (mobile only) -->
   <nav class="bottom-nav">
@@ -232,6 +239,7 @@
   let activeFilter = 'all';
 
   function renderNotifs() {
+    document.getElementById('notifListSkel')?.remove();
     const main = document.getElementById('notifMain');
     main.innerHTML = '';
 
@@ -402,6 +410,7 @@
   }
   .bell-shake { animation: bellShake 0.7s ease; }
 </style>
+<script src="js/admin.js"></script>
 </body>
 </html>
 

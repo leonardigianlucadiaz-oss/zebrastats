@@ -10,8 +10,33 @@
   <link rel="stylesheet" href="css/main.css?v=12" />
   <script src="https://unpkg.com/lucide@0.363.0/dist/umd/lucide.min.js"></script>
   <style>
-    .match-hero { opacity: 0; transition: opacity 0.4s ease; }
+    .match-hero { opacity: 0; transition: opacity 0.4s ease; position: relative; }
     .match-hero.loaded { opacity: 1; }
+
+    .match-hero-skeleton {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 24px 20px;
+      gap: 16px;
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+    }
+    .match-hero-skeleton .team-skel {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+    }
+    .match-hero-skeleton .score-skel {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+    .match-hero.loaded .match-hero-skeleton { display: none; }
   </style>
 </head>
 <body>
@@ -57,6 +82,21 @@
 
   <!-- PLACAR HERO -->
   <section class="match-hero" style="background:linear-gradient(180deg,rgba(46,230,92,0.06) 0%,var(--card2) 40%,var(--bg) 100%);padding:28px 16px 24px;border-bottom:1px solid var(--border);">
+    <!-- Skeleton visível enquanto carrega (Fix STATE03) -->
+    <div class="match-hero-skeleton">
+      <div class="team-skel">
+        <div class="skel" style="width:64px;height:64px;border-radius:50%"></div>
+        <div class="skel" style="width:80px;height:14px;border-radius:6px;margin-top:4px"></div>
+      </div>
+      <div class="score-skel">
+        <div class="skel" style="width:100px;height:40px;border-radius:8px"></div>
+        <div class="skel" style="width:60px;height:10px;border-radius:4px;margin-top:6px"></div>
+      </div>
+      <div class="team-skel">
+        <div class="skel" style="width:64px;height:64px;border-radius:50%"></div>
+        <div class="skel" style="width:80px;height:14px;border-radius:6px;margin-top:4px"></div>
+      </div>
+    </div>
     <!-- Liga e status -->
     <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px;">
       <span id="matchCompetition" style="font-size:0.75rem;color:var(--gray);">🇧🇷 Brasileirão Série A · Rodada 12</span>
@@ -391,13 +431,23 @@
   if (_urlHomeCrest) {
     const homeShieldEl = document.getElementById('matchHomeShield');
     if (homeShieldEl) {
-      homeShieldEl.innerHTML = `<img src="${_urlHomeCrest}" style="width:44px;height:44px;object-fit:contain;" onerror="this.style.display='none'">`;
+      const _hi = document.createElement('img');
+      _hi.src = _urlHomeCrest;
+      _hi.style.cssText = 'width:100%;height:100%;object-fit:contain';
+      _hi.onerror = function(){ this.style.display='none'; };
+      homeShieldEl.innerHTML = '';
+      homeShieldEl.appendChild(_hi);
     }
   }
   if (_urlAwayCrest) {
     const awayShieldEl = document.getElementById('matchAwayShield');
     if (awayShieldEl) {
-      awayShieldEl.innerHTML = `<img src="${_urlAwayCrest}" style="width:44px;height:44px;object-fit:contain;" onerror="this.style.display='none'">`;
+      const _ai = document.createElement('img');
+      _ai.src = _urlAwayCrest;
+      _ai.style.cssText = 'width:100%;height:100%;object-fit:contain';
+      _ai.onerror = function(){ this.style.display='none'; };
+      awayShieldEl.innerHTML = '';
+      awayShieldEl.appendChild(_ai);
     }
   }
 
@@ -749,12 +799,12 @@
           const hLogo = hRes?.teams?.[0]?.strTeamBadge || '';
           const aLogo = aRes?.teams?.[0]?.strTeamBadge || '';
           if (hLogo && homeShield) {
-            homeShield.innerHTML = `<img src="${hLogo}" alt="${m.home}" style="width:52px;height:52px;object-fit:contain;" onerror="this.parentElement.textContent='${homeAbbr}'">`;
+            homeShield.innerHTML = `<img src="${hLogo}" alt="${m.home}" style="width:100%;height:100%;object-fit:contain" onerror="this.parentElement.textContent='${homeAbbr}'">`;
             homeShield.style.background = 'transparent';
             homeShield.style.border = 'none';
           }
           if (aLogo && awayShield) {
-            awayShield.innerHTML = `<img src="${aLogo}" alt="${m.away}" style="width:52px;height:52px;object-fit:contain;" onerror="this.parentElement.textContent='${awayAbbr}'">`;
+            awayShield.innerHTML = `<img src="${aLogo}" alt="${m.away}" style="width:100%;height:100%;object-fit:contain" onerror="this.parentElement.textContent='${awayAbbr}'">`;
             awayShield.style.background = 'transparent';
             awayShield.style.border = 'none';
           }
@@ -815,6 +865,7 @@
             document.getElementById('ziDesc').textContent     = `${labelPT} Zebra · ZI ${zi}`;
             animateMeter(zi * 10);
             if (zi === 0) document.getElementById('zebraBadge').style.display = 'none';
+            if (typeof window._applyZiBadgeColor === 'function') window._applyZiBadgeColor(zi);
           }
         }
       }
@@ -1406,6 +1457,24 @@
     lucide.createIcons();
   };
 
+  // ── HIER02 — ZI badge cor dinâmica ─────────────────────────────
+  function _applyZiBadgeColor(ziValue) {
+    const badge = document.getElementById('zebraBadge');
+    if (!badge) return;
+    const zi = parseFloat(ziValue || 0);
+    const level = zi >= 7 ? 'grande' : zi >= 4 ? 'media' : 'leve';
+    const badgeColors = {
+      grande: 'background:rgba(238,68,68,0.15);color:#EE4444;border-color:rgba(238,68,68,0.4)',
+      media:  'background:rgba(255,140,0,0.15);color:#FF8C00;border-color:rgba(255,140,0,0.4)',
+      leve:   'background:rgba(46,230,92,0.12);color:var(--green);border-color:rgba(46,230,92,0.3)'
+    };
+    badge.setAttribute('style', badgeColors[level]);
+  }
+  // Aplica cor do badge com ZI da URL (se presente)
+  if (_urlZi) _applyZiBadgeColor(_urlZi);
+  // Expõe globalmente para initRealData() chamar após calcular ZI real
+  window._applyZiBadgeColor = _applyZiBadgeColor;
+
   initApifData();
   lucide.createIcons();
 </script>
@@ -1465,6 +1534,7 @@
   .factor-card--blue  { background: rgba(96,165,250,0.07); border-color: #60a5fa; }
   .factor-card--blue  .factor-card__icon { background: rgba(96,165,250,0.15); }
 </style>
+<script src="js/admin.js"></script>
 </body>
 </html>
 

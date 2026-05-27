@@ -85,7 +85,7 @@
   <section class="section-padded" style="padding:12px 16px;border-bottom:1px solid var(--border);background:var(--card2);">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
       <span style="font-size:0.75rem;font-weight:600;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;">Intensidade da Semana</span>
-      <span style="font-size:0.625rem;color:var(--gray);">zebras por dia</span>
+      <span style="font-size:0.6875rem;color:var(--gray);">zebras por dia</span>
     </div>
     <div id="weekHeatmap" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;"></div>
     <div style="display:flex;justify-content:space-between;margin-top:4px;">
@@ -262,6 +262,42 @@
     });
   }
 
+  // ── EMPTY STATE CONTEXTUAL (STATE02) ─────────────────────────
+  function renderEmptyState() {
+    const isApiConfigured = typeof ZebraAPI !== 'undefined' && ZebraAPI.isConfigured.footballData();
+    if (!isApiConfigured) {
+      return `<div style="text-align:center;padding:32px;color:var(--gray);">
+        <div style="font-size:2rem;margin-bottom:8px;">🦓</div>
+        <div style="font-weight:600;margin-bottom:4px;">Configure a API do Football-Data.org para ver zebras reais</div>
+        <div style="font-size:0.8125rem;"><a href="perfil.html" style="color:var(--green);">Ir para Perfil → Configurar API</a></div>
+      </div>`;
+    }
+    const minZi = _ziMinFilter;
+    if (minZi > 0) {
+      return `<div class="empty-state" style="text-align:center;padding:32px;color:var(--gray);">
+        <p style="font-size:2rem">🎚️</p>
+        <p style="font-weight:700">Nenhuma zebra com ZI ≥ ${minZi.toFixed(1)}</p>
+        <p style="color:var(--gray);font-size:0.875rem">O filtro está muito restrito</p>
+        <button onclick="resetZiFilter()" style="margin-top:12px;padding:8px 16px;background:var(--green);color:var(--dark-text);border:none;border-radius:8px;cursor:pointer;font-weight:600">Resetar filtro</button>
+      </div>`;
+    }
+    return `<div class="empty-state" style="text-align:center;padding:32px;color:var(--gray);">
+      <p style="font-size:2rem">🦓</p>
+      <p style="font-weight:700">Nenhuma zebra encontrada</p>
+      <p style="color:var(--gray);font-size:0.875rem">Tente outra liga ou período</p>
+    </div>`;
+  }
+
+  function resetZiFilter() {
+    _ziMinFilter = 0;
+    const slider = document.getElementById('ziSlider');
+    const valEl  = document.getElementById('ziSliderVal');
+    if (slider) slider.value = 0;
+    if (valEl)  valEl.textContent = '0';
+    renderZebras();
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+
   // ── ZEBRA LIST ───────────────────────────────────────────────
   function renderZebras() {
     window._zebraShowAll = false;
@@ -278,18 +314,7 @@
     document.getElementById('zebraCount').textContent = `${list.length} resultado${list.length !== 1 ? 's' : ''}`;
 
     if (!list.length) {
-      const isApiConfigured = typeof ZebraAPI !== 'undefined' && ZebraAPI.isConfigured.footballData();
-      const msg = isApiConfigured
-        ? 'Nenhuma zebra encontrada para este filtro'
-        : 'Configure a API do Football-Data.org para ver zebras reais';
-      const sub = isApiConfigured
-        ? 'Tente outro filtro ou liga'
-        : '<a href="perfil.html" style="color:var(--green);">Ir para Perfil → Configurar API</a>';
-      container.innerHTML = `<div style="text-align:center;padding:32px;color:var(--gray);">
-        <div style="font-size:2rem;margin-bottom:8px;">🦓</div>
-        <div style="font-weight:600;margin-bottom:4px;">${msg}</div>
-        <div style="font-size:0.8125rem;">${sub}</div>
-      </div>`;
+      container.innerHTML = renderEmptyState();
       return;
     }
 
@@ -358,11 +383,11 @@
           z.azarao === z.home || z.home.includes(z.azarao) || z.azarao.includes(z.home)
         );
         const homeRoleHtml = dogIsHome
-          ? `<span style="font-size:0.625rem;color:var(--green);font-weight:700;">Azarão</span>`
-          : `<span style="font-size:0.625rem;color:var(--gray);">Favorito</span>`;
+          ? `<span style="font-size:0.6875rem;color:var(--green);font-weight:700;">Azarão</span>`
+          : `<span style="font-size:0.6875rem;color:var(--gray);">Favorito</span>`;
         const awayRoleHtml = dogIsHome
-          ? `<span style="font-size:0.625rem;color:var(--gray);">Favorito</span>`
-          : `<span style="font-size:0.625rem;color:var(--green);font-weight:700;">Azarão</span>`;
+          ? `<span style="font-size:0.6875rem;color:var(--gray);">Favorito</span>`
+          : `<span style="font-size:0.6875rem;color:var(--green);font-weight:700;">Azarão</span>`;
         card.innerHTML = `
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
             <span class="text-xs text-gray">${leagueLogoHtml}${z.league} · ${z.date}</span>
@@ -384,7 +409,7 @@
             </div>
           </div>
           <div style="margin-bottom:12px;">
-            <div style="display:flex;justify-content:space-between;font-size:0.625rem;color:var(--gray);margin-bottom:4px;">
+            <div style="display:flex;justify-content:space-between;font-size:0.6875rem;color:var(--gray);margin-bottom:4px;">
               <span>${z.home} ${probH}%</span>
               <span>Empate ${probE}%</span>
               <span>${z.away} ${probA}%</span>
@@ -397,11 +422,11 @@
           </div>
           <div style="display:flex;gap:12px;padding-top:10px;border-top:1px solid var(--border);align-items:center;">
             <div>
-              <div style="font-size:0.625rem;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px;">Odd azarão</div>
+              <div style="font-size:0.6875rem;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px;">Odd azarão</div>
               <div style="font-size:0.9375rem;font-weight:700;color:var(--green);">${z.odds_h}</div>
             </div>
             <div>
-              <div style="font-size:0.625rem;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px;">Odd favorito</div>
+              <div style="font-size:0.6875rem;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px;">Odd favorito</div>
               <div style="font-size:0.9375rem;font-weight:700;color:var(--red);">${z.odds_a}</div>
             </div>
             <a href="#" onclick="event.stopPropagation();(function(z){const zi=parseFloat(z.zi||0);const p=new URLSearchParams({home:z.home||'',away:z.away||'',score:z.hs!==undefined?z.hs+' – '+z.as:'',zi:z.zi||'',league:z.league||'Futebol',date:z.date||'',ziClass:zi>=7?'grande':zi>=4?'media':'leve'});window.location.href='partida.html?'+p.toString();})(${JSON.stringify({home:z.home,away:z.away,hs:z.hs,as:z.as,zi:z.zi,league:z.league,date:z.date})})" style="margin-left:auto;font-size:0.75rem;color:var(--green);font-weight:600;text-decoration:none;display:flex;align-items:center;gap:3px;">Ver detalhes <i data-lucide="arrow-right" style="width:13px;height:13px;"></i></a>
@@ -410,7 +435,7 @@
 
       card.classList.add('zebra-card-anim');
       if (currentView === 'list') card.classList.add('zebra-card--list');
-      card.style.animationDelay = (i * 0.05) + 's';
+      card.style.animationDelay = Math.min(i * 0.05, 0.3) + 's'; // ANIM02 — stagger máximo 0.3s
       card.addEventListener('click', function(e) {
         if (e.target.tagName === 'A') return;
         // If clicking inside the expanded detail accordion, toggle it closed
@@ -710,8 +735,9 @@
   /* ── VIEW TOGGLE ── */
   .view-toggle-btn {
     background: none; border: none; cursor: pointer;
-    padding: 5px 7px; color: var(--gray);
-    display: flex; align-items: center;
+    padding: 10px 12px; color: var(--gray); /* TOUCH02 — área mínima de toque 44px */
+    min-height: 44px; min-width: 44px;
+    display: flex; align-items: center; justify-content: center;
     transition: background var(--transition), color var(--transition);
   }
   .view-toggle-btn.active { background: var(--green-dim); color: var(--green); }
@@ -796,7 +822,34 @@
   [data-zi-level="grande"].zebra-card {
     padding: 16px !important;
   }
+
+  /* ── COMP02 — Range slider customizado ── */
+  input[type="range"] {
+    -webkit-appearance: none;
+    height: 5px;
+    background: var(--border);
+    border-radius: 3px;
+    outline: none;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--green);
+    cursor: pointer;
+    box-shadow: 0 0 0 3px rgba(46,230,92,0.2);
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--green);
+    cursor: pointer;
+    border: none;
+  }
 </style>
+<script src="js/admin.js"></script>
 </body>
 </html>
 

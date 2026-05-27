@@ -38,6 +38,16 @@
       .phone { display: flex; align-items: center; justify-content: center; min-height: 100vh; width: 100%; }
       .auth-wrapper { width: 420px; padding: 32px 0; }
     }
+    @media (prefers-reduced-motion: reduce) {
+      .particle, [class*="particle"], .auth-bg-particles span {
+        display: none !important;
+      }
+      * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
   </style>
 </head>
 <body>
@@ -290,23 +300,26 @@
     });
 
     // Particle generator
-    (function() {
-      const container = document.getElementById('authParticles');
-      if (!container) return;
-      const count = 18;
-      for (let i = 0; i < count; i++) {
-        const span = document.createElement('span');
-        const left = Math.random() * 100;
-        const height = 18 + Math.random() * 40;
-        const duration = 6 + Math.random() * 10;
-        const delay = Math.random() * 10;
-        span.style.cssText = `left:${left}%;height:${height}px;animation-duration:${duration}s;animation-delay:${delay}s;`;
-        container.appendChild(span);
-      }
-    })();
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      (function() {
+        const container = document.getElementById('authParticles');
+        if (!container) return;
+        const count = 18;
+        for (let i = 0; i < count; i++) {
+          const span = document.createElement('span');
+          const left = Math.random() * 100;
+          const height = 18 + Math.random() * 40;
+          const duration = 6 + Math.random() * 10;
+          const delay = Math.random() * 10;
+          span.style.cssText = `left:${left}%;height:${height}px;animation-duration:${duration}s;animation-delay:${delay}s;`;
+          container.appendChild(span);
+        }
+      })();
+    }
 
     lucide.createIcons();
   </script>
+<script src="js/admin.js"></script>
 </body>
 </html>
 

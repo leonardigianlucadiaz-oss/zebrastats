@@ -54,6 +54,11 @@
     </nav>
 
     <!-- HERO DO TIME -->
+    <div id="teamHeroSkel" style="display:flex;flex-direction:column;align-items:center;gap:12px;padding:24px">
+      <div class="skel" style="width:80px;height:80px;border-radius:50%"></div>
+      <div class="skel" style="width:140px;height:20px;border-radius:8px"></div>
+      <div class="skel" style="width:200px;height:14px;border-radius:6px"></div>
+    </div>
     <div class="team-hero" id="teamHero" style="background:linear-gradient(160deg,#851414 0%,#3a0808 100%);">
       <div class="team-hero__shield" id="heroShield">TOR</div>
       <div class="team-hero__name"  id="heroName">Torino FC</div>
@@ -216,7 +221,7 @@
 
         <!-- Insight sazonal -->
         <div style="margin-top:14px;padding:12px;background:var(--input-bg);border-radius:var(--radius-sm);border-left:3px solid var(--gold);">
-          <p style="font-size:0.8125rem;color:var(--white);font-weight:500;">💡 Insight</p>
+          <p style="font-size:0.8125rem;color:var(--white);font-weight:500;display:flex;align-items:center;gap:5px;"><i data-lucide="lightbulb" style="width:14px;height:14px;color:var(--gold);flex-shrink:0;"></i>Insight</p>
           <p style="font-size:0.75rem;color:var(--gray);margin-top:4px;line-height:1.5;" id="seasonalInsight">
             Este time tende a perder desempenho em novembro e dezembro, período em que mais produz zebras como azarão. Historicamente, recupera força em março.
           </p>
@@ -721,6 +726,7 @@
         console.warn('[time] loadTeam SDB error:', e);
         document.getElementById('heroLeague').textContent = 'Erro ao carregar dados';
       }
+      document.getElementById('teamHeroSkel')?.remove();
     }
 
     // ── FAVORITE BUTTON ───────────────────────────────────
@@ -1251,6 +1257,7 @@
       z-index: 1;
     }
   </style>
+<script src="js/admin.js"></script>
 </body>
 </html>
 

@@ -77,6 +77,12 @@
     </div>
 
     <!-- STATS DINÂMICOS DO localStorage -->
+    <div id="profileStatsSkel" style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;margin-bottom:16px">
+      <div class="skel" style="height:56px;border-radius:8px"></div>
+      <div class="skel" style="height:56px;border-radius:8px"></div>
+      <div class="skel" style="height:56px;border-radius:8px"></div>
+      <div class="skel" style="height:56px;border-radius:8px"></div>
+    </div>
     <div style="display:flex;gap:0;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;">
       <div class="profile-stat" style="padding:12px 8px;border-right:1px solid var(--border);">
         <div class="profile-stat__value" id="statZebras">–</div>
@@ -424,12 +430,12 @@
     <div style="display:flex;flex-direction:column;gap:14px;">
       <div>
         <div style="font-size:0.75rem;color:var(--gray);margin-bottom:8px;">O que você achou do ZebraStats?</div>
-        <div style="display:flex;gap:8px;justify-content:center;font-size:2rem;" id="ratingStars">
-          <span class="rating-star" data-v="1">⭐</span>
-          <span class="rating-star" data-v="2">⭐</span>
-          <span class="rating-star" data-v="3">⭐</span>
-          <span class="rating-star" data-v="4">⭐</span>
-          <span class="rating-star" data-v="5">⭐</span>
+        <div style="display:flex;gap:8px;justify-content:center;" id="ratingStars">
+          <span class="rating-star" data-v="1" style="cursor:pointer;"><i data-lucide="star" style="width:28px;height:28px;color:var(--gold);"></i></span>
+          <span class="rating-star" data-v="2" style="cursor:pointer;"><i data-lucide="star" style="width:28px;height:28px;color:var(--gold);"></i></span>
+          <span class="rating-star" data-v="3" style="cursor:pointer;"><i data-lucide="star" style="width:28px;height:28px;color:var(--gold);"></i></span>
+          <span class="rating-star" data-v="4" style="cursor:pointer;"><i data-lucide="star" style="width:28px;height:28px;color:var(--gold);"></i></span>
+          <span class="rating-star" data-v="5" style="cursor:pointer;"><i data-lucide="star" style="width:28px;height:28px;color:var(--gold);"></i></span>
         </div>
       </div>
       <div class="form-group">
@@ -659,6 +665,7 @@
 
   // ── STATS DO USUÁRIO ──────────────────────────────────────────
   async function loadUserStats() {
+    document.getElementById('profileStatsSkel')?.remove();
     const alertsData = JSON.parse(localStorage.getItem('zs_alerts') || '[]');
     const favs       = JSON.parse(localStorage.getItem('zebrastats_favorites') || '[]');
     const ligas      = JSON.parse(localStorage.getItem('zebrastats_fav_leagues') || '[]');
@@ -777,6 +784,38 @@
   .navbar__icon i { display: block; }
   .profile-menu-item__icon i { display: block; }
 </style>
+<script src="js/admin.js"></script>
+<script>
+  // Injetar botão Admin na seção "Minha Conta" se for o admin
+  (function() {
+    function _maybeShowAdminBtnPerfil() {
+      const email = localStorage.getItem('zs_email') || ''
+      if (email !== 'leonardi.gianluca.diaz@gmail.com') return
+      // Usa o container da seção "Minha Conta"
+      const container = document.querySelector('#editarDados')?.closest('div[style*="background:var(--card)"]')
+      if (!container) return
+      const adminItem = document.createElement('a')
+      adminItem.href = '#'
+      adminItem.className = 'profile-menu-item'
+      adminItem.innerHTML = `
+        <div class="profile-menu-item__icon"><span style="font-size:18px;line-height:1.2">🛠️</span></div>
+        <div class="profile-menu-item__text">
+          <div class="profile-menu-item__label" style="color:var(--green);font-weight:700">Painel Admin</div>
+          <div class="profile-menu-item__sub">Simular plano PRO / FREE</div>
+        </div>
+        <span class="profile-menu-item__arrow">›</span>
+      `
+      adminItem.style.borderTop = '1px solid var(--border)'
+      adminItem.onclick = (e) => { e.preventDefault(); window.zsAdmin?.open() }
+      container.appendChild(adminItem)
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', _maybeShowAdminBtnPerfil)
+    } else {
+      _maybeShowAdminBtnPerfil()
+    }
+  })()
+</script>
 </body>
 </html>
 

@@ -3,6 +3,16 @@
    Canvas share card generator
    ============================================================ */
 
+function fitText(ctx, text, maxWidth, initialFontSize, fontWeight, fontFamily) {
+  let size = initialFontSize;
+  ctx.font = `${fontWeight} ${size}px ${fontFamily}`;
+  while (ctx.measureText(text).width > maxWidth && size > 20) {
+    size -= 4;
+    ctx.font = `${fontWeight} ${size}px ${fontFamily}`;
+  }
+  return size;
+}
+
 async function drawShareCard(config) {
   const W = 1080, H = 1080;
   const canvas = document.createElement('canvas');
@@ -56,7 +66,7 @@ async function drawShareCard(config) {
 
   // ── HOME TEAM ─────────────────────────────────────────
   ctx.textAlign = 'center';
-  ctx.font = 'bold 76px Inter, -apple-system, sans-serif';
+  fitText(ctx, config.homeTeam || 'Casa', 420, 76, 'bold', 'Inter, -apple-system, sans-serif');
   ctx.fillStyle = '#FFFFFF';
   ctx.fillText(config.homeTeam || 'Casa', W / 2, 340);
 
@@ -85,7 +95,7 @@ async function drawShareCard(config) {
   ctx.fillText(scoreText, W / 2, by + bh / 2 + (isVs ? 22 : 34));
 
   // ── AWAY TEAM ─────────────────────────────────────────
-  ctx.font = 'bold 76px Inter, -apple-system, sans-serif';
+  fitText(ctx, config.awayTeam || 'Fora', 420, 76, 'bold', 'Inter, -apple-system, sans-serif');
   ctx.fillStyle = '#FFFFFF';
   ctx.fillText(config.awayTeam || 'Fora', W / 2, 650);
 
