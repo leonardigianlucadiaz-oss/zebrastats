@@ -69,9 +69,13 @@ Deno.serve(async (req: Request) => {
   // LIMITAÇÃO: o header x-zs-guest: 1 é de fácil falsificação por qualquer cliente HTTP.
   // A próxima evolução desta proteção seria rate limiting por IP (ex: via Upstash Redis),
   // que permitiria bloquear abuso mesmo de clientes que conhecem o header.
-  const authHeader  = req.headers.get("Authorization") || "";
-  const guestHeader = req.headers.get("x-zs-guest") || "";
-  const hasAuth = authHeader.startsWith("Bearer ") || guestHeader === "1";
+  // Fix: sb_publishable_... não é JWT — o frontend envia só 'apikey', não 'Authorization Bearer'.
+  // Aceita: (1) qualquer header Authorization presente, (2) header apikey (Supabase anon key),
+  // (3) x-zs-guest: 1 para visitantes não autenticados.
+  const authHeader   = req.headers.get("Authorization") || "";
+  const apikeyHeader = req.headers.get("apikey") || "";
+  const guestHeader  = req.headers.get("x-zs-guest") || "";
+  const hasAuth = authHeader.length > 0 || apikeyHeader.length > 0 || guestHeader === "1";
   if (!hasAuth) {
     console.warn('[zebra-proxy] Request sem auth de origem desconhecida')
     return new Response(JSON.stringify({ error: 'Auth required' }), {
@@ -85,8 +89,19 @@ Deno.serve(async (req: Request) => {
 
   try {
 
+    // ── Health check ─────────────────────────────────────────────
+    if (action === "ping") {
+      return ok({
+        ok: true,
+        timestamp: new Date().toISOString(),
+        fd:   !!Deno.env.get("FOOTBALL_DATA_KEY"),
+        apif: !!Deno.env.get("APIF_KEY"),
+        odds: !!Deno.env.get("ODDS_API_KEY"),
+      });
+    }
+
     // ════════════════════════════════════════════════════════════
-    // ── FOOTBALL-DATA.ORG ────────────────────────────────────────
+    // ── FOOTBALL-DATA.ORG ────────────────────────────────════════
     // ════════════════════════════════════════════════════════════
 
     // ── Partidas da liga ─────────────────────────────────────────
