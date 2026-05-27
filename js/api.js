@@ -96,7 +96,10 @@ const ZebraAPI = (() => {
         // anon key como fallback; o JWT real é injetado pelo cliente Supabase nos
         // contextos autenticados.
         const isGuest = !!(typeof localStorage !== 'undefined' && localStorage.getItem('zs_guest'));
-        const reqHeaders = { 'apikey': anon, 'Authorization': `Bearer ${anon}` };
+        // Nota: sb_publishable_... NÃO é JWT — enviar como Bearer causa 401 no gateway
+        // do Supabase antes mesmo de o código da função rodar. Apenas 'apikey' é enviado;
+        // para usuários logados, o Supabase JS client injeta o JWT real automaticamente.
+        const reqHeaders = { 'apikey': anon };
         if (isGuest) reqHeaders['x-zs-guest'] = '1';
         const r = await fetch(`${base}?${qs}`, { headers: reqHeaders });
         if (!r.ok) {
