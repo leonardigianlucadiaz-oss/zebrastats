@@ -468,14 +468,105 @@ Deno.serve(async (req: Request) => {
       return ok(data);
     }
 
+    // ── Top assistentes da liga ──────────────────────────────────
+    if (action === "apif-top-assists") {
+      const key = Deno.env.get("APIF_KEY");
+      if (!key) return err("APIF_KEY não configurada", 503);
+      const league = APIF_IDS[lid];
+      if (!league) return err(`Liga desconhecida: ${lid}`, 400);
+      const season = url.searchParams.get("season") ?? "2024";
+      const data = await apiFetch(
+        `${APIF_BASE}/players/topassists?league=${league}&season=${season}`,
+        { headers: { "x-apisports-key": key } });
+      return ok(data);
+    }
+
+    // ── Top cartões amarelos ─────────────────────────────────────
+    if (action === "apif-top-yellow") {
+      const key = Deno.env.get("APIF_KEY");
+      if (!key) return err("APIF_KEY não configurada", 503);
+      const league = APIF_IDS[lid];
+      if (!league) return err(`Liga desconhecida: ${lid}`, 400);
+      const season = url.searchParams.get("season") ?? "2024";
+      const data = await apiFetch(
+        `${APIF_BASE}/players/topyellowcards?league=${league}&season=${season}`,
+        { headers: { "x-apisports-key": key } });
+      return ok(data);
+    }
+
+    // ── Top cartões vermelhos ────────────────────────────────────
+    if (action === "apif-top-red") {
+      const key = Deno.env.get("APIF_KEY");
+      if (!key) return err("APIF_KEY não configurada", 503);
+      const league = APIF_IDS[lid];
+      if (!league) return err(`Liga desconhecida: ${lid}`, 400);
+      const season = url.searchParams.get("season") ?? "2024";
+      const data = await apiFetch(
+        `${APIF_BASE}/players/topredcards?league=${league}&season=${season}`,
+        { headers: { "x-apisports-key": key } });
+      return ok(data);
+    }
+
+    // ── Estatísticas detalhadas de um jogador ────────────────────
+    if (action === "apif-player-stats") {
+      const key = Deno.env.get("APIF_KEY");
+      if (!key) return err("APIF_KEY não configurada", 503);
+      const playerId = url.searchParams.get("playerId") ?? "";
+      if (!playerId) return err("Parâmetro 'playerId' obrigatório", 400);
+      const season = url.searchParams.get("season") ?? "2024";
+      const data = await apiFetch(
+        `${APIF_BASE}/players?id=${playerId}&season=${season}`,
+        { headers: { "x-apisports-key": key } });
+      return ok(data);
+    }
+
+    // ── Transferências de um time ────────────────────────────────
+    if (action === "apif-transfers") {
+      const key = Deno.env.get("APIF_KEY");
+      if (!key) return err("APIF_KEY não configurada", 503);
+      const teamId = url.searchParams.get("teamId") ?? "";
+      if (!teamId) return err("Parâmetro 'teamId' obrigatório", 400);
+      const data = await apiFetch(
+        `${APIF_BASE}/transfers?team=${teamId}`,
+        { headers: { "x-apisports-key": key } });
+      return ok(data);
+    }
+
+    // ── Treinador de um time ─────────────────────────────────────
+    if (action === "apif-coach") {
+      const key = Deno.env.get("APIF_KEY");
+      if (!key) return err("APIF_KEY não configurada", 503);
+      const teamId = url.searchParams.get("teamId") ?? "";
+      if (!teamId) return err("Parâmetro 'teamId' obrigatório", 400);
+      const data = await apiFetch(
+        `${APIF_BASE}/coachs?team=${teamId}`,
+        { headers: { "x-apisports-key": key } });
+      return ok(data);
+    }
+
+    // ── Rodadas da liga na temporada ─────────────────────────────
+    if (action === "apif-rounds") {
+      const key = Deno.env.get("APIF_KEY");
+      if (!key) return err("APIF_KEY não configurada", 503);
+      const league = APIF_IDS[lid];
+      if (!league) return err(`Liga desconhecida: ${lid}`, 400);
+      const season = url.searchParams.get("season") ?? "2024";
+      const data = await apiFetch(
+        `${APIF_BASE}/fixtures/rounds?league=${league}&season=${season}`,
+        { headers: { "x-apisports-key": key } });
+      return ok(data);
+    }
+
     return err(
       `Ação desconhecida: '${action}'. Ações disponíveis: ` +
-      `matches, standings, fd-scorers, fd-team, ` +
+      `ping, matches, standings, fd-scorers, fd-team, ` +
       `odds, odds-scores, ` +
       `sdb-team, sdb-table, sdb-events-last, sdb-next-events, sdb-teams, sdb-players, sdb-player, ` +
       `apif-fixtures, apif-live, apif-fixture-stats, apif-fixture-events, apif-fixture-lineups, ` +
       `apif-h2h, apif-team-search, apif-team-stats, apif-standings, apif-top-scorers, ` +
-      `apif-squad, apif-injuries, apif-predictions`,
+      `apif-squad, apif-injuries, apif-predictions, ` +
+      `apif-top-assists, apif-top-yellow, apif-top-red, apif-player-stats, ` +
+      `apif-transfers, apif-coach, apif-rounds`,
       400
     );
 

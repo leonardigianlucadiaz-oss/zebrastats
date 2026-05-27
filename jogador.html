@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ZebraStats — Perfil do Jogador</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/main.css?v=12" />
+  <script src="https://unpkg.com/lucide@0.363.0/dist/umd/lucide.min.js"></script>
+</head>
+<body>
+<div class="app-wrapper">
+
+  <!-- SIDEBAR -->
+  <aside class="app-sidebar">
+    <a href="home.html" class="sidebar__brand">
+      <div class="sidebar__brand-icon">Z</div>
+      Zebra<span>Stats</span>
+    </a>
+    <nav class="sidebar__nav">
+      <a href="home.html"    class="sidebar__nav-item"><i data-lucide="home"></i><span>Home</span></a>
+      <a href="zebras.html"  class="sidebar__nav-item"><i data-lucide="activity"></i><span>Zebras</span></a>
+      <a href="ranking.html" class="sidebar__nav-item"><i data-lucide="medal"></i><span>Ranking</span></a>
+      <a href="comparar.html"class="sidebar__nav-item"><i data-lucide="git-compare"></i><span>Comparar</span></a>
+      <a href="alertas.html" class="sidebar__nav-item"><i data-lucide="bell-ring"></i><span>Alertas</span></a>
+      <a href="liga.html"    class="sidebar__nav-item"><i data-lucide="trophy"></i><span>Ligas</span></a>
+      <a href="time.html"    class="sidebar__nav-item"><i data-lucide="star"></i><span>Times</span></a>
+      <a href="perfil.html"  class="sidebar__nav-item"><i data-lucide="user"></i><span>Perfil</span></a>
+    </nav>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="app-main">
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+      <button onclick="goBack('busca.html')" class="navbar__icon" style="background:none;border:none;cursor:pointer;color:var(--white);display:flex;align-items:center;justify-content:center;">
+        <i data-lucide="arrow-left" style="width:20px;height:20px;"></i>
+      </button>
+      <span style="font-size:1rem;font-weight:600;flex:1;" id="navTitle">Perfil do Jogador</span>
+      <div class="navbar__actions"></div>
+    </nav>
+
+    <!-- HERO SKELETON -->
+    <div id="heroSkel" style="padding:20px 16px;display:flex;gap:16px;align-items:center;">
+      <div class="skel" style="width:80px;height:80px;border-radius:50%;flex-shrink:0;"></div>
+      <div style="flex:1;display:flex;flex-direction:column;gap:8px;">
+        <div class="skel" style="width:60%;height:18px;border-radius:6px;"></div>
+        <div class="skel" style="width:40%;height:12px;border-radius:6px;"></div>
+        <div class="skel" style="width:50%;height:12px;border-radius:6px;"></div>
+      </div>
+    </div>
+
+    <!-- HERO -->
+    <div id="playerHero" style="display:none;background:linear-gradient(160deg,var(--card2) 0%,var(--bg) 100%);border-bottom:1px solid var(--border);padding:20px 16px;">
+      <div style="display:flex;gap:16px;align-items:center;margin-bottom:16px;">
+        <div style="position:relative;flex-shrink:0;">
+          <img id="playerPhoto" src="" alt="" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:2px solid var(--border);display:none;">
+          <div id="playerInitials" style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--card2),var(--border));border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:800;flex-shrink:0;">?</div>
+          <div id="playerFlag" style="position:absolute;bottom:-2px;right:-2px;font-size:1.25rem;line-height:1;"></div>
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:1.375rem;font-weight:800;line-height:1.2;" id="playerName">—</div>
+          <div style="display:flex;align-items:center;gap:6px;margin-top:4px;">
+            <img id="teamLogoHero" src="" alt="" style="width:18px;height:18px;object-fit:contain;display:none;">
+            <span style="font-size:0.875rem;color:var(--gray);" id="playerTeam">—</span>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
+            <span class="badge" id="playerPos" style="background:var(--card2);border:1px solid var(--border);font-size:0.6875rem;padding:3px 8px;border-radius:var(--radius-pill);">—</span>
+            <span class="badge" id="playerAge" style="background:var(--card2);border:1px solid var(--border);font-size:0.6875rem;padding:3px 8px;border-radius:var(--radius-pill);">—</span>
+            <span class="badge" id="playerHeight" style="background:var(--card2);border:1px solid var(--border);font-size:0.6875rem;padding:3px 8px;border-radius:var(--radius-pill);display:none;">—</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- STAT PILLS (resumo rápido) -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;" id="statPills">
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:10px 6px;text-align:center;">
+          <div style="font-size:1.25rem;font-weight:800;color:var(--green);" id="statGoals">—</div>
+          <div style="font-size:0.5625rem;color:var(--gray);margin-top:2px;text-transform:uppercase;">Gols</div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:10px 6px;text-align:center;">
+          <div style="font-size:1.25rem;font-weight:800;color:var(--gold);" id="statAssists">—</div>
+          <div style="font-size:0.5625rem;color:var(--gray);margin-top:2px;text-transform:uppercase;">Assist.</div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:10px 6px;text-align:center;">
+          <div style="font-size:1.25rem;font-weight:800;" id="statRating">—</div>
+          <div style="font-size:0.5625rem;color:var(--gray);margin-top:2px;text-transform:uppercase;">Nota</div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:10px 6px;text-align:center;">
+          <div style="font-size:1.25rem;font-weight:800;" id="statMinutes">—</div>
+          <div style="font-size:0.5625rem;color:var(--gray);margin-top:2px;text-transform:uppercase;">Minutos</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TABS -->
+    <div class="tab-bar" id="playerTabBar">
+      <button class="tab-bar__item active" data-tab="stats"><i data-lucide="bar-chart-2" style="width:13px;height:13px;"></i>Estatísticas</button>
+      <button class="tab-bar__item" data-tab="bio"><i data-lucide="user" style="width:13px;height:13px;"></i>Perfil</button>
+      <button class="tab-bar__item" data-tab="carreira"><i data-lucide="arrow-left-right" style="width:13px;height:13px;"></i>Carreira</button>
+    </div>
+
+    <main class="content">
+
+      <!-- TAB: ESTATÍSTICAS -->
+      <div id="tab-stats">
+        <div id="statsLoading" style="padding:24px;text-align:center;color:var(--gray);font-size:0.8125rem;">Carregando estatísticas...</div>
+
+        <!-- Ataque -->
+        <div id="statBlockAtaque" class="card" style="display:none;">
+          <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--green);margin-bottom:12px;">⚽ Ataque</div>
+          <div id="statsAtaque"></div>
+        </div>
+
+        <!-- Passe -->
+        <div id="statBlockPasse" class="card" style="display:none;">
+          <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--gold);margin-bottom:12px;">🎯 Passe & Criação</div>
+          <div id="statsPasse"></div>
+        </div>
+
+        <!-- Defesa -->
+        <div id="statBlockDefesa" class="card" style="display:none;">
+          <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#60a5fa;margin-bottom:12px;">🛡️ Defesa & Duelos</div>
+          <div id="statsDefesa"></div>
+        </div>
+
+        <!-- Disciplina -->
+        <div id="statBlockDisc" class="card" style="display:none;">
+          <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--red);margin-bottom:12px;">🟨 Disciplina</div>
+          <div id="statsDisc"></div>
+        </div>
+
+        <!-- Outros -->
+        <div id="statBlockOutros" class="card" style="display:none;">
+          <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--gray);margin-bottom:12px;">📊 Outros</div>
+          <div id="statsOutros"></div>
+        </div>
+      </div>
+
+      <!-- TAB: PERFIL -->
+      <div id="tab-bio" style="display:none;">
+        <div class="card" id="bioCard">
+          <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--gray);margin-bottom:12px;">Informações Pessoais</div>
+          <div id="bioContent" style="display:flex;flex-direction:column;gap:0;"></div>
+        </div>
+      </div>
+
+      <!-- TAB: CARREIRA / TRANSFERS -->
+      <div id="tab-carreira" style="display:none;">
+        <div class="card">
+          <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--gray);margin-bottom:12px;">Histórico de Clubes</div>
+          <div id="carreiraContent" style="display:flex;flex-direction:column;gap:0;">
+            <div style="padding:16px;text-align:center;color:var(--gray);font-size:0.8125rem;">Carregando...</div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- BOTTOM NAV -->
+    <nav class="bottom-nav">
+      <a href="home.html"    class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="home"></i></span>Home</a>
+      <a href="zebras.html"  class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="activity"></i></span>Zebras</a>
+      <a href="ranking.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="medal"></i></span>Ranking</a>
+      <a href="alertas.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="bell-ring"></i></span>Alertas</a>
+      <a href="perfil.html"  class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="user"></i></span>Perfil</a>
+    </nav>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="js/config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/db.js"></script>
+<script src="js/auth-guard.js?v=4"></script>
+<script src="js/api.js"></script>
+<script src="js/main.js?v=9"></script>
+<script>
+  // ── URL PARAMS ──────────────────────────────────────────────
+  const _p    = new URLSearchParams(location.search);
+  const playerId   = _p.get('playerId') || '';
+  const playerName = decodeURIComponent(_p.get('name') || 'Jogador');
+  const playerTeam = decodeURIComponent(_p.get('team') || '');
+  const season     = _p.get('season') || '2024';
+  const lid        = _p.get('lid') || 'ENG';
+
+  document.getElementById('navTitle').textContent = playerName;
+  document.getElementById('playerName').textContent = playerName;
+  document.getElementById('playerTeam').textContent = playerTeam;
+
+  // ── TABS ────────────────────────────────────────────────────
+  const TABS = ['stats','bio','carreira'];
+  document.querySelectorAll('#playerTabBar .tab-bar__item').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('#playerTabBar .tab-bar__item').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      TABS.forEach(t => {
+        document.getElementById(`tab-${t}`).style.display = t === this.dataset.tab ? 'block' : 'none';
+      });
+    });
+  });
+
+  // ── STAT ROW ────────────────────────────────────────────────
+  function statRow(label, value, unit, color, i, total) {
+    if (value === null || value === undefined) return '';
+    const border = i < total - 1 ? 'border-bottom:1px solid var(--border);' : '';
+    const v = typeof value === 'number' && !Number.isInteger(value) ? value.toFixed(1) : value;
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;${border}">
+      <span style="font-size:0.8125rem;color:var(--gray);">${label}</span>
+      <span style="font-size:0.9375rem;font-weight:700;color:${color || 'var(--white)'};">${v}${unit ? ' <span style="font-size:0.6875rem;color:var(--gray);">' + unit + '</span>' : ''}</span>
+    </div>`;
+  }
+
+  function renderStatBlock(blockId, contentId, rows) {
+    const hasData = rows.some(r => r[1] !== null && r[1] !== undefined && r[1] !== 0);
+    if (!hasData) return;
+    const html = rows
+      .filter(r => r[1] !== null && r[1] !== undefined)
+      .map((r, i, arr) => statRow(r[0], r[1], r[2], r[3], i, arr.length))
+      .join('');
+    document.getElementById(contentId).innerHTML = html;
+    document.getElementById(blockId).style.display = 'block';
+  }
+
+  // ── BIO ROW ─────────────────────────────────────────────────
+  function bioRow(label, value, i) {
+    if (!value) return '';
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;${i > 0 ? 'border-top:1px solid var(--border);' : ''}">
+      <span style="font-size:0.8125rem;color:var(--gray);">${label}</span>
+      <span style="font-size:0.875rem;font-weight:600;">${value}</span>
+    </div>`;
+  }
+
+  // ── NATIONALITY FLAG ────────────────────────────────────────
+  function nationalityFlag(nat) {
+    const map = {
+      'Brazil':'br','Brazil':'br','England':'gb-eng','Spain':'es','Italy':'it',
+      'Germany':'de','France':'fr','Portugal':'pt','Argentina':'ar','Netherlands':'nl',
+      'Belgium':'be','Uruguay':'uy','Colombia':'co','Chile':'cl','Mexico':'mx',
+      'Senegal':'sn','Nigeria':'ng','Morocco':'ma','Ivory Coast':'ci',
+      'Japan':'jp','South Korea':'kr','USA':'us','Canada':'ca',
+    };
+    const code = map[nat];
+    if (!code) return '🌐';
+    return `<img src="https://flagcdn.com/w20/${code}.png" style="height:14px;vertical-align:middle;" onerror="this.outerHTML='🌐'">`;
+  }
+
+  // ── RENDER CAREER ───────────────────────────────────────────
+  function renderCareer(transfers) {
+    const el = document.getElementById('carreiraContent');
+    if (!el) return;
+    if (!transfers || !transfers.length) {
+      el.innerHTML = '<div style="padding:16px;text-align:center;color:var(--gray);font-size:0.8125rem;">Histórico não disponível</div>';
+      return;
+    }
+    // Flatten transfers into timeline
+    const entries = [];
+    transfers.forEach(t => {
+      (t.transfers || []).forEach(tr => {
+        entries.push({
+          from: tr.teams?.out?.name || '—',
+          fromLogo: tr.teams?.out?.logo || '',
+          to: tr.teams?.in?.name || '—',
+          toLogo: tr.teams?.in?.logo || '',
+          type: tr.type || '—',
+          date: tr.date || '',
+        });
+      });
+    });
+    entries.sort((a,b) => (b.date || '').localeCompare(a.date || ''));
+    if (!entries.length) {
+      el.innerHTML = '<div style="padding:16px;text-align:center;color:var(--gray);font-size:0.8125rem;">Histórico não disponível</div>';
+      return;
+    }
+    el.innerHTML = entries.slice(0, 12).map((e, i) => {
+      const border = i > 0 ? 'border-top:1px solid var(--border);' : '';
+      const toLogo = e.toLogo ? `<img src="${e.toLogo}" style="width:18px;height:18px;object-fit:contain;" onerror="this.remove()">` : '';
+      const fromLogo = e.fromLogo ? `<img src="${e.fromLogo}" style="width:18px;height:18px;object-fit:contain;" onerror="this.remove()">` : '';
+      const feeColor = e.type === 'Free' ? 'var(--green)' : e.type === 'Loan' ? 'var(--gold)' : 'var(--gray)';
+      return `<div style="padding:10px 0;${border}">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+          ${fromLogo}<span style="font-size:0.875rem;font-weight:500;">${e.from}</span>
+          <i data-lucide="arrow-right" style="width:12px;height:12px;color:var(--gray);flex-shrink:0;"></i>
+          ${toLogo}<span style="font-size:0.875rem;font-weight:600;">${e.to}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;">
+          <span style="font-size:0.75rem;color:${feeColor};">${e.type}</span>
+          <span style="font-size:0.75rem;color:var(--gray);">${e.date ? e.date.substring(0,7) : ''}</span>
+        </div>
+      </div>`;
+    }).join('');
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+
+  // ── MAIN LOAD ───────────────────────────────────────────────
+  async function loadPlayer() {
+    if (!playerId) {
+      document.getElementById('heroSkel').style.display = 'none';
+      document.getElementById('playerHero').style.display = 'block';
+      document.getElementById('statsLoading').textContent = 'ID do jogador não encontrado.';
+      return;
+    }
+
+    try {
+      const data = await ZebraAPI.apiFootball.getPlayerStats(playerId, season);
+      if (!data) {
+        document.getElementById('statsLoading').textContent = 'Dados não encontrados para este jogador.';
+        return;
+      }
+
+      const pl  = data.player;
+      const sts = data.statistics || [];
+      const st  = sts[0] || {};
+
+      // ── Hero ─────────────────────────────────────────────
+      document.getElementById('heroSkel').style.display = 'none';
+      const hero = document.getElementById('playerHero');
+      hero.style.display = 'block';
+
+      document.getElementById('navTitle').textContent = pl.name || playerName;
+      document.getElementById('playerName').textContent = pl.name || playerName;
+
+      if (pl.photo) {
+        const photoEl = document.getElementById('playerPhoto');
+        photoEl.src = pl.photo;
+        photoEl.style.display = 'block';
+        document.getElementById('playerInitials').style.display = 'none';
+      } else {
+        document.getElementById('playerInitials').textContent =
+          (pl.name || playerName).split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+      }
+
+      const teamLogoEl = document.getElementById('teamLogoHero');
+      if (st.team?.logo) {
+        teamLogoEl.src = st.team.logo;
+        teamLogoEl.style.display = 'inline-block';
+      }
+      document.getElementById('playerTeam').textContent = st.team?.name || playerTeam;
+
+      if (pl.nationality) {
+        document.getElementById('playerFlag').innerHTML = nationalityFlag(pl.nationality);
+      }
+
+      // Badges
+      document.getElementById('playerPos').textContent = st.games?.position || pl.position || '—';
+      const age = pl.age ? `${pl.age} anos` : pl.birth?.date ? `${new Date().getFullYear() - parseInt(pl.birth.date)} anos` : null;
+      if (age) document.getElementById('playerAge').textContent = age;
+      if (pl.height) {
+        document.getElementById('playerHeight').textContent = pl.height;
+        document.getElementById('playerHeight').style.display = 'inline-block';
+      }
+
+      // Stat pills
+      const goals = st.goals?.total ?? '—';
+      const assists = st.goals?.assists ?? '—';
+      const rating = st.games?.rating ? parseFloat(st.games.rating).toFixed(1) : '—';
+      const minutes = st.games?.minutes ?? '—';
+      document.getElementById('statGoals').textContent   = goals;
+      document.getElementById('statAssists').textContent = assists;
+      document.getElementById('statRating').textContent  = rating;
+      document.getElementById('statMinutes').textContent = minutes;
+
+      // Rating color
+      if (rating !== '—') {
+        const r = parseFloat(rating);
+        const rColor = r >= 7.5 ? 'var(--green)' : r >= 6.5 ? 'var(--gold)' : 'var(--red)';
+        document.getElementById('statRating').style.color = rColor;
+      }
+
+      // ── Stats Blocks ─────────────────────────────────────
+      document.getElementById('statsLoading').style.display = 'none';
+
+      renderStatBlock('statBlockAtaque', 'statsAtaque', [
+        ['Gols',                     st.goals?.total,           '',    'var(--green)'],
+        ['Gols de pênalti',          st.penalty?.scored,        '',    'var(--green)'],
+        ['Chutes totais',            st.shots?.total,           '',    'var(--white)'],
+        ['Chutes no gol',            st.shots?.on,              '',    'var(--white)'],
+        ['Precisão de chute',        st.shots?.on && st.shots?.total ? Math.round(st.shots.on/st.shots.total*100) : null, '%', 'var(--gold)'],
+        ['Dribles tentados',         st.dribbles?.attempts,     '',    'var(--white)'],
+        ['Dribles bem-sucedidos',    st.dribbles?.success,      '',    'var(--gold)'],
+        ['Faltas sofridas',          st.fouls?.drawn,           '',    'var(--white)'],
+      ]);
+
+      renderStatBlock('statBlockPasse', 'statsPasse', [
+        ['Assistências',             st.goals?.assists,         '',    'var(--gold)'],
+        ['Passes totais',            st.passes?.total,          '',    'var(--white)'],
+        ['Passes chave',             st.passes?.key,            '',    'var(--gold)'],
+        ['Precisão de passes',       st.passes?.accuracy,       '%',   'var(--white)'],
+        ['Cruzamentos',              st.passes?.crosses,        '',    'var(--white)'],
+      ]);
+
+      renderStatBlock('statBlockDefesa', 'statsDefesa', [
+        ['Desarmes',                 st.tackles?.total,         '',    '#60a5fa'],
+        ['Interceptações',           st.tackles?.interceptions, '',    '#60a5fa'],
+        ['Bloqueios',                st.tackles?.blocks,        '',    '#60a5fa'],
+        ['Duelos ganhos',            st.duels?.won,             '',    'var(--white)'],
+        ['Duelos totais',            st.duels?.total,           '',    'var(--white)'],
+        ['% duelos ganhos',          st.duels?.won && st.duels?.total ? Math.round(st.duels.won/st.duels.total*100) : null, '%', 'var(--gold)'],
+      ]);
+
+      renderStatBlock('statBlockDisc', 'statsDisc', [
+        ['Cartões amarelos',         st.cards?.yellow,          '',    'var(--gold)'],
+        ['Segundo amarelo',          st.cards?.yellowred,       '',    'var(--gold)'],
+        ['Cartões vermelhos',        st.cards?.red,             '',    'var(--red)'],
+        ['Faltas cometidas',         st.fouls?.committed,       '',    'var(--white)'],
+        ['Impedimentos',             st.offsides,               '',    'var(--white)'],
+        ['Pênaltis cometidos',       st.penalty?.committed,     '',    'var(--red)'],
+      ]);
+
+      renderStatBlock('statBlockOutros', 'statsOutros', [
+        ['Jogos',                    st.games?.appearences,     '',    'var(--white)'],
+        ['Titular',                  st.games?.lineups,         '',    'var(--white)'],
+        ['Minutos jogados',          st.games?.minutes,         'min', 'var(--white)'],
+        ['Nota média',               st.games?.rating ? parseFloat(st.games.rating) : null, '', 'var(--gold)'],
+        ['Substituído',              st.substitutes?.out,       '',    'var(--white)'],
+        ['Entrou como suplente',     st.substitutes?.in,        '',    'var(--white)'],
+      ]);
+
+      // ── Bio Tab ──────────────────────────────────────────
+      const bioRows = [
+        ['Nome completo',   pl.firstname && pl.lastname ? `${pl.firstname} ${pl.lastname}` : pl.name],
+        ['Nacionalidade',   pl.nationality],
+        ['Data de nascimento', pl.birth?.date],
+        ['Local de nascimento', pl.birth?.place && pl.birth?.country ? `${pl.birth.place}, ${pl.birth.country}` : pl.birth?.place || pl.birth?.country],
+        ['Altura',          pl.height],
+        ['Peso',            pl.weight],
+        ['Posição',         st.games?.position || pl.position],
+        ['Número de camisa', st.games?.number ? `#${st.games.number}` : null],
+        ['Clube atual',     st.team?.name],
+        ['Liga',            st.league?.name],
+      ].filter(r => r[1]);
+      document.getElementById('bioContent').innerHTML = bioRows.map((r,i) => bioRow(r[0], r[1], i)).join('');
+
+      // ── Carreira Tab (transfers) ─────────────────────────
+      // Busca transfers pelo APIF usando player.id
+      ZebraAPI.apiFootball.getTransfers(null).catch(() => null); // no-op, carregado abaixo
+      try {
+        // Usa endpoint de transfers por jogador se disponível
+        const rawTr = await _proxy_direct_fetch('apif-transfers-player', pl.id);
+        if (rawTr?.response?.length) {
+          renderCareer(rawTr.response);
+        } else {
+          document.getElementById('carreiraContent').innerHTML =
+            `<div style="padding:16px;text-align:center;color:var(--gray);font-size:0.8125rem;">Histórico de transferências não disponível no plano atual.</div>`;
+        }
+      } catch {
+        document.getElementById('carreiraContent').innerHTML =
+          `<div style="padding:16px;text-align:center;color:var(--gray);font-size:0.8125rem;">Histórico de transferências não disponível no plano atual.</div>`;
+      }
+
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+
+    } catch(e) {
+      console.warn('[jogador] loadPlayer error:', e);
+      document.getElementById('statsLoading').textContent = 'Erro ao carregar dados do jogador.';
+    }
+  }
+
+  // Proxy direct helper para endpoints não expostos no ZebraAPI
+  async function _proxy_direct_fetch(action, id) {
+    try {
+      const base = (typeof ZEBRA_CONFIG !== 'undefined') ? ZEBRA_CONFIG.PROXY_BASE : null;
+      if (!base) return null;
+      const anon = ZEBRA_CONFIG.SUPABASE_ANON || '';
+      const r = await fetch(`${base}?action=${action}&playerId=${id}`, {
+        headers: { 'apikey': anon }
+      });
+      if (!r.ok) return null;
+      return r.json();
+    } catch { return null; }
+  }
+
+  loadPlayer();
+  lucide.createIcons();
+</script>
+<style>
+  .bottom-nav__icon i { width: 20px; height: 20px; display: block; }
+  .navbar__icon i { display: block; }
+  #playerTabBar { overflow-x: auto; scrollbar-width: none; flex-wrap: nowrap; }
+  #playerTabBar::-webkit-scrollbar { display: none; }
+  .tab-bar__item { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+</style>
+<script src="js/admin.js"></script>
+</body>
+</html>
