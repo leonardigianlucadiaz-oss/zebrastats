@@ -61,31 +61,34 @@
     </div>
     <div class="team-hero" id="teamHero" style="background:linear-gradient(160deg,#851414 0%,#3a0808 100%);">
       <div class="team-hero__shield" id="heroShield">TOR</div>
-      <div class="team-hero__name"  id="heroName">Torino FC</div>
-      <div class="team-hero__league" id="heroLeague">Serie A · Itália</div>
+      <div class="team-hero__name"  id="heroName">Carregando...</div>
+      <div class="team-hero__league" id="heroLeague">—</div>
 
-      <!-- Mini stats rápidos -->
-      <div style="display:flex;gap:24px;margin-top:12px;">
-        <div style="text-align:center;">
-          <div style="font-size:1.25rem;font-weight:700;" id="statW">8</div>
-          <div style="font-size:0.6875rem;color:rgba(255,255,255,0.6);">Vitórias</div>
+      <!-- Stat pills (Pos | P | V/E/D | Gols/SG) -->
+      <div style="display:flex;gap:6px;margin-top:14px;flex-wrap:wrap;justify-content:center;">
+        <div style="background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.15);border-radius:var(--radius-pill);padding:5px 12px;text-align:center;min-width:52px;">
+          <div style="font-size:0.625rem;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:0.3px;">Posição</div>
+          <div style="font-size:1.125rem;font-weight:800;" id="statPos">—</div>
         </div>
-        <div style="text-align:center;">
-          <div style="font-size:1.25rem;font-weight:700;" id="statD">5</div>
-          <div style="font-size:0.6875rem;color:rgba(255,255,255,0.6);">Empates</div>
+        <div style="background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.15);border-radius:var(--radius-pill);padding:5px 12px;text-align:center;min-width:52px;">
+          <div style="font-size:0.625rem;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:0.3px;">Pontos</div>
+          <div style="font-size:1.125rem;font-weight:800;" id="statPts">—</div>
         </div>
-        <div style="text-align:center;">
-          <div style="font-size:1.25rem;font-weight:700;" id="statL">11</div>
-          <div style="font-size:0.6875rem;color:rgba(255,255,255,0.6);">Derrotas</div>
+        <div style="background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.15);border-radius:var(--radius-pill);padding:5px 12px;text-align:center;min-width:72px;">
+          <div style="font-size:0.625rem;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:0.3px;">V/E/D</div>
+          <div style="font-size:1.125rem;font-weight:800;" id="statVED">—</div>
         </div>
-        <div style="text-align:center;">
-          <div style="font-size:1.25rem;font-weight:700;color:var(--gold);" id="statZebra">7</div>
-          <div style="font-size:0.6875rem;color:rgba(255,255,255,0.6);">Zebras</div>
+        <div style="background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.15);border-radius:var(--radius-pill);padding:5px 12px;text-align:center;min-width:60px;">
+          <div style="font-size:0.625rem;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:0.3px;">SG</div>
+          <div style="font-size:1.125rem;font-weight:800;" id="statSG">—</div>
         </div>
       </div>
-      <a href="comparar.html" id="compararBtn" style="display:inline-flex;align-items:center;gap:5px;background:var(--card2);border:1px solid var(--border);border-radius:var(--radius-pill);padding:6px 12px;font-size:0.8125rem;font-weight:600;color:var(--white);text-decoration:none;margin-top:8px;">
-        <i data-lucide="git-compare" style="width:13px;height:13px;"></i>Comparar
-      </a>
+
+      <div style="display:flex;gap:8px;margin-top:10px;align-items:center;justify-content:center;">
+        <a href="comparar.html" id="compararBtn" style="display:inline-flex;align-items:center;gap:5px;background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.2);border-radius:var(--radius-pill);padding:6px 12px;font-size:0.8125rem;font-weight:600;color:var(--white);text-decoration:none;">
+          <i data-lucide="git-compare" style="width:13px;height:13px;"></i>Comparar
+        </a>
+      </div>
     </div>
 
     <!-- SELETOR DE TIME (demo) -->
@@ -97,10 +100,10 @@
     <div class="time-tab-wrapper">
       <div class="tab-bar" id="timeTabBar" style="overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;">
         <button class="tab-bar__item active" data-tab="overview"><i data-lucide="layout-dashboard" style="width:13px;height:13px;"></i>Visão Geral</button>
-        <button class="tab-bar__item" data-tab="jogos"><i data-lucide="clock" style="width:13px;height:13px;"></i>Últimos Jogos</button>
-        <button class="tab-bar__item" data-tab="zebras"><i data-lucide="zap" style="width:13px;height:13px;"></i>Maiores Zebras</button>
-        <button class="tab-bar__item" data-tab="escalacao"><i data-lucide="layout-grid" style="width:13px;height:13px;"></i>Escalação</button>
+        <button class="tab-bar__item" data-tab="escalacao"><i data-lucide="users" style="width:13px;height:13px;"></i>Elenco</button>
+        <button class="tab-bar__item" data-tab="jogos"><i data-lucide="clock" style="width:13px;height:13px;"></i>Jogos</button>
         <button class="tab-bar__item" data-tab="transfers"><i data-lucide="arrow-left-right" style="width:13px;height:13px;"></i>Transfers</button>
+        <button class="tab-bar__item" data-tab="zebras"><i data-lucide="zap" style="width:13px;height:13px;"></i>Zebras</button>
       </div>
     </div>
 
@@ -164,6 +167,26 @@
         <div class="stats-spark-grid" id="statsSparkGrid"></div>
       </div>
 
+      <!-- FORMA RECENTE -->
+      <div id="formaCard" style="display:none;" class="card">
+        <div style="font-size:0.6875rem;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Forma Recente</div>
+        <div style="display:flex;gap:5px;align-items:center;" id="formaRow"></div>
+        <div style="margin-top:10px;display:flex;gap:12px;" id="statsRow">
+          <div style="flex:1;text-align:center;padding:8px;background:var(--card2);border-radius:var(--radius-md);">
+            <div style="font-size:1.125rem;font-weight:800;color:var(--green);" id="formaStat_gf">—</div>
+            <div style="font-size:0.5625rem;color:var(--gray);text-transform:uppercase;">Gols marcados</div>
+          </div>
+          <div style="flex:1;text-align:center;padding:8px;background:var(--card2);border-radius:var(--radius-md);">
+            <div style="font-size:1.125rem;font-weight:800;color:var(--red);" id="formaStat_ga">—</div>
+            <div style="font-size:0.5625rem;color:var(--gray);text-transform:uppercase;">Gols sofridos</div>
+          </div>
+          <div style="flex:1;text-align:center;padding:8px;background:var(--card2);border-radius:var(--radius-md);">
+            <div style="font-size:1.125rem;font-weight:800;color:var(--gold);" id="formaStat_pct">—</div>
+            <div style="font-size:0.5625rem;color:var(--gray);text-transform:uppercase;">Aproveitamento</div>
+          </div>
+        </div>
+      </div>
+
       <!-- TREINADOR (API-Football) -->
       <div id="coachCard" style="display:none;" class="card">
         <div style="display:flex;align-items:center;gap:12px;">
@@ -179,6 +202,15 @@
             <div style="font-size:0.875rem;font-weight:600;" id="coachSince">—</div>
           </div>
         </div>
+      </div>
+
+      <!-- LESIONADOS/SUSPENSOS -->
+      <div id="injuriesCard" style="display:none;" class="card">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;">
+          <i data-lucide="shield-alert" style="width:14px;height:14px;color:var(--red);flex-shrink:0;"></i>
+          <span style="font-size:0.875rem;font-weight:700;">Lesionados / Suspensos</span>
+        </div>
+        <div id="injuriesList" style="display:flex;flex-direction:column;gap:6px;"></div>
       </div>
 
       <!-- ESTATÍSTICAS REAIS (API-Football) — injetado por JS quando disponível -->
@@ -247,13 +279,15 @@
 
       </div><!-- /tab-overview -->
 
-      <!-- TAB: ÚLTIMOS JOGOS -->
+      <!-- TAB: JOGOS (últimos + próximos) -->
       <div id="tab-jogos" style="display:none;">
-        <div class="section-header">
-          <span class="section-title"><i data-lucide="clock" class="sec-ic"></i>Últimas Partidas</span>
-          <a href="zebras.html" class="section-link">Ver todas</a>
+        <!-- Sub-tabs -->
+        <div style="display:flex;gap:6px;margin-bottom:10px;">
+          <button class="filter-chip active" data-jgtab="ultimos">Últimas 5</button>
+          <button class="filter-chip" data-jgtab="proximos">Próximas 5</button>
         </div>
         <div id="lastMatchesList" style="display:flex;flex-direction:column;gap:8px;"></div>
+        <div id="nextMatchesList" style="display:flex;flex-direction:column;gap:8px;display:none;"></div>
       </div>
 
       <!-- TAB: MAIORES ZEBRAS -->
@@ -265,55 +299,27 @@
         <div id="biggestZebrasList" style="display:flex;flex-direction:column;gap:8px;"></div>
       </div>
 
-      <!-- TAB: ESCALAÇÃO -->
+      <!-- TAB: ELENCO (era ESCALAÇÃO) -->
       <div id="tab-escalacao" style="display:none;">
-        <!-- Campo + Onze Titular -->
-        <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px;margin-bottom:10px;">
-          <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px;">
-            <i data-lucide="layout-grid" style="width:14px;height:14px;color:var(--green);"></i>
-            <span style="font-size:0.875rem;font-weight:600;">Formação Provável</span>
-            <span style="margin-left:auto;font-size:0.75rem;color:var(--gray);font-weight:700;" id="formationLabel">4-3-3</span>
+        <!-- Elenco por posição -->
+        <div id="elencoLoading" style="padding:20px;text-align:center;color:var(--gray);font-size:0.8125rem;">
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div class="skel" style="height:14px;width:80px;border-radius:6px;"></div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+              ${Array.from({length:6},()=>`<div class="skel" style="height:80px;border-radius:var(--radius-md);"></div>`).join('')}
+            </div>
           </div>
-          <!-- SVG PITCH -->
-          <div style="position:relative;width:100%;max-width:300px;margin:0 auto;" id="pitchContainer">
-            <svg id="pitchSvg" viewBox="0 0 220 310" style="width:100%;display:block;" xmlns="http://www.w3.org/2000/svg">
-              <!-- Grass gradient -->
-              <defs>
-                <linearGradient id="grassGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="#1a3a1a"/>
-                  <stop offset="100%" stop-color="#163216"/>
-                </linearGradient>
-              </defs>
-              <rect x="0" y="0" width="220" height="310" rx="8" fill="url(#grassGrad)"/>
-              <!-- Stripes -->
-              <rect x="10" y="10"  width="200" height="36" fill="rgba(255,255,255,0.025)" rx="0"/>
-              <rect x="10" y="82"  width="200" height="36" fill="rgba(255,255,255,0.025)" rx="0"/>
-              <rect x="10" y="154" width="200" height="36" fill="rgba(255,255,255,0.025)" rx="0"/>
-              <rect x="10" y="226" width="200" height="36" fill="rgba(255,255,255,0.025)" rx="0"/>
-              <!-- Field lines -->
-              <rect x="10" y="10" width="200" height="290" rx="4" fill="none" stroke="rgba(255,255,255,0.22)" stroke-width="1.5"/>
-              <line x1="10" y1="155" x2="210" y2="155" stroke="rgba(255,255,255,0.22)" stroke-width="1.5"/>
-              <circle cx="110" cy="155" r="26" fill="none" stroke="rgba(255,255,255,0.22)" stroke-width="1.5"/>
-              <circle cx="110" cy="155" r="2" fill="rgba(255,255,255,0.35)"/>
-              <!-- Attack penalty area (top) -->
-              <rect x="52" y="10" width="116" height="48" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1.2"/>
-              <rect x="78" y="10" width="64" height="24" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1.2"/>
-              <!-- Defense penalty area (bottom) -->
-              <rect x="52" y="252" width="116" height="48" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1.2"/>
-              <rect x="78" y="276" width="64" height="24" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1.2"/>
-              <!-- Players rendered by JS -->
-              <g id="pitchPlayers"></g>
-            </svg>
-          </div>
-          <div id="playersList" style="margin-top:10px;display:flex;flex-direction:column;"></div>
         </div>
-        <!-- Banco de Reservas -->
-        <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px 16px;">
-          <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;">
-            <i data-lucide="users" style="width:14px;height:14px;color:var(--gray);"></i>
-            <span style="font-size:0.8125rem;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;">Banco de Reservas</span>
-          </div>
-          <div id="benchList" style="display:flex;flex-direction:column;"></div>
+        <div id="elencoContent" style="display:none;"></div>
+
+        <!-- Manter campo SVG para compatibilidade mas oculto -->
+        <div style="display:none;" id="pitchContainer">
+          <svg id="pitchSvg" viewBox="0 0 220 310" xmlns="http://www.w3.org/2000/svg">
+            <g id="pitchPlayers"></g>
+          </svg>
+          <div id="playersList"></div>
+          <div id="benchList"></div>
+          <span id="formationLabel"></span>
         </div>
       </div>
 
@@ -406,6 +412,146 @@
           selectorEl.appendChild(btn);
         });
       } catch(e) { console.warn('[time] loadTeamSelector error:', e); }
+    }
+
+    // ── RENDER ELENCO POR POSIÇÃO ────────────────────────────
+    function renderElencoGrid(players) {
+      const el = document.getElementById('elencoContent');
+      const loadEl = document.getElementById('elencoLoading');
+      if (!el) return;
+      if (!players || !players.length) {
+        if (loadEl) loadEl.innerHTML = `<div style="padding:24px;text-align:center;color:var(--gray);font-size:0.8125rem;">Elenco não disponível</div>`;
+        return;
+      }
+      if (loadEl) loadEl.style.display = 'none';
+      el.style.display = 'block';
+
+      function getGroup(posStr) {
+        const p = (posStr || '').toLowerCase();
+        if (/goalkeeper|goleiro|arquero|gk/.test(p)) return 'Goleiros';
+        if (/defender|zagueiro|lateral|back|centre-back|stopper/.test(p)) return 'Defensores';
+        if (/midfielder|meia|volante|centrocampista|mediocampista/.test(p)) return 'Meias';
+        if (/forward|attacker|atacante|delantero|winger|striker/.test(p)) return 'Atacantes';
+        return 'Meias';
+      }
+
+      const grouped = { 'Goleiros':[], 'Defensores':[], 'Meias':[], 'Atacantes':[] };
+      players.forEach(pl => {
+        const grp = getGroup(pl.strPosition || pl.position || pl.pos || '');
+        if (grouped[grp]) grouped[grp].push(pl);
+      });
+
+      const color = currentTeamData?.color || '#2EE65C';
+      const lid = selectorLid || 'BRA';
+      const season = ZebraAPI.apiFootball.SEASONS[lid] || String(new Date().getFullYear());
+
+      let html = '';
+      ['Goleiros','Defensores','Meias','Atacantes'].forEach(grp => {
+        const list = grouped[grp];
+        if (!list.length) return;
+        html += `<div style="margin-bottom:16px;">
+          <div style="font-size:0.6875rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--gray);margin-bottom:8px;padding:0 2px;">${grp} (${list.length})</div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+            ${list.map(pl => {
+              const name = pl.strPlayer || pl.name || '—';
+              const photo = pl.strCutout || pl.strThumb || pl.photo || '';
+              const num = pl.strNumber || pl.number || '';
+              const pid = pl.idPlayer || pl.id || '';
+              const initials = name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+              const photoHtml = photo
+                ? `<img src="${photo}" style="width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid var(--border);display:block;margin:0 auto;" onerror="this.style.display='none'">`
+                : `<div style="width:52px;height:52px;border-radius:50%;background:${color}22;border:2px solid ${color}44;display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:800;color:${color};margin:0 auto;">${initials}</div>`;
+              const clickAttr = pid ? `onclick="window.location.href='jogador.html?playerId=${pid}&name=${encodeURIComponent(name)}&team=${encodeURIComponent(currentTeamData?.name||currentTeam)}&season=${encodeURIComponent(season)}&lid=${encodeURIComponent(lid)}'"` : '';
+              return `<div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:12px 8px;text-align:center;${pid?'cursor:pointer;':''}" ${clickAttr}>
+                ${photoHtml}
+                ${num ? `<div style="font-size:0.5625rem;color:var(--gray);margin:4px 0 1px;">#${num}</div>` : '<div style="margin-top:5px;"></div>'}
+                <div style="font-size:0.75rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${name}">${name.split(' ').pop()}</div>
+              </div>`;
+            }).join('')}
+          </div>
+        </div>`;
+      });
+      el.innerHTML = html;
+    }
+
+    // ── RENDER FORMA CARD ────────────────────────────────────
+    function renderFormaCard(formStr, gf, ga, played) {
+      const card = document.getElementById('formaCard');
+      const row = document.getElementById('formaRow');
+      if (!card || !row || !formStr) return;
+      const chars = formStr.replace(/[^WDL]/gi,'').toUpperCase().split('').slice(-5);
+      if (!chars.length) return;
+      row.innerHTML = chars.map(r => {
+        const c = r==='W' ? 'var(--green)' : r==='D' ? 'var(--gold)' : 'var(--red)';
+        const lbl = r==='W' ? 'V' : r==='D' ? 'E' : 'D';
+        return `<div style="width:34px;height:34px;border-radius:50%;background:${c};display:flex;align-items:center;justify-content:center;font-size:0.875rem;font-weight:800;color:#000;">${lbl}</div>`;
+      }).join('');
+      if (gf !== undefined) document.getElementById('formaStat_gf').textContent = gf;
+      if (ga !== undefined) document.getElementById('formaStat_ga').textContent = ga;
+      if (played) {
+        const wins = (formStr.match(/W/gi)||[]).length;
+        const draws = (formStr.match(/D/gi)||[]).length;
+        const pct = Math.round(((wins + draws * 0.5) / played) * 100);
+        document.getElementById('formaStat_pct').textContent = `${pct}%`;
+      }
+      card.style.display = 'block';
+    }
+
+    // ── RENDER INJURIES ──────────────────────────────────────
+    function renderInjuries(injuries) {
+      const card = document.getElementById('injuriesCard');
+      const list = document.getElementById('injuriesList');
+      if (!card || !list) return;
+      const items = (injuries || []).slice(0, 8);
+      if (!items.length) return;
+      list.innerHTML = items.map(inj => {
+        const pl = inj.player;
+        const name = pl?.name || '—';
+        const reason = pl?.reason || pl?.type || inj.player?.reason || '—';
+        const initials = name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+        const photoHtml = pl?.photo
+          ? `<img src="${pl.photo}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;flex-shrink:0;" onerror="this.style.display='none'">`
+          : `<div style="width:32px;height:32px;border-radius:50%;background:var(--card2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:0.625rem;font-weight:700;flex-shrink:0;">${initials}</div>`;
+        const isSuspended = /suspend|card/i.test(reason);
+        const color2 = isSuspended ? 'var(--gold)' : 'var(--red)';
+        const icon = isSuspended ? '🟨' : '🤕';
+        return `<div style="display:flex;align-items:center;gap:10px;padding:5px 0;">
+          ${photoHtml}
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:0.875rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${name}</div>
+            <div style="font-size:0.6875rem;color:${color2};">${icon} ${reason}</div>
+          </div>
+        </div>`;
+      }).join('');
+      card.style.display = 'block';
+    }
+
+    // ── RENDER NEXT MATCHES (APIF) ───────────────────────────
+    function renderNextMatches(matches) {
+      const el = document.getElementById('nextMatchesList');
+      if (!el) return;
+      el.innerHTML = '';
+      if (!matches || !matches.length) {
+        el.innerHTML = `<div style="padding:16px;text-align:center;color:var(--gray);font-size:0.8125rem;">Nenhuma partida programada</div>`;
+        return;
+      }
+      matches.forEach(m => {
+        const hLogo = m.homeLogo ? `<img src="${m.homeLogo}" style="width:22px;height:22px;object-fit:contain;flex-shrink:0;" onerror="this.style.display='none'">` : crestImg(m.home, 22);
+        const aLogo = m.awayLogo ? `<img src="${m.awayLogo}" style="width:22px;height:22px;object-fit:contain;flex-shrink:0;" onerror="this.style.display='none'">` : crestImg(m.away, 22);
+        const row = document.createElement('div');
+        row.style.cssText = 'display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);cursor:pointer;';
+        row.innerHTML = `
+          <div style="flex:1;min-width:0;">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:4px;">
+              <span style="display:flex;align-items:center;gap:5px;font-size:0.875rem;font-weight:600;flex:1;">${hLogo}${m.home}</span>
+              <span style="font-size:0.875rem;font-weight:700;color:var(--gold);margin:0 4px;white-space:nowrap;">${m.time || '–'}</span>
+              <span style="display:flex;align-items:center;gap:5px;font-size:0.875rem;font-weight:600;flex:1;justify-content:flex-end;">${m.away}${aLogo}</span>
+            </div>
+            <div style="font-size:0.6875rem;color:var(--gray);margin-top:3px;text-align:center;">${m.date || ''} · ${(m.round||'').replace('Regular Season - ','R')}</div>
+          </div>`;
+        row.addEventListener('click', () => window.location.href = 'partida.html');
+        el.appendChild(row);
+      });
     }
 
     // ── RENDER ZI VISUAL ──────────────────────────────────
@@ -583,27 +729,37 @@
     // ── RENDER LAST MATCHES ───────────────────────────────
     function renderLastMatches(matches) {
       const el = document.getElementById('lastMatchesList');
+      if (!el) return;
       el.innerHTML = '';
+      if (!matches || !matches.length) {
+        el.innerHTML = `<div style="padding:16px;text-align:center;color:var(--gray);font-size:0.8125rem;">Nenhuma partida encontrada</div>`;
+        return;
+      }
       matches.forEach(m => {
         const RES = {
           W: { label:'V', color:'var(--green)', bg:'rgba(46,230,92,0.12)', border:'rgba(46,230,92,0.3)' },
-          D: { label:'D', color:'var(--red)',   bg:'rgba(238,68,68,0.12)',  border:'rgba(238,68,68,0.3)'  },
+          L: { label:'D', color:'var(--red)',   bg:'rgba(238,68,68,0.12)',  border:'rgba(238,68,68,0.3)'  },
           E: { label:'E', color:'var(--gold)',  bg:'rgba(255,200,50,0.12)', border:'rgba(255,200,50,0.3)' },
         };
-        const r = RES[m.result] || RES.E;
-        const hCrest = crestImg(m.home, 20);
-        const aCrest = crestImg(m.away, 20);
+        const resKey = m.result === 'W' ? 'W' : m.result === 'L' ? 'L' : 'E';
+        const r = RES[resKey] || RES.E;
+        const hLogo = m.homeLogo
+          ? `<img src="${m.homeLogo}" style="width:20px;height:20px;object-fit:contain;flex-shrink:0;" onerror="this.style.display='none'">`
+          : crestImg(m.home, 20);
+        const aLogo = m.awayLogo
+          ? `<img src="${m.awayLogo}" style="width:20px;height:20px;object-fit:contain;flex-shrink:0;" onerror="this.style.display='none'">`
+          : crestImg(m.away, 20);
         const row = document.createElement('div');
         row.style.cssText = `display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);border-left:3px solid ${r.color};cursor:pointer;`;
         row.innerHTML = `
           <div style="width:32px;height:32px;border-radius:50%;background:${r.bg};border:1px solid ${r.border};display:flex;align-items:center;justify-content:center;font-size:0.875rem;font-weight:800;color:${r.color};flex-shrink:0;">${r.label}</div>
           <div style="flex:1;min-width:0;">
-            <div style="display:flex;align-items:center;justify-content:space-between;">
-              <span style="display:flex;align-items:center;gap:4px;font-size:0.875rem;font-weight:600;">${hCrest || ''}${m.home}</span>
-              <span style="font-size:1.125rem;font-weight:700;margin:0 6px;">${m.hs} – ${m.as}</span>
-              <span style="display:flex;align-items:center;gap:4px;font-size:0.875rem;font-weight:600;">${m.away}${aCrest || ''}</span>
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:4px;">
+              <span style="display:flex;align-items:center;gap:4px;font-size:0.875rem;font-weight:600;flex:1;">${hLogo}${m.home}</span>
+              <span style="font-size:1.125rem;font-weight:800;margin:0 4px;white-space:nowrap;">${m.hs ?? '–'} – ${m.as ?? '–'}</span>
+              <span style="display:flex;align-items:center;gap:4px;font-size:0.875rem;font-weight:600;flex:1;justify-content:flex-end;">${m.away}${aLogo}</span>
             </div>
-            <div style="font-size:0.6875rem;color:var(--gray);margin-top:3px;">${m.date}</div>
+            <div style="font-size:0.6875rem;color:var(--gray);margin-top:3px;text-align:center;">${m.date || ''}</div>
           </div>
         `;
         row.addEventListener('click', () => window.location.href = 'partida.html');
@@ -625,10 +781,7 @@
       document.getElementById('heroName').textContent   = name;
       document.getElementById('heroShield').textContent = name.substring(0,3).toUpperCase();
       document.getElementById('heroLeague').textContent = '—';
-      document.getElementById('statW').textContent = '—';
-      document.getElementById('statD').textContent = '—';
-      document.getElementById('statL').textContent = '—';
-      document.getElementById('statZebra').textContent = '—';
+      ['statPos','statPts','statVED','statSG'].forEach(id => { const e = document.getElementById(id); if (e) e.textContent = '—'; });
 
       // Show empty confrontos / chart while real data loads
       renderConfrontos([], 'losingList',  'red');
@@ -696,16 +849,22 @@
 
         syncTeamFavBtn();
 
-        // Real players for escalação
+        // Real squad for elenco tab — try APIF first, then SDB
         if (currentTeamSdbId) {
           ZebraAPI.sportsDb.getSquad(currentTeamSdbId).then(squad => {
             if (squad && squad.length) {
               window._realPlayers = squad;
               const activeTabEl = document.querySelector('#timeTabBar .tab-bar__item.active');
-              if (activeTabEl && activeTabEl.dataset.tab === 'escalacao') renderEscalacao();
+              if (activeTabEl && activeTabEl.dataset.tab === 'escalacao') {
+                renderElencoGrid(squad);
+                renderEscalacao(); // keep SVG pitch compat
+              }
             }
           }).catch(() => {});
         }
+
+        // APIF squad (better photos + jersey numbers)
+        loadApifSquadForTeam(currentTeam);
 
         // Real last matches
         if (currentTeamSdbId) {
@@ -837,6 +996,91 @@
       } catch(e) { console.warn('[time] loadCoach error:', e); }
     }
 
+    // ── APIF SQUAD LOADER ─────────────────────────────────────────
+    async function loadApifSquadForTeam(teamName) {
+      if (!ZebraAPI.isConfigured.apiFootball() || !teamName) return;
+      try {
+        let apifTeamId = window._apifTeamId;
+        if (!apifTeamId) {
+          const results = await ZebraAPI.apiFootball.searchTeam(teamName);
+          apifTeamId = results?.[0]?.team?.id || null;
+          if (apifTeamId) window._apifTeamId = apifTeamId;
+        }
+        if (!apifTeamId) return;
+
+        const [squad, injuries] = await Promise.all([
+          ZebraAPI.apiFootball.getSquad(apifTeamId).catch(() => null),
+          ZebraAPI.apiFootball.getInjuries({ teamId: apifTeamId }).catch(() => null),
+        ]);
+
+        if (squad && squad.length) {
+          window._apifSquad = squad;
+          // Map APIF positions to SDB-like format
+          const mapped = squad.map(p => ({
+            idPlayer: p.id, strPlayer: p.name, name: p.name,
+            strPosition: p.pos === 'G' ? 'Goalkeeper' : p.pos === 'D' ? 'Defender' : p.pos === 'M' ? 'Midfielder' : p.pos === 'F' ? 'Forward' : p.pos || '',
+            position: p.pos, photo: p.photo, strNumber: p.number, number: p.number,
+          }));
+          window._realPlayers = mapped;
+          const activeTabEl = document.querySelector('#timeTabBar .tab-bar__item.active');
+          if (activeTabEl && activeTabEl.dataset.tab === 'escalacao') renderElencoGrid(mapped);
+        }
+
+        if (injuries && injuries.length) {
+          renderInjuries(injuries);
+        }
+
+        // Also load next/last fixtures for this team
+        loadApifTeamFixtures(apifTeamId);
+      } catch(e) { console.warn('[time] loadApifSquadForTeam error:', e); }
+    }
+
+    // ── APIF FIXTURES FOR TEAM ────────────────────────────────────
+    async function loadApifTeamFixtures(apifTeamId) {
+      if (!apifTeamId) return;
+      try {
+        const lid = selectorLid || 'BRA';
+        const season = ZebraAPI.apiFootball.SEASONS[lid] || String(new Date().getFullYear());
+        const [lastRaw, nextRaw] = await Promise.all([
+          ZebraAPI.apiFootball.getFixtures(null, { last: 5 }).catch(() => null),
+          ZebraAPI.apiFootball.getFixtures(null, { next: 5 }).catch(() => null),
+        ]);
+        // fallback: last/next without lid
+        const mapF = f => ZebraAPI.apiFootball.transformFixture(f);
+        if (lastRaw && lastRaw.length) {
+          const teamName = (currentTeamData?.name || currentTeam || '').toLowerCase();
+          const filtered = lastRaw.filter(f => {
+            const h = (f.teams?.home?.name||'').toLowerCase();
+            const a = (f.teams?.away?.name||'').toLowerCase();
+            return h.includes(teamName.split(' ')[0]) || a.includes(teamName.split(' ')[0]);
+          });
+          const mapped = (filtered.length ? filtered : lastRaw).slice(0,5).map(mapF).filter(Boolean).map(m => {
+            const isHome = (m.home||'').toLowerCase().includes((currentTeamData?.name||currentTeam||'').toLowerCase().split(' ')[0]);
+            let result = 'E';
+            if (m.hs !== null && m.as !== null && m.hs !== m.as) {
+              result = (isHome ? m.hs > m.as : m.as > m.hs) ? 'W' : 'L';
+            }
+            return { ...m, result, homeLogo: m.homeLogo, awayLogo: m.awayLogo };
+          });
+          window._apifLastMatches = mapped;
+          const jTab = document.querySelector('#timeTabBar .tab-bar__item.active');
+          if (jTab?.dataset.tab === 'jogos') renderLastMatches(mapped);
+        }
+        if (nextRaw && nextRaw.length) {
+          const teamName = (currentTeamData?.name || currentTeam || '').toLowerCase();
+          const filtered = nextRaw.filter(f => {
+            const h = (f.teams?.home?.name||'').toLowerCase();
+            const a = (f.teams?.away?.name||'').toLowerCase();
+            return h.includes(teamName.split(' ')[0]) || a.includes(teamName.split(' ')[0]);
+          });
+          const mapped = (filtered.length ? filtered : nextRaw).slice(0,5).map(mapF).filter(Boolean);
+          window._apifNextMatches = mapped;
+          const jTab = document.querySelector('#timeTabBar .tab-bar__item.active');
+          if (jTab?.dataset.tab === 'jogos') renderNextMatches(mapped);
+        }
+      } catch(e) { console.warn('[time] loadApifTeamFixtures error:', e); }
+    }
+
     // ── API REAL DATA — legacy initRealData kept as no-op ─────────
     async function initRealData() {
       // Real data loading is now handled inside loadTeam()
@@ -878,17 +1122,29 @@
         if (!fx) return;
 
         // Atualiza W/D/L no hero com dados reais
-        const wins   = fx.wins?.total   || fx.wins?.home   + fx.wins?.away   || 0;
-        const draws  = fx.draws?.total  || fx.draws?.home  + fx.draws?.away  || 0;
-        const losses = fx.loses?.total  || fx.loses?.home  + fx.loses?.away  || 0;
+        const wins   = fx.wins?.total   || (fx.wins?.home   + fx.wins?.away)   || 0;
+        const draws  = fx.draws?.total  || (fx.draws?.home  + fx.draws?.away)  || 0;
+        const losses = fx.loses?.total  || (fx.loses?.home  + fx.loses?.away)  || 0;
         if (wins || draws || losses) {
-          const wEl = document.getElementById('statW');
-          const dEl = document.getElementById('statD');
-          const lEl = document.getElementById('statL');
-          if (wEl) wEl.textContent = wins;
-          if (dEl) dEl.textContent = draws;
-          if (lEl) lEl.textContent = losses;
+          const vedEl = document.getElementById('statVED');
+          if (vedEl) vedEl.textContent = `${wins}/${draws}/${losses}`;
         }
+
+        // Goals for/against
+        const gf = s.goals?.for?.total?.total || s.goals?.for?.total || 0;
+        const ga = s.goals?.against?.total?.total || s.goals?.against?.total || 0;
+        const played = fx.played?.total || (wins + draws + losses) || 0;
+        const pts = (wins * 3) + draws;
+        const sg = gf - ga;
+
+        const ptsEl = document.getElementById('statPts');
+        const sgEl  = document.getElementById('statSG');
+        if (ptsEl) ptsEl.textContent = pts;
+        if (sgEl)  sgEl.textContent  = sg > 0 ? `+${sg}` : String(sg);
+
+        // Forma recente
+        const formStr = s.form || '';
+        if (formStr) renderFormaCard(formStr, gf, ga, played);
 
         // Monta cartão de estatísticas
         const goalsFor  = s.goals?.for?.average?.total  || '–';
@@ -929,13 +1185,38 @@
       btn.addEventListener('click', function() {
         document.querySelectorAll('#timeTabBar .tab-bar__item').forEach(b => b.classList.remove('active'));
         this.classList.add('active');
-        const activeTab = this.dataset.tab;
+        const activeTabName = this.dataset.tab;
         TIME_TABS.forEach(t => {
           const el = document.getElementById(`tab-${t}`);
-          if (el) el.style.display = t === activeTab ? 'block' : 'none';
+          if (el) el.style.display = t === activeTabName ? 'block' : 'none';
         });
-        if (activeTab === 'escalacao') renderEscalacao();
-        if (activeTab === 'transfers') renderTransfers();
+        if (activeTabName === 'escalacao') {
+          // Show APIF squad if available, else SDB squad, else svg pitch fallback
+          const squad = window._apifSquad || window._realPlayers;
+          if (squad && squad.length) renderElencoGrid(squad);
+          else renderEscalacao();
+        }
+        if (activeTabName === 'transfers') renderTransfers();
+        if (activeTabName === 'jogos') {
+          // show last matches by default
+          const lastM = window._apifLastMatches;
+          if (lastM && lastM.length) renderLastMatches(lastM);
+          const nextM = window._apifNextMatches;
+          if (nextM && nextM.length) renderNextMatches(nextM);
+        }
+      });
+    });
+
+    // ── JOGOS SUB-TABS ────────────────────────────────────
+    document.querySelectorAll('[data-jgtab]').forEach(btn => {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('[data-jgtab]').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        const tab = this.dataset.jgtab;
+        const lastEl = document.getElementById('lastMatchesList');
+        const nextEl = document.getElementById('nextMatchesList');
+        if (lastEl) lastEl.style.display = tab === 'ultimos' ? 'flex' : 'none';
+        if (nextEl) nextEl.style.display = tab === 'proximos' ? 'flex' : 'none';
       });
     });
 

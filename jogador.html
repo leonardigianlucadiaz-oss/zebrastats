@@ -206,51 +206,77 @@
   });
 
   // ── STAT ROW ────────────────────────────────────────────────
-  function statRow(label, value, unit, color, i, total) {
+  function statRow(label, value, unit, color, i, total, max) {
     if (value === null || value === undefined) return '';
     const border = i < total - 1 ? 'border-bottom:1px solid var(--border);' : '';
     const v = typeof value === 'number' && !Number.isInteger(value) ? value.toFixed(1) : value;
-    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;${border}">
-      <span style="font-size:0.8125rem;color:var(--gray);">${label}</span>
-      <span style="font-size:0.9375rem;font-weight:700;color:${color || 'var(--white)'};">${v}${unit ? ' <span style="font-size:0.6875rem;color:var(--gray);">' + unit + '</span>' : ''}</span>
+    const showBar = max && max > 0 && typeof value === 'number';
+    const pct = showBar ? Math.min(100, Math.round((value / max) * 100)) : 0;
+    const barHtml = showBar ? `<div style="margin-top:4px;height:3px;background:var(--border);border-radius:2px;overflow:hidden;">
+      <div style="height:100%;width:${pct}%;background:${color||'var(--green)'};border-radius:2px;"></div>
+    </div>` : '';
+    return `<div style="padding:8px 0;${border}">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:0.8125rem;color:var(--gray);">${label}</span>
+        <span style="font-size:0.9375rem;font-weight:700;color:${color || 'var(--white)'};">${v}${unit ? `<span style="font-size:0.6875rem;color:var(--gray);"> ${unit}</span>` : ''}</span>
+      </div>
+      ${barHtml}
     </div>`;
   }
 
   function renderStatBlock(blockId, contentId, rows) {
     const hasData = rows.some(r => r[1] !== null && r[1] !== undefined && r[1] !== 0);
     if (!hasData) return;
+    // compute max per-block for mini bar
+    const nums = rows.filter(r => typeof r[1] === 'number').map(r => r[1]);
+    const blockMax = nums.length ? Math.max(...nums) : 0;
     const html = rows
       .filter(r => r[1] !== null && r[1] !== undefined)
-      .map((r, i, arr) => statRow(r[0], r[1], r[2], r[3], i, arr.length))
+      .map((r, i, arr) => statRow(r[0], r[1], r[2], r[3], i, arr.length, blockMax))
       .join('');
     document.getElementById(contentId).innerHTML = html;
     document.getElementById(blockId).style.display = 'block';
   }
 
   // ── BIO ROW ─────────────────────────────────────────────────
+  const BIO_ICONS = {
+    'Nome completo': 'user', 'Nacionalidade': 'globe', 'Data de nascimento': 'calendar',
+    'Idade': 'cake', 'Local de nascimento': 'map-pin', 'Altura': 'ruler', 'Peso': 'scale',
+    'Posição': 'layout-grid', 'Número de camisa': 'hash', 'Clube atual': 'shield',
+    'Liga': 'trophy',
+  };
   function bioRow(label, value, i) {
     if (!value) return '';
-    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;${i > 0 ? 'border-top:1px solid var(--border);' : ''}">
-      <span style="font-size:0.8125rem;color:var(--gray);">${label}</span>
-      <span style="font-size:0.875rem;font-weight:600;">${value}</span>
+    const icon = BIO_ICONS[label] || 'info';
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;${i > 0 ? 'border-top:1px solid var(--border);' : ''}">
+      <span style="display:flex;align-items:center;gap:6px;font-size:0.8125rem;color:var(--gray);">
+        <i data-lucide="${icon}" style="width:13px;height:13px;flex-shrink:0;"></i>
+        ${label}
+      </span>
+      <span style="font-size:0.875rem;font-weight:600;text-align:right;max-width:55%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${value}</span>
     </div>`;
   }
 
   // ── NATIONALITY FLAG ────────────────────────────────────────
   function nationalityFlag(nat) {
     const map = {
-      'Brazil':'br','Brazil':'br','England':'gb-eng','Spain':'es','Italy':'it',
+      'Brazil':'br','England':'gb-eng','Scotland':'gb-sct','Wales':'gb-wls','Spain':'es','Italy':'it',
       'Germany':'de','France':'fr','Portugal':'pt','Argentina':'ar','Netherlands':'nl',
-      'Belgium':'be','Uruguay':'uy','Colombia':'co','Chile':'cl','Mexico':'mx',
-      'Senegal':'sn','Nigeria':'ng','Morocco':'ma','Ivory Coast':'ci',
-      'Japan':'jp','South Korea':'kr','USA':'us','Canada':'ca',
+      'Belgium':'be','Uruguay':'uy','Colombia':'co','Chile':'cl','Mexico':'mx','Peru':'pe',
+      'Senegal':'sn','Nigeria':'ng','Morocco':'ma','Ivory Coast':'ci','Ghana':'gh','Cameroon':'cm',
+      'Japan':'jp','South Korea':'kr','USA':'us','Canada':'ca','Australia':'au','Croatia':'hr',
+      'Serbia':'rs','Poland':'pl','Czech Republic':'cz','Slovakia':'sk','Hungary':'hu',
+      'Sweden':'se','Denmark':'dk','Norway':'no','Austria':'at','Switzerland':'ch',
+      'Turkey':'tr','Algeria':'dz','Egypt':'eg','Gabon':'ga','Guinea':'gn',
+      'Ecuador':'ec','Paraguay':'py','Bolivia':'bo','Venezuela':'ve',
+      'Saudi Arabia':'sa','Iran':'ir','Japan':'jp','China':'cn','India':'in',
     };
     const code = map[nat];
-    if (!code) return '🌐';
-    return `<img src="https://flagcdn.com/w20/${code}.png" style="height:14px;vertical-align:middle;" onerror="this.outerHTML='🌐'">`;
+    if (!code) return `<span title="${nat}">🌐</span>`;
+    return `<img src="https://flagcdn.com/w20/${code}.png" alt="${nat}" title="${nat}" style="height:14px;border-radius:2px;vertical-align:middle;" onerror="this.outerHTML='🌐'">`;
   }
 
-  // ── RENDER CAREER ───────────────────────────────────────────
+  // ── RENDER CAREER (timeline visual) ─────────────────────────
   function renderCareer(transfers) {
     const el = document.getElementById('carreiraContent');
     if (!el) return;
@@ -277,23 +303,29 @@
       el.innerHTML = '<div style="padding:16px;text-align:center;color:var(--gray);font-size:0.8125rem;">Histórico não disponível</div>';
       return;
     }
-    el.innerHTML = entries.slice(0, 12).map((e, i) => {
-      const border = i > 0 ? 'border-top:1px solid var(--border);' : '';
-      const toLogo = e.toLogo ? `<img src="${e.toLogo}" style="width:18px;height:18px;object-fit:contain;" onerror="this.remove()">` : '';
-      const fromLogo = e.fromLogo ? `<img src="${e.fromLogo}" style="width:18px;height:18px;object-fit:contain;" onerror="this.remove()">` : '';
-      const feeColor = e.type === 'Free' ? 'var(--green)' : e.type === 'Loan' ? 'var(--gold)' : 'var(--gray)';
-      return `<div style="padding:10px 0;${border}">
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
-          ${fromLogo}<span style="font-size:0.875rem;font-weight:500;">${e.from}</span>
-          <i data-lucide="arrow-right" style="width:12px;height:12px;color:var(--gray);flex-shrink:0;"></i>
-          ${toLogo}<span style="font-size:0.875rem;font-weight:600;">${e.to}</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;">
-          <span style="font-size:0.75rem;color:${feeColor};">${e.type}</span>
-          <span style="font-size:0.75rem;color:var(--gray);">${e.date ? e.date.substring(0,7) : ''}</span>
-        </div>
-      </div>`;
-    }).join('');
+    el.innerHTML = `<div style="position:relative;padding-left:28px;">
+      <!-- vertical line -->
+      <div style="position:absolute;left:9px;top:0;bottom:0;width:2px;background:var(--border);border-radius:1px;"></div>
+      ${entries.slice(0, 12).map((e, i) => {
+        const feeColor = e.type === 'Free' || e.type === 'free' ? 'var(--green)' : /loan/i.test(e.type) ? 'var(--gold)' : 'var(--gray)';
+        const feeLabel = /free/i.test(e.type) ? 'Livre' : /loan/i.test(e.type) ? 'Empréstimo' : e.type;
+        const toLogo = e.toLogo ? `<img src="${e.toLogo}" style="width:16px;height:16px;object-fit:contain;flex-shrink:0;" onerror="this.style.display='none'">` : '';
+        const fromLogo = e.fromLogo ? `<img src="${e.fromLogo}" style="width:16px;height:16px;object-fit:contain;flex-shrink:0;" onerror="this.style.display='none'">` : '';
+        return `<div style="position:relative;padding:12px 0 12px 0;${i<entries.slice(0,12).length-1?'border-bottom:1px solid var(--border);':''}">
+          <!-- dot -->
+          <div style="position:absolute;left:-20px;top:16px;width:10px;height:10px;border-radius:50%;background:${feeColor};border:2px solid var(--bg);"></div>
+          <div style="font-size:0.6875rem;color:var(--gray);margin-bottom:4px;">${e.date ? e.date.substring(0,7) : '–'}</div>
+          <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;">
+            ${fromLogo}<span style="font-size:0.8125rem;color:var(--gray);">${e.from}</span>
+            <span style="color:var(--gray);font-size:0.75rem;">→</span>
+            ${toLogo}<span style="font-size:0.875rem;font-weight:700;">${e.to}</span>
+          </div>
+          <div style="margin-top:3px;">
+            <span style="font-size:0.6875rem;font-weight:600;color:${feeColor};background:${feeColor}15;padding:2px 6px;border-radius:var(--radius-pill);">${feeLabel}</span>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`;
     if (typeof lucide !== 'undefined') lucide.createIcons();
   }
 
@@ -422,10 +454,24 @@
       ]);
 
       // ── Bio Tab ──────────────────────────────────────────
+      // Calcula idade dinamicamente a partir do birthdate
+      let dynamicAge = null;
+      if (pl.birth?.date) {
+        const bDate = new Date(pl.birth.date);
+        const today = new Date();
+        let age = today.getFullYear() - bDate.getFullYear();
+        const m = today.getMonth() - bDate.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < bDate.getDate())) age--;
+        dynamicAge = `${age} anos`;
+      } else if (pl.age) {
+        dynamicAge = `${pl.age} anos`;
+      }
+
       const bioRows = [
         ['Nome completo',   pl.firstname && pl.lastname ? `${pl.firstname} ${pl.lastname}` : pl.name],
-        ['Nacionalidade',   pl.nationality],
+        ['Nacionalidade',   pl.nationality ? `${nationalityFlag(pl.nationality)} ${pl.nationality}` : null],
         ['Data de nascimento', pl.birth?.date],
+        ['Idade', dynamicAge],
         ['Local de nascimento', pl.birth?.place && pl.birth?.country ? `${pl.birth.place}, ${pl.birth.country}` : pl.birth?.place || pl.birth?.country],
         ['Altura',          pl.height],
         ['Peso',            pl.weight],
@@ -435,6 +481,7 @@
         ['Liga',            st.league?.name],
       ].filter(r => r[1]);
       document.getElementById('bioContent').innerHTML = bioRows.map((r,i) => bioRow(r[0], r[1], i)).join('');
+      if (typeof lucide !== 'undefined') lucide.createIcons({ nodes: [document.getElementById('bioCard')] });
 
       // ── Carreira Tab (transfers) ─────────────────────────
       // Busca transfers pelo APIF usando player.id

@@ -396,7 +396,14 @@ const ZebraAPI = (() => {
   /* ── API-FOOTBALL (via proxy Supabase) ─────────────────────── */
   const APIF = {
     LEAGUES: { ENG:39, ESP:140, ITA:135, GER:78, FRA:61, BRA:71, POR:94, UCL:2, HOL:88 },
-    SEASONS: { BRA:'2025', ENG:'2024', ESP:'2024', ITA:'2024', GER:'2024', FRA:'2024', POR:'2024', UCL:'2024', HOL:'2024' },
+
+    // Fix: temporada dinâmica — europeias iniciam em julho, Brasileirão é anual
+    get SEASONS() {
+      const yr = new Date().getFullYear();
+      const mo = new Date().getMonth(); // 0-based; julho = 6
+      const eu = mo >= 6 ? String(yr) : String(yr - 1);
+      return { ENG:eu, ESP:eu, ITA:eu, GER:eu, FRA:eu, POR:eu, UCL:eu, HOL:eu, BRA:String(yr) };
+    },
 
     async _p(action, params = {}) {
       const raw = await _proxy.fetch(action, params);
@@ -404,7 +411,7 @@ const ZebraAPI = (() => {
     },
 
     async getFixtures(lid, { last, next } = {}) {
-      const season = this.SEASONS[lid] || '2024';
+      const season = this.SEASONS[lid] || String(new Date().getFullYear());
       const params = { lid, season };
       if (last) params.last = String(last);
       if (next) params.next = String(next);
@@ -432,7 +439,7 @@ const ZebraAPI = (() => {
     },
 
     async getTeamStats(teamId, lid) {
-      const season = this.SEASONS[lid] || '2024';
+      const season = this.SEASONS[lid] || String(new Date().getFullYear());
       return this._p('apif-team-stats', { teamId: String(teamId), lid, season });
     },
 
@@ -447,13 +454,13 @@ const ZebraAPI = (() => {
 
     // Tabela de classificação (mais rica que FD: forma recente, casa/fora)
     async getStandings(lid) {
-      const season = this.SEASONS[lid] || '2024';
+      const season = this.SEASONS[lid] || String(new Date().getFullYear());
       return this._p('apif-standings', { lid, season });
     },
 
     // Artilheiros da liga
     async getTopScorers(lid) {
-      const season = this.SEASONS[lid] || '2024';
+      const season = this.SEASONS[lid] || String(new Date().getFullYear());
       return this._p('apif-top-scorers', { lid, season });
     },
 
@@ -466,26 +473,26 @@ const ZebraAPI = (() => {
 
     // Top assistentes da liga
     async getTopAssists(lid) {
-      const season = this.SEASONS[lid] || '2024';
+      const season = this.SEASONS[lid] || String(new Date().getFullYear());
       return this._p('apif-top-assists', { lid, season });
     },
 
     // Top cartões amarelos da liga
     async getTopYellowCards(lid) {
-      const season = this.SEASONS[lid] || '2024';
+      const season = this.SEASONS[lid] || String(new Date().getFullYear());
       return this._p('apif-top-yellow', { lid, season });
     },
 
     // Top cartões vermelhos da liga
     async getTopRedCards(lid) {
-      const season = this.SEASONS[lid] || '2024';
+      const season = this.SEASONS[lid] || String(new Date().getFullYear());
       return this._p('apif-top-red', { lid, season });
     },
 
     // Estatísticas detalhadas de um jogador na temporada
     // Retorna array de objetos { player, statistics[] }
     async getPlayerStats(playerId, season) {
-      const s = season || '2024';
+      const s = season || String(new Date().getFullYear());
       const raw = await _proxy.fetch('apif-player-stats', { playerId: String(playerId), season: s });
       return raw?.response?.[0] ?? null;
     },
@@ -503,7 +510,7 @@ const ZebraAPI = (() => {
 
     // Rodadas da liga na temporada
     async getRounds(lid, season) {
-      const s = season || this.SEASONS[lid] || '2024';
+      const s = season || this.SEASONS[lid] || String(new Date().getFullYear());
       const raw = await _proxy.fetch('apif-rounds', { lid, season: s });
       return raw?.response ?? null;
     },
