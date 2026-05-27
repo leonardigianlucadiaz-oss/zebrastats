@@ -85,7 +85,7 @@
         <div style="display:flex;align-items:center;gap:12px;">
           <div style="background:rgba(46,230,92,0.12);border:1px solid rgba(46,230,92,0.3);border-radius:8px;padding:6px 12px;display:flex;flex-direction:column;align-items:center;">
             <div style="font-size:1.25rem;font-weight:900;color:var(--green);line-height:1;" id="heroZiValue">–</div>
-            <div style="font-size:0.625rem;color:var(--gray);margin-top:1px;">ZI</div>
+            <div style="font-size:0.6875rem;color:var(--gray);margin-top:1px;">ZI</div>
           </div>
           <div style="font-size:0.8125rem;color:var(--gray);flex:1;" id="heroMatchDesc">Analisando partidas de hoje...</div>
           <a href="zebras.html" style="background:var(--green);color:#000;border-radius:8px;padding:8px 14px;font-size:0.8125rem;font-weight:700;text-decoration:none;white-space:nowrap;flex-shrink:0;">Ver zebras →</a>
@@ -185,7 +185,12 @@
           <div class="shimmer-line" style="width:82%;"></div>
         </div>
 
-        <div id="zebrasDoDiaList" style="display:flex;flex-direction:column;gap:8px;"></div>
+        <div id="zebrasDoDiaList" style="display:flex;flex-direction:column;gap:8px;">
+          <!-- HIER01 — skeletons imediatos antes do JS carregar -->
+          <div class="skel" style="height:72px;border-radius:12px;margin-bottom:8px"></div>
+          <div class="skel" style="height:72px;border-radius:12px;margin-bottom:8px"></div>
+          <div class="skel" style="height:72px;border-radius:12px"></div>
+        </div>
 
         <!-- SPARKLINES POR LIGA -->
         <div id="sparklineSection">
@@ -296,7 +301,7 @@
       background: var(--card2);
       border: 1px solid var(--border);
       display: flex; align-items: center; justify-content: center;
-      font-size: 0.625rem; font-weight: 700; color: var(--gray);
+      font-size: 0.6875rem; font-weight: 700; color: var(--gray);
       overflow: hidden; flex-shrink: 0;
     }
     .gc-crest img { width: 36px; height: 36px; object-fit: contain; }
@@ -344,7 +349,7 @@
     .hot-league-card:hover { border-color: var(--green); transform: translateY(-1px); }
     .hot-league-card__logo { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; }
     .hot-league-card__logo img { width: 28px; height: 28px; object-fit: contain; }
-    .hot-league-card__name { font-size: 0.625rem; font-weight: 600; color: var(--gray); line-height: 1.2; }
+    .hot-league-card__name { font-size: 0.6875rem; font-weight: 600; color: var(--gray); line-height: 1.2; }
     .hot-league-card__count { font-size: 1rem; font-weight: 800; color: var(--white); line-height: 1; }
     .hot-league-card__label { font-size: 0.5625rem; color: var(--gray); }
     .hot-league-card__bar { width: 100%; height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; margin-top: 2px; }
@@ -361,7 +366,7 @@
     }
     .zebra-dia-hero:hover { border-color: var(--green); }
     .zebra-dia-hero__badge {
-      font-size: 0.625rem; font-weight: 700; letter-spacing: 0.5px;
+      font-size: 0.6875rem; font-weight: 700; letter-spacing: 0.5px;
       text-transform: uppercase; color: var(--gold);
       background: var(--gold-dim); border-radius: var(--radius-pill);
       padding: 3px 10px; display: inline-flex; align-items: center; gap: 4px;
@@ -374,17 +379,17 @@
     .zebra-dia-hero__team { display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; }
     .zebra-dia-hero__team.away { align-items: center; }
     .zebra-dia-hero__team-name { font-size: 0.875rem; font-weight: 600; }
-    .zebra-dia-hero__team-role { font-size: 0.625rem; color: var(--gray); }
+    .zebra-dia-hero__team-role { font-size: 0.6875rem; color: var(--gray); }
     .zebra-dia-hero__score { text-align: center; }
     .zebra-dia-hero__score-val { font-size: 2rem; font-weight: 800; line-height: 1; }
     .zebra-dia-hero__zi { font-size: 0.75rem; color: var(--green); font-weight: 700; margin-top: 2px; }
     .zebra-dia-hero__footer { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.06); font-size: 0.75rem; color: var(--gray); }
     .zebra-dia-hero__odd { color: var(--gold); font-weight: 700; background: var(--gold-dim); padding: 2px 8px; border-radius: var(--radius-pill); }
 
-    /* Refined stagger for home sections */
-    .section-header { animation: fadeSlideIn 0.3s ease both; }
-    .game-card { animation: fadeSlideIn 0.35s ease both; }
-    .hot-league-card { animation: fadeSlideIn 0.4s ease both; }
+    /* Refined stagger for home sections — only on first visit (ANIM01) */
+    .animate-entrance .section-header { animation: fadeSlideIn 0.3s ease both; }
+    .animate-entrance .game-card { animation: fadeSlideIn 0.35s ease both; }
+    .animate-entrance .hot-league-card { animation: fadeSlideIn 0.4s ease both; }
     @keyframes fadeSlideIn {
       from { opacity: 0; transform: translateY(10px); }
       to   { opacity: 1; transform: translateY(0); }
@@ -426,6 +431,13 @@
     .sparkline-card svg { width: 100%; height: 36px; }
   </style>
 
+  <script>
+    // ANIM01 — anima entrada apenas na primeira visita da sessão
+    if (!sessionStorage.getItem('zs_home_visited')) {
+      sessionStorage.setItem('zs_home_visited', '1');
+      document.body.classList.add('animate-entrance');
+    }
+  </script>
   <script src="js/config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="js/auth.js"></script>
@@ -473,7 +485,7 @@
       document.getElementById(containerId).innerHTML =
         `<div style="text-align:center;padding:16px 8px;">
           <p class="text-gray text-sm">${msg}</p>
-          ${sub ? `<p style="font-size:0.6875rem;color:var(--border);margin-top:6px;">${sub}</p>` : ''}
+          ${sub ? `<p style="font-size:0.6875rem;color:var(--gray);margin-top:6px;">${sub}</p>` : ''}
         </div>`;
     }
 
@@ -518,7 +530,7 @@
             </div>
             <div class="gc-score-block">
               <div class="gc-score">${g.hs}<span style="color:var(--gray);font-size:1.25rem;margin:0 3px;">–</span>${g.as}</div>
-              ${g.zebra ? `<div style="font-size:0.625rem;color:var(--green);font-weight:700;margin-top:4px;text-align:center;">🦓 ZEBRA</div>` : ''}
+              ${g.zebra ? `<div style="font-size:0.6875rem;color:var(--green);font-weight:700;margin-top:4px;text-align:center;">🦓 ZEBRA</div>` : ''}
             </div>
             <div class="gc-team-block away">
               ${crestBlock(g.awayCrest, g.away)}
@@ -1008,7 +1020,7 @@
       // Data is available — show lock banner for free users (unless already hidden by initZebrasDoDia for PRO)
       if (lockBanner && !isPro) lockBanner.style.display = 'flex';
       const shown = all.slice(0, isPro ? 8 : 3);
-      container.innerHTML = '';
+      container.innerHTML = ''; // HIER01 — limpa skeletons antes de renderizar cards reais
       shown.forEach(z => {
         const cls = z.ziClass || 'leve';
         const clr = cls==='grande'?'var(--red)':cls==='media'?'var(--gold)':'var(--gray)';
@@ -1117,13 +1129,13 @@
       if (!card || !top) return;
       card.style.display = 'block';
       card.innerHTML = `
-        <div style="font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--gold);background:var(--gold-dim);border-radius:var(--radius-pill);padding:3px 10px;display:inline-flex;align-items:center;gap:4px;margin-bottom:10px;">
+        <div style="font-size:0.6875rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--gold);background:var(--gold-dim);border-radius:var(--radius-pill);padding:3px 10px;display:inline-flex;align-items:center;gap:4px;margin-bottom:10px;">
           ⚡ Zebra do Dia · ${top.league}
         </div>
         <div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;">
           <div style="text-align:center;">
             <div style="font-size:0.875rem;font-weight:700;">${top.home||'?'}</div>
-            <div style="font-size:0.625rem;color:var(--gray);">Casa</div>
+            <div style="font-size:0.6875rem;color:var(--gray);">Casa</div>
           </div>
           <div style="text-align:center;">
             <div style="font-size:1.25rem;font-weight:800;">${top.hs}–${top.as}</div>
@@ -1131,7 +1143,7 @@
           </div>
           <div style="text-align:center;">
             <div style="font-size:0.875rem;font-weight:700;">${top.away||'?'}</div>
-            <div style="font-size:0.625rem;color:var(--gray);">Fora</div>
+            <div style="font-size:0.6875rem;color:var(--gray);">Fora</div>
           </div>
         </div>`;
       card.onclick = () => {
