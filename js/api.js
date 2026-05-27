@@ -464,6 +464,50 @@ const ZebraAPI = (() => {
       return raw?.response?.[0]?.players ?? null;
     },
 
+    // Top assistentes da liga
+    async getTopAssists(lid) {
+      const season = this.SEASONS[lid] || '2024';
+      return this._p('apif-top-assists', { lid, season });
+    },
+
+    // Top cartões amarelos da liga
+    async getTopYellowCards(lid) {
+      const season = this.SEASONS[lid] || '2024';
+      return this._p('apif-top-yellow', { lid, season });
+    },
+
+    // Top cartões vermelhos da liga
+    async getTopRedCards(lid) {
+      const season = this.SEASONS[lid] || '2024';
+      return this._p('apif-top-red', { lid, season });
+    },
+
+    // Estatísticas detalhadas de um jogador na temporada
+    // Retorna array de objetos { player, statistics[] }
+    async getPlayerStats(playerId, season) {
+      const s = season || '2024';
+      const raw = await _proxy.fetch('apif-player-stats', { playerId: String(playerId), season: s });
+      return raw?.response?.[0] ?? null;
+    },
+
+    // Transferências de um time (chegadas e saídas)
+    async getTransfers(teamId) {
+      return this._p('apif-transfers', { teamId: String(teamId) });
+    },
+
+    // Treinador atual de um time
+    async getCoach(teamId) {
+      const raw = await _proxy.fetch('apif-coach', { teamId: String(teamId) });
+      return raw?.response?.[0] ?? null;
+    },
+
+    // Rodadas da liga na temporada
+    async getRounds(lid, season) {
+      const s = season || this.SEASONS[lid] || '2024';
+      const raw = await _proxy.fetch('apif-rounds', { lid, season: s });
+      return raw?.response ?? null;
+    },
+
     // Lesionados/suspensos de uma partida ou time
     async getInjuries(params = {}) {
       // params: { fixtureId } ou { teamId, lid } ou { lid }

@@ -164,6 +164,23 @@
         <div class="stats-spark-grid" id="statsSparkGrid"></div>
       </div>
 
+      <!-- TREINADOR (API-Football) -->
+      <div id="coachCard" style="display:none;" class="card">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <img id="coachPhoto" src="" alt="" style="width:48px;height:48px;border-radius:50%;object-fit:cover;border:1px solid var(--border);display:none;">
+          <div id="coachInitials" style="width:48px;height:48px;border-radius:50%;background:var(--card2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:700;flex-shrink:0;">—</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:0.6875rem;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px;">Treinador</div>
+            <div style="font-size:1rem;font-weight:700;" id="coachName">—</div>
+            <div style="font-size:0.75rem;color:var(--gray);" id="coachNat">—</div>
+          </div>
+          <div style="text-align:right;flex-shrink:0;">
+            <div style="font-size:0.6875rem;color:var(--gray);">No clube desde</div>
+            <div style="font-size:0.875rem;font-weight:600;" id="coachSince">—</div>
+          </div>
+        </div>
+      </div>
+
       <!-- ESTATÍSTICAS REAIS (API-Football) — injetado por JS quando disponível -->
       <div id="apifStatsCard" style="display:none;" class="card">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
@@ -719,6 +736,9 @@
           } catch(e) { console.warn('[time] last events error:', e); }
         }
 
+        // Treinador (APIF, async)
+        loadCoach(currentTeam);
+
         // Biggest zebras (async, doesn't block)
         renderBiggestZebras(currentTeamData.name);
 
@@ -777,6 +797,44 @@
         loadTeam(decodeURIComponent(_savedTeam));
       }
       // else: show empty hero — user picks a team from selector
+    }
+
+    // ── CARREGAR TREINADOR (APIF) ─────────────────────────────────
+    async function loadCoach(teamName) {
+      if (!ZebraAPI.isConfigured.apiFootball()) return;
+      try {
+        let apifTeamId = window._apifTeamId || null;
+        if (!apifTeamId) {
+          const results = await ZebraAPI.apiFootball.searchTeam(teamName);
+          apifTeamId = results?.[0]?.team?.id || null;
+          if (apifTeamId) window._apifTeamId = apifTeamId;
+        }
+        if (!apifTeamId) return;
+        const coach = await ZebraAPI.apiFootball.getCoach(apifTeamId);
+        if (!coach) return;
+        const card = document.getElementById('coachCard');
+        const photoEl = document.getElementById('coachPhoto');
+        const initEl  = document.getElementById('coachInitials');
+        const nameEl  = document.getElementById('coachName');
+        const natEl   = document.getElementById('coachNat');
+        const sinceEl = document.getElementById('coachSince');
+        if (!card) return;
+        if (coach.photo) {
+          photoEl.src = coach.photo;
+          photoEl.style.display = 'block';
+          initEl.style.display  = 'none';
+        } else {
+          initEl.textContent = (coach.name || '?').substring(0,2).toUpperCase();
+        }
+        nameEl.textContent  = coach.name || '—';
+        natEl.textContent   = [coach.nationality, coach.age ? `${coach.age} anos` : ''].filter(Boolean).join(' · ');
+        // career: entry at current team
+        const career = Array.isArray(coach.career) ? coach.career : [];
+        const teamId = String(apifTeamId);
+        const entry  = career.find(c => String(c.team?.id) === teamId);
+        sinceEl.textContent = entry?.start ? entry.start.substring(0,7) : '—';
+        card.style.display = 'block';
+      } catch(e) { console.warn('[time] loadCoach error:', e); }
     }
 
     // ── API REAL DATA — legacy initRealData kept as no-op ─────────
@@ -1115,27 +1173,102 @@
       }
     }
 
-    // ── RENDER TRANSFERS ──────────────────────────────────
-    // Show Transfermarkt link — no fake data
-    function renderTransfers() {
+    // ── RENDER TRANSFERS (via APIF) ───────────────────────
+    async function renderTransfers() {
       const inEl  = document.getElementById('transfersIn');
       const outEl = document.getElementById('transfersOut');
       if (!inEl || !outEl) return;
 
-      const tname = currentTeamData?.name || currentTeam || '';
-      const tmQuery = encodeURIComponent(tname);
-      const tmLink = `https://www.transfermarkt.com.br/schnellsuche/ergebnis/schnellsuche?query=${tmQuery}`;
-      const linkHtml = `
-        <div style="padding:20px;text-align:center;color:var(--gray);font-size:0.8125rem;">
-          <div style="margin-bottom:10px;">Dados de transferências disponíveis no Transfermarkt.</div>
+      inEl.innerHTML  = `<div style="padding:16px;text-align:center;color:var(--gray);font-size:0.8125rem;">Carregando transferências...</div>`;
+      outEl.innerHTML = `<div style="padding:16px;text-align:center;color:var(--gray);font-size:0.8125rem;"></div>`;
+
+      // Busca APIF team ID se ainda não temos
+      let apifTeamId = window._apifTeamId || null;
+      if (!apifTeamId && currentTeam) {
+        try {
+          const results = await ZebraAPI.apiFootball.searchTeam(currentTeam);
+          apifTeamId = results?.[0]?.team?.id || null;
+          if (apifTeamId) window._apifTeamId = apifTeamId;
+        } catch {}
+      }
+
+      if (!apifTeamId) {
+        const tname = currentTeamData?.name || currentTeam || '';
+        const tmLink = `https://www.transfermarkt.com.br/schnellsuche/ergebnis/schnellsuche?query=${encodeURIComponent(tname)}`;
+        const html = `<div style="padding:16px;text-align:center;color:var(--gray);font-size:0.8125rem;">
           <a href="${tmLink}" target="_blank" rel="noopener noreferrer"
-             style="display:inline-flex;align-items:center;gap:5px;font-size:0.8125rem;color:var(--green);font-weight:600;text-decoration:none;">
-            <i data-lucide="external-link" style="width:13px;height:13px;"></i>
-            Ver no Transfermarkt
-          </a>
-        </div>`;
-      inEl.innerHTML  = linkHtml;
-      outEl.innerHTML = linkHtml;
+             style="color:var(--green);font-weight:600;text-decoration:none;">Ver no Transfermarkt →</a></div>`;
+        inEl.innerHTML = outEl.innerHTML = html;
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+        return;
+      }
+
+      try {
+        const raw = await ZebraAPI.apiFootball.getTransfers(apifTeamId);
+        if (!raw || !raw.length) {
+          inEl.innerHTML = outEl.innerHTML = `<div style="padding:16px;text-align:center;color:var(--gray);font-size:0.8125rem;">Nenhuma transferência recente</div>`;
+          return;
+        }
+
+        // Filtra transferências dos últimos 2 anos
+        const cutoff = new Date();
+        cutoff.setFullYear(cutoff.getFullYear() - 2);
+        const recent = raw.filter(t => t.transfers?.some(tr => new Date(tr.date) >= cutoff));
+
+        const arrivals = [], departures = [];
+        (recent.length ? recent : raw).forEach(item => {
+          const pl = item.player;
+          (item.transfers || []).forEach(tr => {
+            const entry = {
+              name: pl?.name || '—',
+              photo: pl?.photo || '',
+              from: tr.teams?.out?.name || '—',
+              fromLogo: tr.teams?.out?.logo || '',
+              to: tr.teams?.in?.name || '—',
+              toLogo: tr.teams?.in?.logo || '',
+              type: tr.type || '—',
+              date: tr.date || '',
+              fee: tr.type === 'Free' ? 'Livre' : tr.type === 'Loan' ? 'Empréstimo' : tr.type || '—',
+            };
+            const currentName = (currentTeamData?.name || currentTeam || '').toLowerCase();
+            const toName = (entry.to || '').toLowerCase();
+            const fromName = (entry.from || '').toLowerCase();
+            if (toName.includes(currentName.split(' ')[0]) || currentName.includes(toName.split(' ')[0])) arrivals.push(entry);
+            else departures.push(entry);
+          });
+        });
+
+        function transferRow(t, i, total) {
+          const border = i < total-1 ? 'border-bottom:1px solid var(--border);' : '';
+          const photoHtml = t.photo
+            ? `<img src="${t.photo}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0;" onerror="this.style.display='none'">`
+            : `<div style="width:36px;height:36px;border-radius:50%;background:var(--card2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:0.625rem;font-weight:700;flex-shrink:0;">${(t.name||'?').substring(0,2).toUpperCase()}</div>`;
+          const clubLogo = logo => logo ? `<img src="${logo}" style="width:14px;height:14px;object-fit:contain;vertical-align:middle;margin-right:3px;" onerror="this.remove()">` : '';
+          const feeColor = t.fee === 'Livre' ? 'var(--green)' : t.fee === 'Empréstimo' ? 'var(--gold)' : 'var(--gray)';
+          return `<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;${border}">
+            ${photoHtml}
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:0.9rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${t.name}</div>
+              <div style="font-size:0.7rem;color:var(--gray);margin-top:2px;">${clubLogo(t.fromLogo)}${t.from} → ${clubLogo(t.toLogo)}${t.to}</div>
+            </div>
+            <div style="text-align:right;flex-shrink:0;">
+              <div style="font-size:0.75rem;font-weight:600;color:${feeColor};">${t.fee}</div>
+              <div style="font-size:0.6875rem;color:var(--gray);">${t.date ? t.date.substring(0,7) : ''}</div>
+            </div>
+          </div>`;
+        }
+
+        inEl.innerHTML = arrivals.length
+          ? arrivals.slice(0,8).map((t,i) => transferRow(t, i, Math.min(arrivals.length,8))).join('')
+          : `<div style="padding:16px;text-align:center;color:var(--gray);font-size:0.8125rem;">Nenhuma chegada recente</div>`;
+        outEl.innerHTML = departures.length
+          ? departures.slice(0,8).map((t,i) => transferRow(t, i, Math.min(departures.length,8))).join('')
+          : `<div style="padding:16px;text-align:center;color:var(--gray);font-size:0.8125rem;">Nenhuma saída recente</div>`;
+
+      } catch(e) {
+        console.warn('[time] transfers error:', e);
+        inEl.innerHTML = outEl.innerHTML = `<div style="padding:16px;text-align:center;color:var(--gray);font-size:0.8125rem;">Dados de transferências indisponíveis</div>`;
+      }
       if (typeof lucide !== 'undefined') lucide.createIcons();
     }
 

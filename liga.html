@@ -162,6 +162,12 @@
       <div class="section-header"><span class="section-title"><i data-lucide="corner-up-right" class="sec-ic"></i>Assistências</span></div>
       <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;margin-bottom:16px;" id="assistencias"></div>
 
+      <div class="section-header"><span class="section-title" style="color:var(--gold);">🟨 Cartões Amarelos</span></div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;margin-bottom:16px;" id="cartaoAmarelo"></div>
+
+      <div class="section-header"><span class="section-title" style="color:var(--red);">🟥 Cartões Vermelhos</span></div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;margin-bottom:16px;" id="cartaoVermelho"></div>
+
       <div class="section-header"><span class="section-title"><i data-lucide="bar-chart-2" class="sec-ic"></i>Clubes — Zebra Index</span></div>
       <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;" id="clubeStats"></div>
     </div>
@@ -632,72 +638,91 @@
 
   // ── STATS ─────────────────────────────────────────────────────────
   function renderStats() {
-    // FIX 17 — guard against empty CLUBE_STATS
-    if (!CLUBE_STATS || !CLUBE_STATS.length) {
-      const csEl = document.getElementById('clubeStats');
-      if (csEl) csEl.innerHTML = '<div style="padding:20px;text-align:center;color:var(--gray);font-size:0.8125rem;">Dados indisponíveis</div>';
-      return;
+    // Helper: avatar com foto real (APIF) ou iniciais como fallback
+    function playerAvatar(p) {
+      if (p.photo) {
+        return `<img src="${p.photo}" alt="${p.name}" style="width:38px;height:38px;border-radius:50%;object-fit:cover;border:1px solid var(--border);flex-shrink:0;" onerror="this.outerHTML=fallbackAvatar('${p.name}')">`;
+      }
+      const initials = (p.name||'?').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+      return `<div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--card2),var(--border));border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;flex-shrink:0;">${initials}</div>`;
     }
-    // Artilheiros com avatar
-    function playerAvatar(name, flag) {
-      const initials = name.split(' ').map(w => w[0]).join('').substring(0,2).toUpperCase();
-      return `<div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--card2),var(--border));border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;flex-shrink:0;position:relative;">
-        ${initials}<span style="position:absolute;bottom:-2px;right:-2px;font-size:0.75rem;line-height:1;">${flag}</span>
+    function teamLogo(p) {
+      return p.teamLogo ? `<img src="${p.teamLogo}" style="width:14px;height:14px;object-fit:contain;vertical-align:middle;margin-right:3px;" onerror="this.remove()">` : '';
+    }
+    function playerRow(p, i, total, mainVal, mainLabel, mainColor, secVal, secLabel, secColor) {
+      const medal = {0:'🥇',1:'🥈',2:'🥉'}[i] || `<span style="font-size:0.875rem;font-weight:700;color:var(--gray);">#${i+1}</span>`;
+      const border = i < total-1 ? 'border-bottom:1px solid var(--border);' : '';
+      const clickable = p.id ? `cursor:pointer;` : '';
+      return `<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;${border}${clickable}"
+          ${p.id ? `onclick="window.location.href='jogador.html?playerId=${p.id}&name=${encodeURIComponent(p.name)}&team=${encodeURIComponent(p.team)}&season=${encodeURIComponent(ZebraAPI.apiFootball.SEASONS[activeLid]||'2024')}&lid=${activeLid}'"` : ''}>
+        <span style="font-size:1.125rem;min-width:28px;text-align:center;">${medal}</span>
+        ${playerAvatar(p)}
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:0.9375rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.name}</div>
+          <div style="font-size:0.75rem;color:var(--gray);">${teamLogo(p)}${p.team}</div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;">
+          <div style="text-align:center;min-width:36px;">
+            <span style="font-size:1.25rem;font-weight:700;color:${mainColor};">${mainVal}</span>
+            <div style="font-size:0.625rem;color:var(--gray);">${mainLabel}</div>
+          </div>
+          ${secVal !== undefined && secVal !== null ? `<div style="text-align:center;min-width:30px;">
+            <span style="font-size:0.9375rem;font-weight:600;color:${secColor};">${secVal}</span>
+            <div style="font-size:0.625rem;color:var(--gray);">${secLabel}</div>
+          </div>` : ''}
+        </div>
       </div>`;
     }
 
+    // ── Artilheiros ──────────────────────────────────────────
     const artEl = document.getElementById('artilheiros');
-    artEl.innerHTML = '';
-    ARTILHEIROS.forEach((p, i) => {
-      const row = document.createElement('div');
-      row.style.cssText = 'display:flex;align-items:center;gap:12px;padding:10px 14px;' + (i < ARTILHEIROS.length-1 ? 'border-bottom:1px solid var(--border);' : '');
-      const medal = {0:'🥇',1:'🥈',2:'🥉'}[i] || `<span style="font-size:0.875rem;font-weight:700;color:var(--gray);">#${i+1}</span>`;
-      row.innerHTML = `
-        <span style="font-size:1.125rem;min-width:28px;text-align:center;">${medal}</span>
-        ${playerAvatar(p.name, p.flag)}
-        <div style="flex:1;min-width:0;">
-          <div style="font-size:0.9375rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.name}</div>
-          <div style="font-size:0.75rem;color:var(--gray);">${p.team}</div>
-        </div>
-        <div style="display:flex;gap:10px;align-items:center;">
-          <div style="text-align:center;min-width:36px;">
-            <span style="font-size:1.25rem;font-weight:700;color:var(--green);">${p.gols}</span>
-            <div style="font-size:0.625rem;color:var(--gray);">gols</div>
-          </div>
-          ${p.ast !== undefined ? `<div style="text-align:center;min-width:30px;">
-            <span style="font-size:0.9375rem;font-weight:600;color:var(--gold);">${p.ast}</span>
-            <div style="font-size:0.625rem;color:var(--gray);">ast</div>
-          </div>` : ''}
-        </div>`;
-      artEl.appendChild(row);
-    });
+    if (artEl) {
+      if (!ARTILHEIROS.length) {
+        artEl.innerHTML = '<div style="padding:16px;text-align:center;color:var(--gray);font-size:0.8125rem;">Carregando...</div>';
+      } else {
+        artEl.innerHTML = ARTILHEIROS.slice(0,10).map((p,i) =>
+          playerRow(p, i, Math.min(ARTILHEIROS.length,10), p.gols, 'gols', 'var(--green)', p.ast, 'ast', 'var(--gold)')
+        ).join('');
+      }
+    }
 
-    // Assistências com avatar
+    // ── Top Assistentes ──────────────────────────────────────
     const astEl = document.getElementById('assistencias');
-    astEl.innerHTML = '';
-    ASSISTENCIAS.forEach((p, i) => {
-      const row = document.createElement('div');
-      row.style.cssText = 'display:flex;align-items:center;gap:12px;padding:10px 14px;' + (i < ASSISTENCIAS.length-1 ? 'border-bottom:1px solid var(--border);' : '');
-      const medal = {0:'🥇',1:'🥈',2:'🥉'}[i] || `<span style="font-size:0.875rem;font-weight:700;color:var(--gray);">#${i+1}</span>`;
-      row.innerHTML = `
-        <span style="font-size:1.125rem;min-width:28px;text-align:center;">${medal}</span>
-        ${playerAvatar(p.name, p.flag)}
-        <div style="flex:1;min-width:0;">
-          <div style="font-size:0.9375rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.name}</div>
-          <div style="font-size:0.75rem;color:var(--gray);">${p.team}</div>
-        </div>
-        <div style="display:flex;gap:10px;align-items:center;">
-          <div style="text-align:center;min-width:36px;">
-            <span style="font-size:1.25rem;font-weight:700;color:var(--gold);">${p.ast}</span>
-            <div style="font-size:0.625rem;color:var(--gray);">ast</div>
-          </div>
-          ${p.gols !== undefined ? `<div style="text-align:center;min-width:30px;">
-            <span style="font-size:0.9375rem;font-weight:600;color:var(--green);">${p.gols}</span>
-            <div style="font-size:0.625rem;color:var(--gray);">gols</div>
-          </div>` : ''}
-        </div>`;
-      astEl.appendChild(row);
-    });
+    if (astEl) {
+      if (!ASSISTENCIAS.length) {
+        astEl.innerHTML = '<div style="padding:16px;text-align:center;color:var(--gray);font-size:0.8125rem;">Carregando...</div>';
+      } else {
+        astEl.innerHTML = ASSISTENCIAS.slice(0,10).map((p,i) =>
+          playerRow(p, i, Math.min(ASSISTENCIAS.length,10), p.ast, 'ast', 'var(--gold)', p.gols, 'gols', 'var(--green)')
+        ).join('');
+      }
+    }
+
+    // ── Cartões Amarelos ─────────────────────────────────────
+    const yelEl = document.getElementById('cartaoAmarelo');
+    if (yelEl) {
+      const yc = window._yellowCards || [];
+      if (!yc.length) {
+        yelEl.innerHTML = '<div style="padding:16px;text-align:center;color:var(--gray);font-size:0.8125rem;">Carregando...</div>';
+      } else {
+        yelEl.innerHTML = yc.map((p,i) =>
+          playerRow(p, i, yc.length, p.yellow, '🟨', 'var(--gold)', p.red || 0, '🟥', 'var(--red)')
+        ).join('');
+      }
+    }
+
+    // ── Cartões Vermelhos ────────────────────────────────────
+    const redEl = document.getElementById('cartaoVermelho');
+    if (redEl) {
+      const rc = window._redCards || [];
+      if (!rc.length) {
+        redEl.innerHTML = '<div style="padding:16px;text-align:center;color:var(--gray);font-size:0.8125rem;">Carregando...</div>';
+      } else {
+        redEl.innerHTML = rc.map((p,i) =>
+          playerRow(p, i, rc.length, p.red, '🟥', 'var(--red)', p.yellow, '🟨', 'var(--gold)')
+        ).join('');
+      }
+    }
 
     // Clube stats — Zebra Index ranking com barra de progresso
     const csEl = document.getElementById('clubeStats');
@@ -994,9 +1019,141 @@
       }
     }
 
+    // ── Artilheiros via APIF (foto real, stats completos) ──────
+    async function loadApifScorers() {
+      if (!ZebraAPI.isConfigured.apiFootball()) return;
+      try {
+        const raw = await ZebraAPI.apiFootball.getTopScorers(lid);
+        if (!raw || !raw.length) return;
+        // Preenche artilheiros se APIF retornou dados (mais ricos que FD)
+        ARTILHEIROS.length = 0;
+        raw.slice(0, 15).forEach(item => {
+          const pl = item.player;
+          const st = item.statistics?.[0];
+          if (!pl || !st) return;
+          ARTILHEIROS.push({
+            id: pl.id, name: pl.name,
+            photo: pl.photo || '',
+            team: st.team?.name || '',
+            teamLogo: st.team?.logo || '',
+            nationality: pl.nationality || '',
+            gols: st.goals?.total || 0,
+            ast: st.goals?.assists || 0,
+            flag: pl.nationality ? '🌐' : '🌍',
+          });
+        });
+        if (activeTab === 'stats') renderStats();
+      } catch(e) { console.warn('[liga] apif scorers error:', e); }
+    }
+
+    // ── Top Assistentes APIF ────────────────────────────────────
+    async function loadApifAssists() {
+      if (!ZebraAPI.isConfigured.apiFootball()) return;
+      try {
+        const raw = await ZebraAPI.apiFootball.getTopAssists(lid);
+        if (!raw || !raw.length) return;
+        ASSISTENCIAS.length = 0;
+        raw.slice(0, 10).forEach(item => {
+          const pl = item.player;
+          const st = item.statistics?.[0];
+          if (!pl || !st) return;
+          ASSISTENCIAS.push({
+            id: pl.id, name: pl.name,
+            photo: pl.photo || '',
+            team: st.team?.name || '',
+            teamLogo: st.team?.logo || '',
+            ast: st.goals?.assists || 0,
+            gols: st.goals?.total || 0,
+            flag: '🌍',
+          });
+        });
+        if (activeTab === 'stats') renderStats();
+      } catch(e) { console.warn('[liga] apif assists error:', e); }
+    }
+
+    // ── Top Cartões Amarelos APIF ───────────────────────────────
+    async function loadApifYellowCards() {
+      if (!ZebraAPI.isConfigured.apiFootball()) return;
+      try {
+        const raw = await ZebraAPI.apiFootball.getTopYellowCards(lid);
+        if (!raw || !raw.length) return;
+        window._yellowCards = raw.slice(0, 10).map(item => {
+          const pl = item.player;
+          const st = item.statistics?.[0];
+          return {
+            id: pl?.id, name: pl?.name || '—',
+            photo: pl?.photo || '',
+            team: st?.team?.name || '',
+            yellow: st?.cards?.yellow || 0,
+            red: st?.cards?.red || 0,
+          };
+        });
+        if (activeTab === 'stats') renderStats();
+      } catch(e) { console.warn('[liga] yellow cards error:', e); }
+    }
+
+    // ── Top Cartões Vermelhos APIF ──────────────────────────────
+    async function loadApifRedCards() {
+      if (!ZebraAPI.isConfigured.apiFootball()) return;
+      try {
+        const raw = await ZebraAPI.apiFootball.getTopRedCards(lid);
+        if (!raw || !raw.length) return;
+        window._redCards = raw.slice(0, 10).map(item => {
+          const pl = item.player;
+          const st = item.statistics?.[0];
+          return {
+            id: pl?.id, name: pl?.name || '—',
+            photo: pl?.photo || '',
+            team: st?.team?.name || '',
+            yellow: st?.cards?.yellow || 0,
+            red: st?.cards?.red || 0,
+          };
+        });
+        if (activeTab === 'stats') renderStats();
+      } catch(e) { console.warn('[liga] red cards error:', e); }
+    }
+
+    // ── Jogos via APIF (next + last) ────────────────────────────
+    async function loadApifMatches() {
+      if (!ZebraAPI.isConfigured.apiFootball()) return;
+      try {
+        const [nextRaw, lastRaw, liveRaw] = await Promise.all([
+          ZebraAPI.apiFootball.getFixtures(lid, { next: 8 }).catch(() => null),
+          ZebraAPI.apiFootball.getFixtures(lid, { last: 8 }).catch(() => null),
+          ZebraAPI.apiFootball.getLiveFixtures(lid).catch(() => null),
+        ]);
+
+        const mapF = f => ZebraAPI.apiFootball.transformFixture(f);
+
+        const proximos = (nextRaw || []).map(mapF).filter(Boolean).map(m => ({
+          home: m.home, away: m.away, homeLogo: m.homeLogo, awayLogo: m.awayLogo,
+          time: m.time, date: m.date, league: m.round || activeLid,
+        }));
+        const encerrados = (lastRaw || []).map(mapF).filter(Boolean).map(m => ({
+          home: m.home, away: m.away, hs: m.hs, as: m.as,
+          date: m.date, league: m.round || activeLid, round: m.round,
+        }));
+        const aovivo = (liveRaw || []).map(mapF).filter(Boolean).map(m => ({
+          home: m.home, away: m.away, hs: m.hs, as: m.as,
+          min: `${m.elapsed || '?'}'`, league: activeLid, round: m.round,
+        }));
+
+        if (proximos.length)   JOGOS.proximos   = proximos;
+        if (encerrados.length) JOGOS.encerrados = encerrados;
+        if (aovivo.length)     JOGOS.aovivo     = aovivo;
+
+        if (activeTab === 'jogos') renderJogos();
+      } catch(e) { console.warn('[liga] apif matches error:', e); }
+    }
+
     loadStandings();
     loadFDMatches();
+    loadApifMatches();
     loadFDScorers();
+    loadApifScorers();
+    loadApifAssists();
+    loadApifYellowCards();
+    loadApifRedCards();
     loadZebrasLiga();
   }
   // ── URL PARAM ?id= ─────────────────────────────────────────────
