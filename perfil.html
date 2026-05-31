@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/main.css?v=12" />
+  <link rel="stylesheet" href="css/main.css?v=14" />
   <script src="https://unpkg.com/lucide@0.363.0/dist/umd/lucide.min.js"></script>
 </head>
 <body>
@@ -170,32 +170,6 @@
         </div>
         <span class="profile-menu-item__arrow">›</span>
       </a>
-    </div>
-
-    <!-- STATS DO USUÁRIO -->
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px;margin:0 16px 16px;" id="userStatsCard">
-      <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px;">
-        <i data-lucide="bar-chart-2" style="width:14px;height:14px;color:var(--green);"></i>
-        <span style="font-size:0.875rem;font-weight:600;">Sua Atividade</span>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-        <div style="background:var(--card2);border-radius:var(--radius-md);padding:12px;text-align:center;">
-          <div style="font-size:1.5rem;font-weight:800;color:var(--green);" id="statAlertasCard">0</div>
-          <div style="font-size:0.6875rem;color:var(--gray);margin-top:3px;">Alertas criados</div>
-        </div>
-        <div style="background:var(--card2);border-radius:var(--radius-md);padding:12px;text-align:center;">
-          <div style="font-size:1.5rem;font-weight:800;color:var(--gold);" id="statFavsCard">0</div>
-          <div style="font-size:0.6875rem;color:var(--gray);margin-top:3px;">Times favoritos</div>
-        </div>
-        <div style="background:var(--card2);border-radius:var(--radius-md);padding:12px;text-align:center;">
-          <div style="font-size:1.5rem;font-weight:800;color:var(--gold);" id="statDiasCard">1</div>
-          <div style="font-size:0.6875rem;color:var(--gray);margin-top:3px;">Dias na plataforma</div>
-        </div>
-        <div style="background:var(--card2);border-radius:var(--radius-md);padding:12px;text-align:center;">
-          <div style="font-size:1.5rem;font-weight:800;color:var(--green);" id="statLigasCard">0</div>
-          <div style="font-size:0.6875rem;color:var(--gray);margin-top:3px;">Ligas seguidas</div>
-        </div>
-      </div>
     </div>
 
     <!-- ASSINATURA -->
@@ -499,13 +473,11 @@
     const darkToggle  = document.getElementById('darkToggle');
     const notifToggle = document.getElementById('notifToggle');
 
-    // FIX 23 — sync checkbox with actual zs_theme value
     const currentTheme = localStorage.getItem('zs_theme') || 'dark';
     darkToggle.checked = (currentTheme === 'dark');
     if (localStorage.getItem('zs_push_notifs') === 'false') notifToggle.checked = false;
 
     darkToggle.addEventListener('change', function() {
-      // FIX 23 — always call toggleTheme() to keep zs_theme in sync
       if (typeof toggleTheme === 'function') {
         toggleTheme();
       } else {
@@ -566,7 +538,6 @@
     document.getElementById('statFavTimes').textContent = favTeams.length;
     document.getElementById('statFavLigas').textContent = favLeagues.length;
 
-    // Atualiza subtítulo da seção de favoritos
     const meta = getFavTeamsData();
     const names = favTeams.map(id => meta[id]?.name || id).filter(Boolean);
     const countEl = document.getElementById('favTeamsCount');
@@ -612,7 +583,6 @@
       grid.appendChild(chip);
     });
 
-    // Botão adicionar
     const addChip = document.createElement('div');
     addChip.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;opacity:0.6;';
     addChip.innerHTML = `
@@ -623,7 +593,7 @@
   }
   renderFavTeamsVisual();
 
-  // ── AVATAR UPLOAD (unified — saves to both zs_avatar and zs_user_avatar) ──
+  // ── AVATAR UPLOAD ──────────────────────────────────────────────
   const avatarUpload = document.getElementById('avatarUpload');
   if (avatarUpload) {
     avatarUpload.addEventListener('change', function(e) {
@@ -632,7 +602,6 @@
       const reader = new FileReader();
       reader.onload = function(ev) {
         const rawDataUrl = ev.target.result;
-        // Compress/resize to max 128×128 before storing to avoid 5MB localStorage overflow
         const imgEl = new Image();
         imgEl.onload = function() {
           const canvas = document.createElement('canvas');
@@ -641,8 +610,7 @@
           canvas.width  = Math.round(imgEl.width  * ratio);
           canvas.height = Math.round(imgEl.height * ratio);
           canvas.getContext('2d').drawImage(imgEl, 0, 0, canvas.width, canvas.height);
-          const compressed = canvas.toDataURL('image/jpeg', 0.7); // ~5-15KB max
-          // Save to both keys so sidebar and profile stay in sync
+          const compressed = canvas.toDataURL('image/jpeg', 0.7);
           try { localStorage.setItem('zs_avatar', compressed); } catch {}
           try { localStorage.setItem('zs_user_avatar', compressed); } catch {}
           document.querySelectorAll('.profile-avatar, #avatarEl, #profileAvatar, .sidebar__user-avatar, #sidebarAvatar').forEach(el => {
@@ -654,7 +622,6 @@
       };
       reader.readAsDataURL(file);
     });
-    // Load saved avatar on page load (prefer zs_user_avatar, fall back to zs_avatar)
     const savedAvatar = localStorage.getItem('zs_user_avatar') || localStorage.getItem('zs_avatar');
     if (savedAvatar) {
       document.querySelectorAll('.profile-avatar, #avatarEl, #profileAvatar, .sidebar__user-avatar, #sidebarAvatar').forEach(el => {
@@ -670,7 +637,6 @@
     const favs       = JSON.parse(localStorage.getItem('zebrastats_favorites') || '[]');
     const ligas      = JSON.parse(localStorage.getItem('zebrastats_fav_leagues') || '[]');
 
-    // Fix MISS-6: use Supabase created_at as authoritative join date; fall back to Date.now() for guests
     let joinDateMs = parseInt(localStorage.getItem('zs_join_date') || '0');
     const isGuest = localStorage.getItem('zs_guest') === '1';
     if (!joinDateMs) {
@@ -692,11 +658,9 @@
     if (el('statFavsCard'))    el('statFavsCard').textContent    = favs.length;
     if (el('statDiasCard'))    el('statDiasCard').textContent    = dias;
     if (el('statLigasCard'))   el('statLigasCard').textContent   = ligas.length;
-    // Hero stats (top summary row)
     if (el('statAlertas'))  el('statAlertas').textContent  = alertsData.length;
     if (el('statFavTimes')) el('statFavTimes').textContent = favs.length;
     if (el('statFavLigas')) el('statFavLigas').textContent = ligas.length;
-    // statZebras: only show real tracked value; hide with "—" if not yet tracked
     const zebrasSeen = parseInt(localStorage.getItem('zs_zebras_seen') || '0');
     if (el('statZebras')) el('statZebras').textContent = zebrasSeen > 0 ? zebrasSeen : '—';
   }
@@ -715,24 +679,20 @@
     document.getElementById('editEmail').value       = savedEmail;
   }
 
-  // Atualiza nome ao salvar perfil (com sync Supabase — Fix CQ-13)
   window.saveProfile = async function() {
     const name  = document.getElementById('editName').value.trim();
     const email = document.getElementById('editEmail').value.trim();
     const btn = document.querySelector('#editDadosModal .btn--primary');
     if (btn) { btn.disabled = true; btn.textContent = 'Salvando…'; }
 
-    // Persist to localStorage
     if (name)  { localStorage.setItem('zs_user_name', name); }
     if (email) { localStorage.setItem('zs_user_email', email); }
 
-    // Sync to Supabase
     if (name || email) {
       const { error } = await ZebraDB.dbUpdateProfile({ name, email });
       if (error) console.warn('[perfil] dbUpdateProfile error:', error.message);
     }
 
-    // Update UI
     if (name)  document.getElementById('userName').textContent  = name;
     if (email) document.getElementById('userEmail').textContent = email;
     if (name)  document.getElementById('avatarEl').textContent  = name[0].toUpperCase();
@@ -746,7 +706,6 @@
     showToast('✓ Dados atualizados!');
   };
 
-  // Inicializa dados reais
   ZebraAuth.initAuthUI();
   if (typeof lucide !== 'undefined') lucide.createIcons();
 
@@ -754,7 +713,7 @@
   function _activityHeatmap() {
     const grid = document.getElementById('activityGrid');
     if (!grid) return;
-    const days = 56; // 8 weeks × 7 days
+    const days = 56;
     const actData = JSON.parse(localStorage.getItem('zs_activity_days') || '{}');
     const hasRealData = Object.keys(actData).length > 0;
     if (!hasRealData) {
@@ -791,7 +750,6 @@
     function _maybeShowAdminBtnPerfil() {
       const email = localStorage.getItem('zs_email') || ''
       if (email !== 'leonardi.gianluca.diaz@gmail.com') return
-      // Usa o container da seção "Minha Conta"
       const container = document.querySelector('#editarDados')?.closest('div[style*="background:var(--card)"]')
       if (!container) return
       const adminItem = document.createElement('a')
@@ -818,6 +776,3 @@
 </script>
 </body>
 </html>
-
-
-

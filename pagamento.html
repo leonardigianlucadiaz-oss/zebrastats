@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/main.css?v=12" />
+  <link rel="stylesheet" href="css/main.css?v=14" />
   <script src="https://unpkg.com/lucide@0.363.0/dist/umd/lucide.min.js"></script>
   <style>
     .navbar__icon i { display: block; }
@@ -380,61 +380,6 @@
     return true;
   }
 
-  // ── CONFIRMAR PAGAMENTO ───────────────────────────────────────
-  async function processPayment() {
-    if (!_validatePaymentForm()) return;
-
-    const btn = document.getElementById('confirmBtn');
-    btn.textContent = 'Processando...';
-    btn.disabled = true;
-
-    try {
-      const user = await ZebraAuth.getSessionUser();
-      if (!user) { window.location.href = 'index.html'; return; }
-
-      const STRIPE_PRICE_ID = 'price_1QYourPriceIdHere'; // substituir após criar produto no Stripe
-      const PROXY = 'https://wjiicdzpjxacqjwxmtqy.supabase.co/functions/v1/create-checkout';
-
-      // Fix #12: bloqueia se o price ID ainda é placeholder
-      if (STRIPE_PRICE_ID.includes('YourPriceId')) {
-        showToast('⚙️ Pagamento em configuração. Tente novamente em breve.');
-        btn.textContent = 'Confirmar Pagamento';
-        btn.disabled = false;
-        return;
-      }
-
-      const sb = ZebraAuth.getSupabase();
-      const { data: { session: authSession } } = await sb.auth.getSession();
-
-      // Fix #1: usa BASE_URL para URLs de redirect (GitHub Pages compatível)
-      const base = (typeof ZEBRA_CONFIG !== 'undefined') ? ZEBRA_CONFIG.BASE_URL : window.location.origin;
-
-      const res = await fetch(PROXY, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authSession.access_token}`,
-          'apikey': ZEBRA_CONFIG.SUPABASE_ANON,
-        },
-        body: JSON.stringify({
-          priceId:    STRIPE_PRICE_ID,
-          userId:     user.id,
-          successUrl: `${base}/home.html?upgrade=success`,
-          cancelUrl:  `${base}/pagamento.html`,
-        })
-      });
-
-      const { url, error } = await res.json();
-      if (error || !url) throw new Error(error || 'Erro ao criar sessão de pagamento');
-      window.location.href = url;
-
-    } catch(err) {
-      showToast('Erro ao processar pagamento: ' + err.message);
-      btn.textContent = 'Confirmar Pagamento';
-      btn.disabled = false;
-    }
-  }
-
   // ── CHECKOUT REAL VIA STRIPE (Fix [17]) ───────────────────────
   async function _startCheckout() {
     const btn = document.querySelector('#confirmBtn, .pay-btn, [data-pay-btn]')
@@ -508,6 +453,3 @@
 <script src="js/admin.js"></script>
 </body>
 </html>
-
-
-
