@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/main.css?v=12" />
+  <link rel="stylesheet" href="css/main.css?v=14" />
   <script src="https://unpkg.com/lucide@0.363.0/dist/umd/lucide.min.js"></script>
 </head>
 <body>
@@ -102,7 +102,7 @@
       <div class="rank-skeleton"></div>
       <div class="rank-skeleton"></div>
     </div>
-    <div id="rankingList" style="display:none;flex-direction:column;gap:10px;"></div>
+    <div id="rankingList" class="ranking-list-grid" style="display:none;gap:10px;"></div>
 
     <!-- BAR CHART SECTION -->
     <div id="rankBarChart" style="display:none;margin-top:16px;padding:14px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);">
@@ -552,8 +552,7 @@ function showRanking() {
   document.getElementById('skeletonList').style.display = 'none';
   document.getElementById('podiumBlock').style.display = 'none'; // will be shown by renderPodium
   const list = document.getElementById('rankingList');
-  list.style.display = 'flex';
-  list.style.flexDirection = 'column';
+  list.style.display = '';
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
@@ -787,10 +786,24 @@ lucide.createIcons();
     background: var(--border);
     margin: 0 16px;
   }
+
+  /* ── RANKING LIST: single column on mobile, fills width as grid on desktop ── */
+  .ranking-list-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  @media (min-width: 1000px) {
+    /* let the ranking content fill the desktop width — no empty side gutters */
+    .app-main > main#rankingMain { max-width: none; width: 100%; box-sizing: border-box; }
+    .ranking-list-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 12px;
+      align-items: start;
+    }
+  }
 </style>
 <script src="js/admin.js"></script>
 </body>
 </html>
-
-
-

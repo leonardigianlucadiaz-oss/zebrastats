@@ -151,7 +151,6 @@ body {
 .sidebar__brand {
   display: flex;
   align-items: center;
-  gap: 10px;
   padding: 20px 20px 18px;
   font-size: 1.125rem;
   font-weight: 700;
@@ -169,6 +168,8 @@ body {
   font-size: 0.9375rem;
   font-weight: 800;
   color: var(--green);
+  margin-right: 10px;
+  flex-shrink: 0;
 }
 .sidebar__brand span { color: var(--green); }
 
@@ -1608,11 +1609,13 @@ input:checked + .toggle-slider::before { transform: translateX(20px); }
 
 /* ── MAX-WIDTH em ultrawide ── */
 @media (min-width: 1440px) {
-  .content-container, .home-two-col, .app-main > main {
+  .content-container, .app-main > main:not(.home-two-col) {
     max-width: 1440px;
     margin-left: auto;
     margin-right: auto;
   }
+  /* home stretches edge-to-edge so the side columns hug the screen */
+  main.home-two-col { max-width: none; width: 100%; }
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -1709,16 +1712,21 @@ input:checked + .toggle-slider::before { transform: translateX(20px); }
   /* ── 9. MEUS TIMES section bar ── */
   .fav-teams-section { padding: 12px 32px; }
 
-  /* ── 10. HOME PAGE — 2-column grid layout ── */
+  /* ── 10. HOME PAGE — 3-column grid layout ── */
   main.home-two-col {
     display: grid;
-    grid-template-columns: 1fr 340px;
+    grid-template-columns: 300px 1fr 300px;
     gap: 0;
     align-items: start;
     padding: 0;
   }
+  /* THREE columns: Zebras do Dia (left) | main content | Tendência (right) */
+  .home-col-side { display: contents; }
+  .side-group--zebras { grid-column: 1; order: 1; }
+  .home-col-main      { grid-column: 2; order: 2; }
+  .side-group--trends { grid-column: 3; order: 3; }
   .home-col-main,
-  .home-col-side {
+  .side-group {
     display: flex;
     flex-direction: column;
     gap: 20px;
@@ -1726,8 +1734,13 @@ input:checked + .toggle-slider::before { transform: translateX(20px); }
     min-width: 0; /* prevent fr-column overflow */
     overflow: hidden;
   }
-  .home-col-main { padding-left: 32px; border-right: 1px solid var(--border); }
-  .home-col-side { padding-right: 32px; background: var(--card2); min-height: 100%; }
+  .side-group {
+    gap: 16px;
+    background: var(--card2);
+    min-height: 100%;
+  }
+  .side-group--zebras { border-right: 1px solid var(--border); }
+  .side-group--trends { border-left: 1px solid var(--border); }
 
   /* ── 11. ZEBRA LIST: 2-column card grid on desktop ── */
   #zebraList {
@@ -1799,13 +1812,21 @@ input:checked + .toggle-slider::before { transform: translateX(20px); }
   }
 }
 
+/* ── SIDE COLUMN: split into two groups (Zebras do Dia | Tendências/Rankings) ── */
+/* On mobile the groups just flow inline as normal blocks; desktop grid handles columns. */
+
+@media (min-width: 1280px) {
+  main.home-two-col { grid-template-columns: 320px 1fr 320px; }
+}
+
 /* ── EXTRA WIDE ≥1400px ── */
 @media (min-width: 1400px) {
   .app-sidebar  { width: 300px; }
-  .content      { padding: 32px 40px; }
-  main.home-two-col { grid-template-columns: 1fr 380px; }
-  .home-col-main { padding-left: 40px; }
-  .home-col-side { padding-right: 40px; }
+  .content:not(.home-two-col) { padding: 32px 40px; }
+  main.home-two-col { grid-template-columns: 360px 1fr 360px; padding: 0; }
+  .home-col-main { padding-left: 40px; padding-right: 40px; }
+  .side-group--zebras { padding-left: 40px; }
+  .side-group--trends { padding-right: 40px; }
   #zebraList     { grid-template-columns: repeat(3, 1fr) !important; }
   #hotLeagues    { grid-template-columns: repeat(6, 1fr) !important; }
 }
@@ -1837,7 +1858,28 @@ input:checked + .toggle-slider::before { transform: translateX(20px); }
 @media (min-width: 900px) {
   .desktop-grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
   .desktop-grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; }
-  .content { max-width:1100px; margin:0 auto; }
+  .content:not(.home-two-col) { max-width:1100px; margin:0 auto; }
+  /* home grid spans full width so the side columns hug the screen edges */
+  main.home-two-col { max-width:none !important; width:100%; margin:0; grid-template-columns: 320px 1fr 320px; }
+}
+
+/* Zebra list full-width grid */
+.zebra-list-grid { display:flex; flex-direction:column; gap:10px; }
+@media (min-width:1000px) {
+  .app-main > main.content { max-width:none; width:100%; box-sizing:border-box; }
+  .zebra-list-grid { display:grid !important; grid-template-columns:repeat(auto-fill,minmax(360px,1fr)); }
+}
+
+/* Ranking list full-width grid */
+.ranking-list-grid { display:flex; flex-direction:column; gap:10px; }
+@media (min-width:1000px) {
+  .app-main > main#rankingMain { max-width:none; width:100%; box-sizing:border-box; }
+  .ranking-list-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(360px,1fr)); gap:12px; }
+}
+
+/* Liga: jogos full-width no desktop */
+@media (min-width:1000px) {
+  #jogosList > * { width:100%; }
 }
 
 /* Pull to refresh indicador */
@@ -1883,4 +1925,3 @@ input:checked + .toggle-slider::before { transform: translateX(20px); }
 /* Stat pill label tamanho */
 #statPills .bottom-nav__item,
 #statPills [style*="0.5625rem"] { font-size: 0.6875rem !important; }
-}

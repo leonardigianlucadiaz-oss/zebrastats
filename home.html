@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/main.css?v=12" />
+  <link rel="stylesheet" href="css/main.css?v=14" />
   <script src="https://unpkg.com/lucide@0.363.0/dist/umd/lucide.min.js"></script>
 </head>
 <body>
@@ -104,7 +104,7 @@
       </div>
     </section>
 
-    <!-- CONTEÚDO PRINCIPAL — 2 colunas no desktop, 1 coluna no mobile -->
+    <!-- CONTEÚDO PRINCIPAL — 3 colunas no desktop, 1 coluna no mobile -->
     <main class="content home-two-col">
 
       <!-- ── COLUNA PRINCIPAL (partidas) ── -->
@@ -163,6 +163,8 @@
       <!-- ── COLUNA LATERAL (analytics) ── -->
       <div class="home-col-side">
 
+        <div class="side-group side-group--zebras">
+
         <!-- ZEBRAS DO DIA -->
         <div class="section-header" style="margin-top:4px;">
           <span class="section-title"><i data-lucide="zap" class="sec-ic"></i>Zebras do Dia</span>
@@ -198,6 +200,10 @@
           <div class="skel" style="height:72px;border-radius:12px"></div>
         </div>
 
+        </div><!-- /side-group zebras -->
+
+        <div class="side-group side-group--trends">
+
         <!-- SPARKLINES POR LIGA -->
         <div id="sparklineSection">
           <div class="section-header" style="margin-top:8px;">
@@ -213,6 +219,8 @@
         </div>
 
         <div id="zebraRanking" style="display:flex;flex-direction:column;gap:8px;"></div>
+
+        </div><!-- /side-group trends -->
 
       </div><!-- /home-col-side -->
 
@@ -303,12 +311,10 @@
     .gc-team-block.away { align-items: center; }
     .gc-crest {
       width: 40px; height: 40px;
-      border-radius: 50%;
-      background: var(--card2);
-      border: 1px solid var(--border);
+      background: transparent;
       display: flex; align-items: center; justify-content: center;
       font-size: 0.6875rem; font-weight: 700; color: var(--gray);
-      overflow: hidden; flex-shrink: 0;
+      overflow: visible; flex-shrink: 0;
     }
     .gc-crest img { width: 36px; height: 36px; object-fit: contain; }
     .gc-team-name { font-size: 0.8125rem; font-weight: 600; line-height: 1.2; }
@@ -701,8 +707,6 @@
       const bar = document.getElementById('favTeamsBar');
       bar.innerHTML = '';
 
-      // Monta lista: favoritos reais (sem duplicatas) + completar com defaults até 5
-      // Dedup case-insensitive de IDs (ex: "arsenal" e "Arsenal" são o mesmo time)
       const _rawIds = getFavorites();
       const _seenIds = new Set();
       const favIds = _rawIds.filter(id => {
@@ -713,12 +717,10 @@
       });
       const favMeta = getFavTeamsData();
 
-      // Times com meta salva (nome + crest já conhecido)
       const fromMeta = favIds
         .map(id => favMeta[id])
         .filter(Boolean)
         .reduce((acc, m) => {
-          // Case-insensitive dedup — prevents same team saved under 2 IDs
           if (!acc.find(x => (x.name || '').toLowerCase() === (m.name || '').toLowerCase())) acc.push(m);
           return acc;
         }, []);
@@ -730,7 +732,6 @@
         const pill = document.createElement('div');
         pill.className = 'team-pill';
 
-        // Se já tem crest no meta, mostra direto; senão skeleton
         const knownLogo = item.crest || '';
         pill.innerHTML = `
           <div class="team-pill__avatar" style="${knownLogo ? 'background:transparent;border:none;' : 'background:var(--card2);'}">
@@ -742,7 +743,6 @@
         pill.addEventListener('click', () => window.location.href = `time.html?team=${encodeURIComponent(item.id || name.toLowerCase().replace(/\s+/g,'-') || 'flamengo')}`);
         bar.appendChild(pill);
 
-        // Busca SDB apenas se não tem logo ainda
         if (!knownLogo) {
           ZebraAPI.sportsDb.searchTeam(name).then(res => {
             const team = res?.teams?.[0];
@@ -759,7 +759,6 @@
         }
       }
 
-      // Empty state hint when no real favorites
       if (fromMeta.length === 0) {
         const hint = document.createElement('div');
         hint.style.cssText = 'width:100%;font-size:0.6875rem;color:var(--gray);text-align:center;padding:4px 0 2px;flex-shrink:0;order:-1;';
@@ -767,7 +766,6 @@
         bar.appendChild(hint);
       }
 
-      // Botão adicionar
       const addPill = document.createElement('div');
       addPill.className = 'team-pill';
       addPill.innerHTML = `
@@ -777,9 +775,6 @@
       bar.appendChild(addPill);
     }
 
-    // ── LEAGUE PILLS COM LOGOS OFICIAIS ──────────────────
-    // Usa LEAGUE_LOGOS (pre-baked URLs do CDN TheSportsDB) diretamente,
-    // sem etapa de bandeira de baixa qualidade.
     function initLeaguePills() {
       const lids = ['BRA','ENG','ESP','ITA','GER','FRA','UCL'];
       lids.forEach(lid => {
@@ -792,11 +787,9 @@
       });
     }
 
-    // ── LEAGUE FILTER ─────────────────────────────────────
     document.querySelectorAll('.league-pill').forEach(pill => {
       pill.addEventListener('click', function() {
         const lid = this.dataset.lid;
-        // If already active and has a liga, navigate to liga.html
         if (this.classList.contains('active') && lid) {
           window.location.href = `liga.html?id=${lid}`;
           return;
@@ -809,15 +802,8 @@
       });
     });
 
-    // Mapa reverso APIF league.id → lid para live games
     const APIF_ID_TO_LID = { 39:'ENG', 140:'ESP', 135:'ITA', 78:'GER', 61:'FRA', 71:'BRA', 94:'POR', 2:'UCL' };
 
-    // ── INIT GAMES FROM API ───────────────────────────────
-    // Prioridade:
-    //   Live     → API-Football (suporta tempo real) → RapidAPI → vazio
-    //   Upcoming → API-Football next=N (sem season)  → FD SCHEDULED (fallback)
-    // Nota: Football-Data free tier NÃO suporta status=IN_PLAY (403).
-    //       API-Football (APIF_KEY no Supabase) suporta partidas ao vivo.
     async function initGames() {
       showSkeletonGames('liveGames', 2);
       showSkeletonGames('upcomingGames', 3);
@@ -825,7 +811,6 @@
       const canApif = ZebraAPI.isConfigured.apiFootball();
       const canFd   = ZebraAPI.isConfigured.footballData();
 
-      // ── 1. AO VIVO: API-Football (tempo real) ────────────────────
       if (canApif) {
         ZebraAPI.apiFootball.getLiveFixtures('ALL').then(liveRes => {
           if (Array.isArray(liveRes) && liveRes.length) {
@@ -851,7 +836,6 @@
         }).catch(() => renderLive());
 
       } else if (ZebraAPI.isConfigured.rapidApi()) {
-        // Fallback: RapidAPI live (se configurado e sem APIF)
         ZebraAPI.rapidApi.getLiveMatches().then(rapid => {
           const matches = rapid?.response || rapid?.data || [];
           if (!Array.isArray(matches) || !matches.length) { renderLive(); return; }
@@ -871,13 +855,9 @@
         }).catch(() => renderLive());
 
       } else {
-        // Nenhuma fonte de live disponível
         setTimeout(() => { if (!LIVE_GAMES.length) renderLive(); }, 3000);
       }
 
-      // ── 2. EM BREVE: API-Football next=N (sem season, temporada atual) ──
-      // Paralelo: todas as ligas simultaneamente (rate limit mais flexível).
-      // A proxy corrige automaticamente omitindo season quando next é fornecido.
       if (canApif) {
         try {
           await Promise.all(ALL_LIDS.map(async lid => {
@@ -911,8 +891,6 @@
         } catch {}
       }
 
-      // ── 3. FALLBACK FD SCHEDULED (se APIF não retornou upcoming) ──
-      // Football-Data free tier suporta SCHEDULED (mas não IN_PLAY).
       if (!UPCOMING_GAMES.length && canFd) {
         ALL_LIDS.forEach((lid, idx) => {
           setTimeout(() => {
@@ -931,11 +909,10 @@
                 renderUpcoming();
               }
             }).catch(() => {});
-          }, idx * 600); // escalonamento: respeita 10 req/min do FD free tier
+          }, idx * 600);
         });
       }
 
-      // ── 4. Fallback timeout final ──────────────────────────────────
       setTimeout(() => {
         const liveEl = document.getElementById('liveGames');
         const upEl = document.getElementById('upcomingGames');
@@ -949,7 +926,6 @@
         }
       }, 10000);
 
-      // ── 5. Última atualização ──────────────────────────────────────
       const lastUpdEl = document.getElementById('lastUpdatedBar');
       if (lastUpdEl) {
         lastUpdEl.innerHTML = `<i data-lucide="refresh-cw" style="width:10px;height:10px;"></i>Atualizado às ${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`;
@@ -957,11 +933,9 @@
       }
     }
 
-    // ── ZEBRA RANKING + SHARED DATA LOADER ───────────────
     const MEDALS = { 1:'🥇', 2:'🥈', 3:'🥉' };
     const rankContainer = document.getElementById('zebraRanking');
 
-    // Skeleton
     for (let i = 0; i < 5; i++) {
       const sk = document.createElement('div');
       sk.className = 'ranking-row';
@@ -1002,11 +976,6 @@
       if (typeof lucide !== 'undefined') lucide.createIcons();
     }
 
-    // ── CARREGADOR CENTRAL: busca zebras de TODAS as ligas ───
-    // Cada liga resolve independentemente e atualiza todos os widgets.
-    // Requisições são escalonadas (800ms entre cada) para respeitar o limite
-    // de 10 req/min do Football-Data free tier. Timer de fallback (18s) limpa
-    // os skeletons caso nenhuma liga responda (evita carregamento infinito).
     function _loadAllZebras() {
       if (typeof ZebraAPI === 'undefined' || !ZebraAPI.isConfigured.footballData() || typeof ZebraEngine === 'undefined') {
         rankContainer.innerHTML = '<div style="text-align:center;padding:16px;color:var(--gray);font-size:0.8125rem;">Dados indisponíveis — configure a API em Perfil</div>';
@@ -1017,7 +986,6 @@
         return;
       }
 
-      // Fallback: após 18s sem nenhuma resposta, limpa os skeletons
       const _fallbackTimer = setTimeout(() => {
         if (!_zebraLoadedCount) {
           rankContainer.innerHTML = '<div style="text-align:center;padding:16px;color:var(--gray);font-size:0.8125rem;">Sem zebras disponíveis agora. <a href="javascript:location.reload()" style="color:var(--green)">Tentar novamente</a></div>';
@@ -1025,35 +993,28 @@
           if (hotC && hotC.querySelector('.skel')) hotC.innerHTML = '<div style="text-align:center;padding:16px;color:var(--gray);font-size:0.75rem;grid-column:1/-1;">Sem dados no momento</div>';
           const sparksGrid = document.getElementById('sparklineGrid');
           if (sparksGrid && sparksGrid.querySelector('.skel')) sparksGrid.innerHTML = '<div style="text-align:center;padding:16px;color:var(--gray);font-size:0.75rem;grid-column:1/-1;">Sem dados no momento</div>';
-          // Dispara evento zebrasLoaded vazio para limpar seções que aguardam ele
           document.dispatchEvent(new CustomEvent('zebrasLoaded', { detail: [] }));
         }
       }, 18000);
 
-      // Escalonamento: 300ms entre cada liga para não sobrecarregar a API
       ALL_LIDS.forEach((lid, idx) => {
         setTimeout(() => {
           ZebraAPI.fetchRealZebras(lid, 15).then(zebras => {
             if (!zebras.length) return;
-            clearTimeout(_fallbackTimer); // pelo menos uma liga respondeu — cancela fallback
+            clearTimeout(_fallbackTimer);
             _zebrasByLid[lid] = zebras;
             _zebraLoadedCount++;
-            // Atualiza todos os widgets que dependem de zebras
             _renderRankingFromCache();
             _updateHotLeagues();
             _updateZebrasDoDia(zebras, lid);
             _updateSparklines();
             _updateStatsBar();
-            // Dispara evento para o hero banner
             document.dispatchEvent(new CustomEvent('zebrasLoaded', { detail: Object.values(_zebrasByLid).flat() }));
           }).catch(() => {});
         }, idx * 300);
       });
     }
 
-    // ── ZEBRAS DO DIA — atualizado pelo carregador central ───
-    // _updateZebrasDoDia é chamada a cada liga que resolve.
-    // Acumula todas as zebras e mostra as top-N ordenadas por ZI.
     function initZebrasDoDia() {
       const lockBanner = document.querySelector('.lock-banner');
       const isPro = getUserPlan() === 'pro';
@@ -1070,15 +1031,13 @@
       const isPro = getUserPlan() === 'pro';
       const lockBanner = document.querySelector('.lock-banner');
       const all = Object.values(_zebrasByLid).flat().sort((a,b) => b.zi - a.zi);
-      // Only show the lock banner after data has loaded — not while the list is still empty
       if (!all.length) {
-        if (lockBanner && !_zebraLoadedCount) lockBanner.style.display = 'none'; // still loading, show neither
+        if (lockBanner && !_zebraLoadedCount) lockBanner.style.display = 'none';
         return;
       }
-      // Data is available — show lock banner for free users (unless already hidden by initZebrasDoDia for PRO)
       if (lockBanner && !isPro) lockBanner.style.display = 'flex';
       const shown = all.slice(0, isPro ? 8 : 3);
-      container.innerHTML = ''; // HIER01 — limpa skeletons antes de renderizar cards reais
+      container.innerHTML = '';
       shown.forEach(z => {
         const cls = z.ziClass || 'leve';
         const clr = cls==='grande'?'var(--red)':cls==='media'?'var(--gold)':'var(--gray)';
@@ -1105,33 +1064,27 @@
       });
     }
 
-    // ── EDIT FAV BUTTON ───────────────────────────────────
     document.getElementById('editFavBtn').addEventListener('click', function(e) {
       e.preventDefault();
       window.location.href = 'busca.html';
     });
 
-    // ── INIT ──────────────────────────────────────────────
-    initHotLeagues();     // renderiza skeletons imediatos
+    initHotLeagues();
     initFavBar();
     initLeaguePills();
-    initSparklines();     // renderiza skeletons de sparklines
-    initPullToRefresh(() => { initGames(); }); // pull-to-refresh
-    initGames();          // busca jogos de todas as ligas (escalonado: 600ms/liga)
-    initZebrasDoDia();    // configura seção (esconde lock-banner se PRO)
+    initSparklines();
+    initPullToRefresh(() => { initGames(); });
+    initGames();
+    initZebrasDoDia();
     initBellBadge();
-    // Delay de 500ms antes de iniciar o carregador de zebras para não competir
-    // com initGames pelo limite de 10 req/min do Football-Data free tier.
-    setTimeout(_loadAllZebras, 500); // carregador central (depois de initGames iniciar)
+    setTimeout(_loadAllZebras, 500);
 
-    // Populate hero banner — atualiza sempre que um novo lote de zebras chega
     (function _heroBanner() {
       const el  = document.getElementById('heroMatchTitle');
       const elL = document.getElementById('heroMatchLeague');
       const elZ = document.getElementById('heroZiValue');
       const elD = document.getElementById('heroMatchDesc');
       if (!el) return;
-      // Fallback após 26s (5s delay + 18s escalonamento + margem)
       const heroFallbackTimer = setTimeout(() => {
         if (el.textContent === 'Carregando...') {
           el.textContent = 'Nenhuma zebra disponível agora';
@@ -1145,7 +1098,7 @@
         const zebras = e.detail || [];
         if (!zebras.length) return;
         const top = zebras.sort((a,b) => b.zi - a.zi)[0];
-        if (!top || top.zi <= heroBestZi) return; // só atualiza se achou ZI maior
+        if (!top || top.zi <= heroBestZi) return;
         heroBestZi = top.zi;
         el.textContent  = `${top.home} vs ${top.away}`;
         elL.textContent = `${top.league} · ${top.date}`;
@@ -1157,15 +1110,12 @@
 
     lucide.createIcons();
 
-    // Stats bar — atualizada pelo carregador central
     function initStatsBar() { /* aguarda _loadAllZebras */ }
 
     function _updateStatsBar() {
       const allZebras = Object.values(_zebrasByLid).flat();
       const highZiCount = allZebras.filter(z => z.zi >= 7).length;
       const totalZebras = allZebras.length;
-
-      // Jogos ao vivo e agendados já estão em LIVE_GAMES/UPCOMING_GAMES
       const liveCount = LIVE_GAMES.length;
       const todayCount = UPCOMING_GAMES.length;
 
@@ -1179,7 +1129,6 @@
     }
     initStatsBar();
 
-    // ── Zebra Destaque — atualizado pelo carregador central ──────
     function _zebraDestaque() { /* aguarda _loadAllZebras via evento zebrasLoaded */ }
     document.addEventListener('zebrasLoaded', function(e) {
       const arr = e.detail || [];
@@ -1213,7 +1162,6 @@
     });
     _zebraDestaque();
 
-    // ── Próximas Zebras Potenciais — atualizado pelo carregador ──
     function _proximasZebras() { /* aguarda _loadAllZebras */ }
     document.addEventListener('zebrasLoaded', function(e) {
       const wrap = document.getElementById('proximasZebrasWrap');
@@ -1232,13 +1180,9 @@
     });
     _proximasZebras();
 
-    // ── Sparklines por Liga — dados reais ────────────────────────
-    // SPARK_LIDS declarado no topo do script (junto com ALL_LIDS) para evitar TDZ
-
     function initSparklines() {
       const grid = document.getElementById('sparklineGrid');
       if (!grid) return;
-      // Skeleton enquanto carrega
       grid.innerHTML = SPARK_LIDS.map(lid => `
         <div class="sparkline-card">
           <div class="sparkline-card__title">${LID_LABEL[lid]||lid}</div>
@@ -1249,7 +1193,6 @@
     function _updateSparklines() {
       const grid = document.getElementById('sparklineGrid');
       if (!grid) return;
-      // Só atualiza se tiver dados de pelo menos 2 das 4 ligas de interesse
       const ready = SPARK_LIDS.filter(l => _zebrasByLid[l]?.length).length;
       if (ready < 1) return;
       grid.innerHTML = '';
@@ -1282,14 +1225,12 @@
       });
     }
 
-    // Toast de boas-vindas após onboarding
     const welcomeMsg = localStorage.getItem('zs_welcome_toast');
     if (welcomeMsg) {
       localStorage.removeItem('zs_welcome_toast');
       setTimeout(() => showToast(welcomeMsg, 3500), 600);
     }
 
-    // Preenche nome no navbar/sidebar com dados do cadastro
     const savedName = localStorage.getItem('zs_user_name');
     if (savedName) {
       document.querySelectorAll('.sidebar__user-name').forEach(el => {
@@ -1303,6 +1244,3 @@
 <script src="js/admin.js"></script>
 </body>
 </html>
-
-
-

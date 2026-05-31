@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/main.css?v=12" />
+  <link rel="stylesheet" href="css/main.css?v=14" />
   <script src="https://unpkg.com/lucide@0.363.0/dist/umd/lucide.min.js"></script>
 </head>
 <body>
@@ -62,19 +62,14 @@
     <div class="scroll-x" id="leagueBar"></div>
   </section>
 
-  <!-- FILTROS DE MAGNITUDE -->
+  <!-- FILTROS (magnitude + período numa só barra) -->
   <section class="section-padded" style="padding:10px 16px;border-bottom:1px solid var(--border);">
     <div class="scroll-x" style="gap:8px;" id="filterRow">
       <button class="filter-chip active" data-filter="all">Todas</button>
       <button class="filter-chip" data-filter="grande"><i data-lucide="alert-circle" class="chip-ic" style="color:var(--red);"></i>Grande (7+)</button>
       <button class="filter-chip" data-filter="media"><i data-lucide="alert-circle" class="chip-ic" style="color:var(--gold);"></i>Média (4–7)</button>
       <button class="filter-chip" data-filter="leve"><i data-lucide="alert-circle" class="chip-ic" style="color:var(--gray);"></i>Leve (&lt;4)</button>
-    </div>
-  </section>
-
-  <!-- FILTROS DE PERÍODO -->
-  <section style="padding:8px 16px;border-bottom:1px solid var(--border);background:var(--bg);">
-    <div class="scroll-x" style="gap:8px;" id="periodFilterRow">
+      <span style="width:1px;height:18px;background:var(--border);flex-shrink:0;align-self:center;"></span>
       <button class="filter-chip active" data-period="all"><i data-lucide="calendar" class="chip-ic"></i>Tudo</button>
       <button class="filter-chip" data-period="week"><i data-lucide="calendar-days" class="chip-ic"></i>Semana</button>
       <button class="filter-chip" data-period="month"><i data-lucide="calendar-range" class="chip-ic"></i>Mês</button>
@@ -133,7 +128,7 @@
       <span class="text-xs text-gray" id="zebraCount"></span>
     </div>
 
-    <div id="zebraList" style="display:flex;flex-direction:column;gap:12px;"></div>
+    <div id="zebraList" class="zebra-list-grid" style="display:flex;flex-direction:column;gap:12px;"></div>
 
     <!-- LOAD MORE -->
     <div id="loadMoreWrap" style="display:none;text-align:center;padding:16px 0;">

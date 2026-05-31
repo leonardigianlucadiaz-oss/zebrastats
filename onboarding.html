@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/main.css?v=12" />
+  <link rel="stylesheet" href="css/main.css?v=14" />
   <script src="https://unpkg.com/lucide@0.363.0/dist/umd/lucide.min.js"></script>
 </head>
 <body>
@@ -422,12 +422,10 @@
       card.addEventListener('click', () => toggleLeague(l.id, l.name, card));
       grid.appendChild(card);
     });
-    // Tenta carregar logos das ligas via SDB de forma assíncrona
     loadLeagueLogosForOnboarding();
   }
 
   function loadLeagueLogosForOnboarding() {
-    // Usa logos pré-cacheados de LEAGUE_LOGOS (main.js) — sem chamada de API
     LEAGUES.forEach(l => {
       const badge = (window.LEAGUE_LOGOS || {})[l.id] || '';
       if (badge) {
@@ -435,10 +433,9 @@
         if (el) el.innerHTML = `<img src="${badge}" class="lc-logo" onerror="this.parentElement.innerHTML='${l.flag}';">`;
       }
     });
-    // Tenta carregar logos via API para ligas sem cache (assíncrono, sem bloquear)
     if (!window.ZebraAPI) return;
     LEAGUES.forEach(async l => {
-      if ((window.LEAGUE_LOGOS || {})[l.id]) return; // já tem
+      if ((window.LEAGUE_LOGOS || {})[l.id]) return;
       try {
         const badge = await loadLeagueLogo(l.id);
         if (badge) {
@@ -474,7 +471,6 @@
   // ── PASSO 2: TIMES ────────────────────────────────────────────
   function renderDefaultTeams() {
     renderTeamGrid(DEFAULT_TEAMS);
-    // Carrega crests dos times padrão
     DEFAULT_TEAMS.forEach(t => loadTeamCrest(t.id, t.name));
   }
 
@@ -515,7 +511,6 @@
         if (el) {
           el.innerHTML = `<img src="${logo}" alt="${name}" style="width:30px;height:30px;object-fit:contain;" onerror="this.style.display='none'">`;
         }
-        // Update selected chip if already selected
         if (selectedTeams.has(id)) {
           selectedTeams.get(id).crest = logo;
           refreshSelectedChips();
@@ -556,7 +551,6 @@
         <i data-lucide="x" style="width:12px;height:12px;"></i>`;
       chip.addEventListener('click', () => {
         selectedTeams.delete(id);
-        // Unselect in grid
         const gridRow = document.querySelector(`.team-row[data-id="${id}"]`);
         if (gridRow) {
           gridRow.classList.remove('selected');
@@ -624,27 +618,20 @@
   }
 
   function updateProgressUI() {
-    // Segmentos
     ['seg1','seg2','seg3'].forEach((id, i) => {
       document.getElementById(id).style.background = (i + 1) <= currentStep ? 'var(--green)' : 'var(--border)';
     });
-    // Label
     document.getElementById('stepLabel').textContent = `Passo ${currentStep} de 3`;
-    // Botão voltar
     document.getElementById('backBtn').style.display = currentStep > 1 ? 'block' : 'none';
-    // Footer de navegação: oculto no passo 3 (que tem seus próprios botões)
     document.getElementById('footerNav').style.display = currentStep === 3 ? 'none' : 'block';
-    // Texto do botão continuar
     const btn = document.getElementById('nextBtn');
     btn.innerHTML = `Continuar <i data-lucide="arrow-right" style="width:18px;height:18px;"></i>`;
 
-    // Botões de notificação: EXCLUSIVOS do passo 3
     document.getElementById('enableNotifBtn').style.display = currentStep === 3 ? 'flex' : 'none';
     document.getElementById('skipNotifBtn').style.display   = currentStep === 3 ? 'block' : 'none';
 
     lucide.createIcons();
 
-    // Validação do estado atual
     if (currentStep === 1) updateLeagueCount();
     if (currentStep === 2) updateTeamCount();
   }
@@ -726,13 +713,11 @@
 
   // ── SALVAR E FINALIZAR ────────────────────────────────────────
   function finish() {
-    // Salva ligas favoritas
     selectedLeagues.forEach(lid => {
       const l = LEAGUES.find(x => x.id === lid);
       if (l && !isFavLeague(lid)) toggleFavLeague(lid, l.name);
     });
 
-    // Salva times favoritos
     selectedTeams.forEach((meta, id) => {
       const favs = getFavorites();
       if (!favs.includes(id)) {
@@ -740,32 +725,24 @@
       }
     });
 
-    // Persiste ligas favoritas no Supabase
     if (typeof ZebraDB !== 'undefined') {
-      const selectedLeagueEls = Array.from(document.querySelectorAll('.league-card.selected, .league-item.active, [data-lid].selected'))
-        .map(el => el.dataset.lid || el.dataset.league || el.getAttribute('data-lid'))
-        .filter(Boolean);
-      // Prefer the selectedLeagues Set (authoritative); fall back to DOM query
-      const leagueIds = selectedLeagues.size > 0 ? Array.from(selectedLeagues) : selectedLeagueEls;
+      const leagueIds = selectedLeagues.size > 0 ? Array.from(selectedLeagues) : ['BRA','ENG','ESP'];
       ZebraDB.dbSaveSettings({
         onboarded: true,
-        favorite_leagues: leagueIds.length ? leagueIds : ['BRA','ENG','ESP']
+        favorite_leagues: leagueIds
       });
     }
     localStorage.setItem('zs_onboarded', '1');
 
-    // Redireciona para home com toast
     localStorage.setItem('zs_welcome_toast', '🎉 Tudo pronto! Bem-vindo ao ZebraStats!');
     window.location.href = 'home.html';
   }
 
   // ── INIT ─────────────────────────────────────────────────────
-  // Se já passou pelo onboarding, vai direto pra home
   if (localStorage.getItem('zs_onboarded')) {
     window.location.href = 'home.html';
   }
 
-  // Personaliza com nome do usuário
   const savedName = localStorage.getItem('zs_user_name');
   if (savedName) {
     const firstName = savedName.split(' ')[0];
@@ -780,6 +757,3 @@
 <script src="js/admin.js"></script>
 </body>
 </html>
-
-
-
