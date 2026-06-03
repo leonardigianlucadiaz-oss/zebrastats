@@ -48,9 +48,7 @@
   <nav class="navbar">
     <button onclick="goBack('home.html')" class="navbar__icon" style="background:none;border:none;cursor:pointer;color:var(--white);display:flex;align-items:center;justify-content:center;"><i data-lucide="arrow-left" style="width:20px;height:20px;"></i></button>
     <a href="home.html" class="navbar__brand" style="flex:1;text-align:center;">Zebra<span>Stats</span></a>
-    <div class="navbar__actions">
-      <button id="favLeagueBtn" class="navbar__icon" title="Favoritar liga"><i data-lucide="star" style="width:18px;height:18px;"></i></button>
-    </div>
+    <div class="navbar__actions"></div>
   </nav>
 
   <!-- SELETOR DE LIGA (acima do hero) -->
@@ -76,9 +74,14 @@
       <div>
         <div style="font-size:1.25rem;font-weight:700;line-height:1.2;" id="leagueName">Brasileirão Série A</div>
         <div style="font-size:0.8125rem;color:var(--gray);margin-top:3px;" id="leagueSub">Brasil · Temporada 2025</div>
-        <div style="display:flex;align-items:center;gap:6px;margin-top:6px;">
-          <span style="width:6px;height:6px;border-radius:50%;background:var(--green);display:inline-block;animation:pulse 1.5s infinite;"></span>
-          <span style="font-size:0.6875rem;color:var(--green);font-weight:600;">Em andamento</span>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap;">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span style="width:6px;height:6px;border-radius:50%;background:var(--green);display:inline-block;animation:pulse 1.5s infinite;"></span>
+            <span style="font-size:0.6875rem;color:var(--green);font-weight:600;">Em andamento</span>
+          </div>
+          <button id="favLeagueBtn" style="display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:var(--radius-pill);padding:3px 10px;font-size:0.75rem;font-weight:600;color:var(--gray);cursor:pointer;transition:all 0.2s;" title="Favoritar liga">
+            <i data-lucide="star" style="width:12px;height:12px;"></i>Favoritar
+          </button>
         </div>
       </div>
     </div>

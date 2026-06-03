@@ -48,9 +48,7 @@
     <nav class="navbar">
       <button onclick="goBack('home.html')" class="navbar__icon" style="background:none;border:none;cursor:pointer;color:var(--white);display:flex;align-items:center;justify-content:center;"><i data-lucide="arrow-left" style="width:20px;height:20px;"></i></button>
       <span style="font-size:1rem;font-weight:600;flex:1;" id="navTitle">Perfil do Time</span>
-      <div class="navbar__actions">
-        <button id="favBtn" class="navbar__icon" title="Favoritar"><i data-lucide="star" style="width:18px;height:18px;"></i></button>
-      </div>
+      <div class="navbar__actions"></div>
     </nav>
 
     <!-- HERO DO TIME -->
@@ -88,6 +86,9 @@
         <a href="comparar.html" id="compararBtn" style="display:inline-flex;align-items:center;gap:5px;background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.2);border-radius:var(--radius-pill);padding:6px 12px;font-size:0.8125rem;font-weight:600;color:var(--white);text-decoration:none;">
           <i data-lucide="git-compare" style="width:13px;height:13px;"></i>Comparar
         </a>
+        <button id="favBtn" style="display:inline-flex;align-items:center;gap:5px;background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.2);border-radius:var(--radius-pill);padding:6px 12px;font-size:0.8125rem;font-weight:600;color:var(--white);cursor:pointer;transition:all 0.2s;" title="Favoritar time">
+          <i data-lucide="star" style="width:13px;height:13px;"></i>Favoritar
+        </button>
       </div>
     </div>
 
