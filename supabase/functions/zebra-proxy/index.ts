@@ -40,9 +40,32 @@ const ODDS_SPORTS: Record<string, string> = {
 // NOTA: Edge Functions são stateless — esta função faz fetch direto.
 // O cache de longa duração (30 min / 60 min) vive no cliente (localStorage).
 async function apiFetch(url: string, init?: RequestInit): Promise<unknown> {
-  const r = await fetch(url, init);
+  // Timeout de 8s para evitar que APIs lentas travem a Edge Function
+  const r = await fetch(url, { ...init, signal: AbortSignal.timeout(8_000) });
   if (!r.ok) throw new Error(`HTTP ${r.status}: ${url}`);
   return r.json();
+}
+
+// ── Temporada dinâmica ──────────────────────────────────────────
+// API-Football representa a temporada pelo ano de início:
+//   "2025" = temporada 2025-26 (ligas europeias que começam em ago/set)
+//   "2026" = temporada 2026 do Brasileirão (calendário corrido)
+// Regra: se o mês corrente for >= julho → nova temporada europeia já começou.
+//        se for < julho → ainda estamos no final da temporada anterior.
+function defaultSeason(lid = "ENG"): string {
+  const now   = new Date();
+  const year  = now.getFullYear();
+  const month = now.getMonth() + 1; // 1-based
+  if (lid === "BRA") return String(year);          // calendário corrido
+  return month >= 7 ? String(year) : String(year - 1); // europeia
+}
+
+// TheSportsDB usa formato "YYYY-YYYY" para ligas europeias
+function defaultSdbSeason(): string {
+  const now   = new Date();
+  const year  = now.getFullYear();
+  const month = now.getMonth() + 1;
+  return month >= 7 ? `${year}-${year + 1}` : `${year - 1}-${year}`;
 }
 
 function ok(data: unknown) {
@@ -213,7 +236,7 @@ Deno.serve(async (req: Request) => {
       const key    = Deno.env.get("THESPORTSDB_KEY") ?? "123";
       const sdb_id = SDB_IDS[lid];
       if (!sdb_id) return err(`Liga desconhecida: ${lid}`, 400);
-      const season = url.searchParams.get("season") ?? "2024-2025";
+      const season = url.searchParams.get("season") ?? defaultSdbSeason();
       const data = await apiFetch(
         `https://www.thesportsdb.com/api/v1/json/${key}/lookuptable.php?l=${sdb_id}&s=${season}`
       );
@@ -285,7 +308,7 @@ Deno.serve(async (req: Request) => {
       if (!key) return err("APIF_KEY não configurada", 503);
       const league = APIF_IDS[lid];
       if (!league) return err(`Liga desconhecida: ${lid}`, 400);
-      const season = url.searchParams.get("season") ?? "2024";
+      const season = url.searchParams.get("season") ?? defaultSeason(lid);
       const last   = url.searchParams.get("last");
       const next   = url.searchParams.get("next");
       const date   = url.searchParams.get("date");
@@ -387,7 +410,7 @@ Deno.serve(async (req: Request) => {
       if (!teamId) return err("Parâmetro 'teamId' obrigatório", 400);
       const league = APIF_IDS[lid];
       if (!league) return err(`Liga desconhecida: ${lid}`, 400);
-      const season = url.searchParams.get("season") ?? "2024";
+      const season = url.searchParams.get("season") ?? defaultSeason(lid);
       const data = await apiFetch(
         `${APIF_BASE}/teams/statistics?team=${teamId}&league=${league}&season=${season}`,
         { headers: { "x-apisports-key": key } });
@@ -401,7 +424,7 @@ Deno.serve(async (req: Request) => {
       if (!key) return err("APIF_KEY não configurada", 503);
       const league = APIF_IDS[lid];
       if (!league) return err(`Liga desconhecida: ${lid}`, 400);
-      const season = url.searchParams.get("season") ?? "2024";
+      const season = url.searchParams.get("season") ?? defaultSeason(lid);
       const data = await apiFetch(
         `${APIF_BASE}/standings?league=${league}&season=${season}`,
         { headers: { "x-apisports-key": key } });
@@ -414,7 +437,7 @@ Deno.serve(async (req: Request) => {
       if (!key) return err("APIF_KEY não configurada", 503);
       const league = APIF_IDS[lid];
       if (!league) return err(`Liga desconhecida: ${lid}`, 400);
-      const season = url.searchParams.get("season") ?? "2024";
+      const season = url.searchParams.get("season") ?? defaultSeason(lid);
       const data = await apiFetch(
         `${APIF_BASE}/players/topscorers?league=${league}&season=${season}`,
         { headers: { "x-apisports-key": key } });
@@ -441,7 +464,7 @@ Deno.serve(async (req: Request) => {
       const fixtureId = url.searchParams.get("fixtureId");
       const teamId    = url.searchParams.get("teamId");
       const league    = APIF_IDS[lid];
-      const season    = url.searchParams.get("season") ?? "2024";
+      const season    = url.searchParams.get("season") ?? defaultSeason(lid);
       let qs = "";
       if (fixtureId) {
         qs = `fixture=${fixtureId}`;
@@ -474,7 +497,7 @@ Deno.serve(async (req: Request) => {
       if (!key) return err("APIF_KEY não configurada", 503);
       const league = APIF_IDS[lid];
       if (!league) return err(`Liga desconhecida: ${lid}`, 400);
-      const season = url.searchParams.get("season") ?? "2024";
+      const season = url.searchParams.get("season") ?? defaultSeason(lid);
       const data = await apiFetch(
         `${APIF_BASE}/players/topassists?league=${league}&season=${season}`,
         { headers: { "x-apisports-key": key } });
@@ -487,7 +510,7 @@ Deno.serve(async (req: Request) => {
       if (!key) return err("APIF_KEY não configurada", 503);
       const league = APIF_IDS[lid];
       if (!league) return err(`Liga desconhecida: ${lid}`, 400);
-      const season = url.searchParams.get("season") ?? "2024";
+      const season = url.searchParams.get("season") ?? defaultSeason(lid);
       const data = await apiFetch(
         `${APIF_BASE}/players/topyellowcards?league=${league}&season=${season}`,
         { headers: { "x-apisports-key": key } });
@@ -500,7 +523,7 @@ Deno.serve(async (req: Request) => {
       if (!key) return err("APIF_KEY não configurada", 503);
       const league = APIF_IDS[lid];
       if (!league) return err(`Liga desconhecida: ${lid}`, 400);
-      const season = url.searchParams.get("season") ?? "2024";
+      const season = url.searchParams.get("season") ?? defaultSeason(lid);
       const data = await apiFetch(
         `${APIF_BASE}/players/topredcards?league=${league}&season=${season}`,
         { headers: { "x-apisports-key": key } });
@@ -513,7 +536,7 @@ Deno.serve(async (req: Request) => {
       if (!key) return err("APIF_KEY não configurada", 503);
       const playerId = url.searchParams.get("playerId") ?? "";
       if (!playerId) return err("Parâmetro 'playerId' obrigatório", 400);
-      const season = url.searchParams.get("season") ?? "2024";
+      const season = url.searchParams.get("season") ?? defaultSeason(lid);
       const data = await apiFetch(
         `${APIF_BASE}/players?id=${playerId}&season=${season}`,
         { headers: { "x-apisports-key": key } });
@@ -550,7 +573,7 @@ Deno.serve(async (req: Request) => {
       if (!key) return err("APIF_KEY não configurada", 503);
       const league = APIF_IDS[lid];
       if (!league) return err(`Liga desconhecida: ${lid}`, 400);
-      const season = url.searchParams.get("season") ?? "2024";
+      const season = url.searchParams.get("season") ?? defaultSeason(lid);
       const data = await apiFetch(
         `${APIF_BASE}/fixtures/rounds?league=${league}&season=${season}`,
         { headers: { "x-apisports-key": key } });
