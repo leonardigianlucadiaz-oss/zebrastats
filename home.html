@@ -152,7 +152,7 @@
         <div id="upcomingGames" style="display:flex;flex-direction:column;gap:10px;"></div>
 
         <!-- QUENTE AGORA -->
-        <div class="section-header" style="margin-top:4px;">
+        <div class="section-header" id="hotNowHeader" style="margin-top:4px;">
           <span class="section-title"><i data-lucide="flame" class="sec-ic" style="color:#ff6b35;"></i>Quente Agora</span>
           <a href="zebras.html" class="section-link">Ver zebras</a>
         </div>
@@ -184,7 +184,7 @@
         <div id="zebraDestaqueCard" style="display:none;background:linear-gradient(135deg,rgba(46,230,92,0.1),rgba(255,200,50,0.07));border:1px solid rgba(46,230,92,0.35);border-radius:var(--radius-md);padding:14px;cursor:pointer;"></div>
 
         <!-- MAIORES ZEBRAS RECENTES -->
-        <div class="section-header" style="margin-top:8px;">
+        <div class="section-header" id="recentZebrasHeader" style="margin-top:8px;">
           <span class="section-title"><i data-lucide="trending-up" class="sec-ic" style="color:var(--gold);"></i>Maiores Zebras Recentes</span>
         </div>
         <div id="proximasZebrasWrap" style="display:flex;flex-direction:column;gap:6px;">
@@ -441,6 +441,16 @@
     }
     .sparkline-card__title { font-size: 0.6875rem; color: var(--gray); margin-bottom: 6px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
     .sparkline-card svg { width: 100%; height: 36px; }
+
+    /* ── MOBILE: esconde seções secundárias ─────────────── */
+    @media (max-width: 999px) {
+      #hotNowHeader,
+      #hotLeagues,
+      #recentZebrasHeader,
+      #proximasZebrasWrap,
+      #zebrasDoDiaList,
+      .side-group--trends { display: none !important; }
+    }
 
     /* ── DIVIDER DE RODADA ───────────────────────────────── */
     .round-divider {
