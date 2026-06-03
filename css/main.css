@@ -8,8 +8,8 @@
 
 :root {
   --bg:         #060C15;
-  --card:       #0D1A2A;
-  --card2:      #0A1524;
+  --card:       #0F1E32;
+  --card2:      #0A1720;
   --green:      #2EE65C;
   --green-dim:  rgba(46, 230, 92, 0.12);
   --green-glow: rgba(46, 230, 92, 0.25);
@@ -21,7 +21,7 @@
   --gray:       #9AAABB;
   --gray-dim:   rgba(136, 154, 170, 0.15);
   --input-bg:   #0A1825;
-  --border:     #152A3E;
+  --border:     #1A3249;
   --dark-text:  #0D1A2A;
   --radius:     12px;
   --radius-sm:  8px;
@@ -668,6 +668,31 @@ p  { font-size: 0.875rem; line-height: 1.5; color: var(--gray); }
   margin-top: 8px;
 }
 
+/* ── LEAGUE PILL — unificado com filter-chip (fix #6) ── */
+.league-pill {
+  flex-shrink: 0;
+  min-height: 36px;
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  background: var(--card);
+  border: 1px solid var(--border);
+  color: var(--gray);
+  font-size: 0.8125rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.league-pill.active,
+.league-pill:hover {
+  background: var(--green-dim);
+  border-color: var(--green);
+  color: var(--white);
+}
+
 /* ── TEAM PILL (favorites bar) ── */
 .team-pill {
   display: flex;
@@ -677,6 +702,7 @@ p  { font-size: 0.875rem; line-height: 1.5; color: var(--gray); }
   cursor: pointer;
   min-width: 60px;
 }
+
 
 .team-pill__avatar {
   width: 46px; height: 46px;
@@ -1069,14 +1095,27 @@ p  { font-size: 0.875rem; line-height: 1.5; color: var(--gray); }
   .cards-grid   { grid-template-columns: repeat(3, 1fr); }
 }
 
-/* ── DESKTOP ≥1024px: sidebar drawer (hambúrguer) ── */
-/* Sidebar permanece como drawer em todos os tamanhos de tela.
-   O hambúrguer é visível no desktop e abre/fecha a sidebar com overlay. */
+/* ── DESKTOP ≥1024px: sidebar persistente (sempre visível) ── */
 @media (min-width: 1024px) {
-  /* Hambúrguer sempre visível no desktop */
-  .hamburger-btn { display: flex !important; }
+  /* Sidebar: sai do modo drawer e fica fixa no flex flow */
+  .app-sidebar {
+    position: sticky !important;
+    top: 0 !important;
+    height: 100vh !important;
+    transform: none !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transition: none !important;
+    z-index: 50 !important;
+    flex-shrink: 0;
+    overflow-y: auto;
+  }
+  /* Hamburger e backdrop desnecessários no desktop */
+  .hamburger-btn       { display: none !important; }
+  .sidebar-backdrop    { display: none !important; }
+  .sidebar-close-btn   { display: none !important; }
 
-  /* app-main sem offset — sidebar sobrepõe o conteúdo quando aberta */
+  /* app-main ocupa o espaço restante ao lado da sidebar */
   .app-main { min-width: 0; flex: 1; max-width: none; margin-left: 0; }
 
   /* Backdrop permitido no desktop (cobre o conteúdo ao abrir a sidebar) */
@@ -1833,6 +1872,87 @@ input:checked + .toggle-slider::before { transform: translateX(20px); }
 }
 
 /* ── FIXES GLOBAIS ─────────────────────────────────── */
+
+/* ── fw-800 utility (#12) ── */
+.fw-800 { font-weight: 800; }
+
+/* ── shimmer-line — alias do skel para linhas de texto (#9) ── */
+.shimmer-line {
+  height: 12px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, var(--card2) 25%, rgba(255,255,255,0.07) 50%, var(--card2) 75%);
+  background-size: 400% 100%;
+  animation: skeleton-shimmer 1.4s ease infinite;
+  margin-bottom: 6px;
+}
+
+/* ── Pulsos diferenciados por semântica (#21) ── */
+/* Ao Vivo → urgente, rápido */
+@keyframes pulse-live {
+  0%, 100% { opacity: 1;   transform: scale(1); }
+  50%       { opacity: 0.3; transform: scale(0.85); }
+}
+/* Em andamento → tranquilo, lento */
+@keyframes pulse-status {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.45; }
+}
+/* Retrocompatibilidade: pulse antigo mantido */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
+}
+.pulse-live   { animation: pulse-live   0.9s ease-in-out infinite; }
+.pulse-status { animation: pulse-status 2.2s ease-in-out infinite; }
+
+/* ── ZI Slider customizado (#16) ── */
+#ziSlider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: linear-gradient(to right, var(--green) 0%, var(--green) var(--zi-pct, 0%), var(--border) var(--zi-pct, 0%), var(--border) 100%);
+  outline: none;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+#ziSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: var(--green);
+  border: 3px solid var(--bg);
+  box-shadow: 0 0 0 2px var(--green), 0 2px 8px rgba(46,230,92,0.4);
+  cursor: pointer;
+  transition: box-shadow 0.15s;
+}
+#ziSlider::-moz-range-thumb {
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: var(--green);
+  border: 3px solid var(--bg);
+  box-shadow: 0 0 0 2px var(--green), 0 2px 8px rgba(46,230,92,0.4);
+  cursor: pointer;
+}
+#ziSlider::-webkit-slider-thumb:hover,
+#ziSlider::-moz-range-thumb:hover {
+  box-shadow: 0 0 0 3px var(--green), 0 4px 12px rgba(46,230,92,0.5);
+}
+#ziSliderWrap label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--gray);
+  margin-bottom: 8px;
+}
+#ziSliderWrap label span:last-child {
+  font-weight: 700;
+  color: var(--green);
+  font-size: 0.8125rem;
+}
 
 /* Fonte mínima 11px em labels */
 .stat-label, .pill-label, .bottom-nav__item { font-size: 0.6875rem !important; }

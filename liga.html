@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/main.css?v=14" />
+  <link rel="stylesheet" href="css/main.css?v=15" />
   <script src="https://unpkg.com/lucide@0.363.0/dist/umd/lucide.min.js"></script>
 </head>
 <body>
@@ -23,10 +23,10 @@
       <a href="home.html"    class="sidebar__nav-item"><i data-lucide="home"></i><span>Home</span></a>
       <a href="zebras.html"  class="sidebar__nav-item"><i data-lucide="activity"></i><span>Zebras</span></a>
       <a href="ranking.html" class="sidebar__nav-item"><i data-lucide="medal"></i><span>Ranking</span></a>
-      <a href="comparar.html"class="sidebar__nav-item"><i data-lucide="git-compare"></i><span>Comparar</span></a>
+      <a href="comparar.html"class="sidebar__nav-item"><i data-lucide="bar-chart-2"></i><span>Comparar</span></a>
       <a href="alertas.html" class="sidebar__nav-item"><i data-lucide="bell-ring"></i><span>Alertas</span></a>
       <a href="liga.html"    class="sidebar__nav-item active"><i data-lucide="trophy"></i><span>Ligas</span></a>
-      <a href="time.html"    class="sidebar__nav-item"><i data-lucide="star"></i><span>Times</span></a>
+      <a href="time.html"    class="sidebar__nav-item"><i data-lucide="shield"></i><span>Times</span></a>
       <a href="perfil.html"  class="sidebar__nav-item"><i data-lucide="user"></i><span>Perfil</span></a>
     </nav>
     <div class="sidebar__footer">
@@ -53,7 +53,7 @@
 
   <!-- SELETOR DE LIGA (acima do hero) -->
   <section class="section-padded" style="background:var(--card2);padding:10px 16px;border-bottom:1px solid var(--border);">
-    <div class="scroll-x" style="gap:8px;" id="leaguePicker">
+    <div class="scroll-x scroll-x-fade" style="gap:8px;" id="leaguePicker">
       <button class="filter-chip active" data-lid="BRA" data-name="Brasileirão Série A" data-sub="Brasil · Temporada 2025" data-lider="—" data-zebras="—" data-rodada="—"><span class="picker-logo" id="pl-BRA"></span> Brasileirão</button>
       <button class="filter-chip" data-lid="ENG" data-name="Premier League" data-sub="Inglaterra · Temporada 2024/25" data-lider="—" data-zebras="—" data-rodada="—"><span class="picker-logo" id="pl-ENG"></span> Premier Lge</button>
       <button class="filter-chip" data-lid="ESP" data-name="La Liga" data-sub="Espanha · Temporada 2024/25" data-lider="—" data-zebras="—" data-rodada="—"><span class="picker-logo" id="pl-ESP"></span> La Liga</button>
@@ -76,11 +76,11 @@
         <div style="font-size:0.8125rem;color:var(--gray);margin-top:3px;" id="leagueSub">Brasil · Temporada 2025</div>
         <div style="display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap;">
           <div style="display:flex;align-items:center;gap:6px;">
-            <span style="width:6px;height:6px;border-radius:50%;background:var(--green);display:inline-block;animation:pulse 1.5s infinite;"></span>
+            <span style="width:6px;height:6px;border-radius:50%;background:var(--green);display:inline-block;" class="pulse-status"></span>
             <span style="font-size:0.6875rem;color:var(--green);font-weight:600;">Em andamento</span>
           </div>
-          <button id="favLeagueBtn" style="display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:var(--radius-pill);padding:3px 10px;font-size:0.75rem;font-weight:600;color:var(--gray);cursor:pointer;transition:all 0.2s;" title="Favoritar liga">
-            <i data-lucide="star" style="width:12px;height:12px;"></i>Favoritar
+          <button id="favLeagueBtn" style="display:inline-flex;align-items:center;gap:5px;background:var(--gold-dim);border:1.5px solid rgba(255,200,50,0.4);border-radius:var(--radius-pill);padding:4px 12px;font-size:0.75rem;font-weight:700;color:var(--gold);cursor:pointer;transition:all 0.2s;" title="Favoritar liga">
+            <i data-lucide="star" style="width:12px;height:12px;"></i><span id="favLeagueLabel">Favoritar</span>
           </button>
         </div>
       </div>
@@ -222,7 +222,7 @@
     <a href="home.html"   class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="home"></i></span>Home</a>
     <a href="zebras.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="zap"></i></span>Zebras</a>
     <a href="liga.html"   class="bottom-nav__item active"><span class="bottom-nav__icon"><i data-lucide="trophy"></i></span>Ligas</a>
-    <a href="comparar.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="git-compare" style="width:20px;height:20px;display:block;"></i></span>Comparar</a>
+    <a href="comparar.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="bar-chart-2" style="width:20px;height:20px;display:block;"></i></span>Comparar</a>
     <a href="perfil.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="user"></i></span>Perfil</a>
   </nav>
 
@@ -237,7 +237,7 @@
 <script src="js/db.js"></script>
 <script src="js/auth-guard.js?v=4"></script>
 <script src="js/api.js"></script>
-<script src="js/main.js?v=10"></script>
+<script src="js/main.js?v=11"></script>
 <script>
   // ── DATA ────────────────────────────────────────────────────────
   // All arrays start empty — populated by real API calls in initRealData()
@@ -383,23 +383,46 @@
   let activeLid          = 'BRA';
   let sdbStandingsLoaded = false;
 
+  // ── CORES POR LIGA (#11) ─────────────────────────────────────────
+  const LEAGUE_HERO_COLORS = {
+    BRA: { a: 'rgba(46,180,80,0.12)',  b: 'rgba(255,220,0,0.06)' },  // verde/amarelo Brasil
+    ENG: { a: 'rgba(99,149,255,0.14)', b: 'rgba(200,30,30,0.05)' },  // azul/vermelho England
+    ESP: { a: 'rgba(200,50,50,0.12)',  b: 'rgba(255,200,0,0.06)' },  // vermelho/amarelo Espanha
+    ITA: { a: 'rgba(30,100,220,0.13)', b: 'rgba(46,230,92,0.05)' },  // azul/verde Itália
+    GER: { a: 'rgba(220,40,40,0.12)',  b: 'rgba(255,200,0,0.06)' },  // vermelho/amarelo Alemanha
+    FRA: { a: 'rgba(30,80,210,0.14)',  b: 'rgba(220,30,30,0.06)' },  // azul/vermelho França
+    POR: { a: 'rgba(180,20,20,0.14)',  b: 'rgba(46,180,80,0.06)' },  // vermelho/verde Portugal
+    UCL: { a: 'rgba(30,80,210,0.16)',  b: 'rgba(180,150,50,0.08)' }, // azul/dourado UCL
+  };
+
+  function updateLeagueHero(lid) {
+    const hero = document.getElementById('leagueHero');
+    if (!hero) return;
+    const c = LEAGUE_HERO_COLORS[lid] || LEAGUE_HERO_COLORS.BRA;
+    hero.style.background = `linear-gradient(135deg,${c.a} 0%,${c.b} 50%,var(--card2) 100%)`;
+  }
+
   // ── FAVORITAR LIGA ──────────────────────────────────────────────
   function syncFavBtn() {
     const btn = document.getElementById('favLeagueBtn');
+    const lbl = document.getElementById('favLeagueLabel');
     favLeague = isFavLeague(activeLid);
-    btn.innerHTML = favLeague
-      ? '<i data-lucide="star" style="width:18px;height:18px;fill:var(--gold);color:var(--gold);"></i>'
-      : '<i data-lucide="star" style="width:18px;height:18px;"></i>';
-    lucide.createIcons();
+    if (lbl) lbl.textContent = favLeague ? 'Favoritado' : 'Favoritar';
+    btn.querySelector('i').style.cssText = favLeague
+      ? 'width:12px;height:12px;fill:var(--gold);color:var(--gold);'
+      : 'width:12px;height:12px;';
+    if (typeof lucide !== 'undefined') lucide.createIcons({ nodes: [btn] });
   }
 
   document.getElementById('favLeagueBtn').addEventListener('click', function() {
     const name = document.getElementById('leagueName').textContent;
     favLeague = toggleFavLeague(activeLid, name);
-    this.innerHTML = favLeague
-      ? '<i data-lucide="star" style="width:18px;height:18px;fill:var(--gold);color:var(--gold);"></i>'
-      : '<i data-lucide="star" style="width:18px;height:18px;"></i>';
-    lucide.createIcons();
+    const lbl = document.getElementById('favLeagueLabel');
+    if (lbl) lbl.textContent = favLeague ? 'Favoritado' : 'Favoritar';
+    this.querySelector('i').style.cssText = favLeague
+      ? 'width:12px;height:12px;fill:var(--gold);color:var(--gold);'
+      : 'width:12px;height:12px;';
+    if (typeof lucide !== 'undefined') lucide.createIcons({ nodes: [this] });
     animFavBtn(this);
   });
 
@@ -421,6 +444,7 @@
       ARTILHEIROS.length = 0; ASSISTENCIAS.length = 0; ZEBRAS_LIGA.length = 0;
       CLUBE_STATS.length = 0; // FIX 7 — reset club stats on league switch
       syncFavBtn();
+      updateLeagueHero(activeLid);
       loadHeroLogo(activeLid);
       loadLeagueCrests(activeLid);
       renderJogos();
@@ -1333,8 +1357,10 @@
     document.getElementById('statZebras').textContent = chip.dataset.zebras|| '—';
     document.getElementById('statRodada').textContent = chip.dataset.rodada|| '—';
     syncFavBtn();
+    updateLeagueHero(activeLid);
     loadHeroLogo(activeLid);
   })();
+  updateLeagueHero(activeLid); // aplicar hero color na carga inicial
   loadLeagueCrests(activeLid);
   initRealData();
 
@@ -1433,5 +1459,8 @@
 <script src="js/admin.js"></script>
 </body>
 </html>
+
+
+
 
 

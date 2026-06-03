@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/main.css?v=14" />
+  <link rel="stylesheet" href="css/main.css?v=15" />
   <script src="https://unpkg.com/lucide@0.363.0/dist/umd/lucide.min.js"></script>
 </head>
 <body>
@@ -23,10 +23,10 @@
       <a href="home.html"    class="sidebar__nav-item"><i data-lucide="home"></i><span>Home</span></a>
       <a href="zebras.html"  class="sidebar__nav-item active"><i data-lucide="activity"></i><span>Zebras</span></a>
       <a href="ranking.html" class="sidebar__nav-item"><i data-lucide="medal"></i><span>Ranking</span></a>
-      <a href="comparar.html"class="sidebar__nav-item"><i data-lucide="git-compare"></i><span>Comparar</span></a>
+      <a href="comparar.html"class="sidebar__nav-item"><i data-lucide="bar-chart-2"></i><span>Comparar</span></a>
       <a href="alertas.html" class="sidebar__nav-item"><i data-lucide="bell-ring"></i><span>Alertas</span></a>
       <a href="liga.html"    class="sidebar__nav-item"><i data-lucide="trophy"></i><span>Ligas</span></a>
-      <a href="time.html"    class="sidebar__nav-item"><i data-lucide="star"></i><span>Times</span></a>
+      <a href="time.html"    class="sidebar__nav-item"><i data-lucide="shield"></i><span>Times</span></a>
       <a href="perfil.html"  class="sidebar__nav-item"><i data-lucide="user"></i><span>Perfil</span></a>
     </nav>
     <div class="sidebar__footer">
@@ -59,17 +59,17 @@
       <span class="section-title" style="font-size:0.875rem;"><i data-lucide="trophy" class="sec-ic"></i>Ligas</span>
       <button id="addLeagueBtn" style="background:none;border:none;color:var(--green);font-size:0.75rem;font-weight:600;cursor:pointer;font-family:inherit;">+ Adicionar Liga</button>
     </div>
-    <div class="scroll-x" id="leagueBar"></div>
+    <div class="scroll-x scroll-x-fade" id="leagueBar"></div>
   </section>
 
   <!-- FILTROS (magnitude + período numa só barra) -->
   <section class="section-padded" style="padding:10px 16px;border-bottom:1px solid var(--border);">
-    <div class="scroll-x" style="gap:8px;" id="filterRow">
+    <div class="scroll-x scroll-x-fade" style="gap:8px;" id="filterRow">
       <button class="filter-chip active" data-filter="all">Todas</button>
       <button class="filter-chip" data-filter="grande"><i data-lucide="alert-circle" class="chip-ic" style="color:var(--red);"></i>Grande (7+)</button>
       <button class="filter-chip" data-filter="media"><i data-lucide="alert-circle" class="chip-ic" style="color:var(--gold);"></i>Média (4–7)</button>
       <button class="filter-chip" data-filter="leve"><i data-lucide="alert-circle" class="chip-ic" style="color:var(--gray);"></i>Leve (&lt;4)</button>
-      <span style="width:1px;height:18px;background:var(--border);flex-shrink:0;align-self:center;"></span>
+      <span style="width:2px;height:20px;background:var(--gray);opacity:0.35;border-radius:1px;flex-shrink:0;align-self:center;"></span>
       <button class="filter-chip active" data-period="all"><i data-lucide="calendar" class="chip-ic"></i>Tudo</button>
       <button class="filter-chip" data-period="week"><i data-lucide="calendar-days" class="chip-ic"></i>Semana</button>
       <button class="filter-chip" data-period="month"><i data-lucide="calendar-range" class="chip-ic"></i>Mês</button>
@@ -84,7 +84,7 @@
   </div>
 
   <!-- ZI SLIDER -->
-  <div id="ziSliderWrap">
+  <div id="ziSliderWrap" style="padding:14px 16px;border-bottom:1px solid var(--border);background:var(--card2);">
     <label>
       <span>Índice Zebra mínimo</span>
       <span id="ziSliderVal">0</span>
@@ -92,23 +92,24 @@
     <input type="range" id="ziSlider" min="0" max="10" step="0.5" value="0" />
   </div>
 
-  <!-- HEATMAP SEMANAL -->
-  <section class="section-padded" style="padding:12px 16px;border-bottom:1px solid var(--border);background:var(--card2);">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-      <span style="font-size:0.75rem;font-weight:600;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;">Intensidade da Semana</span>
-      <span style="font-size:0.6875rem;color:var(--gray);">zebras por dia</span>
-    </div>
-    <div id="weekHeatmap" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;"></div>
-    <div style="display:flex;justify-content:space-between;margin-top:4px;">
-      <div id="heatmapLabels" style="display:contents;"></div>
-    </div>
-    <!-- FIX 1 — heatmap legend -->
-    <div style="display:flex;align-items:center;gap:6px;margin-top:6px;justify-content:flex-end;">
-      <span style="font-size:0.6rem;color:var(--gray);">menos</span>
-      <span style="width:10px;height:10px;border-radius:2px;background:var(--green-dim);display:inline-block;"></span>
-      <span style="width:10px;height:10px;border-radius:2px;background:#22c55e99;display:inline-block;"></span>
-      <span style="width:10px;height:10px;border-radius:2px;background:var(--green);display:inline-block;"></span>
-      <span style="font-size:0.6rem;color:var(--gray);">mais</span>
+  <!-- HEATMAP SEMANAL (#17 — card com borda) -->
+  <section class="section-padded" style="padding:12px 16px 14px;border-bottom:1px solid var(--border);background:var(--card2);">
+    <div class="card" style="padding:14px 16px;border-color:var(--border);">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <span style="font-size:var(--text-xs);font-weight:700;color:var(--white);text-transform:uppercase;letter-spacing:0.5px;">Intensidade da Semana</span>
+        <span style="font-size:var(--text-2xs);color:var(--gray);">zebras por dia</span>
+      </div>
+      <div id="weekHeatmap" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;"></div>
+      <div style="display:flex;justify-content:space-between;margin-top:4px;">
+        <div id="heatmapLabels" style="display:contents;"></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;margin-top:8px;justify-content:flex-end;">
+        <span style="font-size:0.6rem;color:var(--gray);">menos</span>
+        <span style="width:10px;height:10px;border-radius:2px;background:var(--green-dim);display:inline-block;"></span>
+        <span style="width:10px;height:10px;border-radius:2px;background:#22c55e99;display:inline-block;"></span>
+        <span style="width:10px;height:10px;border-radius:2px;background:var(--green);display:inline-block;"></span>
+        <span style="font-size:0.6rem;color:var(--gray);">mais</span>
+      </div>
     </div>
   </section>
 
@@ -153,7 +154,7 @@
     <a href="home.html"   class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="home"></i></span>Home</a>
     <a href="zebras.html" class="bottom-nav__item active"><span class="bottom-nav__icon"><i data-lucide="zap"></i></span>Zebras</a>
     <a href="liga.html"   class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="trophy"></i></span>Ligas</a>
-    <a href="comparar.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="git-compare" style="width:20px;height:20px;display:block;"></i></span>Comparar</a>
+    <a href="comparar.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="bar-chart-2" style="width:20px;height:20px;display:block;"></i></span>Comparar</a>
     <a href="perfil.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="user"></i></span>Perfil</a>
   </nav>
 
@@ -184,7 +185,7 @@
 <script src="js/auth-guard.js?v=4"></script>
 <script src="js/zebra-engine.js"></script>
 <script src="js/api.js"></script>
-<script src="js/main.js?v=10"></script>
+<script src="js/main.js?v=11"></script>
 <script>
   const LEAGUES = [
     { id:'BRA', flag:'🇧🇷', name:'Brasileirão Série A', country:'Brasil',     faved:true  },
@@ -917,6 +918,9 @@
 <script src="js/admin.js"></script>
 </body>
 </html>
+
+
+
 
 
 

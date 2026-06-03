@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/main.css?v=14" />
+  <link rel="stylesheet" href="css/main.css?v=15" />
   <script src="https://unpkg.com/lucide@0.363.0/dist/umd/lucide.min.js"></script>
 </head>
 <body>
@@ -23,10 +23,10 @@
       <a href="home.html"    class="sidebar__nav-item active"><i data-lucide="home"></i><span>Home</span></a>
       <a href="zebras.html"  class="sidebar__nav-item"><i data-lucide="activity"></i><span>Zebras</span></a>
       <a href="ranking.html" class="sidebar__nav-item"><i data-lucide="medal"></i><span>Ranking</span></a>
-      <a href="comparar.html"class="sidebar__nav-item"><i data-lucide="git-compare"></i><span>Comparar</span></a>
+      <a href="comparar.html"class="sidebar__nav-item"><i data-lucide="bar-chart-2"></i><span>Comparar</span></a>
       <a href="alertas.html" class="sidebar__nav-item"><i data-lucide="bell-ring"></i><span>Alertas</span></a>
       <a href="liga.html"    class="sidebar__nav-item"><i data-lucide="trophy"></i><span>Ligas</span></a>
-      <a href="time.html"    class="sidebar__nav-item"><i data-lucide="star"></i><span>Times</span></a>
+      <a href="time.html"    class="sidebar__nav-item"><i data-lucide="shield"></i><span>Times</span></a>
       <a href="perfil.html"  class="sidebar__nav-item"><i data-lucide="user"></i><span>Perfil</span></a>
     </nav>
     <div class="sidebar__footer">
@@ -54,22 +54,30 @@
     </nav>
 
 
-    <!-- HERO BANNER -->
-    <div id="heroBanner" class="section-padded" style="background:linear-gradient(135deg,rgba(46,230,92,0.08) 0%,rgba(255,200,50,0.05) 50%,var(--card2) 100%);border-bottom:1px solid var(--border);padding:20px 16px 16px;position:relative;overflow:hidden;">
-      <!-- Background zebra pattern -->
-      <div style="position:absolute;right:-20px;top:-10px;font-size:5rem;opacity:0.06;transform:rotate(15deg);pointer-events:none;">🦓</div>
+    <!-- HERO BANNER — Zebra do Dia (#10 redesign) -->
+    <div id="heroBanner" class="section-padded" style="background:linear-gradient(135deg,rgba(46,230,92,0.09) 0%,rgba(255,200,50,0.04) 60%,var(--card2) 100%);border-bottom:1px solid var(--border);padding:20px 16px 18px;position:relative;overflow:hidden;">
+      <div style="position:absolute;right:-10px;top:-16px;font-size:6rem;opacity:0.05;transform:rotate(18deg);pointer-events:none;user-select:none;">🦓</div>
       <div style="position:relative;z-index:1;">
-        <div style="font-size:0.6875rem;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">🦓 Zebra do Dia</div>
-        <div style="font-size:1rem;font-weight:700;margin-bottom:2px;" id="heroMatchTitle">Carregando...</div>
-        <div style="font-size:0.75rem;color:var(--gray);margin-bottom:12px;" id="heroMatchLeague">—</div>
-        <div style="display:flex;align-items:center;gap:12px;">
-          <div style="background:rgba(46,230,92,0.12);border:1px solid rgba(46,230,92,0.3);border-radius:8px;padding:6px 12px;display:flex;flex-direction:column;align-items:center;">
-            <div style="font-size:1.25rem;font-weight:900;color:var(--green);line-height:1;" id="heroZiValue">–</div>
-            <div style="font-size:0.6875rem;color:var(--gray);margin-top:1px;">ZI</div>
-          </div>
-          <div style="font-size:0.8125rem;color:var(--gray);flex:1;" id="heroMatchDesc">Analisando partidas de hoje...</div>
-          <a href="zebras.html" style="background:var(--green);color:#000;border-radius:8px;padding:8px 14px;font-size:0.8125rem;font-weight:700;text-decoration:none;white-space:nowrap;flex-shrink:0;">Ver zebras →</a>
+        <!-- Label -->
+        <div style="font-size:var(--text-2xs);font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+          <span style="width:6px;height:6px;border-radius:50%;background:var(--green);display:inline-block;" class="pulse-status"></span>Zebra do Dia
         </div>
+        <!-- ZI destaque + info lado a lado -->
+        <div style="display:flex;align-items:flex-start;gap:16px;">
+          <!-- ZI badge grande -->
+          <div style="flex-shrink:0;background:rgba(46,230,92,0.12);border:1.5px solid rgba(46,230,92,0.35);border-radius:var(--radius-md);padding:10px 14px;text-align:center;min-width:60px;">
+            <div style="font-size:2rem;font-weight:900;color:var(--green);line-height:1;" id="heroZiValue">–</div>
+            <div style="font-size:var(--text-2xs);color:var(--gray);margin-top:3px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">ZI</div>
+          </div>
+          <!-- Texto -->
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:1.0625rem;font-weight:700;line-height:1.25;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" id="heroMatchTitle">Carregando...</div>
+            <div style="font-size:var(--text-xs);color:var(--gray);margin-bottom:10px;" id="heroMatchLeague">—</div>
+            <div style="font-size:var(--text-sm);color:var(--gray);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;" id="heroMatchDesc">Analisando partidas de hoje...</div>
+          </div>
+        </div>
+        <!-- CTA -->
+        <a href="zebras.html" style="display:inline-flex;align-items:center;gap:6px;margin-top:14px;background:var(--green);color:#000;border-radius:var(--radius-pill);padding:8px 18px;font-size:var(--text-sm);font-weight:700;text-decoration:none;">Ver todas as zebras <i data-lucide="arrow-right" style="width:14px;height:14px;"></i></a>
       </div>
     </div>
 
@@ -96,7 +104,7 @@
         <!-- AO VIVO -->
         <div class="section-header">
           <span class="section-title">
-            <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--red);margin-right:6px;animation:pulse 1.2s infinite;"></span>
+            <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--red);margin-right:6px;" class="pulse-live"></span>
             Ao Vivo
           </span>
           <a href="zebras.html" class="section-link">Ver todos</a>
@@ -109,7 +117,7 @@
           <span style="font-size:0.6875rem;color:var(--gray);">Filtrar por liga</span>
           <a href="liga.html" style="font-size:0.6875rem;color:var(--green);font-weight:600;text-decoration:none;">Explorar ligas →</a>
         </div>
-        <div class="scroll-x" id="leagueFilter" style="gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;flex-wrap:nowrap;">
+        <div class="scroll-x scroll-x-fade" id="leagueFilter" style="gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;flex-wrap:nowrap;">
           <button class="league-pill active" data-league="all">Todos</button>
           <button class="league-pill" data-league="BRA" data-lid="BRA"><span class="pill-logo" id="hpl-BRA"></span> Brasileirão</button>
           <button class="league-pill" data-league="ENG" data-lid="ENG"><span class="pill-logo" id="hpl-ENG"></span> Premier Lge</button>
@@ -205,7 +213,7 @@
       <a href="home.html"   class="bottom-nav__item active"><span class="bottom-nav__icon"><i data-lucide="home"></i></span>Home</a>
       <a href="zebras.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="zap"></i></span>Zebras</a>
       <a href="liga.html"   class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="trophy"></i></span>Ligas</a>
-      <a href="comparar.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="git-compare" style="width:20px;height:20px;display:block;"></i></span>Comparar</a>
+      <a href="comparar.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="bar-chart-2" style="width:20px;height:20px;display:block;"></i></span>Comparar</a>
       <a href="perfil.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="user"></i></span>Perfil</a>
     </nav>
 
@@ -388,18 +396,6 @@
     }
     #zebraDestaqueCard { animation: pulseGreen 2.4s ease-in-out infinite; }
 
-    /* Próximas Zebras shimmer skeleton */
-    .shimmer-line {
-      height: 14px; border-radius: 6px;
-      background: linear-gradient(90deg, var(--card) 25%, var(--card2,#1e1e30) 50%, var(--card) 75%);
-      background-size: 200% 100%;
-      animation: shimmer 1.4s infinite;
-    }
-    @keyframes shimmer {
-      0%   { background-position: 200% 0; }
-      100% { background-position: -200% 0; }
-    }
-
     /* Sparklines section */
     #sparklineSection { margin-top: 4px; }
     .sparkline-grid {
@@ -462,7 +458,7 @@
   <script src="js/auth-guard.js?v=4"></script>
   <script src="js/zebra-engine.js"></script>
   <script src="js/api.js"></script>
-  <script src="js/main.js?v=10"></script>
+  <script src="js/main.js?v=11"></script>
   <script>
     // ── CONSTANTS ─────────────────────────────────────────
     const ALL_LIDS   = ['BRA','ENG','ESP','ITA','GER','FRA','UCL','POR'];
@@ -1301,5 +1297,8 @@
 <script src="js/admin.js"></script>
 </body>
 </html>
+
+
+
 
 
