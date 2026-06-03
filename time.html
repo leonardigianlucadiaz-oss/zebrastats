@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/main.css?v=14" />
+  <link rel="stylesheet" href="css/main.css?v=15" />
   <script src="https://unpkg.com/lucide@0.363.0/dist/umd/lucide.min.js"></script>
 </head>
 <body>
@@ -23,10 +23,10 @@
       <a href="home.html"    class="sidebar__nav-item"><i data-lucide="home"></i><span>Home</span></a>
       <a href="zebras.html"  class="sidebar__nav-item"><i data-lucide="activity"></i><span>Zebras</span></a>
       <a href="ranking.html" class="sidebar__nav-item"><i data-lucide="medal"></i><span>Ranking</span></a>
-      <a href="comparar.html"class="sidebar__nav-item"><i data-lucide="git-compare"></i><span>Comparar</span></a>
+      <a href="comparar.html"class="sidebar__nav-item"><i data-lucide="bar-chart-2"></i><span>Comparar</span></a>
       <a href="alertas.html" class="sidebar__nav-item"><i data-lucide="bell-ring"></i><span>Alertas</span></a>
       <a href="liga.html"    class="sidebar__nav-item"><i data-lucide="trophy"></i><span>Ligas</span></a>
-      <a href="time.html"    class="sidebar__nav-item active"><i data-lucide="star"></i><span>Times</span></a>
+      <a href="time.html"    class="sidebar__nav-item active"><i data-lucide="shield"></i><span>Times</span></a>
       <a href="perfil.html"  class="sidebar__nav-item"><i data-lucide="user"></i><span>Perfil</span></a>
     </nav>
     <div class="sidebar__footer">
@@ -51,13 +51,20 @@
       <div class="navbar__actions"></div>
     </nav>
 
-    <!-- HERO DO TIME -->
-    <div id="teamHeroSkel" style="display:flex;flex-direction:column;align-items:center;gap:12px;padding:24px">
-      <div class="skel" style="width:80px;height:80px;border-radius:50%"></div>
-      <div class="skel" style="width:140px;height:20px;border-radius:8px"></div>
-      <div class="skel" style="width:200px;height:14px;border-radius:6px"></div>
+    <!-- HERO DO TIME — skeleton (#22) mimetiza forma real -->
+    <div id="teamHeroSkel" style="background:linear-gradient(160deg,#0f2040 0%,#060c15 100%);padding:28px 16px 20px;display:flex;flex-direction:column;align-items:center;gap:10px;">
+      <div class="skel" style="width:72px;height:72px;border-radius:50%;"></div>
+      <div class="skel" style="width:160px;height:22px;border-radius:8px;margin-top:4px;"></div>
+      <div class="skel" style="width:120px;height:14px;border-radius:6px;"></div>
+      <div style="display:flex;gap:8px;margin-top:8px;">
+        <div class="skel" style="width:58px;height:52px;border-radius:12px;"></div>
+        <div class="skel" style="width:58px;height:52px;border-radius:12px;"></div>
+        <div class="skel" style="width:58px;height:52px;border-radius:12px;"></div>
+        <div class="skel" style="width:58px;height:52px;border-radius:12px;"></div>
+      </div>
     </div>
-    <div class="team-hero" id="teamHero" style="background:linear-gradient(160deg,#851414 0%,#3a0808 100%);">
+    <!-- Hero real: cor neutra default, JS atualiza para cor do time (#3) -->
+    <div class="team-hero" id="teamHero" style="background:linear-gradient(160deg,#0f2040 0%,#060c15 100%);">
       <div class="team-hero__shield" id="heroShield">TOR</div>
       <div class="team-hero__name"  id="heroName">Carregando...</div>
       <div class="team-hero__league" id="heroLeague">—</div>
@@ -84,10 +91,10 @@
 
       <div style="display:flex;gap:8px;margin-top:10px;align-items:center;justify-content:center;">
         <a href="comparar.html" id="compararBtn" style="display:inline-flex;align-items:center;gap:5px;background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.2);border-radius:var(--radius-pill);padding:6px 12px;font-size:0.8125rem;font-weight:600;color:var(--white);text-decoration:none;">
-          <i data-lucide="git-compare" style="width:13px;height:13px;"></i>Comparar
+          <i data-lucide="bar-chart-2" style="width:13px;height:13px;"></i>Comparar
         </a>
-        <button id="favBtn" style="display:inline-flex;align-items:center;gap:5px;background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.2);border-radius:var(--radius-pill);padding:6px 12px;font-size:0.8125rem;font-weight:600;color:var(--white);cursor:pointer;transition:all 0.2s;" title="Favoritar time">
-          <i data-lucide="star" style="width:13px;height:13px;"></i>Favoritar
+        <button id="favBtn" style="display:inline-flex;align-items:center;gap:5px;background:var(--gold-dim);border:1.5px solid rgba(255,200,50,0.45);border-radius:var(--radius-pill);padding:6px 12px;font-size:0.8125rem;font-weight:700;color:var(--gold);cursor:pointer;transition:all 0.2s;" title="Favoritar time">
+          <i data-lucide="star" style="width:13px;height:13px;"></i><span id="favBtnLabel">Favoritar</span>
         </button>
       </div>
     </div>
@@ -360,7 +367,7 @@
       <a href="home.html"   class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="home"></i></span>Home</a>
       <a href="zebras.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="zap"></i></span>Zebras</a>
       <a href="liga.html"   class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="trophy"></i></span>Ligas</a>
-      <a href="comparar.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="git-compare" style="width:20px;height:20px;display:block;"></i></span>Comparar</a>
+      <a href="comparar.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="bar-chart-2" style="width:20px;height:20px;display:block;"></i></span>Comparar</a>
       <a href="perfil.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="user"></i></span>Perfil</a>
     </nav>
 
@@ -377,7 +384,7 @@
   <script src="js/auth-guard.js?v=4"></script>
   <script src="js/zebra-engine.js"></script>
   <script src="js/api.js"></script>
-  <script src="js/main.js?v=10"></script>
+  <script src="js/main.js?v=11"></script>
   <script src="js/teams-data.js"></script><!-- FIX 28 -->
   <script>
     // ── DATA ──────────────────────────────────────────────
@@ -915,10 +922,13 @@
       const favBtn = document.getElementById('favBtn');
       if (!favBtn) return;
       isFavorited = currentTeamSdbId ? (typeof isFavorite === 'function' ? isFavorite(currentTeamSdbId) : false) : false;
-      favBtn.innerHTML = isFavorited
-        ? '<i data-lucide="star" style="width:18px;height:18px;fill:var(--gold);color:var(--gold);"></i>'
-        : '<i data-lucide="star" style="width:18px;height:18px;"></i>';
-      lucide.createIcons();
+      const lbl = document.getElementById('favBtnLabel');
+      if (lbl) lbl.textContent = isFavorited ? 'Favoritado' : 'Favoritar';
+      const ic = favBtn.querySelector('i');
+      if (ic) ic.style.cssText = isFavorited
+        ? 'width:13px;height:13px;fill:var(--gold);color:var(--gold);'
+        : 'width:13px;height:13px;';
+      if (typeof lucide !== 'undefined') lucide.createIcons({ nodes: [favBtn] });
     }
 
     document.getElementById('favBtn').addEventListener('click', function() {
@@ -927,10 +937,13 @@
       const crest = document.querySelector('#heroShield img')?.src || '';
       const color = currentTeamData?.color || '#2EE65C';
       isFavorited = typeof toggleFavorite === 'function' ? toggleFavorite(id, tname, { crest, color }) : false;
-      this.innerHTML = isFavorited
-        ? '<i data-lucide="star" style="width:18px;height:18px;fill:var(--gold);color:var(--gold);"></i>'
-        : '<i data-lucide="star" style="width:18px;height:18px;"></i>';
-      lucide.createIcons();
+      const lbl2 = document.getElementById('favBtnLabel');
+      if (lbl2) lbl2.textContent = isFavorited ? 'Favoritado' : 'Favoritar';
+      const ic2 = this.querySelector('i');
+      if (ic2) ic2.style.cssText = isFavorited
+        ? 'width:13px;height:13px;fill:var(--gold);color:var(--gold);'
+        : 'width:13px;height:13px;';
+      if (typeof lucide !== 'undefined') lucide.createIcons({ nodes: [this] });
       if (typeof animFavBtn === 'function') animFavBtn(this);
     });
 
@@ -1724,6 +1737,9 @@
 <script src="js/admin.js"></script>
 </body>
 </html>
+
+
+
 
 
 

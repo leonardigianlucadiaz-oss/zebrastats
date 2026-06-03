@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/main.css?v=14" />
+  <link rel="stylesheet" href="css/main.css?v=15" />
   <script src="https://unpkg.com/lucide@0.363.0/dist/umd/lucide.min.js"></script>
 </head>
 <body>
@@ -23,10 +23,10 @@
       <a href="home.html"    class="sidebar__nav-item"><i data-lucide="home"></i><span>Home</span></a>
       <a href="zebras.html"  class="sidebar__nav-item"><i data-lucide="activity"></i><span>Zebras</span></a>
       <a href="ranking.html" class="sidebar__nav-item"><i data-lucide="medal"></i><span>Ranking</span></a>
-      <a href="comparar.html"class="sidebar__nav-item active"><i data-lucide="git-compare"></i><span>Comparar</span></a>
+      <a href="comparar.html"class="sidebar__nav-item active"><i data-lucide="bar-chart-2"></i><span>Comparar</span></a>
       <a href="alertas.html" class="sidebar__nav-item"><i data-lucide="bell-ring"></i><span>Alertas</span></a>
       <a href="liga.html"    class="sidebar__nav-item"><i data-lucide="trophy"></i><span>Ligas</span></a>
-      <a href="time.html"    class="sidebar__nav-item"><i data-lucide="star"></i><span>Times</span></a>
+      <a href="time.html"    class="sidebar__nav-item"><i data-lucide="shield"></i><span>Times</span></a>
       <a href="perfil.html"  class="sidebar__nav-item"><i data-lucide="user"></i><span>Perfil</span></a>
     </nav>
     <div class="sidebar__footer">
@@ -86,10 +86,11 @@
         </div>
       </div>
 
-      <!-- VS -->
-      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding-top:10px;gap:3px;">
-        <div style="font-size:0.6875rem;font-weight:800;color:var(--gray);letter-spacing:1px;">VS</div>
-        <div style="width:1px;height:20px;background:var(--border);"></div>
+      <!-- VS — badge (#20) -->
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding-top:10px;gap:6px;">
+        <div style="width:1px;height:14px;background:var(--border);"></div>
+        <div style="background:linear-gradient(135deg,var(--green-dim),rgba(255,200,50,0.1));border:1.5px solid rgba(46,230,92,0.35);border-radius:50%;width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:0.625rem;font-weight:800;color:var(--green);letter-spacing:0.5px;box-shadow:0 0 12px rgba(46,230,92,0.15);">VS</div>
+        <div style="width:1px;height:14px;background:var(--border);"></div>
       </div>
 
       <!-- SLOT B -->
@@ -281,7 +282,7 @@
       <a href="home.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="home"></i></span>Home</a>
       <a href="zebras.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="zap"></i></span>Zebras</a>
       <a href="liga.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="trophy"></i></span>Ligas</a>
-      <a href="comparar.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="git-compare" style="width:20px;height:20px;display:block;"></i></span>Comparar</a>
+      <a href="comparar.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="bar-chart-2" style="width:20px;height:20px;display:block;"></i></span>Comparar</a>
       <a href="perfil.html" class="bottom-nav__item"><span class="bottom-nav__icon"><i data-lucide="user"></i></span>Perfil</a>
     </nav>
 
@@ -297,7 +298,7 @@
 <script src="js/auth-guard.js?v=4"></script>
 <script src="js/zebra-engine.js"></script>
 <script src="js/api.js"></script>
-<script src="js/main.js?v=10"></script>
+<script src="js/main.js?v=11"></script>
 <script>
 // ── DATASET ───────────────────────────────────────────────────────────────────
 const ALL_TEAMS = [
@@ -1350,5 +1351,8 @@ lucide.createIcons();
 <script src="js/admin.js"></script>
 </body>
 </html>
+
+
+
 
 

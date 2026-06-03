@@ -659,17 +659,26 @@ function ensureNavbarConsistency() {
 
 // ── SIDEBAR SECTION LABEL ─────────────────────────────────────
 /**
- * Adds a "NAVEGAÇÃO" section label above the first nav item on desktop.
- * Makes the sidebar feel more structured.
+ * Insere 3 labels de grupo na sidebar: Principal / Análise / Conta.
+ * Roda em todos os tamanhos (os estilos CSS já controlam a exibição).
  */
 function initSidebarLabel() {
-  if (window.innerWidth < 1024) return;
   const nav = document.querySelector('.sidebar__nav');
   if (!nav || nav.querySelector('.sidebar__section-label')) return;
-  const label = document.createElement('div');
-  label.className = 'sidebar__section-label';
-  label.textContent = 'NAVEGAÇÃO';
-  nav.prepend(label);
+  const items = [...nav.querySelectorAll('a.sidebar__nav-item')];
+  const groups = [
+    { label: 'Principal', hrefs: ['home.html', 'zebras.html', 'ranking.html'] },
+    { label: 'Análise',   hrefs: ['comparar.html', 'liga.html', 'time.html'] },
+    { label: 'Conta',     hrefs: ['alertas.html', 'favoritos.html', 'perfil.html'] },
+  ];
+  groups.forEach(group => {
+    const first = items.find(a => group.hrefs.includes(a.getAttribute('href')));
+    if (!first) return;
+    const lbl = document.createElement('div');
+    lbl.className = 'sidebar__section-label';
+    lbl.textContent = group.label.toUpperCase();
+    nav.insertBefore(lbl, first);
+  });
 }
 
 // ── INJETAR FAVORITOS NA SIDEBAR ──────────────────────────────
@@ -701,7 +710,7 @@ function initBottomNav() {
     { href: 'home.html',     icon: 'home',        label: 'Home' },
     { href: 'zebras.html',   icon: 'zap',         label: 'Zebras' },
     { href: 'liga.html',     icon: 'trophy',      label: 'Ligas' },
-    { href: 'comparar.html', icon: 'git-compare', label: 'Comparar' },
+    { href: 'comparar.html', icon: 'bar-chart-2', label: 'Comparar' },
     { href: 'perfil.html',   icon: 'user',        label: 'Perfil' },
   ];
   nav.innerHTML = items.map(item => {
@@ -837,7 +846,7 @@ function initPlanBadge() {
   crown.className = 'navbar__icon plan-crown';
   crown.title = 'Fazer upgrade para PRO';
   crown.setAttribute('aria-label', 'Upgrade para PRO');
-  crown.style.cssText = 'background:var(--gold-dim,rgba(255,200,50,0.1));color:var(--gold,#FFD700);border:1px solid rgba(255,200,50,0.25);flex-shrink:0;';
+  crown.style.cssText = 'background:var(--gold-dim,rgba(255,200,50,0.12));color:var(--gold,#FFD700);border:1.5px solid rgba(255,200,50,0.45);flex-shrink:0;box-shadow:0 0 8px rgba(255,200,50,0.12);';
   crown.innerHTML = '<i data-lucide="crown" style="width:16px;height:16px;"></i>';
   crown.addEventListener('click', () => { window.location.href = 'assinatura.html'; });
 
