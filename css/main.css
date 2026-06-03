@@ -1095,27 +1095,14 @@ p  { font-size: 0.875rem; line-height: 1.5; color: var(--gray); }
   .cards-grid   { grid-template-columns: repeat(3, 1fr); }
 }
 
-/* ── DESKTOP ≥1024px: sidebar persistente (sempre visível) ── */
+/* ── DESKTOP ≥1024px: sidebar drawer (hambúrguer) ── */
+/* Sidebar permanece como drawer em todos os tamanhos de tela.
+   O hambúrguer é visível no desktop e abre/fecha a sidebar com overlay. */
 @media (min-width: 1024px) {
-  /* Sidebar: sai do modo drawer e fica fixa no flex flow */
-  .app-sidebar {
-    position: sticky !important;
-    top: 0 !important;
-    height: 100vh !important;
-    transform: none !important;
-    visibility: visible !important;
-    pointer-events: auto !important;
-    transition: none !important;
-    z-index: 50 !important;
-    flex-shrink: 0;
-    overflow-y: auto;
-  }
-  /* Hamburger e backdrop desnecessários no desktop */
-  .hamburger-btn       { display: none !important; }
-  .sidebar-backdrop    { display: none !important; }
-  .sidebar-close-btn   { display: none !important; }
+  /* Hambúrguer sempre visível no desktop */
+  .hamburger-btn { display: flex !important; }
 
-  /* app-main ocupa o espaço restante ao lado da sidebar */
+  /* app-main sem offset — sidebar sobrepõe o conteúdo quando aberta */
   .app-main { min-width: 0; flex: 1; max-width: none; margin-left: 0; }
 
   /* Backdrop permitido no desktop (cobre o conteúdo ao abrir a sidebar) */
