@@ -145,8 +145,9 @@ body {
 }
 .sidebar-backdrop.active { display: block; }
 
-/* Botão hambúrguer — oculto no mobile */
+/* Botão hambúrguer — oculto no mobile e tablets (<1000px) */
 .hamburger-btn { display: none; }
+@media (max-width: 999px) { .hamburger-btn { display: none !important; } }
 
 .sidebar__brand {
   display: flex;

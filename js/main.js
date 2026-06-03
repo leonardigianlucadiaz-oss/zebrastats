@@ -832,14 +832,7 @@ function initPlanBadge() {
   const plan = localStorage.getItem('zebrastats_plan') || 'free';
   if (plan === 'pro') return; // PRO users don't see FREE badge
 
-  // FREE badge (subtle pill)
-  const badge = document.createElement('span');
-  badge.className = 'plan-badge';
-  badge.textContent = 'FREE';
-  badge.style.cssText = 'font-size:0.6rem;font-weight:800;padding:2px 6px;border-radius:4px;background:transparent;color:var(--text-muted,#888);border:1px solid var(--border,#2a2a3e);letter-spacing:0.05em;cursor:pointer;white-space:nowrap;flex-shrink:0;';
-  badge.addEventListener('click', () => { window.location.href = 'assinatura.html'; });
-
-  // Crown upgrade button
+  // Crown upgrade button (único indicador de plano)
   const crown = document.createElement('button');
   crown.className = 'navbar__icon plan-crown';
   crown.title = 'Fazer upgrade para PRO';
@@ -848,9 +841,7 @@ function initPlanBadge() {
   crown.innerHTML = '<i data-lucide="crown" style="width:16px;height:16px;"></i>';
   crown.addEventListener('click', () => { window.location.href = 'assinatura.html'; });
 
-  // Prepend: FREE badge then crown, before the existing icons
   actions.prepend(crown);
-  actions.prepend(badge);
 
   if (typeof lucide !== 'undefined') lucide.createIcons({ nodes: [crown] });
 }
@@ -863,7 +854,6 @@ document.addEventListener('DOMContentLoaded', () => {
   injectFavoritosNav(); // must run BEFORE setActiveNavItem so the Favoritos link exists when active-state is assigned
   setActiveNavItem();
   initSidebarActive();
-  initThemeToggle();
   initPlanBadge();
   initDesktopNavTitle(); // no-op — desativado
   initSidebarLabel();
