@@ -698,11 +698,11 @@ function initBottomNav() {
   if (!nav) return;
   const current = window.location.pathname.split('/').pop() || 'home.html';
   const items = [
-    { href: 'home.html',    icon: 'home',    label: 'Home' },
-    { href: 'zebras.html',  icon: 'zap',     label: 'Zebras' },
-    { href: 'liga.html',    icon: 'trophy',  label: 'Ligas' },
-    { href: 'busca.html',   icon: 'search',  label: 'Busca' },
-    { href: 'perfil.html',  icon: 'user',    label: 'Perfil' },
+    { href: 'home.html',     icon: 'home',        label: 'Home' },
+    { href: 'zebras.html',   icon: 'zap',         label: 'Zebras' },
+    { href: 'liga.html',     icon: 'trophy',      label: 'Ligas' },
+    { href: 'comparar.html', icon: 'git-compare', label: 'Comparar' },
+    { href: 'perfil.html',   icon: 'user',        label: 'Perfil' },
   ];
   nav.innerHTML = items.map(item => {
     const active = item.href === current || (current === '' && item.href === 'home.html');
