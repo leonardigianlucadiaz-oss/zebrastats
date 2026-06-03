@@ -441,6 +441,28 @@
     }
     .sparkline-card__title { font-size: 0.6875rem; color: var(--gray); margin-bottom: 6px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
     .sparkline-card svg { width: 100%; height: 36px; }
+
+    /* ── DIVIDER DE RODADA ───────────────────────────────── */
+    .round-divider {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 10px 0 2px;
+      color: var(--gray);
+      font-size: 0.6875rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+    .round-divider::before,
+    .round-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+      border-radius: 1px;
+    }
+    .round-divider:first-child { margin-top: 2px; }
   </style>
 
   <script>
@@ -586,17 +608,61 @@
     function renderUpcoming() {
       const container = document.getElementById('upcomingGames');
       container.innerHTML = '';
-      const games = activeLeagueFilter === 'all'
+
+      let games = activeLeagueFilter === 'all'
         ? UPCOMING_GAMES
         : UPCOMING_GAMES.filter(g => g.league_id === activeLeagueFilter);
 
+      // ── Dedup: mantém só o jogo mais próximo por time ────────
+      const seenTeams = new Set();
+      games = games.filter(g => {
+        const hk = (g.home || '').toLowerCase().trim();
+        const ak = (g.away || '').toLowerCase().trim();
+        if (!hk || !ak) return false;
+        if (seenTeams.has(hk) || seenTeams.has(ak)) return false;
+        seenTeams.add(hk);
+        seenTeams.add(ak);
+        return true;
+      }).slice(0, 10);
+
       if (!games.length) {
-        document.getElementById('upcomingGames').innerHTML = '<div class="empty-state"><i data-lucide="clock" style="width:28px;height:28px;"></i><div class="empty-state__title">Nenhum jogo em breve</div><div class="empty-state__sub">Os próximos jogos aparecerão aqui</div></div>';
-        if (typeof lucide !== 'undefined') lucide.createIcons({ nodes: [document.getElementById('upcomingGames')] });
+        container.innerHTML = '<div class="empty-state"><i data-lucide="clock" style="width:28px;height:28px;"></i><div class="empty-state__title">Nenhum jogo em breve</div><div class="empty-state__sub">Os próximos jogos aparecerão aqui</div></div>';
+        if (typeof lucide !== 'undefined') lucide.createIcons({ nodes: [container] });
         return;
       }
 
+      // ── Chave para o divider de rodada ───────────────────────
+      const singleLeague = activeLeagueFilter !== 'all';
+      function getDividerKey(g) {
+        if (singleLeague && g.round) {
+          return g.round
+            .replace(/Regular Season - /i, 'Rodada ')
+            .replace(/Group Stage - /i,    'Grupo ');
+        }
+        if (g.utcDate) {
+          const d     = new Date(g.utcDate);
+          const today = new Date(); today.setHours(0,0,0,0);
+          const gDay  = new Date(d); gDay.setHours(0,0,0,0);
+          const diff  = Math.round((gDay - today) / 86400000);
+          if (diff <= 0) return 'Hoje';
+          if (diff === 1) return 'Amanhã';
+          return d.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'short' });
+        }
+        return null;
+      }
+
+      let lastDivKey = null;
       games.forEach(g => {
+        // Divider de rodada / data
+        const divKey = getDividerKey(g);
+        if (divKey && divKey !== lastDivKey) {
+          lastDivKey = divKey;
+          const divider = document.createElement('div');
+          divider.className = 'round-divider';
+          divider.innerHTML = `<span>${divKey}</span>`;
+          container.appendChild(divider);
+        }
+
         const card = document.createElement('div');
         card.className = 'game-card';
         const leagueLogo = LEAGUE_LOGOS[g.league_id]
@@ -641,6 +707,13 @@
         });
         container.appendChild(card);
       });
+
+      // Link "Ver lista completa" no final
+      const moreLink = document.createElement('a');
+      moreLink.href = 'liga.html';
+      moreLink.style.cssText = 'display:block;text-align:center;font-size:0.75rem;color:var(--green);font-weight:600;text-decoration:none;padding:10px 0 2px;';
+      moreLink.textContent = 'Ver lista completa em Ligas →';
+      container.appendChild(moreLink);
     }
 
     // ── QUENTE AGORA — atualizado progressivamente ────────
@@ -878,6 +951,7 @@
                     league: LID_LABEL[lid] || lid,
                     league_id: lid,
                     homeCrest: t.homeLogo, awayCrest: t.awayLogo,
+                    round: f.league?.round || '',
                   });
                   added = true;
                 }
