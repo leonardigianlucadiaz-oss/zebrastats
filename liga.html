@@ -54,14 +54,20 @@
   <!-- SELETOR DE LIGA (acima do hero) -->
   <section class="section-padded" style="background:var(--card2);padding:10px 16px;border-bottom:1px solid var(--border);">
     <div class="scroll-x scroll-x-fade" style="gap:8px;" id="leaguePicker">
-      <button class="filter-chip active" data-lid="BRA" data-name="Brasileirão Série A" data-sub="Brasil · Temporada 2025" data-lider="—" data-zebras="—" data-rodada="—"><span class="picker-logo" id="pl-BRA"></span> Brasileirão</button>
-      <button class="filter-chip" data-lid="ENG" data-name="Premier League" data-sub="Inglaterra · Temporada 2024/25" data-lider="—" data-zebras="—" data-rodada="—"><span class="picker-logo" id="pl-ENG"></span> Premier Lge</button>
-      <button class="filter-chip" data-lid="ESP" data-name="La Liga" data-sub="Espanha · Temporada 2024/25" data-lider="—" data-zebras="—" data-rodada="—"><span class="picker-logo" id="pl-ESP"></span> La Liga</button>
-      <button class="filter-chip" data-lid="ITA" data-name="Serie A" data-sub="Itália · Temporada 2024/25" data-lider="—" data-zebras="—" data-rodada="—"><span class="picker-logo" id="pl-ITA"></span> Serie A</button>
-      <button class="filter-chip" data-lid="GER" data-name="Bundesliga" data-sub="Alemanha · Temporada 2024/25" data-lider="—" data-zebras="—" data-rodada="—"><span class="picker-logo" id="pl-GER"></span> Bundesliga</button>
-      <button class="filter-chip" data-lid="FRA" data-name="Ligue 1" data-sub="França · Temporada 2024/25" data-lider="—" data-zebras="—" data-rodada="—"><span class="picker-logo" id="pl-FRA"></span> Ligue 1</button>
-      <button class="filter-chip" data-lid="POR" data-name="Liga Portugal" data-sub="Portugal · Temporada 2024/25" data-lider="—" data-zebras="—" data-rodada="—"><span class="picker-logo" id="pl-POR"></span> Liga PT</button>
-      <button class="filter-chip" data-lid="UCL" data-name="Champions League" data-sub="Europa · Temporada 2024/25" data-lider="—" data-zebras="—" data-rodada="—"><span class="picker-logo" id="pl-UCL"></span> Champions</button>
+      <button class="filter-chip active" data-lid="BRA" data-name="Brasileirão Série A" data-sub="Brasil · Temporada 2026" data-lider="—" data-zebras="—" data-rodada="—"><span class="picker-logo" id="pl-BRA"></span> Brasileirão</button>
+      <button class="filter-chip" data-lid="ENG" data-name="Premier League" data-sub="Inglaterra · Temporada 2025/26" data-lider="—" data-zebras="—" data-rodada="—"><span class="picker-logo" id="pl-ENG"></span> Premier Lge</button>
+      <button class="filter-chip" data-lid="ESP" data-name="La Liga" data-sub="Espanha · Temporada 2025/26" data-lider="—" data-zebras="—" data-rodada="—"><span class="picker-logo" id="pl-ESP"></span> La Liga</button>
+      <button class="filter-chip" data-lid="ITA" data-name="Serie A" data-sub="Itália · Temporada 2025/26" data-lider="—" data-zebras="—" data-rodada="—"><span class="picker-logo" id="pl-ITA"></span> Serie A</button>
+      <button class="filter-chip" data-lid="GER" data-name="Bundesliga" data-sub="Alemanha · Temporada 2025/26" data-lider="—" data-zebras="—" data-rodada="—"><span class="picker-logo" id="pl-GER"></span> Bundesliga</button>
+      <button class="filter-chip" data-lid="FRA" data-name="Ligue 1" data-sub="França · Temporada 2025/26" data-lider="—" data-zebras="—" data-rodada="—"><span class="picker-logo" id="pl-FRA"></span> Ligue 1</button>
+      <button class="filter-chip" data-lid="POR" data-name="Liga Portugal" data-sub="Portugal · Temporada 2025/26" data-lider="—" data-zebras="—" data-rodada="—"><span class="picker-logo" id="pl-POR"></span> Liga PT</button>
+      <button class="filter-chip" data-lid="UCL" data-name="Champions League" data-sub="Europa · Temporada 2025/26" data-lider="—" data-zebras="—" data-rodada="—"><span class="picker-logo" id="pl-UCL"></span> Champions</button>
+      <button class="filter-chip" data-lid="WC"  data-name="Copa do Mundo FIFA 2026" data-sub="Mundial · Junho–Julho 2026" data-lider="—" data-zebras="—" data-rodada="—"><span class="picker-logo" id="pl-WC"></span> Copa Mundo</button>
+      <button class="filter-chip" data-lid="EUR" data-name="Eurocopa UEFA" data-sub="Europa · Edição 2024" data-lider="—" data-zebras="—" data-rodada="—"><span class="picker-logo" id="pl-EUR"></span> Eurocopa</button>
+      <button class="filter-chip" data-lid="CPA" data-name="Copa América" data-sub="Américas · Edição 2024" data-lider="—" data-zebras="—" data-rodada="—"><span class="picker-logo" id="pl-CPA"></span> Copa Amér.</button>
+      <button class="filter-chip" data-lid="UNL" data-name="UEFA Nations League" data-sub="Europa · 2024/25" data-lider="—" data-zebras="—" data-rodada="—"><span class="picker-logo" id="pl-UNL"></span> Nations Lge</button>
+      <button class="filter-chip" data-lid="SAQ" data-name="Eliminatórias CONMEBOL" data-sub="América do Sul · 2026" data-lider="—" data-zebras="—" data-rodada="—"><span class="picker-logo" id="pl-SAQ"></span> Elim. SA</button>
+      <button class="filter-chip" data-lid="AMI" data-name="Amistosos FIFA" data-sub="Internacional · 2026" data-lider="—" data-zebras="—" data-rodada="—"><span class="picker-logo" id="pl-AMI"></span> Amistosos</button>
     </div>
   </section>
 
@@ -393,6 +399,13 @@
     FRA: { a: 'rgba(30,80,210,0.14)',  b: 'rgba(220,30,30,0.06)' },  // azul/vermelho França
     POR: { a: 'rgba(180,20,20,0.14)',  b: 'rgba(46,180,80,0.06)' },  // vermelho/verde Portugal
     UCL: { a: 'rgba(30,80,210,0.16)',  b: 'rgba(180,150,50,0.08)' }, // azul/dourado UCL
+    // Seleções nacionais
+    WC:  { a: 'rgba(255,200,50,0.16)',  b: 'rgba(46,180,80,0.08)' },  // dourado/verde Copa do Mundo
+    EUR: { a: 'rgba(30,80,210,0.16)',  b: 'rgba(255,200,50,0.06)' },  // azul/dourado Eurocopa
+    CPA: { a: 'rgba(220,40,40,0.14)',  b: 'rgba(255,200,0,0.06)' },   // vermelho/amarelo Copa América
+    UNL: { a: 'rgba(30,60,180,0.14)',  b: 'rgba(220,220,220,0.06)' }, // azul Nations League
+    SAQ: { a: 'rgba(46,180,80,0.12)',  b: 'rgba(46,100,200,0.06)' },  // verde/azul CONMEBOL
+    AMI: { a: 'rgba(120,120,180,0.12)',b: 'rgba(180,180,180,0.06)' }, // neutro amistosos
   };
 
   function updateLeagueHero(lid) {
@@ -459,8 +472,10 @@
   async function loadHeroLogo(lid) {
     const flagEl = document.getElementById('leagueFlag');
     // Bandeira do país imediatamente (sem emoji regional)
-    const furl = { BRA:'br',ENG:'gb-eng',ESP:'es',ITA:'it',GER:'de',FRA:'fr',POR:'pt',UCL:'eu',UEL:'eu',HOL:'nl',ARG:'ar' }[lid];
+    const furl = { BRA:'br',ENG:'gb-eng',ESP:'es',ITA:'it',GER:'de',FRA:'fr',POR:'pt',UCL:'eu',UEL:'eu',HOL:'nl',ARG:'ar',EUR:'eu',UNL:'eu',EUQ:'eu' }[lid];
+    const ntEmoji = { WC:'🌍', CPA:'🌎', SAQ:'🌎', AMI:'🤝', CAN:'🌍', GLD:'🌎' }[lid];
     if (furl) flagEl.innerHTML = `<img src="https://flagcdn.com/w40/${furl}.png" alt="${lid}" style="width:44px;height:auto;object-fit:contain;">`;
+    else if (ntEmoji) flagEl.innerHTML = `<span style="font-size:2.5rem;line-height:1;">${ntEmoji}</span>`;
     // Logo oficial SDB por cima quando carregar
     try {
       const badge = await loadLeagueLogo(lid);  // global main.js — retorna URL
