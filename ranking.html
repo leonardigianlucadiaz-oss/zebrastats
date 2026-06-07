@@ -78,8 +78,8 @@
 
   <!-- TABS DE PERÍODO -->
   <div class="tab-bar" id="rankingPeriodTabs" style="margin-bottom:0;">
-    <button class="tab-bar__item" data-period="semana"><i data-lucide="calendar-days" style="width:13px;height:13px;"></i>Esta Semana</button>
     <button class="tab-bar__item active" data-period="mes"><i data-lucide="calendar" style="width:13px;height:13px;"></i>Este Mês</button>
+    <button class="tab-bar__item" data-period="semana"><i data-lucide="calendar-days" style="width:13px;height:13px;"></i>Esta Semana</button>
     <button class="tab-bar__item" data-period="historico"><i data-lucide="history" style="width:13px;height:13px;"></i>Histórico</button>
   </div>
 
@@ -382,17 +382,10 @@ function renderRanking() {
   // Period filter — filter by real match date
   list = list.filter(z => _inPeriod(z, activePeriodNew));
 
-  // Auto-fallback: se "semana" está vazia mas há dados no mês, promove para "mes"
-  if (!list.length && activePeriodNew === 'semana' && RANKING_DATA.length) {
-    const monthList = data.filter(z => _inPeriod(z, 'mes'));
-    if (monthList.length) {
-      activePeriodNew = 'mes';
-      document.querySelectorAll('#rankingPeriodTabs .tab-bar__item').forEach(b => b.classList.remove('active'));
-      const mesBtn = document.querySelector('#rankingPeriodTabs [data-period="mes"]');
-      if (mesBtn) mesBtn.classList.add('active');
-      list = monthList;
-    }
-  }
+  // Conta zebras do mês para usar na mensagem de "Esta Semana" vazia
+  const _mesCount = (activePeriodNew === 'semana' && !list.length)
+    ? data.filter(z => _inPeriod(z, 'mes')).length
+    : 0;
 
   // Sort by ZI desc
   list.sort((a, b) => b.zi - a.zi);
@@ -427,6 +420,16 @@ function renderRanking() {
           if (typeof lucide !== 'undefined') lucide.createIcons();
         }
       }, 2000);
+    } else if (activePeriodNew === 'semana' && _mesCount > 0) {
+      container.innerHTML = `<div style="text-align:center;padding:48px 16px;color:var(--gray);">
+        <div style="font-size:2.5rem;margin-bottom:12px;">📅</div>
+        <div style="font-weight:600;margin-bottom:6px;">Nenhuma zebra nesta semana</div>
+        <div style="font-size:0.8125rem;margin-bottom:16px;">${_mesCount} zebra${_mesCount !== 1 ? 's' : ''} disponíve${_mesCount !== 1 ? 'is' : 'l'} neste mês</div>
+        <button onclick="document.querySelector('#rankingPeriodTabs [data-period=mes]').click()"
+          style="background:var(--accent,#7c3aed);color:#fff;border:none;border-radius:8px;padding:8px 20px;font-size:0.8125rem;font-weight:600;cursor:pointer;">
+          Ver Este Mês
+        </button>
+      </div>`;
     } else {
       const periodLabel = { semana: 'esta semana', mes: 'este mês', historico: 'o período selecionado' }[activePeriodNew] || 'este período';
       container.innerHTML = `<div style="text-align:center;padding:48px 16px;color:var(--gray);">
