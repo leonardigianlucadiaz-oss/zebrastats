@@ -78,8 +78,8 @@
 
   <!-- TABS DE PERÍODO -->
   <div class="tab-bar" id="rankingPeriodTabs" style="margin-bottom:0;">
-    <button class="tab-bar__item active" data-period="semana"><i data-lucide="calendar-days" style="width:13px;height:13px;"></i>Esta Semana</button>
-    <button class="tab-bar__item" data-period="mes"><i data-lucide="calendar" style="width:13px;height:13px;"></i>Este Mês</button>
+    <button class="tab-bar__item" data-period="semana"><i data-lucide="calendar-days" style="width:13px;height:13px;"></i>Esta Semana</button>
+    <button class="tab-bar__item active" data-period="mes"><i data-lucide="calendar" style="width:13px;height:13px;"></i>Este Mês</button>
     <button class="tab-bar__item" data-period="historico"><i data-lucide="history" style="width:13px;height:13px;"></i>Histórico</button>
   </div>
 
@@ -149,7 +149,7 @@
 const RANKING_DATA = [];  // populated by initRealRanking() from real API data
 
 // ── STATE ─────────────────────────────────────────────────────────────────────
-let activePeriodNew = 'semana';
+let activePeriodNew = 'mes';
 
 // Period date-filter helper — returns true if the zebra's date falls within the given period
 function _inPeriod(z, period) {
@@ -381,6 +381,18 @@ function renderRanking() {
 
   // Period filter — filter by real match date
   list = list.filter(z => _inPeriod(z, activePeriodNew));
+
+  // Auto-fallback: se "semana" está vazia mas há dados no mês, promove para "mes"
+  if (!list.length && activePeriodNew === 'semana' && RANKING_DATA.length) {
+    const monthList = data.filter(z => _inPeriod(z, 'mes'));
+    if (monthList.length) {
+      activePeriodNew = 'mes';
+      document.querySelectorAll('#rankingPeriodTabs .tab-bar__item').forEach(b => b.classList.remove('active'));
+      const mesBtn = document.querySelector('#rankingPeriodTabs [data-period="mes"]');
+      if (mesBtn) mesBtn.classList.add('active');
+      list = monthList;
+    }
+  }
 
   // Sort by ZI desc
   list.sort((a, b) => b.zi - a.zi);

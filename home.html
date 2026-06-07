@@ -1048,7 +1048,7 @@
           if (sparksGrid && sparksGrid.querySelector('.skel')) sparksGrid.innerHTML = '<div style="text-align:center;padding:16px;color:var(--gray);font-size:0.75rem;grid-column:1/-1;">Sem dados no momento</div>';
           document.dispatchEvent(new CustomEvent('zebrasLoaded', { detail: [] }));
         }
-      }, 18000);
+      }, 7000);
 
       ALL_LIDS.forEach((lid, idx) => {
         setTimeout(() => {
@@ -1141,15 +1141,25 @@
       const heroFallbackTimer = setTimeout(() => {
         if (el.textContent === 'Carregando...') {
           el.textContent = 'Nenhuma zebra disponível agora';
-          elL.textContent = 'Verifique sua conexão ou configure a API em Perfil';
+          if (elL) elL.textContent = 'Verifique sua conexão ou configure a API em Perfil';
           if (elZ) elZ.textContent = '–';
+          if (elD) elD.textContent = '';
         }
-      }, 26000);
+      }, 9000);
       let heroBestZi = 0;
       document.addEventListener('zebrasLoaded', function(e) {
         clearTimeout(heroFallbackTimer);
         const zebras = e.detail || [];
-        if (!zebras.length) return;
+        if (!zebras.length) {
+          // BUG FIX: sem dados, atualiza o hero em vez de deixar "Carregando..." para sempre
+          if (el.textContent === 'Carregando...') {
+            el.textContent  = 'Nenhuma zebra disponível agora';
+            if (elL) elL.textContent = 'Verifique sua conexão ou configure a API em Perfil';
+            if (elZ) elZ.textContent = '–';
+            if (elD) elD.textContent = '';
+          }
+          return;
+        }
         const top = zebras.sort((a,b) => b.zi - a.zi)[0];
         if (!top || top.zi <= heroBestZi) return;
         heroBestZi = top.zi;

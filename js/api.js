@@ -67,8 +67,8 @@ const ZebraAPI = (() => {
       try { localStorage.setItem(`zs_lsc_${k}`, JSON.stringify({ ts: Date.now(), d })); } catch {}
     },
   };
-  const LS_ZEBRAS_TTL   = 30 * 60 * 1000; // 30 min
-  const LS_STANDING_TTL = 60 * 60 * 1000; // 60 min
+  const LS_ZEBRAS_TTL   = 120 * 60 * 1000; // 2h — zebras não mudam rápido, evita hits desnecessários
+  const LS_STANDING_TTL = 120 * 60 * 1000; // 2h — standings mudam 1x por rodada
 
   /* ── PROXY HELPER (Supabase Edge Function) ──────────────────── */
   // Todas as chamadas passam pelo proxy quando disponível.
