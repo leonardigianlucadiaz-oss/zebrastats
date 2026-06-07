@@ -188,18 +188,29 @@
 <script src="js/main.js?v=11"></script>
 <script>
   const LEAGUES = [
-    { id:'BRA', flag:'🇧🇷', name:'Brasileirão Série A', country:'Brasil',     faved:true  },
-    { id:'ENG', flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', name:'Premier League',    country:'Inglaterra', faved:true  },
-    { id:'ESP', flag:'🇪🇸', name:'La Liga',             country:'Espanha',    faved:false },
-    { id:'ITA', flag:'🇮🇹', name:'Serie A',             country:'Itália',     faved:false },
-    { id:'GER', flag:'🇩🇪', name:'Bundesliga',          country:'Alemanha',   faved:false },
-    { id:'FRA', flag:'🇫🇷', name:'Ligue 1',             country:'França',     faved:false },
-    { id:'POR', flag:'🇵🇹', name:'Liga Portugal',       country:'Portugal',   faved:false },
-    { id:'HOL', flag:'🇳🇱', name:'Eredivisie',          country:'Holanda',    faved:false },
-    { id:'ARG', flag:'🇦🇷', name:'Liga Profesional',    country:'Argentina',  faved:false },
-    { id:'UCL', flag:'🏆', name:'Champions League',     country:'Europa',     faved:false },
-    { id:'UEL', flag:'🟠', name:'Europa League',        country:'Europa',     faved:false },
-    { id:'MLS', flag:'🇺🇸', name:'MLS',                 country:'EUA',        faved:false },
+    // Ligas de clubes
+    { id:'BRA', flag:'🇧🇷', name:'Brasileirão Série A', country:'Brasil',     faved:true,  group:'clubes' },
+    { id:'ENG', flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', name:'Premier League',    country:'Inglaterra', faved:true,  group:'clubes' },
+    { id:'ESP', flag:'🇪🇸', name:'La Liga',             country:'Espanha',    faved:false, group:'clubes' },
+    { id:'ITA', flag:'🇮🇹', name:'Serie A',             country:'Itália',     faved:false, group:'clubes' },
+    { id:'GER', flag:'🇩🇪', name:'Bundesliga',          country:'Alemanha',   faved:false, group:'clubes' },
+    { id:'FRA', flag:'🇫🇷', name:'Ligue 1',             country:'França',     faved:false, group:'clubes' },
+    { id:'POR', flag:'🇵🇹', name:'Liga Portugal',       country:'Portugal',   faved:false, group:'clubes' },
+    { id:'HOL', flag:'🇳🇱', name:'Eredivisie',          country:'Holanda',    faved:false, group:'clubes' },
+    { id:'ARG', flag:'🇦🇷', name:'Liga Profesional',    country:'Argentina',  faved:false, group:'clubes' },
+    { id:'UCL', flag:'🏆', name:'Champions League',     country:'Europa',     faved:false, group:'clubes' },
+    { id:'UEL', flag:'🟠', name:'Europa League',        country:'Europa',     faved:false, group:'clubes' },
+    { id:'MLS', flag:'🇺🇸', name:'MLS',                 country:'EUA',        faved:false, group:'clubes' },
+    // Seleções nacionais
+    { id:'WC',  flag:'🌍', name:'Copa do Mundo FIFA',   country:'Mundial',    faved:false, group:'selecoes' },
+    { id:'EUR', flag:'🇪🇺', name:'Eurocopa UEFA',        country:'Europa',     faved:false, group:'selecoes' },
+    { id:'CPA', flag:'🌎', name:'Copa América',          country:'Américas',   faved:false, group:'selecoes' },
+    { id:'UNL', flag:'⭐', name:'Nations League',        country:'Europa',     faved:false, group:'selecoes' },
+    { id:'SAQ', flag:'🌎', name:'Eliminatórias CONMEBOL',country:'América do Sul', faved:false, group:'selecoes' },
+    { id:'EUQ', flag:'🇪🇺', name:'Eliminatórias UEFA',   country:'Europa',     faved:false, group:'selecoes' },
+    { id:'AMI', flag:'🤝', name:'Amistosos FIFA',        country:'Mundial',    faved:false, group:'selecoes' },
+    { id:'CAN', flag:'🌍', name:'Copa Africana (AFCON)', country:'África',     faved:false, group:'selecoes' },
+    { id:'GLD', flag:'🌎', name:'CONCACAF Gold Cup',     country:'América Central', faved:false, group:'selecoes' },
   ];
 
   // Zebras carregadas exclusivamente da API real — sem dados inventados
@@ -258,9 +269,18 @@
     allPill.addEventListener('click', () => { activeLeague = 'all'; renderLeagueBar(); renderZebras(); initRealData(); lucide.createIcons(); });
     bar.appendChild(allPill);
 
+    let _lastGroup = 'clubes';
     LEAGUES.forEach(l => {
+      // Separador visual entre "Ligas de Clubes" e "Seleções Nacionais"
+      if (l.group === 'selecoes' && _lastGroup === 'clubes') {
+        _lastGroup = 'selecoes';
+        const sep = document.createElement('div');
+        sep.style.cssText = 'display:flex;align-items:center;flex-shrink:0;padding:0 6px;color:var(--text-muted,var(--gray));font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;white-space:nowrap;border-left:1px solid var(--border);margin-left:2px;';
+        sep.textContent = '🌍 Seleções';
+        bar.appendChild(sep);
+      }
+
       const cached    = LEAGUE_LOGOS[l.id] || '';
-      // Usa logo SDB cacheado OU bandeira via flagcdn (jamais emoji regional)
       const logoHtml  = cached
         ? `<img src="${cached}" style="width:14px;height:14px;object-fit:contain;flex-shrink:0;" onerror="this.style.display='none';">`
         : flagImg(l.id, 14);
@@ -288,7 +308,6 @@
       });
       bar.appendChild(pill);
 
-      // Carrega logo SDB (logo oficial substitui a bandeira)
       if (!cached) {
         loadLeagueLogo(l.id).then(badge => {
           if (!badge) return;
@@ -771,6 +790,18 @@
       buildHeatmap(dayCounts);
     } catch(e) { console.warn('[Zebras] initRealData:', e.message); }
   }
+
+  // Pré-seleciona liga via ?lid=WC (links do explorar.html)
+  (function _applyUrlLid() {
+    const lid = new URLSearchParams(location.search).get('lid');
+    if (!lid) return;
+    const league = LEAGUES.find(l => l.id === lid.toUpperCase());
+    if (!league) return;
+    activeLeague = league.id;
+    renderLeagueBar();
+    renderZebras();
+    lucide.createIcons();
+  })();
 
   initRealData();
   initBellBadge();

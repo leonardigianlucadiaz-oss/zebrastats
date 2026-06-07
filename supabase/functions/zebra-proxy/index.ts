@@ -14,10 +14,15 @@ const CORS = {
 const FD_IDS: Record<string, number> = {
   ENG: 2021, ESP: 2014, ITA: 2019, GER: 2002,
   FRA: 2015, BRA: 2013, POR: 2017, UCL: 2001,
+  WC: 2000,  // Copa do Mundo FIFA
 };
 const APIF_IDS: Record<string, number> = {
+  // Ligas de clubes
   ENG: 39,  ESP: 140, ITA: 135, GER: 78,
   FRA: 61,  BRA: 71,  POR: 94,  UCL: 2, HOL: 88,
+  // Seleções nacionais
+  WC:  1,   EUR: 4,   CPA: 9,   UNL: 5,
+  SAQ: 29,  EUQ: 32,  AMI: 10,  CAN: 6,  GLD: 16,
 };
 const APIF_BASE = "https://v3.football.api-sports.io";
 const SDB_IDS: Record<string, number> = {
@@ -34,6 +39,10 @@ const ODDS_SPORTS: Record<string, string> = {
   BRA: "soccer_brazil_campeonato",
   POR: "soccer_portugal_primeira_liga",
   UCL: "soccer_uefa_champs_league",
+  // Seleções nacionais
+  WC:  "soccer_fifa_world_cup",
+  EUR: "soccer_uefa_euros",
+  CPA: "soccer_conmebol_copa_america",
 };
 
 // ── Helpers ────────────────────────────────────────────────────
@@ -56,8 +65,18 @@ function defaultSeason(lid = "ENG"): string {
   const now   = new Date();
   const year  = now.getFullYear();
   const month = now.getMonth() + 1; // 1-based
-  if (lid === "BRA") return String(year);          // calendário corrido
-  return month >= 7 ? String(year) : String(year - 1); // europeia
+  if (lid === "BRA") return String(year);
+  // Seleções nacionais — cada competição tem seu próprio ciclo
+  if (lid === "WC")  return String(year);              // Copa do Mundo (2026)
+  if (lid === "EUR") return month >= 6 && year < 2028 ? "2024" : String(year - (year % 4));
+  if (lid === "CPA") return "2024";                    // Copa América 2024
+  if (lid === "UNL") return month >= 9 ? String(year) : String(year - 1);
+  if (lid === "SAQ") return month >= 7 ? String(year) : String(year - 1);
+  if (lid === "EUQ") return String(year - 1);          // qualifiers UEFA encerraram em 2025
+  if (lid === "AMI") return String(year);
+  if (lid === "CAN") return "2025";                    // AFCON Jan-Fev 2025
+  if (lid === "GLD") return "2025";                    // Gold Cup 2025
+  return month >= 7 ? String(year) : String(year - 1);
 }
 
 // TheSportsDB usa formato "YYYY-YYYY" para ligas europeias

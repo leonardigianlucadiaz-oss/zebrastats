@@ -74,6 +74,16 @@
     <button class="filter-chip" data-rlid="ESP">La Liga</button>
     <button class="filter-chip" data-rlid="ITA">Serie A</button>
     <button class="filter-chip" data-rlid="GER">Bundesliga</button>
+    <div style="display:flex;align-items:center;flex-shrink:0;padding:0 6px;color:var(--text-muted,var(--gray));font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;white-space:nowrap;border-left:1px solid var(--border);margin-left:2px;">🌍 Seleções</div>
+    <button class="filter-chip" data-rlid="WC">🌍 Copa do Mundo</button>
+    <button class="filter-chip" data-rlid="EUR">🇪🇺 Eurocopa</button>
+    <button class="filter-chip" data-rlid="CPA">🌎 Copa América</button>
+    <button class="filter-chip" data-rlid="UNL">⭐ Nations League</button>
+    <button class="filter-chip" data-rlid="SAQ">🌎 Elim. CONMEBOL</button>
+    <button class="filter-chip" data-rlid="EUQ">🇪🇺 Elim. UEFA</button>
+    <button class="filter-chip" data-rlid="AMI">🤝 Amistosos</button>
+    <button class="filter-chip" data-rlid="CAN">🌍 Copa Africana</button>
+    <button class="filter-chip" data-rlid="GLD">🌎 Gold Cup</button>
   </div>
 
   <!-- TABS DE PERÍODO -->
@@ -192,16 +202,53 @@ document.querySelectorAll('#rankingPeriodTabs .tab-bar__item').forEach(btn => {
 
 // ── LIGA FILTER STATE ─────────────────────────────────────────────────────────
 let activeRankingLiga = 'todas';
+const _ntLoaded = new Set(); // evita recarregar NT comp já buscada
+
 document.querySelectorAll('#rankingLigaFilter .filter-chip').forEach(btn => {
-  btn.addEventListener('click', function() {
+  btn.addEventListener('click', async function() {
     document.querySelectorAll('#rankingLigaFilter .filter-chip').forEach(b => b.classList.remove('active'));
     this.classList.add('active');
     activeRankingLiga = this.dataset.rlid;
+
+    // Lazy-load de seleções nacionais: carrega na primeira seleção do chip
+    const lid = this.dataset.rlid;
+    if (_NT_LIDS && _NT_LIDS.has(lid) && !_ntLoaded.has(lid) && typeof ZebraAPI !== 'undefined') {
+      _ntLoaded.add(lid);
+      this.disabled = true;
+      this.style.opacity = '0.6';
+      try {
+        const zebras = await ZebraAPI.fetchRealZebras(lid, 10);
+        if (zebras.length) {
+          const existingIds = new Set(RANKING_DATA.map(z => z.id));
+          zebras.forEach(z => {
+            if (!existingIds.has(z.id)) {
+              RANKING_DATA.push({
+                pos: RANKING_DATA.length + 1,
+                home: z.home, away: z.away,
+                hs: z.hs, as: z.as,
+                league: z.league, lid: z.lid,
+                zi: z.zi, ziClass: z.ziClass,
+                odd: parseFloat(z.odds_h) || parseFloat(z.odds_a) || 0,
+                date: z.date, azarao: z.azarao,
+                homeCrest: z.homeCrest || '', awayCrest: z.awayCrest || '',
+                realOdds: z.realOdds || false,
+                trend: [], period: getPeriod(z.date),
+                odds_h: z.odds_h, odds_a: z.odds_a,
+              });
+            }
+          });
+        }
+      } catch(e) { console.warn('[ranking NT]', e); }
+      this.disabled = false;
+      this.style.opacity = '';
+    }
+
     renderRanking();
   });
 });
 
 const LEAGUE_META = [
+  // Clubes
   { id:'BRA', name:'Brasileirão' },
   { id:'ENG', name:'Premier League' },
   { id:'ESP', name:'La Liga' },
@@ -211,7 +258,19 @@ const LEAGUE_META = [
   { id:'POR', name:'Liga Portugal' },
   { id:'HOL', name:'Eredivisie' },
   { id:'UCL', name:'Champions' },
+  // Seleções nacionais
+  { id:'WC',  name:'Copa do Mundo' },
+  { id:'EUR', name:'Eurocopa' },
+  { id:'CPA', name:'Copa América' },
+  { id:'UNL', name:'Nations League' },
+  { id:'SAQ', name:'Elim. CONMEBOL' },
+  { id:'EUQ', name:'Elim. UEFA' },
+  { id:'AMI', name:'Amistosos FIFA' },
+  { id:'CAN', name:'Copa Africana' },
+  { id:'GLD', name:'Gold Cup' },
 ];
+
+const _NT_LIDS = new Set(['WC','EUR','CPA','UNL','SAQ','EUQ','AMI','CAN','GLD']);
 
 // ── GET PERIOD FROM DATE STRING ──────────────────────────────────────────────
 // FIX 8 — determine period bucket from a "DD/MM/YYYY" date string
