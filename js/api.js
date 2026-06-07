@@ -395,14 +395,31 @@ const ZebraAPI = (() => {
 
   /* ── API-FOOTBALL (via proxy Supabase) ─────────────────────── */
   const APIF = {
-    LEAGUES: { ENG:39, ESP:140, ITA:135, GER:78, FRA:61, BRA:71, POR:94, UCL:2, HOL:88 },
+    LEAGUES: {
+      // Clubes
+      ENG:39, ESP:140, ITA:135, GER:78, FRA:61, BRA:71, POR:94, UCL:2, HOL:88,
+      // Seleções nacionais
+      WC:1, EUR:4, CPA:9, UNL:5, SAQ:29, EUQ:32, AMI:10, CAN:6, GLD:16,
+    },
 
-    // Fix: temporada dinâmica — europeias iniciam em julho, Brasileirão é anual
+    // Temporada dinâmica — clubes + seleções
     get SEASONS() {
       const yr = new Date().getFullYear();
       const mo = new Date().getMonth(); // 0-based; julho = 6
       const eu = mo >= 6 ? String(yr) : String(yr - 1);
-      return { ENG:eu, ESP:eu, ITA:eu, GER:eu, FRA:eu, POR:eu, UCL:eu, HOL:eu, BRA:String(yr) };
+      return {
+        ENG:eu, ESP:eu, ITA:eu, GER:eu, FRA:eu, POR:eu, UCL:eu, HOL:eu, BRA:String(yr),
+        // Seleções — cada competição tem ciclo próprio
+        WC:  String(yr),
+        EUR: mo >= 5 && yr < 2028 ? '2024' : String(yr - (yr % 4)),
+        CPA: '2024',
+        UNL: mo >= 8 ? String(yr) : String(yr - 1),
+        SAQ: mo >= 6 ? String(yr) : String(yr - 1),
+        EUQ: String(yr - 1),
+        AMI: String(yr),
+        CAN: '2025',
+        GLD: '2025',
+      };
     },
 
     async _p(action, params = {}) {
@@ -761,19 +778,116 @@ const ZebraAPI = (() => {
 
   /* ── LEAGUE LABELS ──────────────────────────────────────────── */
   const _LEAGUE_LABEL = {
+    // Clubes
     ENG:'Premier League', ESP:'La Liga', ITA:'Serie A', GER:'Bundesliga',
     FRA:'Ligue 1', BRA:'Brasileirão', POR:'Liga Portugal', UCL:'Champions League',
+    HOL:'Eredivisie', ARG:'Liga Argentina',
+    // Seleções nacionais
+    WC: 'Copa do Mundo', EUR:'Eurocopa', CPA:'Copa América',
+    UNL:'Nations League', SAQ:'Eliminatórias CONMEBOL', EUQ:'Eliminatórias UEFA',
+    AMI:'Amistosos FIFA', CAN:'Copa Africana', GLD:'Gold Cup CONCACAF',
   };
+
+  /* ── FETCH REAL ZEBRAS — SELEÇÕES NACIONAIS (via APIF) ─────── */
+  const _NT_LIDS = new Set(['WC','EUR','CPA','UNL','SAQ','EUQ','AMI','CAN','GLD']);
+
+  async function fetchRealZebrasNT(lid, limit = 20) {
+    if (!_proxy.base()) return [];
+    if (typeof ZebraEngine === 'undefined') return [];
+
+    const lsKey = `zebras_${lid}_${limit}`;
+    const lsHit = _lsCache.get(lsKey, LS_ZEBRAS_TTL);
+    if (lsHit) return lsHit;
+
+    try {
+      // Busca últimas N partidas + tabela em paralelo
+      const [fixtures, standRaw] = await Promise.all([
+        APIF.getFixtures(lid, { last: limit }),
+        APIF.getStandings(lid).catch(() => null),
+      ]);
+      if (!Array.isArray(fixtures) || !fixtures.length) return [];
+
+      // Monta mapa de posição achatando todos os grupos
+      const posMap = {};
+      if (Array.isArray(standRaw) && standRaw[0]?.league?.standings) {
+        for (const group of standRaw[0].league.standings) {
+          if (!Array.isArray(group)) continue;
+          for (const t of group) {
+            if (t.team?.name) posMap[t.team.name] = t.rank;
+          }
+        }
+      }
+
+      // Odds reais (OddsAPI) — opcionais para NT comps
+      let oddsMap = {};
+      try { oddsMap = await ODDS.getOddsMap(lid, 4); } catch {}
+
+      const zebras = [];
+      for (const f of fixtures) {
+        const t = APIF.transformFixture(f);
+        if (!t?.isFinished || t.hs == null || t.as == null) continue;
+        if (t.hs === t.as) continue; // draw (inclui PEN em 90+30 iguais)
+
+        const homePos = posMap[f.teams?.home?.name] || null;
+        const awayPos = posMap[f.teams?.away?.name] || null;
+
+        const oddsKey = `${f.teams?.home?.name}|${f.teams?.away?.name}`;
+        const realOdds = oddsMap[oddsKey];
+        const homeOdd  = realOdds?.homeOdd || null;
+        const awayOdd  = realOdds?.awayOdd || null;
+
+        const result = ZebraEngine.calc({
+          homeScore: t.hs, awayScore: t.as,
+          homeOdd, awayOdd,
+          homePosn: homePos, awayPosn: awayPos,
+          homeForm: '', awayForm: '', lid,
+        });
+        if (!result.isZebra) continue;
+
+        let dispHomeOdd = homeOdd, dispAwayOdd = awayOdd;
+        if (!dispHomeOdd && homePos && awayPos) {
+          const est = ZebraEngine.estimateOdds(homePos, awayPos, '', '');
+          dispHomeOdd = est.homeOdd; dispAwayOdd = est.awayOdd;
+        }
+
+        const matchDate = new Date(f.fixture.date);
+        const age = Date.now() - matchDate.getTime();
+
+        zebras.push({
+          id: f.fixture.id,
+          home: t.home, away: t.away,
+          hs: t.hs, as: t.as,
+          league: _LEAGUE_LABEL[lid] || lid, lid,
+          date: t.date,
+          zi: result.zi, ziClass: result.class,
+          azarao: result.azarao,
+          odds_h: dispHomeOdd ? parseFloat(dispHomeOdd).toFixed(2) : '–',
+          odds_a: dispAwayOdd ? parseFloat(dispAwayOdd).toFixed(2) : '–',
+          homeCrest: t.homeLogo || '', awayCrest: t.awayLogo || '',
+          realOdds: !!realOdds,
+          period: age <= 7*864e5 ? 'week' : age <= 30*864e5 ? 'month' : 'history',
+        });
+      }
+
+      const sorted = zebras.sort((a, b) => b.zi - a.zi);
+      if (sorted.length) _lsCache.set(lsKey, sorted);
+      return sorted;
+    } catch(e) {
+      console.warn('[fetchRealZebrasNT] erro:', e.message);
+      return [];
+    }
+  }
 
   /* ── FETCH REAL ZEBRAS ──────────────────────────────────────── */
   /**
    * Busca partidas recentes + tabela, calcula ZI real com ZebraEngine.
-   * Requer Football-Data.org configurado; usa OddsAPI se disponível.
-   * @param {string} lid  — código de liga (ENG, BRA, ESP…)
+   * Ligas de clubes: Football-Data.org. Seleções nacionais: API-Football.
+   * @param {string} lid  — código de liga (ENG, BRA, ESP… ou WC, EUR, CPA…)
    * @param {number} [limit=20]
    * @returns {Promise<Array>}  Array de zebras ordenadas por ZI desc
    */
   async function fetchRealZebras(lid, limit = 20) {
+    if (_NT_LIDS.has(lid)) return fetchRealZebrasNT(lid, limit);
     if (!_proxy.base() && !FD.key()) return [];
     if (typeof ZebraEngine === 'undefined') return [];
 
