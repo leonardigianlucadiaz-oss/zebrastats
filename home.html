@@ -461,7 +461,7 @@
   <script src="js/main.js?v=11"></script>
   <script>
     // ── CONSTANTS ─────────────────────────────────────────
-    const ALL_LIDS   = ['BRA','ENG','ESP','ITA','GER','FRA','UCL','POR'];
+    const ALL_LIDS   = ['BRA','ENG','ESP','ITA','GER','FRA','UCL','POR','WC'];
     const LID_LABEL  = { BRA:'Brasileirão', ENG:'Premier League', ESP:'La Liga', ITA:'Serie A', GER:'Bundesliga', FRA:'Ligue 1', UCL:'Champions League', POR:'Liga Portugal' };
     const SPARK_LIDS = ['BRA','ENG','ESP','UCL']; // declarado aqui para evitar TDZ em initSparklines()
 
@@ -1152,7 +1152,7 @@
             if (!raw) continue;
             const entry = JSON.parse(raw);
             if (!entry || now - entry.ts > TTL) continue;
-            const arr = entry.data || [];
+            const arr = entry.d || [];
             for (const z of arr) {
               if (!best || (z.zi || 0) > (best.zi || 0)) best = z;
             }
