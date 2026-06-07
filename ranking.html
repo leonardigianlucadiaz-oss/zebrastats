@@ -421,8 +421,8 @@ function renderRanking() {
         if (!RANKING_DATA.length) {
           container.innerHTML = `<div style="text-align:center;padding:40px 16px;color:var(--text-muted,var(--gray));">
             <i data-lucide="search-x" style="width:40px;height:40px;margin-bottom:12px;opacity:0.4;display:block;margin-left:auto;margin-right:auto;"></i>
-            <p style="margin:0 0 8px;font-weight:600;">Sem dados para esta semana</p>
-            <p style="margin:0;font-size:0.8rem;">Tente o período "Este Mês" ou mude de liga</p>
+            <p style="margin:0 0 8px;font-weight:600;">Sem dados disponíveis</p>
+            <p style="margin:0;font-size:0.8rem;">Verifique sua conexão ou tente o período "Histórico"</p>
           </div>`;
           if (typeof lucide !== 'undefined') lucide.createIcons();
         }
@@ -593,7 +593,7 @@ async function initRealRanking() {
   try {
     const lids = ['ENG','ESP','ITA','BRA','GER','FRA','POR'];
     const results = await Promise.allSettled(
-      lids.map(lid => ZebraAPI.fetchRealZebras(lid, 15))
+      lids.map(lid => ZebraAPI.fetchRealZebras(lid, 10))
     );
     const allZebras = results
       .filter(r => r.status === 'fulfilled' && Array.isArray(r.value))

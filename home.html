@@ -1052,7 +1052,7 @@
 
       ALL_LIDS.forEach((lid, idx) => {
         setTimeout(() => {
-          ZebraAPI.fetchRealZebras(lid, 15).then(zebras => {
+          ZebraAPI.fetchRealZebras(lid, 10).then(zebras => {
             if (!zebras.length) return;
             clearTimeout(_fallbackTimer);
             _zebrasByLid[lid] = zebras;
