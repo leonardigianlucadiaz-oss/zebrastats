@@ -389,6 +389,21 @@
   let activeLid          = 'BRA';
   let sdbStandingsLoaded = false;
 
+  const _NT_LIDS = new Set(['WC','EUR','CPA','UNL','SAQ','EUQ','AMI','CAN','GLD']);
+
+  // Valida se fixtures retornados são de seleções nacionais (não clubes)
+  function _isNationalTeamData(fixtures) {
+    if (!Array.isArray(fixtures) || !fixtures.length) return true;
+    const clubPattern = /\b(fc|sc|ac|cf|united|city|athletic|atlético|botafogo|flamengo|palmeiras|santos|corinthians|grêmio|internacional|juventus|inter|milan|arsenal|chelsea|liverpool|barcelona|real\s|madrid|bayern|dortmund|psg|ajax|benfica|porto|sporting|napoli|roma|sevilla|villarreal)\b/i;
+    const sample = fixtures.slice(0, 4);
+    for (const f of sample) {
+      const t = ZebraAPI.apiFootball?.transformFixture?.(f);
+      if (!t) continue;
+      if (clubPattern.test(t.home) || clubPattern.test(t.away)) return false;
+    }
+    return true;
+  }
+
   // ── CORES POR LIGA (#11) ─────────────────────────────────────────
   const LEAGUE_HERO_COLORS = {
     BRA: { a: 'rgba(46,180,80,0.12)',  b: 'rgba(255,220,0,0.06)' },  // verde/amarelo Brasil
@@ -1298,6 +1313,16 @@
           ZebraAPI.apiFootball.getLiveFixtures(lid).catch(() => null),
         ]);
 
+        // Para seleções nacionais, rejeita dados que parecem ser de clubes
+        if (_NT_LIDS.has(lid)) {
+          const allFixtures = [...(nextRaw || []), ...(lastRaw || [])];
+          if (allFixtures.length && !_isNationalTeamData(allFixtures)) {
+            console.warn('[liga] APIF retornou dados de clubes para NT lid:', lid, '— ignorando');
+            if (activeTab === 'jogos') renderJogos();
+            return;
+          }
+        }
+
         const mapF = f => ZebraAPI.apiFootball.transformFixture(f);
 
         const proximos = (nextRaw || []).map(mapF).filter(Boolean).map(m => ({
@@ -1327,6 +1352,18 @@
       try {
         const raw = await ZebraAPI.apiFootball.getStandings(lid);
         if (!raw || !raw.length) return;
+
+        // Para NT, valida que os times são seleções nacionais
+        if (_NT_LIDS.has(lid)) {
+          const firstGroup = raw[0]?.league?.standings?.[0] || [];
+          const names = firstGroup.slice(0, 3).map(t => t.team?.name || '');
+          const clubPattern = /\b(fc|sc|ac|botafogo|flamengo|palmeiras|santos|corinthians|juventus|inter|milan|arsenal|chelsea|liverpool|barcelona|madrid|bayern|dortmund|psg|ajax|benfica|porto)\b/i;
+          if (names.some(n => clubPattern.test(n))) {
+            console.warn('[liga] APIF standings com clubes para NT lid:', lid, '— ignorando');
+            return;
+          }
+        }
+
         // raw[0] = array de grupos/total; flatten
         const groups = Array.isArray(raw[0]) ? raw[0] : raw;
         window._apifStandingsMap = {};

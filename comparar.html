@@ -474,7 +474,14 @@ function setupSearch(slot) {
     const qL = q.toLowerCase();
 
     // Immediate local results
-    const local = ALL_TEAMS.filter(t => t.name.toLowerCase().includes(qL) || t.league.toLowerCase().includes(qL)).slice(0, 6);
+    const local = ALL_TEAMS
+      .filter(t => t.name.toLowerCase().includes(qL) || t.league.toLowerCase().includes(qL))
+      .sort((a, b) => {
+        const aName = a.name.toLowerCase().startsWith(qL) ? 0 : 1;
+        const bName = b.name.toLowerCase().startsWith(qL) ? 0 : 1;
+        return aName - bName;
+      })
+      .slice(0, 6);
     showDropdownItems(slot, dropdown, local, []);
 
     // Debounced SDB search (after 350ms)
