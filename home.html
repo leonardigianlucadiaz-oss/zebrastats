@@ -710,6 +710,7 @@
 
     function initHotLeagues() {
       const container = document.getElementById('hotLeagues');
+      if (!container) return;
       container.innerHTML = '';
       HOT_LIDS_META.slice(0,3).forEach(() => {
         const sk = document.createElement('div');
