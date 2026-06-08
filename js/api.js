@@ -124,6 +124,33 @@ const ZebraAPI = (() => {
     },
   };
 
+  /* ── FD RATE LIMITER ────────────────────────────────────────────
+   * FD free tier = 10 req/min → 1 req a cada 6s.
+   * Enfileira chamadas reais (cache hits passam direto) e garante
+   * mínimo de 6.5s entre disparos para evitar HTTP 429.
+   */
+  const _fdQueue = (() => {
+    let lastTs = 0;
+    let busy   = false;
+    const queue = [];
+    const GAP   = 6_500; // ms entre chamadas (10/min + 500ms buffer)
+
+    function next() {
+      if (busy || queue.length === 0) return;
+      busy = true;
+      const { fn, resolve, reject } = queue.shift();
+      const wait = Math.max(0, GAP - (Date.now() - lastTs));
+      setTimeout(async () => {
+        lastTs = Date.now();
+        try { resolve(await fn()); } catch(e) { reject(e); }
+        busy = false;
+        next();
+      }, wait);
+    }
+
+    return { run: (fn) => new Promise((resolve, reject) => { queue.push({ fn, resolve, reject }); next(); }) };
+  })();
+
   /* ── FOOTBALL-DATA.ORG ──────────────────────────────────────── */
   const FD = {
     BASE : 'https://api.football-data.org/v4',
@@ -142,43 +169,48 @@ const ZebraAPI = (() => {
     },
 
     // Tenta proxy primeiro; fallback para chamada direta com chave local
+    // Cache hits passam direto; chamadas reais passam pelo _fdQueue (rate limit 10 req/min).
     async _fetch(path, lid) {
       const ck = `fd_${path}`;
       const hit = _cache.get(ck); if (hit) return hit;
 
-      // 1. Proxy Supabase (chave no servidor)
-      if (_proxy.base() && lid) {
-        const action = path.includes('/standings') ? 'standings'
-                     : path.includes('/matches')   ? 'matches'
-                     : path.includes('/scorers')   ? 'fd-scorers'
-                     : null;
-        if (action) {
-          const params = { lid };
-          if (action === 'matches') {
-            const status = path.match(/status=([^&]+)/)?.[1];
-            const limit  = path.match(/limit=(\d+)/)?.[1];
-            if (status) params.status = status;
-            if (limit)  params.limit  = limit;
-          }
-          if (action === 'fd-scorers') {
-            const limit = path.match(/limit=(\d+)/)?.[1];
-            if (limit) params.limit = limit;
-          }
-          const data = await _proxy.fetch(action, params);
-          if (data) { _cache.set(ck, data); return data; }
-        }
-      }
+      return _fdQueue.run(async () => {
+        // double-check cache após esperar na fila (outra chamada pode ter preenchido)
+        const hit2 = _cache.get(ck); if (hit2) return hit2;
 
-      // 2. Fallback: chamada direta com chave local
-      const k = this.key(); if (!k) return null;
-      try {
-        const sep = path.includes('?') ? '&' : '?';
-        const r = await fetch(`${this.BASE}${path}`, { headers: { 'X-Auth-Token': k } });
-        if (!r.ok) { console.warn(`[FD] ${r.status} — ${path}`); _cache.setError(ck); return null; }
-        const data = await r.json();
-        _cache.set(ck, data);
-        return data;
-      } catch(e) { console.warn('[FD] Erro de rede:', e.message); _cache.setError(ck); return null; }
+        // 1. Proxy Supabase (chave no servidor)
+        if (_proxy.base() && lid) {
+          const action = path.includes('/standings') ? 'standings'
+                       : path.includes('/matches')   ? 'matches'
+                       : path.includes('/scorers')   ? 'fd-scorers'
+                       : null;
+          if (action) {
+            const params = { lid };
+            if (action === 'matches') {
+              const status = path.match(/status=([^&]+)/)?.[1];
+              const limit  = path.match(/limit=(\d+)/)?.[1];
+              if (status) params.status = status;
+              if (limit)  params.limit  = limit;
+            }
+            if (action === 'fd-scorers') {
+              const limit = path.match(/limit=(\d+)/)?.[1];
+              if (limit) params.limit = limit;
+            }
+            const data = await _proxy.fetch(action, params);
+            if (data) { _cache.set(ck, data); return data; }
+          }
+        }
+
+        // 2. Fallback: chamada direta com chave local
+        const k = this.key(); if (!k) return null;
+        try {
+          const r = await fetch(`${this.BASE}${path}`, { headers: { 'X-Auth-Token': k } });
+          if (!r.ok) { console.warn(`[FD] ${r.status} — ${path}`); _cache.setError(ck); return null; }
+          const data = await r.json();
+          _cache.set(ck, data);
+          return data;
+        } catch(e) { console.warn('[FD] Erro de rede:', e.message); _cache.setError(ck); return null; }
+      });
     },
 
     async getStandings(lid) {
