@@ -340,7 +340,8 @@
   let rulesOpen = true;
 
   // Toggle abrir/fechar seção Regras
-  document.getElementById('leagueRulesToggle').addEventListener('click', function() {
+  const _rulesToggle = document.getElementById('leagueRulesToggle');
+  if (_rulesToggle) _rulesToggle.addEventListener('click', function() {
     rulesOpen = !rulesOpen;
     const body = document.getElementById('leagueRulesBody');
     const chev = document.getElementById('leagueRulesChevron');
@@ -442,7 +443,8 @@
     if (typeof lucide !== 'undefined') lucide.createIcons({ nodes: [btn] });
   }
 
-  document.getElementById('favLeagueBtn').addEventListener('click', function() {
+  const _favLeagueBtn = document.getElementById('favLeagueBtn');
+  if (_favLeagueBtn) _favLeagueBtn.addEventListener('click', function() {
     const name = document.getElementById('leagueName').textContent;
     favLeague = toggleFavLeague(activeLid, name);
     const lbl = document.getElementById('favLeagueLabel');
@@ -460,11 +462,11 @@
       document.querySelectorAll('#leaguePicker .filter-chip').forEach(b => b.classList.remove('active'));
       this.classList.add('active');
       activeLid = this.dataset.lid;
-      document.getElementById('leagueName').textContent = this.dataset.name;
-      document.getElementById('leagueSub').textContent  = this.dataset.sub;
-      document.getElementById('statLider').textContent  = this.dataset.lider;
-      document.getElementById('statZebras').textContent = this.dataset.zebras;
-      document.getElementById('statRodada').textContent = this.dataset.rodada;
+      const _ln = document.getElementById('leagueName');   if (_ln) _ln.textContent = this.dataset.name;
+      const _ls = document.getElementById('leagueSub');    if (_ls) _ls.textContent = this.dataset.sub;
+      const _sl = document.getElementById('statLider');    if (_sl) _sl.textContent = this.dataset.lider;
+      const _sz = document.getElementById('statZebras');   if (_sz) _sz.textContent = this.dataset.zebras;
+      const _sr = document.getElementById('statRodada');   if (_sr) _sr.textContent = this.dataset.rodada;
       // reset standings state for new league
       sdbStandingsLoaded = false;
       STANDINGS.length = 0;
@@ -1037,7 +1039,7 @@
       sdbStandingsLoaded = true;
       if (activeTab === 'tabela') renderTabela();
       const lider = STANDINGS[0];
-      if (lider) document.getElementById('statLider').textContent = lider.abbr || lider.name.substring(0,3).toUpperCase();
+      if (lider) { const _sl2 = document.getElementById('statLider'); if (_sl2) _sl2.textContent = lider.abbr || lider.name.substring(0,3).toUpperCase(); }
       return true;
     }
 
@@ -1403,11 +1405,11 @@
     document.querySelectorAll('#leaguePicker .filter-chip').forEach(b => b.classList.remove('active'));
     chip.classList.add('active');
     activeLid = urlLid;
-    document.getElementById('leagueName').textContent = chip.dataset.name  || urlLid;
-    document.getElementById('leagueSub').textContent  = chip.dataset.sub   || '';
-    document.getElementById('statLider').textContent  = chip.dataset.lider || '—';
-    document.getElementById('statZebras').textContent = chip.dataset.zebras|| '—';
-    document.getElementById('statRodada').textContent = chip.dataset.rodada|| '—';
+    const _ln2 = document.getElementById('leagueName');  if (_ln2) _ln2.textContent = chip.dataset.name  || urlLid;
+    const _ls2 = document.getElementById('leagueSub');   if (_ls2) _ls2.textContent = chip.dataset.sub   || '';
+    const _sl3 = document.getElementById('statLider');   if (_sl3) _sl3.textContent = chip.dataset.lider || '—';
+    const _sz2 = document.getElementById('statZebras');  if (_sz2) _sz2.textContent = chip.dataset.zebras|| '—';
+    const _sr2 = document.getElementById('statRodada');  if (_sr2) _sr2.textContent = chip.dataset.rodada|| '—';
     syncFavBtn();
     updateLeagueHero(activeLid);
     loadHeroLogo(activeLid);

@@ -392,13 +392,17 @@ function updateCounts() {
   const isPro = getUserPlan() !== 'free';
   animateCount('activeCount', active);
   animateCount('totalTriggered', triggered);
-  document.getElementById('limitCount').textContent    = isPro ? '∞' : `${alerts.length}/${FREE_LIMIT}`;
-  document.getElementById('limitCount').style.color    = (!isPro && alerts.length >= FREE_LIMIT) ? 'var(--red)' : 'var(--gold)';
+  const _limitCount = document.getElementById('limitCount');
+  if (_limitCount) {
+    _limitCount.textContent = isPro ? '∞' : `${alerts.length}/${FREE_LIMIT}`;
+    _limitCount.style.color = (!isPro && alerts.length >= FREE_LIMIT) ? 'var(--red)' : 'var(--gold)';
+  }
 }
 
 // ── TEMPLATES ─────────────────────────────────────────────────────────────────
 function renderTemplates() {
   const container = document.getElementById('templatesList');
+  if (!container) return;
   container.innerHTML = '';
   const isPro = getUserPlan() !== 'free';
 
@@ -592,7 +596,8 @@ function deleteAlert(id) {
 }
 
 // ── CLEAR ALL ─────────────────────────────────────────────────────────────────
-document.getElementById('clearAllBtn').addEventListener('click', () => {
+const _clearAllBtn = document.getElementById('clearAllBtn');
+if (_clearAllBtn) _clearAllBtn.addEventListener('click', () => {
   if (!alerts.length) return;
   alerts = [];
   saveAlerts(alerts);
@@ -606,22 +611,27 @@ const modal = document.getElementById('alertModal');
 
 function openModal() {
   editId = null;
-  document.getElementById('modalTitle').textContent = 'Novo Alerta';
+  const _mt = document.getElementById('modalTitle');
+  if (_mt) _mt.textContent = 'Novo Alerta';
   resetForm();
-  modal.classList.add('show');
+  if (modal) modal.classList.add('show');
   lucide.createIcons();
 }
-function closeModal() { modal.classList.remove('show'); }
+function closeModal() { if (modal) modal.classList.remove('show'); }
 
-document.getElementById('fabBtn').addEventListener('click', () => {
+const _fabBtn = document.getElementById('fabBtn');
+if (_fabBtn) _fabBtn.addEventListener('click', () => {
   const isPro = getUserPlan() !== 'free';
   if (!isPro && alerts.length >= FREE_LIMIT) {
-    document.getElementById('proModal').classList.add('show'); return;
+    const _pm = document.getElementById('proModal');
+    if (_pm) _pm.classList.add('show');
+    return;
   }
   openModal();
 });
-document.getElementById('closeModal').addEventListener('click', closeModal);
-modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+const _closeModalBtn = document.getElementById('closeModal');
+if (_closeModalBtn) _closeModalBtn.addEventListener('click', closeModal);
+if (modal) modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
 
 // ── FORM HELPERS ──────────────────────────────────────────────────────────────
 function resetForm() {
@@ -633,11 +643,11 @@ function resetForm() {
   setType('zi_league');
   document.querySelectorAll('[data-tw]').forEach(b => { b.classList.toggle('active', b.dataset.tw === 'any'); });
   document.querySelectorAll('[data-adv]').forEach(b => { b.classList.toggle('active', b.dataset.adv === '15'); });
-  document.getElementById('ziSlider').value  = 6;
-  document.getElementById('ziSlider2').value = 5;
-  document.getElementById('ziValDisplay').textContent  = '6.0';
-  document.getElementById('ziValDisplay2').textContent = '5.0';
-  document.getElementById('teamSearchInput').value = '';
+  const _zs  = document.getElementById('ziSlider');    if (_zs)  _zs.value  = 6;
+  const _zs2 = document.getElementById('ziSlider2');   if (_zs2) _zs2.value = 5;
+  const _zvd  = document.getElementById('ziValDisplay');  if (_zvd)  _zvd.textContent  = '6.0';
+  const _zvd2 = document.getElementById('ziValDisplay2'); if (_zvd2) _zvd2.textContent = '5.0';
+  const _tsi  = document.getElementById('teamSearchInput'); if (_tsi) _tsi.value = '';
   selectedTeamDisplay(null);
 }
 
@@ -653,15 +663,16 @@ function setType(type) {
     o.classList.toggle('active', active);
     o.querySelector('.alert-type-opt__check').style.display = active ? 'flex' : 'none';
   });
-  document.getElementById('cfgLeague').style.display = type === 'zi_league' ? 'block' : 'none';
-  document.getElementById('cfgTeam').style.display   = type === 'zi_team'   ? 'block' : 'none';
-  document.getElementById('cfgMatch').style.display  = type === 'match'     ? 'block' : 'none';
+  const _cfgL = document.getElementById('cfgLeague'); if (_cfgL) _cfgL.style.display = type === 'zi_league' ? 'block' : 'none';
+  const _cfgT = document.getElementById('cfgTeam');   if (_cfgT) _cfgT.style.display = type === 'zi_team'   ? 'block' : 'none';
+  const _cfgM = document.getElementById('cfgMatch');  if (_cfgM) _cfgM.style.display = type === 'match'     ? 'block' : 'none';
   lucide.createIcons();
 }
 
 // ── LEAGUE CHIPS ──────────────────────────────────────────────────────────────
 function renderLeagueChips() {
   const row = document.getElementById('leagueChips');
+  if (!row) return;
   row.innerHTML = '';
 
   // "Todas" option
@@ -700,18 +711,20 @@ function renderLeagueChips() {
 }
 
 // ── SLIDERS ───────────────────────────────────────────────────────────────────
-document.getElementById('ziSlider').addEventListener('input', function() {
-  document.getElementById('ziValDisplay').textContent = parseFloat(this.value).toFixed(1);
+const _zsEl  = document.getElementById('ziSlider');
+if (_zsEl)  _zsEl.addEventListener('input', function() {
+  const _d = document.getElementById('ziValDisplay'); if (_d) _d.textContent = parseFloat(this.value).toFixed(1);
 });
-document.getElementById('ziSlider2').addEventListener('input', function() {
-  document.getElementById('ziValDisplay2').textContent = parseFloat(this.value).toFixed(1);
+const _zsEl2 = document.getElementById('ziSlider2');
+if (_zsEl2) _zsEl2.addEventListener('input', function() {
+  const _d2 = document.getElementById('ziValDisplay2'); if (_d2) _d2.textContent = parseFloat(this.value).toFixed(1);
 });
 
 // ── TEAM SEARCH IN MODAL ──────────────────────────────────────────────────────
 const teamInput    = document.getElementById('teamSearchInput');
 const teamDropdown = document.getElementById('teamDropdown');
 
-teamInput.addEventListener('input', () => {
+if (teamInput) teamInput.addEventListener('input', () => {
   const q = teamInput.value.trim().toLowerCase();
   if (!q) { teamDropdown.style.display='none'; return; }
   const results = TEAMS_LIST.filter(t => t.toLowerCase().includes(q)).slice(0,5);
@@ -726,14 +739,17 @@ teamInput.addEventListener('input', () => {
   });
   teamDropdown.style.display = 'block';
 });
-document.addEventListener('click', e => { if(!e.target.closest('#cfgTeam')) teamDropdown.style.display='none'; });
-document.getElementById('clearTeam').addEventListener('click', () => { selectedTeam=null; selectedTeamDisplay(null); });
+document.addEventListener('click', e => { if(teamDropdown && !e.target.closest('#cfgTeam')) teamDropdown.style.display='none'; });
+const _clearTeam = document.getElementById('clearTeam');
+if (_clearTeam) _clearTeam.addEventListener('click', () => { selectedTeam=null; selectedTeamDisplay(null); });
 
 function selectedTeamDisplay(name) {
   const badge = document.getElementById('selectedTeamBadge');
+  if (!badge) return;
   if (name) {
     badge.style.display = 'flex';
-    document.getElementById('selectedTeamName').textContent = name;
+    const _stn = document.getElementById('selectedTeamName');
+    if (_stn) _stn.textContent = name;
   } else {
     badge.style.display = 'none';
   }
@@ -754,7 +770,8 @@ document.querySelectorAll('[data-adv]').forEach(btn => {
 });
 
 // ── SAVE ALERT ────────────────────────────────────────────────────────────────
-document.getElementById('saveAlertBtn').addEventListener('click', () => {
+const _saveAlertBtn = document.getElementById('saveAlertBtn');
+if (_saveAlertBtn) _saveAlertBtn.addEventListener('click', () => {
   const type = selectedAlertType;
   let label, sub, lid=null, team=null, threshold=0, icon='bell', iconBg='var(--green)';
 

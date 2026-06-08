@@ -322,7 +322,7 @@ function teamCrest(url, name) {
 // ── PODIUM ────────────────────────────────────────────────────────────────────
 function renderPodium(data) {
   const top3 = data.slice(0, 3);
-  if (top3.length < 1) { document.getElementById('podiumBlock').style.display = 'none'; return; }
+  if (top3.length < 1) { const _pb = document.getElementById('podiumBlock'); if (_pb) _pb.style.display = 'none'; return; }
 
   // order: [1]=2nd, [0]=1st, [2]=3rd (podium arrangement)
   const order = [top3[1], top3[0], top3[2]].filter(Boolean);
@@ -623,10 +623,12 @@ function buildRankCard(z, pos, cls, locked = false) {
 
 // ── SKELETON HIDE ─────────────────────────────────────────────────────────────
 function showRanking() {
-  document.getElementById('skeletonList').style.display = 'none';
-  document.getElementById('podiumBlock').style.display = 'none'; // will be shown by renderPodium
+  const _skel = document.getElementById('skeletonList');
+  if (_skel) _skel.style.display = 'none';
+  const _podium = document.getElementById('podiumBlock');
+  if (_podium) _podium.style.display = 'none';
   const list = document.getElementById('rankingList');
-  list.style.display = '';
+  if (list) list.style.display = '';
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────────────

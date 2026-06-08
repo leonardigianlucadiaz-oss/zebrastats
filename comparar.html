@@ -540,28 +540,38 @@ function selectTeam(slot, team) {
   }
 
   // Clear input
-  document.getElementById(`input${slot}`).value = '';
-  document.getElementById(`dropdown${slot}`).style.display = 'none';
+  const _inp = document.getElementById(`input${slot}`);
+  if (_inp) _inp.value = '';
+  const _ddp = document.getElementById(`dropdown${slot}`);
+  if (_ddp) _ddp.style.display = 'none';
 
-  document.getElementById('swapRow').style.display = 'flex';
+  const _swapRow = document.getElementById('swapRow');
+  if (_swapRow) _swapRow.style.display = 'flex';
   if (selectedA && selectedB) renderComparison();
   lucide.createIcons();
 }
 
 // ── CLEAR SLOT ────────────────────────────────────────────────────────────────
 ['A','B'].forEach(slot => {
-  document.getElementById(`clear${slot}`).addEventListener('click', () => {
+  const _clearBtn = document.getElementById(`clear${slot}`);
+  if (!_clearBtn) return;
+  _clearBtn.addEventListener('click', () => {
     if (slot === 'A') selectedA = null; else selectedB = null;
-    document.getElementById(`empty${slot}`).style.display = 'block';
-    document.getElementById(`filled${slot}`).style.display = 'none';
-    document.getElementById('compResults').style.display = 'none';
-    document.getElementById('emptyState').style.display  = 'block';
+    const _empty  = document.getElementById(`empty${slot}`);
+    const _filled = document.getElementById(`filled${slot}`);
+    const _compR  = document.getElementById('compResults');
+    const _empSt  = document.getElementById('emptyState');
+    if (_empty)  _empty.style.display  = 'block';
+    if (_filled) _filled.style.display = 'none';
+    if (_compR)  _compR.style.display  = 'none';
+    if (_empSt)  _empSt.style.display  = 'block';
     lucide.createIcons();
   });
 });
 
 // ── SWAP ──────────────────────────────────────────────────────────────────────
-document.getElementById('swapBtn').addEventListener('click', () => {
+const _swapBtn = document.getElementById('swapBtn');
+if (_swapBtn) _swapBtn.addEventListener('click', () => {
   if (!selectedA || !selectedB) return;
   [selectedA, selectedB] = [selectedB, selectedA];
   selectTeam('A', selectedA);

@@ -393,12 +393,14 @@
     const total = list.length;
     const pageList = list.slice(0, _zebraPage * PAGE_SIZE);
 
-    document.getElementById('zebraCount').textContent = `${total} resultado${total !== 1 ? 's' : ''}`;
+    const _zc = document.getElementById('zebraCount');
+    if (_zc) _zc.textContent = `${total} resultado${total !== 1 ? 's' : ''}`;
     updateMonitoredBar();
 
     if (!pageList.length) {
       container.innerHTML = renderEmptyState();
-      document.getElementById('loadMoreWrap').style.display = 'none';
+      const _lmw = document.getElementById('loadMoreWrap');
+      if (_lmw) _lmw.style.display = 'none';
       return;
     }
 
@@ -594,14 +596,18 @@
   // ── MODAL ────────────────────────────────────────────────────
   const modal = document.getElementById('addLeagueModal');
 
-  document.getElementById('addLeagueBtn').addEventListener('click', () => {
-    modal.classList.add('show');
+  const _addLeagueBtn = document.getElementById('addLeagueBtn');
+  if (_addLeagueBtn) _addLeagueBtn.addEventListener('click', () => {
+    if (modal) modal.classList.add('show');
     renderModalLeagues('');
-    document.getElementById('leagueSearchInput').focus();
+    const _lsi = document.getElementById('leagueSearchInput');
+    if (_lsi) _lsi.focus();
   });
-  document.getElementById('closeModal').addEventListener('click', () => modal.classList.remove('show'));
-  modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('show'); });
-  document.getElementById('leagueSearchInput').addEventListener('input', e => renderModalLeagues(e.target.value));
+  const _closeModal = document.getElementById('closeModal');
+  if (_closeModal) _closeModal.addEventListener('click', () => { if (modal) modal.classList.remove('show'); });
+  if (modal) modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('show'); });
+  const _leagueSearchInput = document.getElementById('leagueSearchInput');
+  if (_leagueSearchInput) _leagueSearchInput.addEventListener('input', e => renderModalLeagues(e.target.value));
 
   function renderModalLeagues(query) {
     const container = document.getElementById('allLeaguesList');

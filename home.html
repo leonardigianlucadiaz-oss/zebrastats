@@ -499,7 +499,9 @@
     }
 
     function emptyState(containerId, msg, sub = '') {
-      document.getElementById(containerId).innerHTML =
+      const _el = document.getElementById(containerId);
+      if (!_el) return;
+      _el.innerHTML =
         `<div style="text-align:center;padding:16px 8px;">
           <p class="text-gray text-sm">${msg}</p>
           ${sub ? `<p style="font-size:0.6875rem;color:var(--gray);margin-top:6px;">${sub}</p>` : ''}
@@ -516,6 +518,7 @@
     // ── RENDER LIVE GAMES ─────────────────────────────────
     function renderLive() {
       const container = document.getElementById('liveGames');
+      if (!container) return;
       container.innerHTML = '';
       const games = activeLeagueFilter === 'all'
         ? LIVE_GAMES
@@ -1121,7 +1124,8 @@
       });
     }
 
-    document.getElementById('editFavBtn').addEventListener('click', function(e) {
+    const _editFavBtn = document.getElementById('editFavBtn');
+    if (_editFavBtn) _editFavBtn.addEventListener('click', function(e) {
       e.preventDefault();
       window.location.href = 'busca.html';
     });
