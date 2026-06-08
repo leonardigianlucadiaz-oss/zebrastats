@@ -101,6 +101,9 @@
         <!-- Pull-to-refresh indicator -->
         <div class="ptr-indicator" id="ptrIndicator"><i data-lucide="refresh-cw" style="width:14px;height:14px;"></i>Atualizando...</div>
 
+        <!-- COPA DO MUNDO COUNTDOWN (escondido após início do torneio) -->
+        <div id="wcCountdownCard" style="display:none;"></div>
+
         <!-- AO VIVO -->
         <div class="section-header">
           <span class="section-title">
@@ -1132,6 +1135,36 @@
     initBellBadge();
     setTimeout(_loadAllZebras, 500);
 
+    // Copa do Mundo 2026 countdown card
+    (function _initWCCountdown() {
+      const card = document.getElementById('wcCountdownCard');
+      if (!card) return;
+      const WC_START = new Date('2026-06-11T17:00:00Z');
+      const WC_END   = new Date('2026-07-19T23:59:59Z');
+      const now = Date.now();
+      if (now >= WC_END.getTime()) return; // torneio encerrado
+      if (now >= WC_START.getTime()) {
+        // Torneio em andamento — mostra badge mas sem countdown
+        card.style.display = 'block';
+        card.innerHTML = `<div style="background:linear-gradient(135deg,rgba(0,100,60,0.18),rgba(46,230,92,0.09));border:1px solid rgba(46,230,92,0.35);border-radius:var(--radius-md);padding:12px 14px;margin-bottom:12px;display:flex;align-items:center;gap:12px;cursor:pointer;" onclick="window.location.href='liga.html?lid=WC'"><span style="font-size:1.5rem;">🌍</span><div style="flex:1;min-width:0;"><div style="font-size:0.875rem;font-weight:700;color:var(--green);">Copa do Mundo 2026 em andamento!</div><div style="font-size:0.75rem;color:var(--gray);margin-top:2px;">Acompanhe placares e zebras em tempo real</div></div><i data-lucide="arrow-right" style="width:16px;height:16px;color:var(--green);flex-shrink:0;"></i></div>`;
+        if (typeof lucide !== 'undefined') lucide.createIcons({ els: [card] });
+        return;
+      }
+      // Pré-torneio — exibe countdown
+      card.style.display = 'block';
+      function _render() {
+        const diff = WC_START.getTime() - Date.now();
+        if (diff <= 0) { card.style.display = 'none'; clearInterval(_tick); return; }
+        const d = Math.floor(diff / 86400000);
+        const h = Math.floor((diff % 86400000) / 3600000);
+        const m = Math.floor((diff % 3600000) / 60000);
+        const s = Math.floor((diff % 60000) / 1000);
+        card.innerHTML = `<div style="background:linear-gradient(135deg,rgba(0,90,50,0.22),rgba(46,230,92,0.07));border:1px solid rgba(46,230,92,0.4);border-radius:var(--radius-md);padding:14px;margin-bottom:12px;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;"><span style="font-size:1.25rem;">🌍</span><div style="font-size:0.875rem;font-weight:700;color:var(--green);">Copa do Mundo 2026</div><span style="margin-left:auto;font-size:0.6875rem;font-weight:600;background:rgba(46,230,92,0.15);color:var(--green);border-radius:999px;padding:2px 8px;">EM BREVE</span></div><div style="display:flex;gap:8px;justify-content:center;margin-bottom:10px;">${[['DIAS',d],['HRS',h],['MIN',m],['SEG',s]].map(([l,v])=>`<div style="flex:1;text-align:center;background:rgba(0,0,0,0.25);border-radius:8px;padding:8px 4px;"><div style="font-size:1.375rem;font-weight:900;color:var(--white);line-height:1;">${String(v).padStart(2,'0')}</div><div style="font-size:0.5625rem;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;margin-top:3px;">${l}</div></div>`).join('')}</div><div style="font-size:0.75rem;color:var(--gray);text-align:center;">Brasil, México e EUA · 11/06 a 19/07 · 48 seleções</div></div>`;
+      }
+      _render();
+      const _tick = setInterval(_render, 1000);
+    })();
+
     (function _heroBanner() {
       const el  = document.getElementById('heroMatchTitle');
       const elL = document.getElementById('heroMatchLeague');
@@ -1169,13 +1202,23 @@
       })();
 
       const heroFallbackTimer = setTimeout(() => {
-        if (el.textContent === 'Carregando...') {
+        if (heroBestZi > 0) return; // cache ou API já populou o hero
+        // WC começa em breve? Mostra countdown em vez de erro genérico
+        const wcStart = new Date('2026-06-11T17:00:00Z');
+        const msToWC  = wcStart - Date.now();
+        const daysToWC = Math.ceil(msToWC / (1000 * 60 * 60 * 24));
+        if (msToWC > 0 && daysToWC <= 10) {
+          el.textContent  = `Copa do Mundo começa em ${daysToWC} dia${daysToWC !== 1 ? 's' : ''}!`;
+          if (elL) elL.textContent = 'FIFA World Cup 2026 · Brasil, México, EUA';
+          if (elZ) elZ.textContent = '🌍';
+          if (elD) elD.textContent = 'A maior zebroteca do planeta está chegando. Os dados dos jogos da Copa serão atualizados em tempo real a partir de 11/06.';
+        } else {
           el.textContent = 'Nenhuma zebra disponível agora';
-          if (elL) elL.textContent = 'Verifique sua conexão ou configure a API em Perfil';
+          if (elL) elL.textContent = 'Verifique sua conexão ou tente novamente em alguns instantes';
           if (elZ) elZ.textContent = '–';
           if (elD) elD.textContent = '';
         }
-      }, 9000);
+      }, 12000);
       document.addEventListener('zebrasLoaded', function(e) {
         const zebras = e.detail || [];
         // Ignora dispatches sem dados — deixa heroFallbackTimer resolver o empty state
