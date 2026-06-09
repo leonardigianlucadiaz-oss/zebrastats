@@ -432,12 +432,13 @@ const LOCAL_LEAGUES = [
   { id:'USA', name:'MLS',                  country:'EUA',       flag:'🇺🇸' },
 ];
 
+// TRENDING: populado dinamicamente via API (top zebras reais do dia)
+// Entradas estáticas com dados fabricados foram removidas.
 const TRENDING = [
-  { icon:'🦓', label:'Botafogo 3×0 Flamengo',     sub:'ZI 8.2 — Maior zebra da rodada',  link:'partida.html', query:'' },
-  { icon:'🏆', label:'Brasileirão — Rodada 12',   sub:'Tabela atualizada · 8 jogos',      link:'liga.html',    query:'' },
-  { icon:'📊', label:'Maiores zebras da semana',  sub:'Top 5 resultados improváveis',     link:'zebras.html',  query:'' },
-  { icon:'⭐', label:'Flamengo',                  sub:'5 jogos sem derrota em casa',      link:'time.html',    query:'Flamengo' },
-  { icon:'🌟', label:'Erling Haaland',            sub:'Man. City · 28 gols na temporada', link:'time.html',    query:'Manchester City' },
+  { icon:'🏆', label:'Brasileirão',        sub:'Tabela e resultados atualizados', link:'liga.html?id=BRA', query:'' },
+  { icon:'🌍', label:'Premier League',     sub:'Resultados e zebras da rodada',   link:'liga.html?id=ENG', query:'' },
+  { icon:'📊', label:'Maiores zebras',     sub:'Índice Zebra · Top resultados',   link:'zebras.html',      query:'' },
+  { icon:'🌍', label:'Copa do Mundo 2026', sub:'Fase de grupos · Ao vivo',        link:'liga.html?id=WC',  query:'' },
 ];
 
 const EMPTY_SUGGESTIONS = ['Flamengo','Premier League','Haaland','Barcelona','Brasileirão','Juventus','Arsenal'];
