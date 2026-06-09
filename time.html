@@ -1310,68 +1310,7 @@
     };
 
     // ── ESCALAÇÕES POR TIME ────────────────────────────────────────
-    const TEAM_LINEUPS = {
-      torino: {
-        formation:'4-3-3',
-        starters:['Milinkovic-Savic','Bellanova','Djidji','Buongiorno','Rodriguez','Tameze','Ricci','Ilic','Seck','Sanabria','Karamoh'],
-        bench:[{pos:'GK',name:'Berisha'},{pos:'ZD',name:'Zima'},{pos:'LB',name:'Vojvoda'},{pos:'MC',name:'Linetty'},{pos:'MC',name:'Lazaro'},{pos:'PD',name:'Vlasic'},{pos:'CA',name:'Pellegri'}],
-      },
-      flamengo: {
-        formation:'4-2-3-1',
-        starters:['Rossi','Varela','Fabrício Bruno','David Luiz','Ayrton Lucas','Thiago Maia','Erick Pulgar','Everton Cebolinha','Arrascaeta','Gerson','Pedro'],
-        bench:[{pos:'GK',name:'Santos'},{pos:'ZD',name:'Léo Pereira'},{pos:'LB',name:'Viña'},{pos:'MC',name:'Matheus França'},{pos:'MEI',name:'Victor Hugo'},{pos:'PE',name:'Gabigol'},{pos:'CA',name:'Lineker'}],
-      },
-      'real-madrid': {
-        formation:'4-3-3',
-        starters:['Lunin','Carvajal','Militão','Nacho','Mendy','Tchouaméni','Kroos','Camavinga','Valverde','Bellingham','Vinicius Jr'],
-        bench:[{pos:'GK',name:'Kepa'},{pos:'ZD',name:'Alaba'},{pos:'LB',name:'García'},{pos:'MC',name:'Modric'},{pos:'MC',name:'Ceballos'},{pos:'PD',name:'Rodrygo'},{pos:'CA',name:'Joselu'}],
-      },
-      'man-city': {
-        formation:'4-2-3-1',
-        starters:['Ederson','Walker','Dias','Akanji','Gvardiol','Rodri','Kovacic','Silva','De Bruyne','Doku','Haaland'],
-        bench:[{pos:'GK',name:'Ortega'},{pos:'RB',name:'Lewis'},{pos:'ZD',name:'Stones'},{pos:'MC',name:'Foden'},{pos:'MC',name:'B. Silva'},{pos:'PD',name:'Oscar Bobb'},{pos:'CA',name:'J. Álvarez'}],
-      },
-      'bayern': {
-        formation:'4-2-3-1',
-        starters:['Neuer','Kimmich','Upamecano','Dier','Davies','Goretzka','Pavlovic','Müller','Musiala','Sané','Kane'],
-        bench:[{pos:'GK',name:'Peretz'},{pos:'RB',name:'Mazraoui'},{pos:'ZD',name:'De Ligt'},{pos:'MC',name:'Laimer'},{pos:'ME',name:'Gnabry'},{pos:'PD',name:'Tel'},{pos:'CA',name:'Zirkzee'}],
-      },
-      'psg': {
-        formation:'4-3-3',
-        starters:['Donnarumma','Hakimi','Marquinhos','L. Beraldo','Nuno Mendes','Fabian Ruiz','Vitinha','Zaïre-Emery','Dembélé','Kolo Muani','Lee Kang-in'],
-        bench:[{pos:'GK',name:'Safonov'},{pos:'RB',name:'Mukiele'},{pos:'ZD',name:'Ramos'},{pos:'MC',name:'Ugarte'},{pos:'MC',name:'Neves'},{pos:'PD',name:'Asensio'},{pos:'CA',name:'Doué'}],
-      },
-      'palmeiras': {
-        formation:'4-2-3-1',
-        starters:['Weverton','Marcos Rocha','Gustavo Gómez','Murilo','Piquerez','Zé Rafael','Aníbal Moreno','Dudu','Raphael Veiga','Lázaro','Flaco López'],
-        bench:[{pos:'GK',name:'M. Lomba'},{pos:'ZD',name:'Vitor Reis'},{pos:'LB',name:'Mayke'},{pos:'MC',name:'Gab. Menino'},{pos:'MC',name:'R. Ríos'},{pos:'PE',name:'Rony'},{pos:'CA',name:'Endrick'}],
-      },
-      'barcelona': {
-        formation:'4-3-3',
-        starters:['Ter Stegen','Koundé','Christensen','Iñigo Martínez','Balde','Pedri','De Jong','Gündoğan','Yamal','Lewandowski','Raphinha'],
-        bench:[{pos:'GK',name:'Peña'},{pos:'ZD',name:'Marcos Alonso'},{pos:'LB',name:'Cancelo'},{pos:'MC',name:'Fermín López'},{pos:'MC',name:'Romeu'},{pos:'PD',name:'João Félix'},{pos:'CA',name:'Vitor Roque'}],
-      },
-      'arsenal': {
-        formation:'4-3-3',
-        starters:['Raya','Ben White','Saliba','Gabriel','Zinchenko','Odegaard','Rice','Havertz','Saka','Jesus','Martinelli'],
-        bench:[{pos:'GK',name:'Ramsdale'},{pos:'ZD',name:'Timber'},{pos:'LB',name:'Tomiyasu'},{pos:'MC',name:'Jorginho'},{pos:'MC',name:'Smith Rowe'},{pos:'PD',name:'Trossard'},{pos:'CA',name:'Nketiah'}],
-      },
-      'liverpool': {
-        formation:'4-3-3',
-        starters:['Alisson','Alexander-Arnold','Matip','Van Dijk','Robertson','Szoboszlai','Mac Allister','Jones','Salah','Darwin Núñez','Diaz'],
-        bench:[{pos:'GK',name:'Kelleher'},{pos:'ZD',name:'Quansah'},{pos:'LB',name:'Bradley'},{pos:'MC',name:'Endo'},{pos:'MC',name:'Elliott'},{pos:'PD',name:'Gakpo'},{pos:'CA',name:'Jota'}],
-      },
-      'atletico-mg': {
-        formation:'4-2-3-1',
-        starters:['Everson','Mariano','Júnior Alonso','M. Lemos','Guilherme Arana','Otávio','Alan Franco','Vargas','Paulinho','Rubens','Hulk'],
-        bench:[{pos:'GK',name:'Rafael'},{pos:'ZD',name:'Réver'},{pos:'RB',name:'Dodô'},{pos:'MC',name:'Jair'},{pos:'MC',name:'Igor Gomes'},{pos:'PE',name:'Savarino'},{pos:'CA',name:'Deyverson'}],
-      },
-      'juventus': {
-        formation:'4-3-3',
-        starters:['Szczesny','Danilo','Bremer','Gatti','Alex Sandro','Locatelli','Cambiaso','Fagioli','Chiesa','Vlahovic','Yildiz'],
-        bench:[{pos:'GK',name:'Perin'},{pos:'ZD',name:'Rugani'},{pos:'LB',name:'De Sciglio'},{pos:'MC',name:'Miretti'},{pos:'MC',name:'Nonge'},{pos:'PD',name:'Iling-Junior'},{pos:'CA',name:'Milik'}],
-      },
-    };
+        const TEAM_LINEUPS = {};
 
     // ── RENDER ESCALAÇÃO ──────────────────────────────────
     function renderEscalacao() {

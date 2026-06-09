@@ -1056,7 +1056,7 @@ document.querySelectorAll('.compar-suggest-btn').forEach(btn => {
 setupSearch('A');
 setupSearch('B');
 updatePlanBadge();
-drawRadar({name:'Flamengo'},{name:'Liverpool'});
+drawRadar(null, null); // inicia vazio — preenchido quando usuário selecionar os times
 
 // Pre-load league logos for dropdown display
 (async () => {
