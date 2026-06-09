@@ -855,14 +855,47 @@ const ZebraAPI = (() => {
       let oddsMap = {};
       try { oddsMap = await ODDS.getOddsMap(lid, 4); } catch {}
 
+      // ── Ranking FIFA estático — fallback para comps NT sem tabela (AMI, UNL, etc.)
+      // Fonte: ranking FIFA oficial (junho 2026). Permite detectar zebras em amistosos
+      // internacionais onde não há pontuação de grupo disponível.
+      // Nota: só entra em ação quando posMap não tem a seleção.
+      const FIFA_RANK = {
+        'Argentina':1,'France':2,'Spain':3,'England':4,'Brazil':5,
+        'Portugal':6,'Netherlands':7,'Belgium':8,'Germany':9,'Italy':10,
+        'Morocco':11,'Uruguay':12,'Colombia':13,'United States':14,'Senegal':15,
+        'Japan':16,'Austria':17,'Croatia':18,'Denmark':19,'Switzerland':20,
+        'Turkey':21,'Mexico':22,'Australia':23,'Ukraine':24,'Serbia':25,
+        'Poland':26,'Ecuador':27,'Chile':28,'Peru':29,'Egypt':30,
+        "Ivory Coast":31,"Côte d'Ivoire":31,'Nigeria':32,'Cameroon':33,
+        'South Korea':34,'Korea Republic':34,'Paraguay':35,'Qatar':36,
+        'Saudi Arabia':37,'Czech Republic':38,'Czechia':38,'Canada':39,
+        'Scotland':40,'Wales':41,'Hungary':42,'South Africa':43,
+        'Tunisia':44,'Venezuela':45,'Iran':46,'Algeria':47,'Bosnia':48,
+        'Bosnia and Herzegovina':48,'Bosnia & Herzegovina':48,
+        'Russia':49,'Sweden':50,'Romania':51,'Slovakia':52,'Slovenia':53,
+        'Greece':54,'Norway':55,'Israel':56,'Iceland':57,'Finland':58,
+        'Haiti':59,'Honduras':60,'Guatemala':61,'Costa Rica':62,
+        'Panama':63,'Jamaica':64,'Trinidad and Tobago':65,
+        'Bolivia':66,'Venezuela':67,'Cuba':68,
+        'Ghana':69,'Burkina Faso':70,'Mali':71,'Guinea':72,'Benin':73,
+        'Congo DR':74,'Mozambique':75,'Angola':76,'Zambia':77,'Zimbabwe':78,
+        'Kenya':79,'Tanzania':80,'Uganda':81,'Ethiopia':82,
+        'Iraq':83,'Syria':84,'Jordan':85,'Oman':86,'Bahrain':87,
+        'Kuwait':88,'Lebanon':89,'UAE':90,'United Arab Emirates':90,
+        'Indonesia':91,'Thailand':92,'Vietnam':93,'China':94,'India':95,
+        'New Zealand':96,'Fiji':97,'Papua New Guinea':98,
+      };
+
       const zebras = [];
       for (const f of fixtures) {
         const t = APIF.transformFixture(f);
         if (!t?.isFinished || t.hs == null || t.as == null) continue;
         if (t.hs === t.as) continue; // draw (inclui PEN em 90+30 iguais)
 
-        const homePos = posMap[f.teams?.home?.name] || null;
-        const awayPos = posMap[f.teams?.away?.name] || null;
+        const hName = f.teams?.home?.name;
+        const aName = f.teams?.away?.name;
+        const homePos = posMap[hName] || FIFA_RANK[hName] || null;
+        const awayPos = posMap[aName] || FIFA_RANK[aName] || null;
 
         const oddsKey = `${f.teams?.home?.name}|${f.teams?.away?.name}`;
         const realOdds = oddsMap[oddsKey];
