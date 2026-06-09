@@ -779,9 +779,9 @@
       const compName = rawMatch.competition?.name || 'Liga';
       const round    = rawMatch.matchday ? `Rodada ${rawMatch.matchday}` : m.date;
 
-      document.getElementById('matchCompetition').textContent = `${compName} · ${round}`;
-      document.getElementById('matchHomeName').textContent    = m.home;
-      document.getElementById('matchAwayName').textContent    = m.away;
+      const _mc = document.getElementById('matchCompetition'); if (_mc) _mc.textContent = `${compName} · ${round}`;
+      const _mhn = document.getElementById('matchHomeName');   if (_mhn) _mhn.textContent = m.home;
+      const _man = document.getElementById('matchAwayName');   if (_man) _man.textContent = m.away;
 
       // Update shield abbr text (fallback if no logo)
       const homeShield = document.getElementById('matchHomeShield');
@@ -838,8 +838,10 @@
 
       const sh = document.getElementById('matchStatsHeader');
       if (sh) {
-        sh.querySelector('span:first-child').textContent = m.home;
-        sh.querySelector('span:last-child').textContent  = m.away;
+        const _shHome = sh.querySelector('span:first-child');
+        const _shAway = sh.querySelector('span:last-child');
+        if (_shHome) _shHome.textContent = m.home;
+        if (_shAway) _shAway.textContent = m.away;
       }
 
       // ── Zebra Index ─────────────────────────────────────────
