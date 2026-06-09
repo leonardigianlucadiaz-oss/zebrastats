@@ -2030,6 +2030,15 @@ input:checked + .toggle-slider::before { transform: translateX(20px); }
   #statPills { grid-template-columns: repeat(2, 1fr); }
 }
 
+/* ── FOOTER DO PROJETO ─────────────────────────────── */
+.app-main > footer {
+  margin-top: auto;
+  flex-shrink: 0;
+}
+@media (max-width: 640px) {
+  .app-main > footer { padding-bottom: calc(16px + var(--bottom-nav-h, 64px)); }
+}
+
 /* Stat pill label tamanho */
 #statPills .bottom-nav__item,
 #statPills [style*="0.5625rem"] { font-size: 0.6875rem !important; }

@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ZebraStats — Home</title>
+  <title>ZebraStats — Zebras no Futebol Mundial</title>
+  <meta name="description" content="Rastreador de zebras no futebol mundial. Zebra Index (ZI) mede o grau de surpresa de cada resultado usando odds de mercado, posição na tabela e forma recente." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -129,6 +130,7 @@
           <button class="league-pill" data-league="GER" data-lid="GER"><span class="pill-logo" id="hpl-GER"></span> Bundesliga</button>
           <button class="league-pill" data-league="FRA" data-lid="FRA"><span class="pill-logo" id="hpl-FRA"></span> Ligue 1</button>
           <button class="league-pill" data-league="UCL" data-lid="UCL"><span class="pill-logo" id="hpl-UCL"></span> Champions</button>
+          <button class="league-pill" data-league="WC"  data-lid="WC"  style="border-color:rgba(46,230,92,0.5);color:var(--green);font-weight:600;">🌍 Copa 2026</button>
         </div>
 
         <!-- ÚLTIMA ATUALIZAÇÃO -->
@@ -207,9 +209,57 @@
 
         </div><!-- /side-group trends -->
 
+        <!-- LEGENDA DO ZEBRA INDEX -->
+        <div class="side-group" style="padding:14px;background:var(--card2);border:1px solid var(--border);border-radius:var(--radius-md);margin-top:4px;">
+          <div style="display:flex;align-items:center;gap:7px;margin-bottom:10px;">
+            <span style="font-size:1rem;">🦓</span>
+            <span style="font-size:0.8125rem;font-weight:700;color:var(--text);">O que é o Zebra Index?</span>
+          </div>
+          <p style="font-size:0.75rem;color:var(--gray);line-height:1.5;margin:0 0 10px;">Score de <strong>0 a 10</strong> que mede o grau de surpresa de um resultado. Combina odds de mercado, posição na tabela e forma recente.</p>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <div style="display:flex;align-items:center;gap:8px;background:rgba(231,76,60,0.1);border-radius:8px;padding:6px 10px;">
+              <span style="width:10px;height:10px;border-radius:50%;background:#e74c3c;flex-shrink:0;"></span>
+              <div>
+                <span style="font-size:0.8125rem;font-weight:700;color:#e74c3c;">Grande ≥ 7.0</span>
+                <span style="font-size:0.6875rem;color:var(--gray);margin-left:6px;">Azarão claro venceu</span>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;background:rgba(230,126,34,0.1);border-radius:8px;padding:6px 10px;">
+              <span style="width:10px;height:10px;border-radius:50%;background:#e67e22;flex-shrink:0;"></span>
+              <div>
+                <span style="font-size:0.8125rem;font-weight:700;color:#e67e22;">Média 4.0–6.9</span>
+                <span style="font-size:0.6875rem;color:var(--gray);margin-left:6px;">Surpresa considerável</span>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;background:rgba(241,196,15,0.1);border-radius:8px;padding:6px 10px;">
+              <span style="width:10px;height:10px;border-radius:50%;background:#f1c40f;flex-shrink:0;"></span>
+              <div>
+                <span style="font-size:0.8125rem;font-weight:700;color:#c9a800;">Leve 2.0–3.9</span>
+                <span style="font-size:0.6875rem;color:var(--gray);margin-left:6px;">Leve surpresa</span>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:10px;font-size:0.6875rem;color:var(--gray);border-top:1px solid var(--border);padding-top:8px;">
+            Pesos: <strong>Odds 65%</strong> · Posição 25% · Forma 10%
+          </div>
+        </div>
+
       </div><!-- /home-col-side -->
 
     </main>
+
+    <!-- FOOTER DO PROJETO -->
+    <footer style="border-top:1px solid var(--border);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;background:var(--card2);">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:1rem;">🦓</span>
+        <span style="font-size:0.8125rem;font-weight:700;color:var(--text);">ZebraStats</span>
+        <span style="font-size:0.75rem;color:var(--gray);">· Projeto Acadêmico 2026</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:16px;">
+        <span style="font-size:0.6875rem;color:var(--gray);">Powered by Football-Data.org · API-Football · TheSportsDB · The Odds API</span>
+      </div>
+      <div style="font-size:0.6875rem;color:var(--gray);">ZebraEngine™ · Zebra Index 0–10</div>
+    </footer>
 
     <!-- BOTTOM NAV (mobile only) — populated by initBottomNav() in main.js -->
     <nav class="bottom-nav">
@@ -464,8 +514,8 @@
   <script src="js/main.js?v=11"></script>
   <script>
     // ── CONSTANTS ─────────────────────────────────────────
-    const ALL_LIDS   = ['BRA','ENG','ESP','ITA','GER','FRA','UCL','POR']; // WC removido: sem dados APIF antes do início do torneio (11/jun/2026)
-    const LID_LABEL  = { BRA:'Brasileirão', ENG:'Premier League', ESP:'La Liga', ITA:'Serie A', GER:'Bundesliga', FRA:'Ligue 1', UCL:'Champions League', POR:'Liga Portugal' };
+    const ALL_LIDS   = ['BRA','ENG','ESP','ITA','GER','FRA','UCL','POR','WC']; // WC reativado em 09/jun/2026 — Copa começa em 11/jun
+    const LID_LABEL  = { BRA:'Brasileirão', ENG:'Premier League', ESP:'La Liga', ITA:'Serie A', GER:'Bundesliga', FRA:'Ligue 1', UCL:'Champions League', POR:'Liga Portugal', WC:'Copa do Mundo 2026' };
     const SPARK_LIDS = ['BRA','ENG','ESP','UCL']; // declarado aqui para evitar TDZ em initSparklines()
 
     // ── STATE ──────────────────────────────────────────────
@@ -1182,7 +1232,7 @@
       (function _preloadFromCache() {
         const now = Date.now();
         const TTL = 120 * 60 * 1000;
-        const lids = ['ENG','ESP','GER','ITA','FRA','POR','BRA'];
+        const lids = ['ENG','ESP','GER','ITA','FRA','POR','BRA','WC'];
         let best = null;
         for (const lid of lids) {
           try {
@@ -1200,9 +1250,15 @@
           heroBestZi = best.zi;
           el.textContent  = `${best.home} vs ${best.away}`;
           if (elL) elL.textContent = `${best.league} · ${best.date}`;
-          if (elZ) elZ.textContent = best.zi;
+          if (elZ) {
+            elZ.textContent = best.zi;
+            const ziColor = best.zi >= 7 ? '#e74c3c' : best.zi >= 4 ? '#e67e22' : '#f1c40f';
+            elZ.style.color = ziColor;
+            const ziParent = elZ.parentElement;
+            if (ziParent) { ziParent.style.borderColor = ziColor + '88'; ziParent.style.background = ziColor + '18'; }
+          }
           const cls = best.zi >= 7 ? 'Grande' : best.zi >= 4 ? 'Média' : 'Leve';
-          if (elD) elD.textContent = `Zebra ${cls} — ZI ${best.zi}. Azarão: ${best.azarao || best.home}.`;
+          if (elD) elD.textContent = `Zebra ${cls} — ZI ${best.zi}. Azarão: ${best.azarao === 'home' ? best.home : best.away}.`;
         }
       })();
 
@@ -1234,9 +1290,15 @@
         heroBestZi = top.zi;
         el.textContent  = `${top.home} vs ${top.away}`;
         elL.textContent = `${top.league} · ${top.date}`;
-        if (elZ) elZ.textContent = top.zi;
+        if (elZ) {
+          elZ.textContent = top.zi;
+          const ziColor = top.zi >= 7 ? '#e74c3c' : top.zi >= 4 ? '#e67e22' : '#f1c40f';
+          elZ.style.color = ziColor;
+          const ziParent = elZ.parentElement;
+          if (ziParent) { ziParent.style.borderColor = ziColor + '88'; ziParent.style.background = ziColor + '18'; }
+        }
         const cls = top.zi >= 7 ? 'Grande' : top.zi >= 4 ? 'Média' : 'Leve';
-        if (elD) elD.textContent = `Zebra ${cls} — ZI ${top.zi}. Azarão: ${top.azarao || top.home}.`;
+        if (elD) elD.textContent = `Zebra ${cls} — ZI ${top.zi}. Azarão: ${top.azarao === 'home' ? top.home : top.away}.`;
       });
     })();
 
