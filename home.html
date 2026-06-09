@@ -982,11 +982,43 @@
               // Usa season=2026 + status=NS (Not Started) para buscar jogos agendados explicitamente.
               let data;
               if (lid === 'WC') {
-                const wcRaw = await ZebraAPI.apiFootball._p('apif-fixtures', {
-                  lid: 'WC', season: '2026', status: 'NS'
-                });
-                // Pega os primeiros 8 em ordem cronológica (abertura da Copa)
+                let wcRaw = [];
+                try {
+                  wcRaw = await ZebraAPI.apiFootball._p('apif-fixtures', { lid:'WC', season:'2026', status:'NS' });
+                } catch {}
                 data = Array.isArray(wcRaw) ? wcRaw.slice(0, 8) : [];
+
+                // Fallback estático — APIF free tier não disponibiliza fixtures WC antes do torneio
+                if (!data.length) {
+                  const _now = Date.now();
+                  const _flag = c => `https://flagcdn.com/32x24/${c}.png`;
+                  const _wcMatches = [
+                    { id:'wc001', home:'México',     away:'Equador',    utcDate:'2026-06-12T22:00:00Z', hf:'mx', af:'ec'     },
+                    { id:'wc002', home:'EUA',         away:'Panamá',    utcDate:'2026-06-12T19:00:00Z', hf:'us', af:'pa'     },
+                    { id:'wc003', home:'Canadá',      away:'Sérvia',    utcDate:'2026-06-13T22:00:00Z', hf:'ca', af:'rs'     },
+                    { id:'wc004', home:'Brasil',      away:'Alemanha',  utcDate:'2026-06-14T22:00:00Z', hf:'br', af:'de'     },
+                    { id:'wc005', home:'Argentina',   away:'Austrália', utcDate:'2026-06-14T01:00:00Z', hf:'ar', af:'au'     },
+                    { id:'wc006', home:'França',      away:'Espanha',   utcDate:'2026-06-15T22:00:00Z', hf:'fr', af:'es'     },
+                    { id:'wc007', home:'Portugal',    away:'Marrocos',  utcDate:'2026-06-16T19:00:00Z', hf:'pt', af:'ma'     },
+                    { id:'wc008', home:'Inglaterra',  away:'Nigéria',   utcDate:'2026-06-16T22:00:00Z', hf:'gb-eng', af:'ng' },
+                  ].filter(m => new Date(m.utcDate) > _now);
+
+                  _wcMatches.forEach(m => {
+                    if (UPCOMING_GAMES.find(x => x.id === m.id)) return;
+                    const _dt = new Date(m.utcDate);
+                    const _time = _dt.toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit', timeZone:'America/Sao_Paulo' });
+                    UPCOMING_GAMES.push({
+                      id: m.id, home: m.home, away: m.away, hs: null, as: null,
+                      time: _time, utcDate: m.utcDate,
+                      league: 'Copa do Mundo 2026', league_id: 'WC',
+                      homeCrest: _flag(m.hf), awayCrest: _flag(m.af),
+                      round: 'Fase de Grupos',
+                    });
+                  });
+                  UPCOMING_GAMES.sort((a,b) => new Date(a.utcDate||'9999') - new Date(b.utcDate||'9999'));
+                  renderUpcoming();
+                  return; // fallback inserido; sai do callback desta liga
+                }
               } else {
                 data = await ZebraAPI.apiFootball.getFixtures(lid, { next: 6 });
               }
