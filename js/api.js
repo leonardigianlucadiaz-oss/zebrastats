@@ -154,7 +154,7 @@ const ZebraAPI = (() => {
   /* ── FOOTBALL-DATA.ORG ──────────────────────────────────────── */
   const FD = {
     BASE : 'https://api.football-data.org/v4',
-    COMPS: { BRA:'BSA', ENG:'PL', ESP:'PD', ITA:'SA', GER:'BL1', FRA:'FL1', UCL:'CL', POR:'PPL' },
+    COMPS: { BRA:'BSA', ENG:'PL', ESP:'PD', ITA:'SA', GER:'BL1', FRA:'FL1', UCL:'CL', POR:'PPL', WC:'WC' },
     SEASON(lid) {
       const now = new Date();
       const yr  = now.getFullYear();
