@@ -989,18 +989,22 @@
                 data = Array.isArray(wcRaw) ? wcRaw.slice(0, 8) : [];
 
                 // Fallback estático — APIF free tier não disponibiliza fixtures WC antes do torneio
+                // Confrontos baseados no calendário oficial FIFA WC 2026 (horários em BRT = UTC-3)
                 if (!data.length) {
                   const _now = Date.now();
-                  const _flag = c => `https://flagcdn.com/32x24/${c}.png`;
+                  // Logos oficiais das seleções via media.api-sports.io (mesma CDN usada pelo APIF)
+                  const _crest = id => `https://media.api-sports.io/football/teams/${id}.png`;
                   const _wcMatches = [
-                    { id:'wc001', home:'México',     away:'Equador',    utcDate:'2026-06-12T22:00:00Z', hf:'mx', af:'ec'     },
-                    { id:'wc002', home:'EUA',         away:'Panamá',    utcDate:'2026-06-12T19:00:00Z', hf:'us', af:'pa'     },
-                    { id:'wc003', home:'Canadá',      away:'Sérvia',    utcDate:'2026-06-13T22:00:00Z', hf:'ca', af:'rs'     },
-                    { id:'wc004', home:'Brasil',      away:'Alemanha',  utcDate:'2026-06-14T22:00:00Z', hf:'br', af:'de'     },
-                    { id:'wc005', home:'Argentina',   away:'Austrália', utcDate:'2026-06-14T01:00:00Z', hf:'ar', af:'au'     },
-                    { id:'wc006', home:'França',      away:'Espanha',   utcDate:'2026-06-15T22:00:00Z', hf:'fr', af:'es'     },
-                    { id:'wc007', home:'Portugal',    away:'Marrocos',  utcDate:'2026-06-16T19:00:00Z', hf:'pt', af:'ma'     },
-                    { id:'wc008', home:'Inglaterra',  away:'Nigéria',   utcDate:'2026-06-16T22:00:00Z', hf:'gb-eng', af:'ng' },
+                    // Qui 11/06
+                    { id:'wc001', home:'México',              away:'África do Sul',      utcDate:'2026-06-11T19:00:00Z', hc:16,  ac:49  },
+                    { id:'wc002', home:'Coreia do Sul',       away:'Tchéquia',           utcDate:'2026-06-12T02:00:00Z', hc:149, ac:44  },
+                    // Sex 12/06
+                    { id:'wc003', home:'Canadá',              away:'Bósnia-Herzegovina', utcDate:'2026-06-12T19:00:00Z', hc:93,  ac:113 },
+                    { id:'wc004', home:'Estados Unidos',      away:'Paraguai',           utcDate:'2026-06-13T01:00:00Z', hc:2,   ac:15  },
+                    // Sáb 13/06
+                    { id:'wc005', home:'Catar',               away:'Suíça',              utcDate:'2026-06-13T19:00:00Z', hc:164, ac:36  },
+                    { id:'wc006', home:'Brasil',              away:'Marrocos',           utcDate:'2026-06-13T22:00:00Z', hc:6,   ac:32  },
+                    { id:'wc007', home:'Haiti',               away:'Escócia',            utcDate:'2026-06-14T01:00:00Z', hc:141, ac:8   },
                   ].filter(m => new Date(m.utcDate) > _now);
 
                   _wcMatches.forEach(m => {
@@ -1011,7 +1015,7 @@
                       id: m.id, home: m.home, away: m.away, hs: null, as: null,
                       time: _time, utcDate: m.utcDate,
                       league: 'Copa do Mundo 2026', league_id: 'WC',
-                      homeCrest: _flag(m.hf), awayCrest: _flag(m.af),
+                      homeCrest: _crest(m.hc), awayCrest: _crest(m.ac),
                       round: 'Fase de Grupos',
                     });
                   });
