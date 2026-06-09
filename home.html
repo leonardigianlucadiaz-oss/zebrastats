@@ -653,7 +653,8 @@
         seenTeams.add(hk);
         seenTeams.add(ak);
         return true;
-      }).slice(0, 10);
+      // WC: mostra mais jogos (seleções todas diferentes, dedup não se aplica bem)
+      }).slice(0, activeLeagueFilter === 'WC' ? 16 : 10);
 
       if (!games.length) {
         // Empty state específico para Copa do Mundo antes do início
@@ -977,7 +978,18 @@
         try {
           await Promise.all(ALL_LIDS.map(async lid => {
             try {
-              const data = await ZebraAPI.apiFootball.getFixtures(lid, { next: 6 });
+              // WC 2026: next=6 sem temporada pode retornar 0 resultados antes do início.
+              // Usa season=2026 + status=NS (Not Started) para buscar jogos agendados explicitamente.
+              let data;
+              if (lid === 'WC') {
+                const wcRaw = await ZebraAPI.apiFootball._p('apif-fixtures', {
+                  lid: 'WC', season: '2026', status: 'NS'
+                });
+                // Pega os primeiros 8 em ordem cronológica (abertura da Copa)
+                data = Array.isArray(wcRaw) ? wcRaw.slice(0, 8) : [];
+              } else {
+                data = await ZebraAPI.apiFootball.getFixtures(lid, { next: 6 });
+              }
               if (!Array.isArray(data) || !data.length) return;
               let added = false;
               data.forEach(f => {
