@@ -160,6 +160,7 @@ const ZebraAPI = (() => {
       const yr  = now.getFullYear();
       const mo  = now.getMonth(); // 0-indexed; July = 6
       if (lid === 'BRA') return String(yr);
+      if (lid === 'WC')  return '2026'; // Copa do Mundo FIFA 2026 (não segue ciclo europeu)
       // European leagues: season starts in July — use current year from July onwards, else year-1
       return String(mo >= 6 ? yr : yr - 1);
     },
