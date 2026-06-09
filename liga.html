@@ -435,9 +435,11 @@
   function syncFavBtn() {
     const btn = document.getElementById('favLeagueBtn');
     const lbl = document.getElementById('favLeagueLabel');
+    if (!btn) return;
     favLeague = isFavLeague(activeLid);
     if (lbl) lbl.textContent = favLeague ? 'Favoritado' : 'Favoritar';
-    btn.querySelector('i').style.cssText = favLeague
+    const icon = btn.querySelector('i');
+    if (icon) icon.style.cssText = favLeague
       ? 'width:12px;height:12px;fill:var(--gold);color:var(--gold);'
       : 'width:12px;height:12px;';
     if (typeof lucide !== 'undefined') lucide.createIcons({ nodes: [btn] });
@@ -548,12 +550,19 @@
 
     if (!filteredList.length) {
       if (activeJfilt === 'proximos') {
-        container.innerHTML = `<div class="empty-state">
-          <i data-lucide="calendar-x" style="width:32px;height:32px;"></i>
-          <div class="empty-state__title">Temporada encerrada</div>
-          <div class="empty-state__sub">A próxima temporada começa em agosto. Veja os resultados encerrados.</div>
-          <button class="filter-chip" onclick="document.querySelector('[data-jfilter=encerrados]').click()" style="margin-top:4px;">Ver encerrados</button>
-        </div>`;
+        const isWC = activeLid === 'WC';
+        container.innerHTML = isWC
+          ? `<div class="empty-state">
+              <span style="font-size:2rem;line-height:1;">🌍</span>
+              <div class="empty-state__title">Copa do Mundo 2026</div>
+              <div class="empty-state__sub">Fase de grupos começa em 11/06. Os jogos aparecem aqui assim que a API liberar os dados.</div>
+             </div>`
+          : `<div class="empty-state">
+              <i data-lucide="calendar-x" style="width:32px;height:32px;"></i>
+              <div class="empty-state__title">Temporada encerrada</div>
+              <div class="empty-state__sub">A próxima temporada começa em agosto. Veja os resultados encerrados.</div>
+              <button class="filter-chip" onclick="document.querySelector('[data-jfilter=encerrados]').click()" style="margin-top:4px;">Ver encerrados</button>
+             </div>`;
       } else if (activeJfilt === 'aovivo') {
         container.innerHTML = `<div class="empty-state">
           <i data-lucide="radio" style="width:32px;height:32px;"></i>
@@ -1303,8 +1312,13 @@
     async function loadApifMatches() {
       if (!ZebraAPI.isConfigured.apiFootball()) return;
       try {
+        // WC: APIF free tier não retorna next=8 antes do torneio; tenta season+status=NS
+        const nextFixtures = lid === 'WC'
+          ? ZebraAPI.apiFootball._p('apif-fixtures', { lid:'WC', season:'2026', status:'NS' }).catch(() => null)
+          : ZebraAPI.apiFootball.getFixtures(lid, { next: 8 }).catch(() => null);
+
         const [nextRaw, lastRaw, liveRaw] = await Promise.all([
-          ZebraAPI.apiFootball.getFixtures(lid, { next: 8 }).catch(() => null),
+          nextFixtures,
           ZebraAPI.apiFootball.getFixtures(lid, { last: 8 }).catch(() => null),
           ZebraAPI.apiFootball.getLiveFixtures(lid).catch(() => null),
         ]);
@@ -1337,6 +1351,30 @@
         if (proximos.length)   JOGOS.proximos   = proximos;
         if (encerrados.length) JOGOS.encerrados = encerrados;
         if (aovivo.length)     JOGOS.aovivo     = aovivo;
+
+        // WC fallback estático quando APIF ainda não tem fixtures disponíveis
+        if (lid === 'WC' && !JOGOS.proximos.length) {
+          const _now = Date.now();
+          const _crest = id => `https://media.api-sports.io/football/teams/${id}.png`;
+          [
+            { home:'México',         away:'África do Sul',      utcDate:'2026-06-11T19:00:00Z', hc:16,  ac:49,  round:'Grupo A' },
+            { home:'Coreia do Sul',  away:'Tchéquia',           utcDate:'2026-06-12T02:00:00Z', hc:149, ac:44,  round:'Grupo A' },
+            { home:'Canadá',         away:'Bósnia-Herzegovina', utcDate:'2026-06-12T19:00:00Z', hc:93,  ac:113, round:'Grupo B' },
+            { home:'Estados Unidos', away:'Paraguai',           utcDate:'2026-06-13T01:00:00Z', hc:2,   ac:15,  round:'Grupo D' },
+            { home:'Catar',          away:'Suíça',              utcDate:'2026-06-13T19:00:00Z', hc:164, ac:36,  round:'Grupo B' },
+            { home:'Brasil',         away:'Marrocos',           utcDate:'2026-06-13T22:00:00Z', hc:6,   ac:32,  round:'Grupo C' },
+            { home:'Haiti',          away:'Escócia',            utcDate:'2026-06-14T01:00:00Z', hc:141, ac:8,   round:'Grupo C' },
+          ].filter(m => new Date(m.utcDate) > _now).forEach(m => {
+            const _dt = new Date(m.utcDate);
+            JOGOS.proximos.push({
+              home: m.home, away: m.away,
+              homeLogo: _crest(m.hc), awayLogo: _crest(m.ac),
+              time: _dt.toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',timeZone:'America/Sao_Paulo'}),
+              date: _dt.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',timeZone:'America/Sao_Paulo'}),
+              league: m.round,
+            });
+          });
+        }
 
         if (activeTab === 'jogos') renderJogos();
       } catch(e) { console.warn('[liga] apif matches error:', e); }
