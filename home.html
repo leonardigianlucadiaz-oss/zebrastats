@@ -509,8 +509,15 @@
   <script src="js/main.js?v=11"></script>
   <script>
     // ── CONSTANTS ─────────────────────────────────────────
-    const ALL_LIDS   = ['BRA','ENG','ESP','ITA','GER','FRA','UCL','POR','WC']; // WC reativado em 09/jun/2026 — Copa começa em 11/jun
-    const LID_LABEL  = { BRA:'Brasileirão', ENG:'Premier League', ESP:'La Liga', ITA:'Serie A', GER:'Bundesliga', FRA:'Ligue 1', UCL:'Champions League', POR:'Liga Portugal', WC:'Copa do Mundo 2026' };
+    const ALL_LIDS   = ['BRA','ENG','ESP','ITA','GER','FRA','UCL','POR','WC']; // ligas de clubes + WC (upcoming games)
+    // Competições de seleções nacionais — buscadas só no ranking de zebras (não em "Em Breve")
+    const NT_ZEBRA_LIDS = ['AMI','UNL','SAQ'];
+    const LID_LABEL  = {
+      BRA:'Brasileirão', ENG:'Premier League', ESP:'La Liga', ITA:'Serie A',
+      GER:'Bundesliga',  FRA:'Ligue 1', UCL:'Champions League', POR:'Liga Portugal',
+      WC:'Copa do Mundo 2026',
+      AMI:'Amistosos FIFA', UNL:'Nations League', SAQ:'Eliminatórias CONMEBOL',
+    };
     const SPARK_LIDS = ['BRA','ENG','ESP','UCL']; // declarado aqui para evitar TDZ em initSparklines()
 
     // ── STATE ──────────────────────────────────────────────
@@ -1188,6 +1195,24 @@
           }).catch(() => {});
         }, idx * 300);
       });
+
+      // Seleções nacionais: amistosos, Nations League e Eliminatórias
+      // Buscados com delay maior para não disputar cota com as ligas principais
+      const _ntBaseDelay = ALL_LIDS.length * 300 + 1000;
+      NT_ZEBRA_LIDS.forEach((lid, idx) => {
+        setTimeout(() => {
+          ZebraAPI.fetchRealZebras(lid, 15).then(zebras => {
+            if (!zebras.length) return;
+            clearTimeout(_fallbackTimer);
+            _zebrasByLid[lid] = zebras;
+            _zebraLoadedCount++;
+            _renderRankingFromCache();
+            _updateZebrasDoDia(zebras, lid);
+            _updateStatsBar();
+            document.dispatchEvent(new CustomEvent('zebrasLoaded', { detail: Object.values(_zebrasByLid).flat() }));
+          }).catch(() => {});
+        }, _ntBaseDelay + idx * 500);
+      });
     }
 
     function initZebrasDoDia() {
@@ -1297,7 +1322,7 @@
       (function _preloadFromCache() {
         const now = Date.now();
         const TTL = 120 * 60 * 1000;
-        const lids = ['ENG','ESP','GER','ITA','FRA','POR','BRA','WC'];
+        const lids = ['ENG','ESP','GER','ITA','FRA','POR','BRA','WC','AMI','UNL','SAQ'];
         let best = null;
         for (const lid of lids) {
           try {
