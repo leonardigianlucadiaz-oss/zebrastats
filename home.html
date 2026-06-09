@@ -130,7 +130,7 @@
           <button class="league-pill" data-league="GER" data-lid="GER"><span class="pill-logo" id="hpl-GER"></span> Bundesliga</button>
           <button class="league-pill" data-league="FRA" data-lid="FRA"><span class="pill-logo" id="hpl-FRA"></span> Ligue 1</button>
           <button class="league-pill" data-league="UCL" data-lid="UCL"><span class="pill-logo" id="hpl-UCL"></span> Champions</button>
-          <button class="league-pill" data-league="WC"  data-lid="WC"  style="border-color:rgba(46,230,92,0.5);color:var(--green);font-weight:600;">🌍 Copa 2026</button>
+          <button class="league-pill" data-league="WC"  data-lid="WC">🌍 Copa 2026</button>
         </div>
 
         <!-- ÚLTIMA ATUALIZAÇÃO -->
@@ -187,6 +187,35 @@
           <div class="skel" style="height:72px;border-radius:12px"></div>
         </div>
 
+        <!-- LEGENDA DO ZEBRA INDEX — dentro de side-group--zebras para não quebrar o grid -->
+        <div style="padding:12px 14px 14px;background:var(--card2);border:1px solid var(--border);border-radius:var(--radius-md);margin-top:8px;">
+          <div style="display:flex;align-items:center;gap:7px;margin-bottom:8px;">
+            <span style="font-size:0.9375rem;">🦓</span>
+            <span style="font-size:0.8125rem;font-weight:700;color:var(--text);">O que é o Zebra Index?</span>
+          </div>
+          <p style="font-size:0.75rem;color:var(--gray);line-height:1.5;margin:0 0 8px;">Score de <strong>0 a 10</strong> que mede o grau de surpresa de um resultado. Combina odds de mercado, posição na tabela e forma recente.</p>
+          <div style="display:flex;flex-direction:column;gap:5px;">
+            <div style="display:flex;align-items:center;gap:8px;background:rgba(231,76,60,0.1);border-radius:7px;padding:5px 9px;">
+              <span style="width:9px;height:9px;border-radius:50%;background:#e74c3c;flex-shrink:0;"></span>
+              <span style="font-size:0.8125rem;font-weight:700;color:#e74c3c;">Grande ≥ 7.0</span>
+              <span style="font-size:0.6875rem;color:var(--gray);">Azarão claro venceu</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;background:rgba(230,126,34,0.1);border-radius:7px;padding:5px 9px;">
+              <span style="width:9px;height:9px;border-radius:50%;background:#e67e22;flex-shrink:0;"></span>
+              <span style="font-size:0.8125rem;font-weight:700;color:#e67e22;">Média 4.0–6.9</span>
+              <span style="font-size:0.6875rem;color:var(--gray);">Surpresa considerável</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;background:rgba(241,196,15,0.1);border-radius:7px;padding:5px 9px;">
+              <span style="width:9px;height:9px;border-radius:50%;background:#f1c40f;flex-shrink:0;"></span>
+              <span style="font-size:0.8125rem;font-weight:700;color:#c9a800;">Leve 2.0–3.9</span>
+              <span style="font-size:0.6875rem;color:var(--gray);">Leve surpresa</span>
+            </div>
+          </div>
+          <div style="margin-top:8px;font-size:0.6875rem;color:var(--gray);border-top:1px solid var(--border);padding-top:7px;">
+            Pesos: <strong>Odds 65%</strong> · Posição 25% · Forma 10%
+          </div>
+        </div>
+
         </div><!-- /side-group zebras -->
 
         <div class="side-group side-group--trends">
@@ -209,40 +238,6 @@
 
         </div><!-- /side-group trends -->
 
-        <!-- LEGENDA DO ZEBRA INDEX -->
-        <div class="side-group" style="padding:14px;background:var(--card2);border:1px solid var(--border);border-radius:var(--radius-md);margin-top:4px;">
-          <div style="display:flex;align-items:center;gap:7px;margin-bottom:10px;">
-            <span style="font-size:1rem;">🦓</span>
-            <span style="font-size:0.8125rem;font-weight:700;color:var(--text);">O que é o Zebra Index?</span>
-          </div>
-          <p style="font-size:0.75rem;color:var(--gray);line-height:1.5;margin:0 0 10px;">Score de <strong>0 a 10</strong> que mede o grau de surpresa de um resultado. Combina odds de mercado, posição na tabela e forma recente.</p>
-          <div style="display:flex;flex-direction:column;gap:6px;">
-            <div style="display:flex;align-items:center;gap:8px;background:rgba(231,76,60,0.1);border-radius:8px;padding:6px 10px;">
-              <span style="width:10px;height:10px;border-radius:50%;background:#e74c3c;flex-shrink:0;"></span>
-              <div>
-                <span style="font-size:0.8125rem;font-weight:700;color:#e74c3c;">Grande ≥ 7.0</span>
-                <span style="font-size:0.6875rem;color:var(--gray);margin-left:6px;">Azarão claro venceu</span>
-              </div>
-            </div>
-            <div style="display:flex;align-items:center;gap:8px;background:rgba(230,126,34,0.1);border-radius:8px;padding:6px 10px;">
-              <span style="width:10px;height:10px;border-radius:50%;background:#e67e22;flex-shrink:0;"></span>
-              <div>
-                <span style="font-size:0.8125rem;font-weight:700;color:#e67e22;">Média 4.0–6.9</span>
-                <span style="font-size:0.6875rem;color:var(--gray);margin-left:6px;">Surpresa considerável</span>
-              </div>
-            </div>
-            <div style="display:flex;align-items:center;gap:8px;background:rgba(241,196,15,0.1);border-radius:8px;padding:6px 10px;">
-              <span style="width:10px;height:10px;border-radius:50%;background:#f1c40f;flex-shrink:0;"></span>
-              <div>
-                <span style="font-size:0.8125rem;font-weight:700;color:#c9a800;">Leve 2.0–3.9</span>
-                <span style="font-size:0.6875rem;color:var(--gray);margin-left:6px;">Leve surpresa</span>
-              </div>
-            </div>
-          </div>
-          <div style="margin-top:10px;font-size:0.6875rem;color:var(--gray);border-top:1px solid var(--border);padding-top:8px;">
-            Pesos: <strong>Odds 65%</strong> · Posição 25% · Forma 10%
-          </div>
-        </div>
 
       </div><!-- /home-col-side -->
 
@@ -661,8 +656,19 @@
       }).slice(0, 10);
 
       if (!games.length) {
-        container.innerHTML = '<div class="empty-state"><i data-lucide="clock" style="width:28px;height:28px;"></i><div class="empty-state__title">Nenhum jogo em breve</div><div class="empty-state__sub">Os próximos jogos aparecerão aqui</div></div>';
-        if (typeof lucide !== 'undefined') lucide.createIcons({ nodes: [container] });
+        // Empty state específico para Copa do Mundo antes do início
+        if (activeLeagueFilter === 'WC') {
+          const wcStart = new Date('2026-06-11T17:00:00Z');
+          const diff = wcStart - Date.now();
+          const days = Math.ceil(diff / 86400000);
+          const msg  = diff > 0
+            ? `Copa do Mundo começa em ${days} dia${days !== 1 ? 's' : ''}! Os jogos aparecem aqui a partir de 11/06.`
+            : 'Buscando jogos da Copa do Mundo...';
+          container.innerHTML = `<div class="empty-state"><span style="font-size:2rem;line-height:1;">🌍</span><div class="empty-state__title">Copa do Mundo 2026</div><div class="empty-state__sub">${msg}</div></div>`;
+        } else {
+          container.innerHTML = '<div class="empty-state"><i data-lucide="clock" style="width:28px;height:28px;"></i><div class="empty-state__title">Nenhum jogo em breve</div><div class="empty-state__sub">Os próximos jogos aparecerão aqui</div></div>';
+          if (typeof lucide !== 'undefined') lucide.createIcons({ nodes: [container] });
+        }
         return;
       }
 
@@ -911,7 +917,7 @@
       });
     });
 
-    const APIF_ID_TO_LID = { 39:'ENG', 140:'ESP', 135:'ITA', 78:'GER', 61:'FRA', 71:'BRA', 94:'POR', 2:'UCL' };
+    const APIF_ID_TO_LID = { 39:'ENG', 140:'ESP', 135:'ITA', 78:'GER', 61:'FRA', 71:'BRA', 94:'POR', 2:'UCL', 1:'WC' };
 
     async function initGames() {
       showSkeletonGames('liveGames', 2);
