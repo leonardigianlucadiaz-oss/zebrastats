@@ -667,12 +667,6 @@
 
   // ── FORMA BADGES ─────────────────────────────────────────────────
   function _formaBadges(team) {
-    const seed = (team.name||'').split('').reduce((a,c)=>a+c.charCodeAt(0),0);
-    const results = ['W','D','L','W','L'].map((_,i) => {
-      const r = ((seed * (i+1) * 6364136223846793005n) || (seed * (i*7+3))) % 3;
-      const outcomes = ['W','D','L'];
-      return outcomes[i % 3 === 0 ? (seed+i)%3 : (seed*i)%3];
-    });
     // Use v/e/d to generate a form pattern
     const v=parseInt(team.v)||0, e=parseInt(team.e)||0, d=parseInt(team.d)||0;
     const total = v+e+d || 5;
