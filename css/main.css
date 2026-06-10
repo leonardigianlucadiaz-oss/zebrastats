@@ -1259,6 +1259,9 @@ p  { font-size: 0.875rem; line-height: 1.5; color: var(--gray); }
 .zebra-card:hover { transform: translateY(-1px); border-color: var(--green); }
 
 /* ── PROFILE ── */
+/* Mobile: layout wrapper is a plain block (sections stack top-to-bottom) */
+.profile-page-layout { display: block; }
+
 .profile-avatar {
   width: 72px; height: 72px;
   border-radius: 50%;
@@ -1825,6 +1828,50 @@ input:checked + .toggle-slider::before { transform: translateX(20px); }
     grid-template-columns: 280px 1fr;
     gap: 28px;
     align-items: start;
+  }
+
+  /* Profile page — two-column desktop layout */
+  .profile-page-layout {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 0 32px;
+    align-items: start;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 32px 28px;
+  }
+
+  /* Left panel: turn the full-bleed mobile hero into a sticky card */
+  .profile-page-layout .profile-left-panel {
+    border-radius: var(--radius-lg) !important;
+    border: 1px solid var(--border) !important;
+    border-bottom: 1px solid var(--border) !important;
+    background: var(--card) !important;
+    padding: 28px 22px !important;
+    position: sticky;
+    top: 24px;
+    overflow: hidden;
+  }
+  .profile-page-layout .profile-left-panel .profile-hero__accent {
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  }
+
+  /* Right panel: remove mobile bottom padding, let content breathe */
+  .profile-page-layout .profile-right-panel {
+    padding-bottom: 32px !important;
+  }
+  /* Section title labels — add top spacing for first item on desktop */
+  .profile-page-layout .profile-right-panel .profile-section-title:first-child {
+    padding-top: 0;
+  }
+  /* Menu cards get proper border-radius on desktop */
+  .profile-page-layout .profile-right-panel > div[style*="background:var(--card)"],
+  .profile-page-layout .profile-right-panel > div[style*="background: var(--card)"] {
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    border-top: 1px solid var(--border) !important;
+    border-bottom: 1px solid var(--border) !important;
+    overflow: hidden;
   }
 
   /* ── 24. RANKING TABLE: larger cells ── */

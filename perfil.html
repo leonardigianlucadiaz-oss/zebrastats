@@ -53,8 +53,11 @@
     </div>
   </nav>
 
-  <!-- HERO DO PERFIL -->
-  <section class="profile-hero section-padded" style="background:linear-gradient(180deg,#0A1E35 0%,var(--bg) 100%);position:relative;overflow:hidden;padding:24px 16px 20px;border-bottom:1px solid var(--border);">
+  <!-- PROFILE LAYOUT WRAPPER (desktop = 2 cols, mobile = stack) -->
+  <div class="profile-page-layout">
+
+  <!-- LEFT: Profile Hero Card -->
+  <section class="profile-hero section-padded profile-left-panel" style="background:linear-gradient(180deg,#0A1E35 0%,var(--bg) 100%);position:relative;overflow:hidden;padding:24px 16px 20px;border-bottom:1px solid var(--border);">
       <!-- Accent top border -->
       <div class="profile-hero__accent" style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--green),rgba(46,230,92,0.2));border-radius:0;"></div>
     <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;">
@@ -103,7 +106,8 @@
     </div>
   </section>
 
-  <main style="padding-bottom:80px;">
+  <!-- RIGHT: Menu Sections -->
+  <main class="profile-right-panel" style="padding-bottom:80px;">
 
     <!-- MINHA CONTA -->
     <div class="profile-section-title">Minha Conta</div>
@@ -331,6 +335,8 @@
     </div>
 
   </main>
+
+  </div><!-- /profile-page-layout -->
 
   <!-- BOTTOM NAV (mobile only) -->
   <nav class="bottom-nav">
