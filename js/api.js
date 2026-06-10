@@ -828,7 +828,8 @@ const ZebraAPI = (() => {
     if (!_proxy.base()) return [];
     if (typeof ZebraEngine === 'undefined') return [];
 
-    const lsKey = `zebras_${lid}_${limit}`;
+    // v2: inclui matchTs + filtro 45 dias. Chave nova invalida cache antigo (sem matchTs).
+    const lsKey = `zebras_v2_${lid}_${limit}`;
     const lsHit = _lsCache.get(lsKey, LS_ZEBRAS_TTL);
     if (lsHit) return lsHit;
 
@@ -917,7 +918,8 @@ const ZebraAPI = (() => {
         }
 
         const matchDate = new Date(f.fixture.date);
-        const age = Date.now() - matchDate.getTime();
+        const matchTs   = matchDate.getTime();
+        const age = Date.now() - matchTs;
 
         zebras.push({
           id: f.fixture.id,
@@ -925,17 +927,21 @@ const ZebraAPI = (() => {
           hs: t.hs, as: t.as,
           league: _LEAGUE_LABEL[lid] || lid, lid,
           date: t.date,
+          matchTs,          // timestamp bruto para filtro de recência em runtime
           zi: result.zi, ziClass: result.class,
           azarao: result.azarao,
           odds_h: dispHomeOdd ? parseFloat(dispHomeOdd).toFixed(2) : '–',
           odds_a: dispAwayOdd ? parseFloat(dispAwayOdd).toFixed(2) : '–',
           homeCrest: t.homeLogo || '', awayCrest: t.awayLogo || '',
           realOdds: !!realOdds,
-          period: age <= 7*864e5 ? 'week' : age <= 30*864e5 ? 'month' : 'history',
+          period: age <= 7*864e5 ? 'week' : age <= 45*864e5 ? 'month' : 'history',
         });
       }
 
-      const sorted = zebras.sort((a, b) => b.zi - a.zi);
+      // Filtra últimos 45 dias — garante apenas dados da temporada atual/recente
+      const sorted = zebras
+        .filter(z => z.matchTs && (Date.now() - z.matchTs) <= 45*864e5)
+        .sort((a, b) => b.zi - a.zi);
       if (sorted.length) _lsCache.set(lsKey, sorted);
       return sorted;
     } catch(e) {
@@ -957,8 +963,8 @@ const ZebraAPI = (() => {
     if (!_proxy.base() && !FD.key()) return [];
     if (typeof ZebraEngine === 'undefined') return [];
 
-    // Check localStorage cache first (30 min) — survives F5 and new tabs
-    const lsKey = `zebras_${lid}_${limit}`;
+    // v2: inclui matchTs + filtro 45 dias. Chave nova invalida cache antigo (sem matchTs).
+    const lsKey = `zebras_v2_${lid}_${limit}`;
     const lsHit = _lsCache.get(lsKey, LS_ZEBRAS_TTL);
     if (lsHit) return lsHit;
 
@@ -1021,12 +1027,16 @@ const ZebraAPI = (() => {
           dispAwayOdd = est.awayOdd;
         }
 
+        const matchDate = new Date(m.utcDate);
+        const matchTs   = matchDate.getTime();
+        const age = Date.now() - matchTs;
         zebras.push({
           id: t.id,
           home: t.home, away: t.away,
           hs: t.hs, as: t.as,
           league: _LEAGUE_LABEL[lid] || lid, lid,
           date: t.date,
+          matchTs,          // timestamp bruto para filtro de recência em runtime
           zi: result.zi,
           ziClass: result.class,
           azarao: result.azarao,
@@ -1035,18 +1045,16 @@ const ZebraAPI = (() => {
           homeCrest: t.homeCrest || '',
           awayCrest: t.awayCrest || '',
           realOdds: !!realOdds,
-          period: (() => {
-            const matchDate = new Date(m.utcDate);
-            const age = Date.now() - matchDate.getTime();
-            if (age <= 7 * 24 * 60 * 60 * 1000)  return 'week';
-            if (age <= 30 * 24 * 60 * 60 * 1000) return 'month';
-            return 'history';
-          })(),
+          period: age <= 7*864e5 ? 'week' : age <= 45*864e5 ? 'month' : 'history',
         });
       }
 
-      const sorted = zebras.sort((a, b) => b.zi - a.zi);
-      if (sorted.length) _lsCache.set(lsKey, sorted); // cache result for 30 min
+      // Filtra apenas últimos 45 dias — impede que finais de temporada europeias
+      // (alta ZI histórica) dominem o ranking sobre dados atuais de competições ativas.
+      const sorted = zebras
+        .filter(z => z.matchTs && (Date.now() - z.matchTs) <= 45*864e5)
+        .sort((a, b) => b.zi - a.zi);
+      if (sorted.length) _lsCache.set(lsKey, sorted);
       return sorted;
     } catch(e) {
       console.warn('[fetchRealZebras] erro:', e.message);
