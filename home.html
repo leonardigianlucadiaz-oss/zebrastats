@@ -1126,7 +1126,13 @@
     }
 
     function _renderRankingFromCache() {
-      const all = Object.values(_zebrasByLid).flat().sort((a,b) => b.zi - a.zi).slice(0, 5);
+      // Filtra somente últimos 45 dias (temporada atual). Dados históricos de
+      // temporadas europeias encerradas (fev/mar) não devem dominar o ranking.
+      const _CUTOFF = 45 * 864e5;
+      const _now = Date.now();
+      const all = Object.values(_zebrasByLid).flat()
+        .filter(z => z.matchTs ? (_now - z.matchTs) <= _CUTOFF : z.period !== 'history')
+        .sort((a,b) => b.zi - a.zi).slice(0, 5);
       if (!all.length) return;
       rankContainer.innerHTML = '';
       all.forEach((z, idx) => {
@@ -1318,26 +1324,38 @@
       if (!el) return;
 
       // Preload from localStorage cache immediately (no waiting for API)
+      // Usa apenas dados dos últimos 45 dias para evitar que temporadas encerradas
+      // travem o hero com alta ZI histórica e impeçam atualizações com dados recentes.
       let heroBestZi = 0;
+      let heroBestTs = 0; // timestamp do jogo exibido no hero
       (function _preloadFromCache() {
         const now = Date.now();
         const TTL = 120 * 60 * 1000;
-        const lids = ['ENG','ESP','GER','ITA','FRA','POR','BRA','WC','AMI','UNL','SAQ'];
+        const CUTOFF = 45 * 864e5;
+        // v2 = chave nova com matchTs; também tenta limit 15 (NT) e 10 (clubes)
+        const lids = ['BRA','ENG','ESP','ITA','GER','FRA','UCL','POR','WC','AMI','UNL','SAQ'];
+        const limits = [10, 15];
         let best = null;
         for (const lid of lids) {
-          try {
-            const raw = localStorage.getItem(`zs_lsc_zebras_${lid}_10`);
-            if (!raw) continue;
-            const entry = JSON.parse(raw);
-            if (!entry || now - entry.ts > TTL) continue;
-            const arr = entry.d || [];
-            for (const z of arr) {
-              if (!best || (z.zi || 0) > (best.zi || 0)) best = z;
-            }
-          } catch(e) {}
+          for (const lim of limits) {
+            try {
+              const raw = localStorage.getItem(`zs_lsc_zebras_v2_${lid}_${lim}`);
+              if (!raw) continue;
+              const entry = JSON.parse(raw);
+              if (!entry || now - entry.ts > TTL) continue;
+              const arr = entry.d || [];
+              for (const z of arr) {
+                // Só considera dados dos últimos 45 dias
+                const ts = z.matchTs || 0;
+                if (ts && (now - ts) > CUTOFF) continue;
+                if (!best || (z.zi || 0) > (best.zi || 0)) best = z;
+              }
+            } catch(e) {}
+          }
         }
         if (best && best.zi > 0) {
           heroBestZi = best.zi;
+          heroBestTs = best.matchTs || 0;
           el.textContent  = `${best.home} vs ${best.away}`;
           if (elL) elL.textContent = `${best.league} · ${best.date}`;
           if (elZ) {
@@ -1375,9 +1393,25 @@
         // Ignora dispatches sem dados — deixa heroFallbackTimer resolver o empty state
         if (!zebras.length) return;
         clearTimeout(heroFallbackTimer);
-        const top = zebras.sort((a,b) => b.zi - a.zi)[0];
-        if (!top || top.zi <= heroBestZi) return;
+
+        // Prioriza dados recentes (45 dias). Se não há nenhum recente, usa o melhor global.
+        const CUTOFF = 45 * 864e5;
+        const now = Date.now();
+        const recent = zebras.filter(z => z.matchTs ? (now - z.matchTs) <= CUTOFF : z.period !== 'history');
+        const pool = recent.length ? recent : zebras;
+        const top = pool.sort((a,b) => b.zi - a.zi)[0];
+        if (!top) return;
+
+        // Atualiza o hero se:
+        // (a) novo dado é mais recente que o exibido (independente de ZI), OU
+        // (b) novo dado tem ZI maior (e não é histórico)
+        const topTs = top.matchTs || 0;
+        const isMoreRecent = topTs > heroBestTs;
+        const isBetterZi   = top.zi > heroBestZi;
+        if (!isMoreRecent && !isBetterZi && heroBestZi > 0) return;
+
         heroBestZi = top.zi;
+        heroBestTs = topTs;
         el.textContent  = `${top.home} vs ${top.away}`;
         elL.textContent = `${top.league} · ${top.date}`;
         if (elZ) {
